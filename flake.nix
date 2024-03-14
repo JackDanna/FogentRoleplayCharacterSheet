@@ -1,6 +1,5 @@
-
 {
-  description = "A fun enviroment to test FSharp";
+  description = "A automated Character Sheet for Fogent Roleplay";
 
   outputs = { self, nixpkgs }:
   let
@@ -31,11 +30,13 @@
     
 
     devShells.${system}.default = pkgs.mkShell rec {
-      name = "FSharpFun";
+      name = "FRCS";
       buildInputs = with pkgs; [
+        dotnet-sdk_8
+        nodejs_20
+
         gnome.gnome-terminal
         bashInteractive
-        dotnet-sdk_8
         (vscode-with-extensions.override  {
           vscode = pkgs.vscode;
           vscodeExtensions = with pkgs.vscode-extensions; [
@@ -52,11 +53,15 @@
             }
           ];
         })
+
+        (pkgs.writeShellScriptBin "iDontKnow" ''
+          ${pkgs.figlet}/bin/figlet "IDontKnow"
+        '')
       ];
 
       shellHook = ''
         export PS1+="${name}> "
-        echo "Welcome to the FSharp Fun"
+        echo "Welcome to the Fogent Roleplay Character Sheet Shell"
       '';
     };
   }; 
