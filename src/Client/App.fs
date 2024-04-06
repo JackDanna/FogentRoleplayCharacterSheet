@@ -12,7 +12,10 @@ open Elmish.Debug
 open Elmish.HMR
 #endif
 
-Program.mkSimple CoreSkill.init CoreSkill.update (CoreSkill.view FogentRoleplayLib.DicePool.baseDicePool)
+Program.mkSimple 
+    CoreSkillList.init 
+    CoreSkillList.update 
+    (CoreSkillList.view [FogentRoleplayLib.DicePool.baseDicePool; FogentRoleplayLib.DicePool.baseDicePool; ])
 #if DEBUG
 |> Program.withConsoleTrace
 #endif
