@@ -76,3 +76,46 @@ module Neg1To5 =
         | Three -> 3
         | Four -> 4
         | Five -> 5
+
+module DicePool =
+    type DicePool = {
+        d4: uint
+        d6: uint
+        d8: uint
+        d10: uint
+        d12: uint
+        d20: uint
+    }
+
+    let emptyDicePool =
+        { d4 = 0u
+          d6 = 0u
+          d8 = 0u
+          d10 = 0u
+          d12 = 0u
+          d20 = 0u }
+    
+    let baseDicePool = { emptyDicePool with d6 = 3u }
+
+    let diceToString numDice diceTypeString =
+        if numDice <> 0u then
+            string numDice + diceTypeString
+        else
+            ""
+
+    let checkIfEmptyDicePoolString dicePoolString =
+        if dicePoolString = "" then
+            "0d6"
+        else
+            dicePoolString
+
+    let dicePoolToString (dicePool: DicePool) =
+        [ diceToString dicePool.d4 "d4"
+          diceToString dicePool.d6 "d6"
+          diceToString dicePool.d8 "d8"
+          diceToString dicePool.d10 "d10"
+          diceToString dicePool.d12 "d12"
+          diceToString dicePool.d20 "d20" ]
+        |> List.filter (fun diceString -> diceString <> "")
+        |> String.concat ", "
+        |> checkIfEmptyDicePoolString
