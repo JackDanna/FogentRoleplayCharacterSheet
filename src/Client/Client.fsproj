@@ -8,6 +8,7 @@
     <Compile Include="Neg2To5.fs" />
     <Compile Include="AttributeStat.fs" />
     <Compile Include="Neg1To5.fs" />
+    <Compile Include="CoreSkill.fs" />
     <None Include="postcss.config.js" />
     <None Include="tailwind.config.js" />
     <None Include="index.html" />

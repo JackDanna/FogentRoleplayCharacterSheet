@@ -119,3 +119,17 @@ module DicePool =
         |> List.filter (fun diceString -> diceString <> "")
         |> String.concat ", "
         |> checkIfEmptyDicePoolString
+
+module Skill =
+    open Neg1To5
+
+    type Skill = {name: string; level: Neg1To5}
+
+module CoreSkill =
+    open Attribute
+    open Skill
+
+    type CoreSkill = {
+        skill: Skill
+        governingAttribute: Attribute
+    }

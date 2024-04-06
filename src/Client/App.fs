@@ -12,7 +12,7 @@ open Elmish.Debug
 open Elmish.HMR
 #endif
 
-Program.mkSimple AttributeStat.init AttributeStat.update AttributeStat.view
+Program.mkSimple CoreSkill.init CoreSkill.update (CoreSkill.view FogentRoleplayLib.DicePool.baseDicePool)
 #if DEBUG
 |> Program.withConsoleTrace
 #endif
