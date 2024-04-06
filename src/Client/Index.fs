@@ -4,6 +4,11 @@ open Elmish
 open Fable.Remoting.Client
 open Shared
 
+// MVU, ~Elmish
+// Model: State of the application
+// View: Ui of the application
+// Update: Describes of the application changes
+
 type Model = { Todos: Todo list; Input: string }
 
 type Msg =
@@ -28,7 +33,7 @@ let update msg model =
     | SetInput value -> { model with Input = value }, Cmd.none
     | AddTodo ->
         let todo = Todo.create model.Input
-
+    
         let cmd = Cmd.OfAsync.perform todosApi.addTodo todo AddedTodo
 
         { model with Input = "" }, cmd

@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="FogentRoleplayLib.fs" />
     <Compile Include="Shared.fs" />
     <Content Include="paket.references" />
   </ItemGroup>

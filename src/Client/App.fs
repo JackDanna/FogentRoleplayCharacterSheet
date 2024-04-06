@@ -12,7 +12,7 @@ open Elmish.Debug
 open Elmish.HMR
 #endif
 
-Program.mkProgram Index.init Index.update Index.view
+Program.mkSimple Neg2To5.init Neg2To5.update Neg2To5.view
 #if DEBUG
 |> Program.withConsoleTrace
 #endif
