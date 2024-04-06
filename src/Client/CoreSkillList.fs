@@ -2,6 +2,7 @@ module CoreSkillList
 
 open FogentRoleplayLib.CoreSkill
 open FogentRoleplayLib.DicePool
+open FogentRoleplayLib.Attribute
 
 type Msg = ModifiedCoreSkillAtPosition of int * CoreSkill.Msg
 
@@ -20,15 +21,18 @@ let update msg (model: CoreSkill list) =
 
 open Feliz
 open Feliz.Bulma
-let view (coreSkillDicePoolList:DicePool list) (model:CoreSkill list) (dispatch: Msg->unit) =
+let view (coreSkillDicePoolList:DicePool list) (model:CoreSkill list) (dispatch: Msg->unit) (governingAttribute:Attribute)=
     
     Html.ul (
         List.mapi2 
-            ( fun index coreSkill coreSkillDicePool-> 
-                CoreSkill.view 
-                    coreSkillDicePool 
-                    coreSkill
-                    (fun msg -> ModifiedCoreSkillAtPosition(index, msg) |> dispatch)
+            ( fun index coreSkill coreSkillDicePool->
+                if coreSkill.governingAttribute = governingAttribute then
+                    CoreSkill.view 
+                        coreSkillDicePool 
+                        coreSkill
+                        (fun msg -> ModifiedCoreSkillAtPosition(index, msg) |> dispatch)
+                else
+                    Html.none
             )
             model
             coreSkillDicePoolList
