@@ -1,6 +1,5 @@
 module Neg2To5
 
-open Elmish
 open FogentRoleplayLib.Neg2To5
 
 type Model = Neg2To5
