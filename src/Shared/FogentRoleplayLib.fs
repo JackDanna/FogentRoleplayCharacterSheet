@@ -33,3 +33,15 @@ module Neg2To5 =
         | Three -> 3
         | Four -> 4
         | Five -> 5
+
+module Attribute =
+    type Attribute = string
+
+module AttributeStat =
+    open Neg2To5
+    open Attribute
+
+    type AttributeStat = {
+        attribute: Attribute
+        stat: Neg2To5
+    }

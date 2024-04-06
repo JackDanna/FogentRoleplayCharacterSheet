@@ -12,7 +12,7 @@ open Elmish.Debug
 open Elmish.HMR
 #endif
 
-Program.mkSimple Neg2To5.init Neg2To5.update Neg2To5.view
+Program.mkSimple AttributeStat.init AttributeStat.update AttributeStat.view
 #if DEBUG
 |> Program.withConsoleTrace
 #endif
