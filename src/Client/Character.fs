@@ -24,4 +24,64 @@ let update msg (model: Character) =
 open Feliz
 open Feliz.Bulma
 
-let view model dispatch = Html.none
+let view model dispatch =
+    // let allItemStackNameList =
+    //     (List.map (fun (itemStack: ItemStack) -> itemStack.item.name) allItemStackList)
+
+    Bulma.container [
+
+        Bulma.input.text [
+            prop.value model.name
+            prop.placeholder "Character Name"
+            prop.onTextChange (SetName >> dispatch)
+            prop.classes [ "is-large"; "has-text-centered" ]
+        ]
+        |> Bulma.content
+
+        Bulma.image [
+            Html.img [
+                prop.style [ style.height 500; style.width 500 ]
+                prop.classes [ "center" ]
+
+                prop.src "https://cogentroleplaycommunity.github.io/Fallen/src/Characters/PC/JavkWick/Javk-Wick.png"
+            ]
+        ]
+        |> Bulma.content
+
+        AttributeAndCoreSkillsList.view model.attributeAndCoreSkillsList (AttributeAndCoreSkillsListMsg >> dispatch)
+
+    // |> AttributeList.view model.attributeList (AttributeListMsg >> dispatch)
+
+    // VocationList.view
+    //     combatVocationalSkill
+    //     (vocationDicePoolListToStringifiedVocationDicePoolList model.vocationDicePoolList)
+    //     (attributesToAttributeNames model.attributeList)
+    //     model.vocationList
+    //     (VocationListMsg >> dispatch)
+
+    // DestinyPoints.view model.destinyPoints (DestinyPointsMsg >> dispatch)
+
+    // CharacterEffectForDisplayList.view
+    //     characterEffectKeyList
+    //     model.characterEffectForDisplayList
+    //     (CharacterEffectListMsg >> dispatch)
+
+    // CarryWeightStatOption.view
+    //     carryWeightCalculationNameList
+    //     model.carryWeightStatOption
+    //     (CarryWeightStatOptionMsg >> dispatch)
+
+    // EquipmentEffectForDisplayList.view model.equipmentEffectForDisplayList
+
+    // EquipmentList.view allItemStackNameList model.equipmentList (EquipmentListMsg >> dispatch)
+
+    // CombatRollTable.view model.combatRollList
+
+    // ContainerList.view
+    //     (List.collect itemToContainerClassNames (itemStackListToItemList allItemStackList))
+    //     allItemStackNameList
+    //     model.containerList
+    //     (ContainerListMsg >> dispatch)
+
+    // CharacterInformation.view model.characterInformation (CharacterInformationMsg >> dispatch)
+    ]
