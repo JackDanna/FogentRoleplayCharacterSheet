@@ -1,19 +1,18 @@
-module AttributeAndCoreSkillsList
+module Character
 
 open FogentRoleplayLib.Character
 
-type Msg = ModifyAttributeAndCoreSkillsList of int * AttributeAndCoreSkills.Msg
+type Msg =
+    | SetName of string
+    | AttributeAndCoreSkillsListMsg of AttributeAndCoreSkillsList.Msg
 
-let update msg model =
+let update msg (model: Character) =
     match msg with
-    | ModifyAttributeAndCoreSkillsList(position, msg) ->
-        List.mapi
-            (fun index attributeAndCoreSkills ->
-                if index = position then
-                    AttributeAndCoreSkills.update msg attributeAndCoreSkills
-                else
-                    attributeAndCoreSkills)
-            model
+    | SetName newName -> { model with name = newName }
+    | AttributeAndCoreSkillsListMsg msg -> {
+        model with
+            attributeAndCoreSkillsList = AttributeAndCoreSkillsList.update msg model.attributeAndCoreSkillsList
+      }
 
 open Feliz
 open Feliz.Bulma

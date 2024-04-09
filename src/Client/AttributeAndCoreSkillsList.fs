@@ -1,7 +1,4 @@
-module Character
-
-open FogentRoleplayLib.AttributeStat
-open FogentRoleplayLib.CoreSkill
+module AttributeAndCoreSkillsList
 
 type Msg = ModifyAttributeAndCoreSkillsList of int * AttributeAndCoreSkills.Msg
 
