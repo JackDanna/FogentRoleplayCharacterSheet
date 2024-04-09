@@ -22,21 +22,15 @@ let fallenDataApi =
     |> Remoting.buildProxy<IFogentRoleplayDataApi>
 
 let init () : Model * Cmd<Msg> =
+    let defaultAttributeList = []
+    let defaultCoreSkillList = []
+
     {
         fallenData = {
-            defaultCoreSkillList = []
-            defaultAttributeList = []
-        //   allItemStackList = []
-        //   magicSkillMap = Map.empty
-        //   magicCombatMap = Map.empty
-        //   rangeMap = Map.empty
-        //   combatVocationalSkill = []
-        //   effectForDisplayMap = Map.empty
-        //   carryWeightCalculationMap = Map.empty
-        //   weightClassList = []
-        //   movementSpeedCalculationMap = Map.empty
+            defaultAttributeList = defaultAttributeList
+            defaultCoreSkillList = defaultCoreSkillList
         }
-        character = Character.init
+        character = Character.init defaultAttributeList defaultCoreSkillList
     },
 
     Cmd.OfAsync.perform fallenDataApi.getInitData () GotInitData
@@ -47,20 +41,7 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
 
         {
             model with
-                character =
-                    Character.update
-                        // model.fallenData.defaultAttributeList
-                        // model.fallenData.defaultCoreSkillList
-                        // model.fallenData.allItemStackList
-                        // model.fallenData.magicSkillMap
-                        // model.fallenData.magicCombatMap
-                        // model.fallenData.rangeMap
-                        // model.fallenData.effectForDisplayMap
-                        // model.fallenData.carryWeightCalculationMap
-                        // model.fallenData.weightClassList
-                        // model.fallenData.movementSpeedCalculationMap
-                        characterMsg
-                        model.character
+                character = Character.update characterMsg model.character
         },
         Cmd.none
     | GotInitData newFallenData ->
@@ -68,7 +49,7 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
         {
             model with
                 fallenData = newFallenData
-                character = Character.update Character.Msg.SetDefault model.character
+                character = Character.init newFallenData.defaultAttributeList newFallenData.defaultCoreSkillList
         },
         Cmd.none
 
@@ -102,12 +83,12 @@ let view (model: Model) (dispatch: Msg -> unit) =
 
             Bulma.heroBody [
                 Character.view
-                    (Seq.toList model.fallenData.carryWeightCalculationMap.Keys)
-                    ((List.ofSeq model.fallenData.effectForDisplayMap.Keys)
-                     @ (List.ofSeq model.fallenData.carryWeightCalculationMap.Keys)
-                     @ (List.ofSeq model.fallenData.movementSpeedCalculationMap.Keys))
-                    model.fallenData.combatVocationalSkill
-                    model.fallenData.allItemStackList
+                    // (Seq.toList model.fallenData.carryWeightCalculationMap.Keys)
+                    // ((List.ofSeq model.fallenData.effectForDisplayMap.Keys)
+                    //  @ (List.ofSeq model.fallenData.carryWeightCalculationMap.Keys)
+                    //  @ (List.ofSeq model.fallenData.movementSpeedCalculationMap.Keys))
+                    // model.fallenData.combatVocationalSkill
+                    // model.fallenData.allItemStackList
                     model.character
                     (CharacterMsg >> dispatch)
             ]
