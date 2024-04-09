@@ -3,6 +3,8 @@ module Character
 open FogentRoleplayLib.Character
 open FogentRoleplayLib.Attribute
 open FogentRoleplayLib.CoreSkill
+open FogentRoleplayLib.Skill
+open FogentRoleplayLib.DicePoolMod
 
 type Msg =
     | SetName of string
@@ -16,15 +18,30 @@ let init (attributeData: Attribute list) (coreSkillData: CoreSkill list) = {
 let update msg (model: Character) =
     match msg with
     | SetName newName -> { model with name = newName }
-    | AttributeAndCoreSkillsListMsg msg -> {
-        model with
-            attributeAndCoreSkillsList = AttributeAndCoreSkillsList.update msg model.attributeAndCoreSkillsList
-      }
+    | AttributeAndCoreSkillsListMsg msg ->
+
+        let calculationData: DicePoolCalculationData = {
+            baseDice = None
+            attributeDicePoolMod = createD6DicePoolMod 0u
+            injuryDicePenalty = 0u
+            weightClassDicePenalty = 0u
+            itemEffectDicePoolMod = createD6DicePoolMod 0u
+        }
+
+        {
+            model with
+                attributeAndCoreSkillsList =
+                    model.attributeAndCoreSkillsList
+                    |> AttributeAndCoreSkillsList.update msg
+                    |> AttributeAndCoreSkillsList.update (
+                        AttributeAndCoreSkillsList.Msg.CalculateDicePools(calculationData)
+                    )
+        }
 
 open Feliz
 open Feliz.Bulma
 
-let view model dispatch =
+let view (model: Character) dispatch =
     // let allItemStackNameList =
     //     (List.map (fun (itemStack: ItemStack) -> itemStack.item.name) allItemStackList)
 

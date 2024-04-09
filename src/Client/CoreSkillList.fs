@@ -5,7 +5,7 @@ open FogentRoleplayLib.Skill
 
 type Msg =
     | ModifiedCoreSkillAtPosition of int * CoreSkill.Msg
-    | CalculateCoreSkillDicePools of DicePoolCalculationData
+    | CalculateDicePools of DicePoolCalculationData
 
 let init () = [ CoreSkill.init (); CoreSkill.init () ]
 
@@ -18,7 +18,7 @@ let update msg (model: CoreSkill list) =
                 CoreSkill.update msg coreSkill
             else
                 coreSkill)
-    | CalculateCoreSkillDicePools dicePoolCalculationData ->
+    | CalculateDicePools dicePoolCalculationData ->
         List.map
             (fun coreSkill -> CoreSkill.update (CoreSkill.Msg.CalculateDicePool dicePoolCalculationData) coreSkill)
             model

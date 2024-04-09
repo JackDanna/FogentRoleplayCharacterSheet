@@ -1,8 +1,11 @@
 module AttributeAndCoreSkillsList
 
 open FogentRoleplayLib.AttributeAndCoreSkills
+open FogentRoleplayLib.Skill
 
-type Msg = ModifyAttributeAndCoreSkillsList of int * AttributeAndCoreSkills.Msg
+type Msg =
+    | ModifyAttributeAndCoreSkillsList of int * AttributeAndCoreSkills.Msg
+    | CalculateDicePools of DicePoolCalculationData
 
 let update msg model =
     match msg with
@@ -14,6 +17,15 @@ let update msg model =
                 else
                     attributeAndCoreSkills)
             model
+    | CalculateDicePools dicePoolCalculationData ->
+
+        List.map
+            (fun attributeAndCoreSkills ->
+                AttributeAndCoreSkills.update
+                    (AttributeAndCoreSkills.Msg.CalculateDicePool(dicePoolCalculationData))
+                    attributeAndCoreSkills)
+            model
+
 
 open Feliz
 open Feliz.Bulma

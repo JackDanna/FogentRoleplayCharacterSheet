@@ -1,10 +1,12 @@
 module AttributeAndCoreSkills
 
 open FogentRoleplayLib.AttributeAndCoreSkills
+open FogentRoleplayLib.Skill
 
 type Msg =
     | AttributeMsg of AttributeStat.Msg
     | CoreSkillListMsg of CoreSkillList.Msg
+    | CalculateDicePool of DicePoolCalculationData
 
 // let init () =
 
@@ -17,6 +19,10 @@ let update msg model =
     | CoreSkillListMsg msg -> {
         model with
             coreSkills = CoreSkillList.update msg model.coreSkills
+      }
+    | CalculateDicePool msg -> {
+        model with
+            coreSkills = CoreSkillList.update (CoreSkillList.Msg.CalculateDicePools(msg)) model.coreSkills
       }
 
 open Feliz
