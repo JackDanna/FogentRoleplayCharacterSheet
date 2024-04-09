@@ -307,15 +307,12 @@ module CoreSkill =
 module AttributeStat =
     open Neg2To5
     open Attribute
-    open CoreSkill
 
-    type AttributeStat = {
-        attribute: Attribute
-        stat: Neg2To5
-        coreSkills: CoreSkill list
-    }
+    type AttributeStat = { attribute: Attribute; stat: Neg2To5 }
 
 module AttributeAndCoreSkills =
+    open Attribute
+    open Neg2To5
     open AttributeStat
     open CoreSkill
 
@@ -324,10 +321,27 @@ module AttributeAndCoreSkills =
         coreSkills: CoreSkill list
     }
 
+    let defaultAttributeAndCoreSkills (coreSkillList: CoreSkill list) (attribute: Attribute) : AttributeAndCoreSkills = {
+        attribute = { attribute = attribute; stat = Zero }
+        coreSkills =
+            List.collect
+                (fun coreSkill ->
+                    if coreSkill.governingAttribute = attribute then
+                        [ coreSkill ]
+                    else
+                        [])
+                coreSkillList
+    }
+
 module Character =
+    open Attribute
+    open CoreSkill
     open AttributeAndCoreSkills
 
     type Character = {
         name: string
         attributeAndCoreSkillsList: AttributeAndCoreSkills list
     }
+
+    let defaultAttributeAndCoreSkillsList (attributeList: Attribute list) (coreSkillList: CoreSkill list) =
+        List.map (defaultAttributeAndCoreSkills coreSkillList) attributeList

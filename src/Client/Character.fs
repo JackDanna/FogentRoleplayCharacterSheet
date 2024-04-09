@@ -1,10 +1,17 @@
 module Character
 
 open FogentRoleplayLib.Character
+open FogentRoleplayLib.Attribute
+open FogentRoleplayLib.CoreSkill
 
 type Msg =
     | SetName of string
     | AttributeAndCoreSkillsListMsg of AttributeAndCoreSkillsList.Msg
+
+let init (attributeData: Attribute list) (coreSkillData: CoreSkill list) = {
+    name = ""
+    attributeAndCoreSkillsList = defaultAttributeAndCoreSkillsList attributeData coreSkillData
+}
 
 let update msg (model: Character) =
     match msg with

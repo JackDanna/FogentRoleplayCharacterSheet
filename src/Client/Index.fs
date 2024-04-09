@@ -7,9 +7,10 @@ open Shared
 
 open FogentRoleplayLib.Character
 
-type Model =
-    { fallenData: FogentRoleplayData
-      character: Character }
+type Model = {
+    fallenData: FogentRoleplayData
+    character: Character
+}
 
 type Msg =
     | CharacterMsg of Character.Msg
@@ -21,9 +22,10 @@ let fallenDataApi =
     |> Remoting.buildProxy<IFogentRoleplayDataApi>
 
 let init () : Model * Cmd<Msg> =
-    { fallenData =
-        { defaultCoreSkillList = []
-          defaultAttributeList = []
+    {
+        fallenData = {
+            defaultCoreSkillList = []
+            defaultAttributeList = []
         //   allItemStackList = []
         //   magicSkillMap = Map.empty
         //   magicCombatMap = Map.empty
@@ -33,8 +35,9 @@ let init () : Model * Cmd<Msg> =
         //   carryWeightCalculationMap = Map.empty
         //   weightClassList = []
         //   movementSpeedCalculationMap = Map.empty
-          }
-      character = Character.init [] [] },
+        }
+        character = Character.init
+    },
 
     Cmd.OfAsync.perform fallenDataApi.getInitData () GotInitData
 
@@ -42,40 +45,31 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
     match msg with
     | CharacterMsg characterMsg ->
 
-        { model with
-            character =
-                Character.update
-                    model.fallenData.defaultAttributeList
-                    model.fallenData.defaultCoreSkillList
-                    model.fallenData.allItemStackList
-                    model.fallenData.magicSkillMap
-                    model.fallenData.magicCombatMap
-                    model.fallenData.rangeMap
-                    model.fallenData.effectForDisplayMap
-                    model.fallenData.carryWeightCalculationMap
-                    model.fallenData.weightClassList
-                    model.fallenData.movementSpeedCalculationMap
-                    characterMsg
-                    model.character },
+        {
+            model with
+                character =
+                    Character.update
+                        // model.fallenData.defaultAttributeList
+                        // model.fallenData.defaultCoreSkillList
+                        // model.fallenData.allItemStackList
+                        // model.fallenData.magicSkillMap
+                        // model.fallenData.magicCombatMap
+                        // model.fallenData.rangeMap
+                        // model.fallenData.effectForDisplayMap
+                        // model.fallenData.carryWeightCalculationMap
+                        // model.fallenData.weightClassList
+                        // model.fallenData.movementSpeedCalculationMap
+                        characterMsg
+                        model.character
+        },
         Cmd.none
     | GotInitData newFallenData ->
 
-        { model with
-            fallenData = newFallenData
-            character =
-                Character.update
-                    newFallenData.defaultAttributeList
-                    newFallenData.defaultCoreSkillList
-                    newFallenData.allItemStackList
-                    newFallenData.magicSkillMap
-                    newFallenData.magicCombatMap
-                    newFallenData.rangeMap
-                    newFallenData.effectForDisplayMap
-                    newFallenData.carryWeightCalculationMap
-                    newFallenData.weightClassList
-                    model.fallenData.movementSpeedCalculationMap
-                    Character.Msg.SetDefault
-                    model.character },
+        {
+            model with
+                fallenData = newFallenData
+                character = Character.update Character.Msg.SetDefault model.character
+        },
         Cmd.none
 
 open Feliz
@@ -100,12 +94,7 @@ let view (model: Model) (dispatch: Msg -> unit) =
                     color.isPrimary
                     prop.children [
                         Bulma.navbarItem.div [
-                            Bulma.title.h3 [
-                                prop.text "Fallen"
-                                prop.style [
-                                    style.fontFamily "PT Serif Caption"
-                                ]
-                            ]
+                            Bulma.title.h3 [ prop.text "Fallen"; prop.style [ style.fontFamily "PT Serif Caption" ] ]
                         ]
                     ]
                 ]
@@ -116,7 +105,7 @@ let view (model: Model) (dispatch: Msg -> unit) =
                     (Seq.toList model.fallenData.carryWeightCalculationMap.Keys)
                     ((List.ofSeq model.fallenData.effectForDisplayMap.Keys)
                      @ (List.ofSeq model.fallenData.carryWeightCalculationMap.Keys)
-                       @ (List.ofSeq model.fallenData.movementSpeedCalculationMap.Keys))
+                     @ (List.ofSeq model.fallenData.movementSpeedCalculationMap.Keys))
                     model.fallenData.combatVocationalSkill
                     model.fallenData.allItemStackList
                     model.character
