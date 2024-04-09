@@ -9,7 +9,6 @@ type Msg = Neg2To5Msg of Neg2To5.Msg
 let init () = {
     attribute = ""
     stat = Neg2To5.init ()
-    coreSkills = []
 }
 
 let update msg model =
