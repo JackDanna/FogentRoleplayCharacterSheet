@@ -50,8 +50,6 @@ let view model dispatch =
 
         AttributeAndCoreSkillsList.view model.attributeAndCoreSkillsList (AttributeAndCoreSkillsListMsg >> dispatch)
 
-    // |> AttributeList.view model.attributeList (AttributeListMsg >> dispatch)
-
     // VocationList.view
     //     combatVocationalSkill
     //     (vocationDicePoolListToStringifiedVocationDicePoolList model.vocationDicePoolList)
