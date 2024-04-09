@@ -6,7 +6,7 @@ open FogentRoleplayLib.Skill
 
 type Msg = 
     | Neg1To5Msg of Neg1To5.Msg
-    | CalculateDicePool of CalculateDicePoolData
+    | CalculateDicePool of DicePoolCalculationData
 
 let init () =
     {
@@ -18,11 +18,7 @@ let update msg model =
     match msg with
     | Neg1To5Msg msg ->
         { model with
-            skill = { 
-                level = Neg1To5.update msg model.skill.level
-                name = model.skill.name
-                dicePool = model.skill.dicePool
-            }
+            skill = { model.skill with level = Neg1To5.update msg model.skill.level }
         }
     | CalculateDicePool msg ->
         { model with skill.dicePool = calculateCoreSkillDicePool msg model.skill.level}

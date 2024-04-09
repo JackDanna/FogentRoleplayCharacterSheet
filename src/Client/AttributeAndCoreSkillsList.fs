@@ -1,6 +1,7 @@
-module AttributeAndCoreSkillsList
+module Character
 
-open FogentRoleplayLib.Character
+open FogentRoleplayLib.AttributeStat
+open FogentRoleplayLib.CoreSkill
 
 type Msg =
     | ModifyAttributeAndCoreSkillsList of int * AttributeAndCoreSkills.Msg
@@ -16,9 +17,3 @@ let update msg model =
                     attributeAndCoreSkills
             )
             model
-
-open Feliz
-open Feliz.Bulma
-
-let view model dispatch =
-    Html.none

@@ -8,6 +8,10 @@ open Shared
 
 module FogentRoleplayServerData =
     open FSharp.Data
+    open FogentRoleplayLib.TypeUtils
+    open FogentRoleplayLib.Attribute
+    open FogentRoleplayLib.Neg1To5
+    open FogentRoleplayLib.DicePool
     // open FogentRoleplayLib.DamageType
     // open FogentRoleplayLib.TypeUtils
     // open FogentRoleplayLib.EngageableOpponents
@@ -41,15 +45,15 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.Skill
     // open FogentRoleplayLib.ItemStack
 
-    let makeFallenDataPath fileName =
+    let makeFogentRoleplayDataPath fileName =
         __SOURCE_DIRECTORY__
-        + "../../FallenData/"
+        + "../../FogentRoleplayData/"
         + fileName
 
     let makeFallenData fileName mappingFunc =
         CsvFile
             .Load(
-                makeFallenDataPath fileName,
+                makeFogentRoleplayDataPath fileName,
                 hasHeaders = true
             )
             .Rows
@@ -116,22 +120,21 @@ module FogentRoleplayServerData =
 
     // AttributeAndCoreSkill
     let attributeData: Attribute list =
-        makeFallenData "AttributeData.csv" (fun row ->
-            { name = AttributeName row.["desc"]
-              level = Zero })
+        makeFallenData 
+            "AttributeData.csv" 
+            (fun row -> Attribute row.["desc"] )
 
     let coreSkillData: CoreSkill list =
-        makeFallenData "CoreSkillData.csv" (fun row ->
-            { skill =
-                { name = SkillName row.["name"]
-                  level = Zero }
-              governingAttribute = AttributeName row.["governingAttribute"] })
+        makeFallenData 
+            "CoreSkillData.csv" 
+            (fun row ->
+                { skill = { name = row.["name"]; level = Zero; dicePool = baseDicePool }
+                  governingAttribute = row.["governingAttribute"]}
+            )
 
-    let attributeNameData = attributesToAttributeNames attributeData
+    let attributeMap = stringListToTypeMap attributeData
 
-    let attributeMap = stringListToTypeMap attributeNameData
-
-    let mapAndStringToAttributes (attributeMap: Map<string, AttributeName>) (input) =
+    let mapAndStringToAttributes (attributeMap: Map<string, Attribute>) (input) =
         String.filter ((<>) ' ') input
         |> (fun s -> s.Split(',', System.StringSplitOptions.RemoveEmptyEntries))
         |> List.ofArray
@@ -437,15 +440,16 @@ let fallenDataApi: IFogentRoleplayDataApi =
                 return
                     { defaultCoreSkillList = FogentRoleplayServerData.coreSkillData
                       defaultAttributeList = FogentRoleplayServerData.attributeData
-                      allItemStackList = FallenServerData.itemStackData
-                      magicSkillMap = FallenServerData.magicSkillMap
-                      magicCombatMap = FallenServerData.magicCombatMap
-                      rangeMap = FallenServerData.rangeMap
-                      combatVocationalSkill = FallenServerData.combatVocationalSkill
-                      effectForDisplayMap = FallenServerData.effectForDisplayMap
-                      carryWeightCalculationMap = FallenServerData.carryWeightCalculationMap
-                      weightClassList = FallenServerData.weightClassData
-                      movementSpeedCalculationMap = FallenServerData.movementSpeedCalculationMap }
+                    //   allItemStackList = FallenServerData.itemStackData
+                    //   magicSkillMap = FallenServerData.magicSkillMap
+                    //   magicCombatMap = FallenServerData.magicCombatMap
+                    //   rangeMap = FallenServerData.rangeMap
+                    //   combatVocationalSkill = FallenServerData.combatVocationalSkill
+                    //   effectForDisplayMap = FallenServerData.effectForDisplayMap
+                    //   carryWeightCalculationMap = FallenServerData.carryWeightCalculationMap
+                    //   weightClassList = FallenServerData.weightClassData
+                    //   movementSpeedCalculationMap = FallenServerData.movementSpeedCalculationMap
+                    }
             } }
 
 let webApp =

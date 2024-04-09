@@ -1,5 +1,11 @@
 namespace FogentRoleplayLib
 
+module TypeUtils =
+
+    let stringListToTypeMap (stringTypeArray: string list) =
+        List.zip stringTypeArray stringTypeArray
+        |> Map.ofList
+
 module Neg2To5 =
     type Neg2To5 =
         | NegTwo
@@ -263,8 +269,9 @@ module Skill =
 
     type Skill = {name: string; level: Neg1To5; dicePool: DicePool}
 
-    type CalculateDicePoolData = {
+    type DicePoolCalculationData = {
         baseDice: DicePool option
+        attributeDicePoolMod: DicePoolMod
         injuryDicePenalty: DicePoolPenalty
         weightClassDicePenalty: DicePoolPenalty
         itemEffectDicePoolMod: DicePoolMod
@@ -282,7 +289,7 @@ module CoreSkill =
         governingAttribute: Attribute
     }
 
-    let calculateCoreSkillDicePool (dicePoolCalculationData:CalculateDicePoolData)  (skillLevel:Neg1To5) =
+    let calculateCoreSkillDicePool (dicePoolCalculationData:DicePoolCalculationData)  (skillLevel:Neg1To5) =
         modifyDicePoolByDicePoolModList
             (dicePoolCalculationData.baseDice |> Option.defaultValue baseDicePool)
             [
@@ -303,11 +310,19 @@ module AttributeStat =
         coreSkills: CoreSkill list
     }
 
+module AttributeAndCoreSkills =
+    open AttributeStat
+    open CoreSkill
+
+    type AttributeAndCoreSkills = {
+        attribute : AttributeStat
+        coreSkills : CoreSkill list
+    }
 
 module Character =
-    open AttributeStat
+    open AttributeAndCoreSkills
 
     type Character = {
         name: string
-        attibuteStats: AttributeStat list
+        attributeAndCoreSkillsList: AttributeAndCoreSkills list
     }

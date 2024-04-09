@@ -10,6 +10,8 @@
     <Compile Include="Neg1To5.fs" />
     <Compile Include="CoreSkill.fs" />
     <Compile Include="CoreSkillList.fs" />
+    <Compile Include="AttributeAndCoreSkills.fs" />
+    <Compile Include="AttributeAndCoreSkillsList.fs" />
     <Compile Include="Character.fs" />
     <None Include="postcss.config.js" />
     <None Include="tailwind.config.js" />

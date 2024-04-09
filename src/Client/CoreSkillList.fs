@@ -1,10 +1,11 @@
 module CoreSkillList
 
 open FogentRoleplayLib.CoreSkill
-open FogentRoleplayLib.DicePool
-open FogentRoleplayLib.Attribute
+open FogentRoleplayLib.Skill
 
-type Msg = ModifiedCoreSkillAtPosition of int * CoreSkill.Msg
+type Msg = 
+    | ModifiedCoreSkillAtPosition of int * CoreSkill.Msg
+    | CalculateCoreSkillDicePools of DicePoolCalculationData
 
 let init () = [CoreSkill.init();CoreSkill.init()]
 
@@ -18,20 +19,22 @@ let update msg (model: CoreSkill list) =
             else
                 coreSkill
         )
+    | CalculateCoreSkillDicePools dicePoolCalculationData ->
+        List.map 
+            (fun coreSkill -> CoreSkill.update (CoreSkill.Msg.CalculateDicePool dicePoolCalculationData) coreSkill) 
+            model
 
 open Feliz
-open Feliz.Bulma
+
 let view (model:CoreSkill list) (dispatch: Msg->unit) =
 
-
-    Html.ul (
-        List.mapi 
-            ( fun index coreSkill ->
-                CoreSkill.view 
-                        coreSkill
-                        (fun msg -> ModifiedCoreSkillAtPosition(index, msg) |> dispatch)
-            )
-            model
-    )
+    List.mapi 
+        ( fun index coreSkill ->
+            CoreSkill.view 
+                    coreSkill
+                    (fun msg -> ModifiedCoreSkillAtPosition(index, msg) |> dispatch)
+        )
+        model
+    |> Html.ul
 
         

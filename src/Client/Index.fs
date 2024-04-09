@@ -24,15 +24,16 @@ let init () : Model * Cmd<Msg> =
     { fallenData =
         { defaultCoreSkillList = []
           defaultAttributeList = []
-          allItemStackList = []
-          magicSkillMap = Map.empty
-          magicCombatMap = Map.empty
-          rangeMap = Map.empty
-          combatVocationalSkill = []
-          effectForDisplayMap = Map.empty
-          carryWeightCalculationMap = Map.empty
-          weightClassList = []
-          movementSpeedCalculationMap = Map.empty }
+        //   allItemStackList = []
+        //   magicSkillMap = Map.empty
+        //   magicCombatMap = Map.empty
+        //   rangeMap = Map.empty
+        //   combatVocationalSkill = []
+        //   effectForDisplayMap = Map.empty
+        //   carryWeightCalculationMap = Map.empty
+        //   weightClassList = []
+        //   movementSpeedCalculationMap = Map.empty
+          }
       character = Character.init [] [] },
 
     Cmd.OfAsync.perform fallenDataApi.getInitData () GotInitData
