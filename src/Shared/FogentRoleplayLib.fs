@@ -3,8 +3,7 @@ namespace FogentRoleplayLib
 module TypeUtils =
 
     let stringListToTypeMap (stringTypeArray: string list) =
-        List.zip stringTypeArray stringTypeArray
-        |> Map.ofList
+        List.zip stringTypeArray stringTypeArray |> Map.ofList
 
 module Neg2To5 =
     type Neg2To5 =
@@ -28,7 +27,7 @@ module Neg2To5 =
         | 4 -> Some Four
         | 5 -> Some Five
         | _ -> None
-    
+
     let neg2To5ToInt neg2To5 =
         match neg2To5 with
         | NegTwo -> -2
@@ -63,7 +62,7 @@ module Neg1To5 =
         | 4 -> Some Four
         | 5 -> Some Five
         | _ -> None
-    
+
     let neg1To5ToInt neg1To5 =
         match neg1To5 with
         | NegOne -> -1
@@ -84,14 +83,15 @@ module DicePool =
         d20: uint
     }
 
-    let emptyDicePool =
-        { d4 = 0u
-          d6 = 0u
-          d8 = 0u
-          d10 = 0u
-          d12 = 0u
-          d20 = 0u }
-    
+    let emptyDicePool = {
+        d4 = 0u
+        d6 = 0u
+        d8 = 0u
+        d10 = 0u
+        d12 = 0u
+        d20 = 0u
+    }
+
     let baseDicePool = { emptyDicePool with d6 = 3u }
 
     let diceToString numDice diceTypeString =
@@ -101,41 +101,43 @@ module DicePool =
             ""
 
     let checkIfEmptyDicePoolString dicePoolString =
-        if dicePoolString = "" then
-            "0d6"
-        else
-            dicePoolString
+        if dicePoolString = "" then "0d6" else dicePoolString
 
     let dicePoolToString (dicePool: DicePool) =
-        [ diceToString dicePool.d4 "d4"
-          diceToString dicePool.d6 "d6"
-          diceToString dicePool.d8 "d8"
-          diceToString dicePool.d10 "d10"
-          diceToString dicePool.d12 "d12"
-          diceToString dicePool.d20 "d20" ]
+        [
+            diceToString dicePool.d4 "d4"
+            diceToString dicePool.d6 "d6"
+            diceToString dicePool.d8 "d8"
+            diceToString dicePool.d10 "d10"
+            diceToString dicePool.d12 "d12"
+            diceToString dicePool.d20 "d20"
+        ]
         |> List.filter (fun diceString -> diceString <> "")
         |> String.concat ", "
         |> checkIfEmptyDicePoolString
-    
+
     let combineDicePools dicePools =
         List.fold
-            (fun acc pool ->
-                { d4 = acc.d4 + pool.d4
-                  d6 = acc.d6 + pool.d6
-                  d8 = acc.d8 + pool.d8
-                  d10 = acc.d10 + pool.d10
-                  d12 = acc.d12 + pool.d12
-                  d20 = acc.d20 + pool.d20 })
+            (fun acc pool -> {
+                d4 = acc.d4 + pool.d4
+                d6 = acc.d6 + pool.d6
+                d8 = acc.d8 + pool.d8
+                d10 = acc.d10 + pool.d10
+                d12 = acc.d12 + pool.d12
+                d20 = acc.d20 + pool.d20
+            })
             emptyDicePool
             dicePools
-    
+
     let dicePoolToNumDice (dicePool: DicePool) =
-        let { d4 = d4
-              d6 = d6
-              d8 = d8
-              d10 = d10
-              d12 = d12
-              d20 = d20 } =
+        let {
+                d4 = d4
+                d6 = d6
+                d8 = d8
+                d10 = d10
+                d12 = d12
+                d20 = d20
+            } =
             dicePool
 
         d4 + d6 + d8 + d10 + d12 + d20
@@ -143,16 +145,15 @@ module DicePool =
 module DicePoolMod =
     open DicePool
 
-     type DicePoolPenalty = uint // always should deduct the dice with the fewest faces first (i.e. d4, then d6, then d8...)
+    type DicePoolPenalty = uint // always should deduct the dice with the fewest faces first (i.e. d4, then d6, then d8...)
 
     type DicePoolMod =
         | AddDice of DicePool
         | RemoveDice of DicePoolPenalty
-    
+
     let createD6DicePoolMod (numDice: uint) =
-        AddDice
-            { emptyDicePool with d6 = numDice }
-    
+        AddDice { emptyDicePool with d6 = numDice }
+
     let removeDice (dice: uint) (neg: uint) : uint * DicePoolPenalty =
         let result = int dice - int neg
         // If the result is negative, their are still dice to lose, but they are of a higher face value
@@ -170,13 +171,15 @@ module DicePoolMod =
         let d12, d20Neg = removeDice dicePool.d12 d12Neg
         let d20, _ = removeDice dicePool.d20 d20Neg
 
-        { d4 = d4
-          d6 = d6
-          d8 = d8
-          d10 = d10
-          d12 = d12
-          d20 = d20 }
-    
+        {
+            d4 = d4
+            d6 = d6
+            d8 = d8
+            d10 = d10
+            d12 = d12
+            d20 = d20
+        }
+
     let modifyDicePool (dicePool: DicePool) (dicePoolMod: DicePoolMod) : DicePool =
         match dicePoolMod with
         | AddDice diceToAdd -> combineDicePools [ dicePool; diceToAdd ]
@@ -267,7 +270,11 @@ module Skill =
     open DicePool
     open DicePoolMod
 
-    type Skill = {name: string; level: Neg1To5; dicePool: DicePool}
+    type Skill = {
+        name: string
+        level: Neg1To5
+        dicePool: DicePool
+    }
 
     type DicePoolCalculationData = {
         baseDice: DicePool option
@@ -289,15 +296,13 @@ module CoreSkill =
         governingAttribute: Attribute
     }
 
-    let calculateCoreSkillDicePool (dicePoolCalculationData:DicePoolCalculationData)  (skillLevel:Neg1To5) =
-        modifyDicePoolByDicePoolModList
-            (dicePoolCalculationData.baseDice |> Option.defaultValue baseDicePool)
-            [
-                skillLevel |> neg1To5ToInt |> intToD6DicePoolMod
-                dicePoolCalculationData.injuryDicePenalty |> RemoveDice
-                dicePoolCalculationData.itemEffectDicePoolMod
-                dicePoolCalculationData.weightClassDicePenalty |> RemoveDice
-            ]
+    let calculateCoreSkillDicePool (dicePoolCalculationData: DicePoolCalculationData) (skillLevel: Neg1To5) =
+        modifyDicePoolByDicePoolModList (dicePoolCalculationData.baseDice |> Option.defaultValue baseDicePool) [
+            skillLevel |> neg1To5ToInt |> intToD6DicePoolMod
+            dicePoolCalculationData.injuryDicePenalty |> RemoveDice
+            dicePoolCalculationData.itemEffectDicePoolMod
+            dicePoolCalculationData.weightClassDicePenalty |> RemoveDice
+        ]
 
 module AttributeStat =
     open Neg2To5
@@ -315,8 +320,8 @@ module AttributeAndCoreSkills =
     open CoreSkill
 
     type AttributeAndCoreSkills = {
-        attribute : AttributeStat
-        coreSkills : CoreSkill list
+        attribute: AttributeStat
+        coreSkills: CoreSkill list
     }
 
 module Character =
