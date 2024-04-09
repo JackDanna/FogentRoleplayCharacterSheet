@@ -37,15 +37,6 @@ module Neg2To5 =
 module Attribute =
     type Attribute = string
 
-module AttributeStat =
-    open Neg2To5
-    open Attribute
-
-    type AttributeStat = {
-        attribute: Attribute
-        stat: Neg2To5
-    }
-
 module Neg1To5 =
     type Neg1To5 =
         | NegOne
@@ -279,7 +270,6 @@ module Skill =
         itemEffectDicePoolMod: DicePoolMod
     }
 
-
 module CoreSkill =
     open Attribute
     open Skill
@@ -301,3 +291,23 @@ module CoreSkill =
                 dicePoolCalculationData.itemEffectDicePoolMod
                 dicePoolCalculationData.weightClassDicePenalty |> RemoveDice
             ]
+
+module AttributeStat =
+    open Neg2To5
+    open Attribute
+    open CoreSkill
+
+    type AttributeStat = {
+        attribute: Attribute
+        stat: Neg2To5
+        coreSkills: CoreSkill list
+    }
+
+
+module Character =
+    open AttributeStat
+
+    type Character = {
+        name: string
+        attibuteStats: AttributeStat list
+    }
