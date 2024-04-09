@@ -15,7 +15,7 @@ open Elmish.HMR
 Program.mkSimple 
     CoreSkillList.init 
     CoreSkillList.update 
-    (CoreSkillList.view [FogentRoleplayLib.DicePool.baseDicePool; FogentRoleplayLib.DicePool.baseDicePool; ])
+    CoreSkillList.view
 #if DEBUG
 |> Program.withConsoleTrace
 #endif

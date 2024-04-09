@@ -21,19 +21,17 @@ let update msg (model: CoreSkill list) =
 
 open Feliz
 open Feliz.Bulma
-let view (coreSkillDicePoolList:DicePool list) (model:CoreSkill list) (dispatch: Msg->unit) (governingAttribute:Attribute)=
-    
+let view (model:CoreSkill list) (dispatch: Msg->unit) =
+
+
     Html.ul (
-        List.mapi2 
-            ( fun index coreSkill coreSkillDicePool->
-                if coreSkill.governingAttribute = governingAttribute then
-                    CoreSkill.view 
-                        coreSkillDicePool 
+        List.mapi 
+            ( fun index coreSkill ->
+                CoreSkill.view 
                         coreSkill
                         (fun msg -> ModifiedCoreSkillAtPosition(index, msg) |> dispatch)
-                else
-                    Html.none
             )
             model
-            coreSkillDicePoolList
     )
+
+        
