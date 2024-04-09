@@ -47,7 +47,7 @@ module FogentRoleplayServerData =
 
     let makeFogentRoleplayDataPath fileName =
         __SOURCE_DIRECTORY__
-        + "../../FogentRoleplayData/"
+        + "../../../FogentRoleplayData/"
         + fileName
 
     let makeFallenData fileName mappingFunc =
