@@ -8,7 +8,7 @@ open Shared
 open FogentRoleplayLib.Character
 
 type Model = {
-    fallenData: FogentRoleplayData
+    fogentRoleplayData: FogentRoleplayData
     character: Character
 }
 
@@ -16,7 +16,7 @@ type Msg =
     | CharacterMsg of Character.Msg
     | GotInitData of FogentRoleplayData
 
-let fallenDataApi =
+let fogentRoleplayDataApi =
     Remoting.createApi ()
     |> Remoting.withRouteBuilder Route.builder
     |> Remoting.buildProxy<IFogentRoleplayDataApi>
@@ -26,14 +26,14 @@ let init () : Model * Cmd<Msg> =
     let defaultCoreSkillList = []
 
     {
-        fallenData = {
+        fogentRoleplayData = {
             defaultAttributeList = defaultAttributeList
             defaultCoreSkillList = defaultCoreSkillList
         }
         character = Character.init defaultAttributeList defaultCoreSkillList
     },
 
-    Cmd.OfAsync.perform fallenDataApi.getInitData () GotInitData
+    Cmd.OfAsync.perform fogentRoleplayDataApi.getInitData () GotInitData
 
 let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
     match msg with
@@ -48,7 +48,7 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
 
         {
             model with
-                fallenData = newFallenData
+                fogentRoleplayData = newFallenData
                 character = Character.init newFallenData.defaultAttributeList newFallenData.defaultCoreSkillList
         },
         Cmd.none

@@ -12,10 +12,7 @@ open Elmish.Debug
 open Elmish.HMR
 #endif
 
-Program.mkSimple 
-    CoreSkillList.init 
-    CoreSkillList.update 
-    CoreSkillList.view
+Program.mkProgram Index.init Index.update Index.view
 #if DEBUG
 |> Program.withConsoleTrace
 #endif
