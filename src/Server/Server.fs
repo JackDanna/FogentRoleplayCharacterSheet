@@ -36,10 +36,8 @@ module FogentRoleplayServerData =
     let damageTypeData =
         makeFogentRoleplayData "DamageTypeData.csv" (fun row -> (DamageType row.["desc"]))
 
-    // let stringToDamageTypeList =
-    //     damageTypeData
-    //     |> stringListToTypeMap
-    //     |> stringAndMapToDamageTypeList
+    let stringToDamageTypeList =
+        damageTypeData |> stringListToTypeMap |> stringAndMapToDamageTypeList
 
     // // EngageableOpponents
     // let engageableOpponentsCalculationData =
