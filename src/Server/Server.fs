@@ -10,6 +10,7 @@ module FogentRoleplayServerData =
     open FSharp.Data
 
     open FogentRoleplayLib.DamageType
+    open FogentRoleplayLib.EngageableOpponents
 
     open FogentRoleplayLib.TypeUtils
     open FogentRoleplayLib.AttributeName
@@ -34,20 +35,21 @@ module FogentRoleplayServerData =
 
     // DamageType
     let damageTypeData =
-        makeFogentRoleplayData "DamageTypeData.csv" (fun row -> (DamageType row.["desc"]))
+        makeFogentRoleplayData "DamageTypeData.csv" (fun row -> (DamageType row.["name"]))
 
     let stringToDamageTypeList =
         damageTypeData |> stringListToTypeMap |> stringAndMapToDamageTypeList
 
-    // // EngageableOpponents
-    // let engageableOpponentsCalculationData =
-    //     makeFallenData "EngageableOpponentsCalculationData.csv" (fun row ->
-    //         { name = string row.["desc"]
-    //           combatRollDivisor = uint row.["combatRollDivisor"]
-    //           maxEO = parseMaxEngageableOpponentsString row.["maxEO"] })
+    // EngageableOpponents
+    let engageableOpponentsCalculationData =
+        makeFogentRoleplayData "EngageableOpponentsCalculationData.csv" (fun row -> {
+            name = string row.["name"]
+            combatRollDivisor = uint row.["combatRollDivisor"]
+            maxEO = parseMaxEngageableOpponentsString row.["maxEO"]
+        })
 
-    // let engageableOpponentsMap =
-    //     parseEngaeableOpponentsString (eoCalculationListToMap engageableOpponentsCalculationData)
+    let engageableOpponentsMap =
+        parseEngaeableOpponentsString (eoCalculationListToMap engageableOpponentsCalculationData)
 
     // // Range
     // let calculatedRangeData =
