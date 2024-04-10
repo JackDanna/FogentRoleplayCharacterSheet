@@ -133,7 +133,7 @@ module FogentRoleplayServerData =
     // WeaponClass
     let weaponClassData =
         makeFogentRoleplayData "WeaponClassData.csv" (fun row -> {
-            name = string row.["desc"]
+            name = string row.["name"]
             oneHandedWeaponDice = parseDicePoolModOptionString row.["oneHandedWeaponDice"]
             twoHandedWeaponDice = parseDicePoolModString row.["twoHandedWeaponDice"]
             penetration = uint row.["penetration"]
