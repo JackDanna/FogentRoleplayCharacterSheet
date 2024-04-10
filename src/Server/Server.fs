@@ -12,6 +12,7 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.DamageType
     open FogentRoleplayLib.EngageableOpponents
     open FogentRoleplayLib.Range
+    open FogentRoleplayLib.ResourceClass
 
     open FogentRoleplayLib.TypeUtils
     open FogentRoleplayLib.AttributeName
@@ -76,16 +77,16 @@ module FogentRoleplayServerData =
         | "None" -> None
         | _ -> rangeMap.Item string |> Some
 
-    // // ResourceClass
-    // let resourceClassData =
-    //     makeFallenData "ResourceClassData.csv" (fun row -> (ResourceClass row.["desc"]))
+    // ResourceClass
+    let resourceClassData =
+        makeFogentRoleplayData "ResourceClassData.csv" (fun row -> (ResourceClass row.["name"]))
 
-    // let resourceClassMap = stringListToTypeMap resourceClassData
+    let resourceClassMap = stringListToTypeMap resourceClassData
 
-    // let resourceClassOptionMap string =
-    //     match string with
-    //     | "None" -> None
-    //     | _ -> Some <| resourceClassMap.Item string
+    let resourceClassOptionMap string =
+        match string with
+        | "None" -> None
+        | _ -> Some <| resourceClassMap.Item string
 
     // AttributeAndCoreSkill
     let attributeData: AttributeName list =
@@ -113,7 +114,7 @@ module FogentRoleplayServerData =
 
 // MagicSkill
 // let magicSkillData =
-//     makeFallenData "MagicSkillData.csv" (fun row ->
+//     makeFogentRoleplayData "MagicSkillData.csv" (fun row ->
 //         { name = string row.["desc"]
 //           damageTypes = stringToDamageTypeList (string row.["damageTypes"])
 //           rangeAdjustment = int row.["rangeAdjustment"]
@@ -126,7 +127,7 @@ module FogentRoleplayServerData =
 
 // // MagicCombat
 // let magicCombatData =
-//     makeFallenData "MagicCombatData.csv" (fun row ->
+//     makeFogentRoleplayData "MagicCombatData.csv" (fun row ->
 //         { name = string row.["Description"]
 //           lvlRequirment = int row.["Lvl Requirment"] |> intToNeg1To4
 //           dicePoolMod = parseDicePoolModString row.["Dice Mod"]
@@ -142,7 +143,7 @@ module FogentRoleplayServerData =
 
 // // WeaponClass
 // let weaponClassData =
-//     makeFallenData "WeaponClassData.csv" (fun row ->
+//     makeFogentRoleplayData "WeaponClassData.csv" (fun row ->
 //         { name = string row.["desc"]
 //           oneHandedWeaponDice = parseDicePoolModOptionString row.["oneHandedWeaponDice"]
 //           twoHandedWeaponDice = parseDicePoolModString row.["twoHandedWeaponDice"]
@@ -160,7 +161,7 @@ module FogentRoleplayServerData =
 
 // // ConduitClass
 // let conduitClassData =
-//     makeFallenData "ConduitClassData.csv" (fun row ->
+//     makeFogentRoleplayData "ConduitClassData.csv" (fun row ->
 
 //         { name = string row.["desc"]
 //           oneHandedDice = parseDicePoolModOptionString row.["oneHandedDice"]
@@ -186,7 +187,7 @@ module FogentRoleplayServerData =
 
 // // ContainerClass
 // let containerClassData =
-//     makeFallenData "ContainerClassData.csv" (fun row ->
+//     makeFogentRoleplayData "ContainerClassData.csv" (fun row ->
 //         { name = string row.["Name"]
 //           weightCapacity = float row.["Weight Capacity"] })
 
@@ -196,7 +197,7 @@ module FogentRoleplayServerData =
 
 // // DefenseClass
 // let physicalDefenseEffectData: PhysicalDefenseEffect list =
-//     makeFallenData "PhysicalDefenseEffect.csv" (fun row ->
+//     makeFogentRoleplayData "PhysicalDefenseEffect.csv" (fun row ->
 //         { name = string row.["desc"]
 //           physicalDefense = float row.["physicalDefense"] })
 
@@ -207,7 +208,7 @@ module FogentRoleplayServerData =
 
 // // SkillDiceModEffect
 // let skillDiceModEffectData: SkillDiceModEffect list =
-//     makeFallenData "SkillDiceModEffect.csv" (fun row ->
+//     makeFogentRoleplayData "SkillDiceModEffect.csv" (fun row ->
 //         { name = string row.["Name"]
 //           skillToEffect = string row.["Skill"]
 //           diceMod = parseDicePoolModString row.["Dice Mod"] })
@@ -219,7 +220,7 @@ module FogentRoleplayServerData =
 
 // // AttributeStatAdjustmentEffect
 // let attributeStatAdjustmentEffectData =
-//     makeFallenData "AttributeStatAdjustmentEffect.csv" (fun row ->
+//     makeFogentRoleplayData "AttributeStatAdjustmentEffect.csv" (fun row ->
 //         { name = string row.["Name"]
 //           attribute = AttributeName row.["Attribute"]
 //           adjustment = int row.["Adjustment"] })
@@ -232,7 +233,7 @@ module FogentRoleplayServerData =
 
 // // AttributeDeterminedDiceModEffect
 // let attributeDeterminedDiceModEffectData =
-//     makeFallenData "AttributeDeterminedDiceModEffectData.csv" (fun row ->
+//     makeFogentRoleplayData "AttributeDeterminedDiceModEffectData.csv" (fun row ->
 //         { name = row.["name"]
 //           attributesToEffect = stringToAttributes row.["attributesToEffect"]
 //           dicePoolMod = parseDicePoolModString row.["dicePoolMod"] })
@@ -245,7 +246,7 @@ module FogentRoleplayServerData =
 
 // // WeightClass
 // let weightClassData: WeightClass list =
-//     makeFallenData "WeightClassData.csv" (fun row ->
+//     makeFogentRoleplayData "WeightClassData.csv" (fun row ->
 //         { name = row.["name"]
 //           bottomPercent = float row.["bottomPercent"]
 //           topPercent = float row.["topPercent"]
@@ -254,7 +255,7 @@ module FogentRoleplayServerData =
 
 // // MovementSpeedCalculation
 // let movementSpeedCalculationData =
-//     makeFallenData "MovementSpeedCalculationData.csv" (fun row ->
+//     makeFogentRoleplayData "MovementSpeedCalculationData.csv" (fun row ->
 //         { name = string row.["desc"]
 //           baseMovementSpeed = uint row.["baseMovementSpeed"]
 //           governingAttribute = attributeMap.Item row.["governingAttributes"]
@@ -269,7 +270,7 @@ module FogentRoleplayServerData =
 
 // // CarryWeightCalculation
 // let carryWeightCalculationData =
-//     makeFallenData "CarryWeightCalculationData.csv" (fun row ->
+//     makeFogentRoleplayData "CarryWeightCalculationData.csv" (fun row ->
 //         { name = string row.["name"]
 //           baseWeight = uint row.["baseWeight"]
 //           governingAttribute = AttributeName row.["governingAttribute"]
@@ -297,7 +298,7 @@ module FogentRoleplayServerData =
 
 // // TextEffectForDisplay
 // let textEffectForDisplayData: TextEffectForDisplay list =
-//     makeFallenData "CharacterEffectForDisplayData.csv" (fun row ->
+//     makeFogentRoleplayData "CharacterEffectForDisplayData.csv" (fun row ->
 //         { name = string row.["Name"]
 //           effect = string row.["Effect"]
 //           durationAndSource =
@@ -323,7 +324,7 @@ module FogentRoleplayServerData =
 
 // // WeaponResourceClass
 // let weaponResourceClassData =
-//     makeFallenData "WeaponResourceClassData.csv" (fun row ->
+//     makeFogentRoleplayData "WeaponResourceClassData.csv" (fun row ->
 //         { name = string row.["desc"]
 //           resourceClass = resourceClassMap.Item row.["resourceClass"]
 //           resourceDice = parseDicePoolModString row.["resourceDice"]
@@ -340,7 +341,7 @@ module FogentRoleplayServerData =
 
 // // ItemTier
 // let itemTierData =
-//     makeFallenData "ItemTierData.csv" (fun row ->
+//     makeFogentRoleplayData "ItemTierData.csv" (fun row ->
 //         { name = string row.["desc"]
 //           level = int row.["level"]
 //           runeSlots = uint row.["runeSlots"]
@@ -385,7 +386,7 @@ module FogentRoleplayServerData =
 //         | _ -> [])
 
 // let itemStackData =
-//     makeFallenData "ItemData.csv" (fun row ->
+//     makeFogentRoleplayData "ItemData.csv" (fun row ->
 //         { quantity = uint row.["quantity"]
 //           item =
 //             { name = string row.["desc"]
