@@ -551,6 +551,16 @@ module CalculatedAOE =
         | Some resourceAOE -> Some(calcShape numDice resourceAOE)
         | None -> determineAOEShapeOption numDice aoe
 
+// Magic
+
+module ResourcePool =
+
+    type ResourcePool = {
+        name: string
+        remainingResources: uint
+        poolMax: uint
+    }
+
 // Item Building
 
 module ResourceClass =
