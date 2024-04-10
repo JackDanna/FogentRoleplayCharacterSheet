@@ -8,6 +8,9 @@ open Shared
 
 module FogentRoleplayServerData =
     open FSharp.Data
+
+    open FogentRoleplayLib.DamageType
+
     open FogentRoleplayLib.TypeUtils
     open FogentRoleplayLib.AttributeName
     open FogentRoleplayLib.Neg1To5
@@ -18,7 +21,7 @@ module FogentRoleplayServerData =
     let makeFogentRoleplayDataPath fileName =
         __SOURCE_DIRECTORY__ + "../../../FogentRoleplayData/" + fileName
 
-    let makeFallenData fileName mappingFunc =
+    let makeFogentRoleplayData fileName mappingFunc =
         CsvFile.Load(makeFogentRoleplayDataPath fileName, hasHeaders = true).Rows
         |> Seq.map (mappingFunc)
         |> List.ofSeq
@@ -29,9 +32,9 @@ module FogentRoleplayServerData =
         | "FALSE" -> false
         | _ -> failwith ("Error: returns " + boolString)
 
-    // // DamageType
-    // let damageTypeData =
-    //     makeFallenData "DamageTypeData.csv" (fun row -> (DamageType row.["desc"]))
+    // DamageType
+    let damageTypeData =
+        makeFogentRoleplayData "DamageTypeData.csv" (fun row -> (DamageType row.["desc"]))
 
     // let stringToDamageTypeList =
     //     damageTypeData
@@ -83,10 +86,10 @@ module FogentRoleplayServerData =
 
     // AttributeAndCoreSkill
     let attributeData: AttributeName list =
-        makeFallenData "AttributeData.csv" (fun row -> AttributeName row.["desc"])
+        makeFogentRoleplayData "AttributeData.csv" (fun row -> AttributeName row.["desc"])
 
     let coreSkillData: CoreSkill list =
-        makeFallenData "CoreSkillData.csv" (fun row -> {
+        makeFogentRoleplayData "CoreSkillData.csv" (fun row -> {
             skill = {
                 name = row.["name"]
                 level = Zero
