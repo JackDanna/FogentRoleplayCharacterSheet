@@ -675,6 +675,18 @@ module MagicResourcePool =
         poolMax: uint
     }
 
+module MagicSkillData =
+    open DamageType
+    open MagicResource
+
+    type MagicSkillData = {
+        name: string
+        damageTypes: DamageType list
+        isMeleeCapable: bool
+        isRangeCapable: bool
+        magicResource: MagicResource
+    }
+
 module MagicSkill =
     open VocationalSkill
     open DamageType

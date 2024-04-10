@@ -13,6 +13,7 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.EngageableOpponents
     open FogentRoleplayLib.Range
     open FogentRoleplayLib.ResourceClass
+    open FogentRoleplayLib.MagicSkillData
 
     open FogentRoleplayLib.TypeUtils
     open FogentRoleplayLib.AttributeName
@@ -112,14 +113,15 @@ module FogentRoleplayServerData =
 
     let stringToAttributes = mapAndStringToAttributes attributeMap
 
-// MagicSkill
-// let magicSkillData =
-//     makeFogentRoleplayData "MagicSkillData.csv" (fun row ->
-//         { name = string row.["desc"]
-//           damageTypes = stringToDamageTypeList (string row.["damageTypes"])
-//           rangeAdjustment = int row.["rangeAdjustment"]
-//           isMeleeCapable = Bool row.["meleeCapable"]
-//           resourceClass = string row.["magicResourceClass"] })
+    //MagicSkillData
+    let magicSkillData: MagicSkillData list =
+        makeFogentRoleplayData "MagicSkillData.csv" (fun row -> {
+            name = string row.["name"]
+            damageTypes = stringToDamageTypeList (string row.["damageTypes"])
+            isMeleeCapable = Bool row.["meleeCapable"]
+            isRangeCapable = Bool row.["rangeCapable"]
+            magicResource = string row.["magicResourceClass"]
+        })
 
 // let magicSkillMap =
 //     List.map (fun (magicSkill: MagicSkill) -> magicSkill.name, magicSkill) magicSkillData
