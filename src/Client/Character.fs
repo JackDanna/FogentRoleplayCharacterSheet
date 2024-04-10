@@ -17,29 +17,31 @@ let init (attributeData: Attribute list) (coreSkillData: CoreSkill list) = {
 }
 
 let update msg (model: Character) =
-    let calculationData: DicePoolCalculationData = {
-        baseDice = None
-        AttributeStatList =
-            List.map
-                (fun attributeAndCoreSkills -> attributeAndCoreSkills.attributeStat)
-                model.attributeAndCoreSkillsList
-        injuryDicePenalty = 0u
-        weightClassDicePenalty = 0u
-        itemEffectDicePoolMod = createD6DicePoolMod 0u
-    }
 
     match msg with
     | SetName newName -> { model with name = newName }
     | AttributeAndCoreSkillsListMsg msg ->
 
+        let newAttributeAndCoreSkillsList =
+            AttributeAndCoreSkillsList.update msg model.attributeAndCoreSkillsList
+
         {
             model with
                 attributeAndCoreSkillsList =
-                    model.attributeAndCoreSkillsList
-                    |> AttributeAndCoreSkillsList.update msg
-                    |> AttributeAndCoreSkillsList.update (
-                        AttributeAndCoreSkillsList.Msg.CalculateDicePools(calculationData)
-                    )
+                    AttributeAndCoreSkillsList.update
+                        (AttributeAndCoreSkillsList.Msg.CalculateDicePools(
+                            {
+                                baseDice = None
+                                AttributeStatList =
+                                    List.map
+                                        (fun attributeAndCoreSkills -> attributeAndCoreSkills.attributeStat)
+                                        newAttributeAndCoreSkillsList
+                                injuryDicePenalty = 0u
+                                weightClassDicePenalty = 0u
+                                itemEffectDicePoolMod = createD6DicePoolMod 0u
+                            }
+                        ))
+                        newAttributeAndCoreSkillsList
         }
 
 open Feliz
