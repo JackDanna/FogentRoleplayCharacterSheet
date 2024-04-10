@@ -11,6 +11,7 @@ module FogentRoleplayServerData =
 
     open FogentRoleplayLib.DamageType
     open FogentRoleplayLib.EngageableOpponents
+    open FogentRoleplayLib.Range
 
     open FogentRoleplayLib.TypeUtils
     open FogentRoleplayLib.AttributeName
@@ -51,27 +52,29 @@ module FogentRoleplayServerData =
     let engageableOpponentsMap =
         parseEngaeableOpponentsString (eoCalculationListToMap engageableOpponentsCalculationData)
 
-    // // Range
-    // let calculatedRangeData =
-    //     makeFallenData "CalculatedRangeData.csv" (fun row ->
-    //         { name = string row.["desc"]
-    //           effectiveRange = uint row.["effectiveRange"]
-    //           maxRange = uint row.["maxRange"] })
+    // Range
+    let calculatedRangeData =
+        makeFogentRoleplayData "CalculatedRangeData.csv" (fun row -> {
+            name = string row.["desc"]
+            effectiveRange = uint row.["effectiveRange"]
+            maxRange = uint row.["maxRange"]
+        })
 
-    // let rangeCalculationData =
-    //     makeFallenData "RangeCalculationData.csv" (fun row ->
-    //         { name = string row.["desc"]
-    //           numDicePerEffectiveRangeUnit = uint row.["numDicePerEffectiveRangeUnit"]
-    //           ftPerEffectiveRangeUnit = uint row.["ftPerEffectiveRangeUnit"]
-    //           roundEffectiveRangeUp = Bool row.["roundEffectiveRangeUp"]
-    //           maxRange = uint row.["maxRange"] })
+    let rangeCalculationData =
+        makeFogentRoleplayData "RangeCalculationData.csv" (fun row -> {
+            name = string row.["desc"]
+            numDicePerEffectiveRangeUnit = uint row.["numDicePerEffectiveRangeUnit"]
+            ftPerEffectiveRangeUnit = uint row.["ftPerEffectiveRangeUnit"]
+            roundEffectiveRangeUp = Bool row.["roundEffectiveRangeUp"]
+            maxRange = uint row.["maxRange"]
+        })
 
-    // let rangeMap = createRangeMap calculatedRangeData rangeCalculationData
+    let rangeMap = createRangeMap calculatedRangeData rangeCalculationData
 
-    // let rangeOptionMap string =
-    //     match string with
-    //     | "None" -> None
-    //     | _ -> rangeMap.Item string |> Some
+    let rangeOptionMap string =
+        match string with
+        | "None" -> None
+        | _ -> rangeMap.Item string |> Some
 
     // // ResourceClass
     // let resourceClassData =
