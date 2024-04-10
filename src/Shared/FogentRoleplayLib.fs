@@ -552,16 +552,6 @@ module CalculatedAOE =
         | Some resourceAOE -> Some(calcShape numDice resourceAOE)
         | None -> determineAOEShapeOption numDice aoe
 
-// Magic
-
-module ResourcePool =
-
-    type ResourcePool = {
-        name: string
-        remainingResources: uint
-        poolMax: uint
-    }
-
 // Item Building
 
 module ResourceClass =
@@ -642,6 +632,43 @@ module CoreSkill =
             dicePoolCalculationData.itemEffectDicePoolMod
             dicePoolCalculationData.weightClassDicePenalty |> RemoveDice
         ]
+
+module CombatSkill =
+    open AttributeName
+    open Skill
+
+    type CombatSkill = {
+        skill: Skill
+        governingAttributeNames: AttributeName
+    }
+// Magic
+
+module MagicResource =
+    type MagicResource = string
+
+module MagicResourcePool =
+
+    open MagicResource
+
+    type MagicResourcePool = {
+        magicResource: MagicResource
+        remainingResources: uint
+        poolMax: uint
+    }
+
+module MagicSkill =
+    open CombatSkill
+    open DamageType
+    open MagicResource
+
+    type MagicSkill = {
+        combatSkill: CombatSkill
+        damageTypes: DamageType list
+        isMeleeCapable: bool
+        isRangeCapable: bool
+        magicResource: MagicResource
+    }
+
 
 module VocationalSkill =
     open Skill
