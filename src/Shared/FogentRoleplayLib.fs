@@ -1,9 +1,129 @@
 namespace FogentRoleplayLib
+// Utils
+module StringUtils =
+    open System.Text.RegularExpressions
+
+    let isNumeric (number: string) =
+        let regex = Regex(@"^[0-9]+$")
+        regex.IsMatch(number)
+
+module MathUtils =
+    open System
+
+    let divideUintByUintThenRound numerator divisor roundDown =
+        let floatCalculation = float numerator / float divisor
+
+        match roundDown with
+        | true -> Math.Floor floatCalculation |> uint
+        | false -> Math.Ceiling floatCalculation |> uint
+
+    let divideUintsThenCompareToMaxThenRound
+        (numerator: uint)
+        (divisor: uint)
+        (maxAllowableValue: uint option)
+        roundDown
+        =
+        let result = divideUintByUintThenRound numerator divisor roundDown
+
+        match maxAllowableValue with
+        | Some max -> if (max < result) then max else result
+        | None -> result
 
 module TypeUtils =
 
     let stringListToTypeMap (stringTypeArray: string list) =
         List.zip stringTypeArray stringTypeArray |> Map.ofList
+
+// Base Building Blocks
+
+module Penetration =
+
+    type Penetration = uint
+
+module DamageType =
+
+    type DamageType = string
+
+    let damageTypesToString (damageTypes: DamageType list) = String.concat ", " damageTypes
+
+    let stringAndMapToDamageTypeList (damageTypeMap: Map<string, DamageType>) (damageTypesString: string) =
+        if damageTypesString.Length = 0 then
+            []
+        else
+            damageTypesString.Split ", "
+            |> List.ofArray
+            |> List.map (fun (damageTypeString) -> damageTypeMap.Item damageTypeString)
+
+module EngageableOpponents =
+
+    open MathUtils
+    open StringUtils
+
+    type EngageableOpponentsCalculation = {
+        name: string
+        combatRollDivisor: uint
+        maxEO: uint option
+    }
+
+    let eoCalculationListToMap eoCalculationList =
+        eoCalculationList
+        |> List.map (fun (eoCalculation) -> eoCalculation.name, eoCalculation)
+        |> Map.ofList
+
+    type CalculatedEngageableOpponents = uint
+
+    type EngageableOpponents =
+        | Calculation of EngageableOpponentsCalculation
+        | Calculated of CalculatedEngageableOpponents
+
+    let determineEngageableOpponents numDice engageableOpponents =
+        match engageableOpponents with
+        | Calculated calculatedEngageableOpponents -> calculatedEngageableOpponents
+        | Calculation eoCalculation ->
+            divideUintsThenCompareToMaxThenRound numDice eoCalculation.combatRollDivisor eoCalculation.maxEO true
+
+    //Todo: this needs to only parse uints
+    let parseMaxEngageableOpponentsString input =
+        if isNumeric input then Some(uint input) else None
+
+    let parseEngaeableOpponentsString eoCalculationMap input =
+        if isNumeric input then
+            uint input |> Calculated
+        elif Map.containsKey input eoCalculationMap then
+            eoCalculationMap.Item input |> Calculation
+        else
+            Calculated 0u
+
+module Neg1To5 =
+    type Neg1To5 =
+        | NegOne
+        | Zero
+        | One
+        | Two
+        | Three
+        | Four
+        | Five
+
+    let intToNeg1To5Option num =
+        match num with
+        | -1 -> Some NegOne
+        | 0 -> Some Zero
+        | 1 -> Some One
+        | 2 -> Some Two
+        | 3 -> Some Three
+        | 4 -> Some Four
+        | 5 -> Some Five
+        | _ -> None
+
+    let neg1To5ToInt neg1To5 =
+        match neg1To5 with
+        | NegOne -> -1
+        | Zero -> 0
+        | One -> 1
+        | Two -> 2
+        | Three -> 3
+        | Four -> 4
+        | Five -> 5
 
 module Neg2To5 =
     type Neg2To5 =
@@ -31,40 +151,6 @@ module Neg2To5 =
     let neg2To5ToInt neg2To5 =
         match neg2To5 with
         | NegTwo -> -2
-        | NegOne -> -1
-        | Zero -> 0
-        | One -> 1
-        | Two -> 2
-        | Three -> 3
-        | Four -> 4
-        | Five -> 5
-
-module Attribute =
-    type Attribute = string
-
-module Neg1To5 =
-    type Neg1To5 =
-        | NegOne
-        | Zero
-        | One
-        | Two
-        | Three
-        | Four
-        | Five
-
-    let intToNeg1To5Option num =
-        match num with
-        | -1 -> Some NegOne
-        | 0 -> Some Zero
-        | 1 -> Some One
-        | 2 -> Some Two
-        | 3 -> Some Three
-        | 4 -> Some Four
-        | 5 -> Some Five
-        | _ -> None
-
-    let neg1To5ToInt neg1To5 =
-        match neg1To5 with
         | NegOne -> -1
         | Zero -> 0
         | One -> 1
@@ -265,17 +351,28 @@ module DicePoolMod =
         | "None" -> None
         | modString -> Some <| parseDicePoolModString modString
 
-module AttributeStat =
-    open Neg2To5
-    open Attribute
+module BattleMapUOM =
+    let feetPerBattleMapUOM = 5u
 
-    type AttributeStat = { attribute: Attribute; stat: Neg2To5 }
+// Character Building Blocks
+
+module AttributeName =
+    type AttributeName = string
+
+module Attribute =
+    open Neg2To5
+    open AttributeName
+
+    type Attribute = {
+        attributeName: AttributeName
+        level: Neg2To5
+    }
 
 module Skill =
     open Neg1To5
     open DicePool
     open DicePoolMod
-    open AttributeStat
+    open Attribute
 
     type Skill = {
         name: string
@@ -285,14 +382,25 @@ module Skill =
 
     type DicePoolCalculationData = {
         baseDice: DicePool option
-        AttributeStatList: AttributeStat list
+        AttributeList: Attribute list
         injuryDicePenalty: DicePoolPenalty
         weightClassDicePenalty: DicePoolPenalty
         itemEffectDicePoolMod: DicePoolMod
     }
 
+    let findSkillLvlWithDefault skillName (defaultLvl: Neg1To5) (skillList: Skill list) =
+        skillList
+        |> List.filter (fun skill -> skill.name = skillName)
+        |> (fun list ->
+            if list.Length = 0 then
+                defaultLvl
+            else
+                list
+                |> List.maxBy (fun skill -> skill.level)
+                |> (fun skillList -> skillList.level))
+
 module CoreSkill =
-    open Attribute
+    open AttributeName
     open Skill
     open DicePoolMod
     open DicePool
@@ -301,53 +409,68 @@ module CoreSkill =
 
     type CoreSkill = {
         skill: Skill
-        governingAttribute: Attribute
+        governingAttributeName: AttributeName
     }
 
     let calculateCoreSkillDicePool
         (dicePoolCalculationData: DicePoolCalculationData)
         (skillLevel: Neg1To5)
-        (skillGoveringAttribute: Attribute)
+        (skillGoveringAttribute: AttributeName)
         =
 
         let attribute =
-            dicePoolCalculationData.AttributeStatList
-            |> List.find (fun attribute -> attribute.attribute = skillGoveringAttribute)
-
+            dicePoolCalculationData.AttributeList
+            |> List.find (fun attribute -> attribute.attributeName = skillGoveringAttribute)
 
         modifyDicePoolByDicePoolModList (dicePoolCalculationData.baseDice |> Option.defaultValue baseDicePool) [
             skillLevel |> neg1To5ToInt |> intToD6DicePoolMod
-            attribute.stat |> neg2To5ToInt |> intToD6DicePoolMod
+            attribute.level |> neg2To5ToInt |> intToD6DicePoolMod
             dicePoolCalculationData.injuryDicePenalty |> RemoveDice
             dicePoolCalculationData.itemEffectDicePoolMod
             dicePoolCalculationData.weightClassDicePenalty |> RemoveDice
         ]
 
+module VocationalSkill =
+    open Skill
+    open AttributeName
+
+    type VocationalSkill = {
+        skill: Skill
+        governingAttributes: AttributeName list
+    }
+
 module AttributeAndCoreSkills =
-    open Attribute
+    open AttributeName
     open Neg2To5
-    open AttributeStat
+    open Attribute
     open CoreSkill
 
     type AttributeAndCoreSkills = {
-        attributeStat: AttributeStat
+        attributeStat: Attribute
         coreSkills: CoreSkill list
     }
 
-    let defaultAttributeAndCoreSkills (coreSkillList: CoreSkill list) (attribute: Attribute) : AttributeAndCoreSkills = {
-        attributeStat = { attribute = attribute; stat = Zero }
-        coreSkills =
-            List.collect
-                (fun coreSkill ->
-                    if coreSkill.governingAttribute = attribute then
-                        [ coreSkill ]
-                    else
-                        [])
-                coreSkillList
-    }
+    let defaultAttributeAndCoreSkills
+        (coreSkillList: CoreSkill list)
+        (attribute: AttributeName)
+        : AttributeAndCoreSkills =
+        {
+            attributeStat = {
+                attributeName = attribute
+                level = Zero
+            }
+            coreSkills =
+                List.collect
+                    (fun coreSkill ->
+                        if coreSkill.governingAttributeName = attribute then
+                            [ coreSkill ]
+                        else
+                            [])
+                    coreSkillList
+        }
 
 module Character =
-    open Attribute
+    open AttributeName
     open CoreSkill
     open AttributeAndCoreSkills
 
@@ -356,5 +479,5 @@ module Character =
         attributeAndCoreSkillsList: AttributeAndCoreSkills list
     }
 
-    let defaultAttributeAndCoreSkillsList (attributeList: Attribute list) (coreSkillList: CoreSkill list) =
+    let defaultAttributeAndCoreSkillsList (attributeList: AttributeName list) (coreSkillList: CoreSkill list) =
         List.map (defaultAttributeAndCoreSkills coreSkillList) attributeList

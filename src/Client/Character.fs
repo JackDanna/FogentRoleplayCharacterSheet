@@ -1,7 +1,7 @@
 module Character
 
 open FogentRoleplayLib.Character
-open FogentRoleplayLib.Attribute
+open FogentRoleplayLib.AttributeName
 open FogentRoleplayLib.CoreSkill
 open FogentRoleplayLib.Skill
 open FogentRoleplayLib.DicePoolMod
@@ -11,7 +11,7 @@ type Msg =
     | SetName of string
     | AttributeAndCoreSkillsListMsg of AttributeAndCoreSkillsList.Msg
 
-let init (attributeData: Attribute list) (coreSkillData: CoreSkill list) = {
+let init (attributeData: AttributeName list) (coreSkillData: CoreSkill list) = {
     name = ""
     attributeAndCoreSkillsList = defaultAttributeAndCoreSkillsList attributeData coreSkillData
 }
@@ -32,7 +32,7 @@ let update msg (model: Character) =
                         (AttributeAndCoreSkillsList.Msg.CalculateDicePools(
                             {
                                 baseDice = None
-                                AttributeStatList =
+                                AttributeList =
                                     List.map
                                         (fun attributeAndCoreSkills -> attributeAndCoreSkills.attributeStat)
                                         newAttributeAndCoreSkillsList

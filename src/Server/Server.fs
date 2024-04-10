@@ -9,7 +9,7 @@ open Shared
 module FogentRoleplayServerData =
     open FSharp.Data
     open FogentRoleplayLib.TypeUtils
-    open FogentRoleplayLib.Attribute
+    open FogentRoleplayLib.AttributeName
     open FogentRoleplayLib.Neg1To5
     open FogentRoleplayLib.DicePool
     open FogentRoleplayLib.Skill
@@ -82,8 +82,8 @@ module FogentRoleplayServerData =
     //     | _ -> Some <| resourceClassMap.Item string
 
     // AttributeAndCoreSkill
-    let attributeData: Attribute list =
-        makeFallenData "AttributeData.csv" (fun row -> Attribute row.["desc"])
+    let attributeData: AttributeName list =
+        makeFallenData "AttributeData.csv" (fun row -> AttributeName row.["desc"])
 
     let coreSkillData: CoreSkill list =
         makeFallenData "CoreSkillData.csv" (fun row -> {
@@ -92,12 +92,12 @@ module FogentRoleplayServerData =
                 level = Zero
                 dicePool = baseDicePool
             }
-            governingAttribute = row.["governingAttribute"]
+            governingAttributeName = row.["governingAttribute"]
         })
 
     let attributeMap = stringListToTypeMap attributeData
 
-    let mapAndStringToAttributes (attributeMap: Map<string, Attribute>) (input) =
+    let mapAndStringToAttributes (attributeMap: Map<string, AttributeName>) (input) =
         String.filter ((<>) ' ') input
         |> (fun s -> s.Split(',', System.StringSplitOptions.RemoveEmptyEntries))
         |> List.ofArray

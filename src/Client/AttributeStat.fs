@@ -1,21 +1,21 @@
 module AttributeStat
 
-open FogentRoleplayLib.AttributeStat
+open FogentRoleplayLib.Attribute
 
-type Model = AttributeStat
+type Model = Attribute
 
 type Msg = Neg2To5Msg of Neg2To5.Msg
 
 let init () = {
-    attribute = ""
-    stat = Neg2To5.init ()
+    attributeName = ""
+    level = Neg2To5.init ()
 }
 
 let update msg model =
     match msg with
     | Neg2To5Msg msg -> {
         model with
-            stat = Neg2To5.update msg model.stat
+            level = Neg2To5.update msg model.level
       }
 
 open Feliz
@@ -23,6 +23,6 @@ open Feliz.Bulma
 
 let view model dispatch =
     Bulma.columns [
-        Bulma.column [ prop.text model.attribute ]
-        Bulma.column [ Neg2To5.view model.stat (Neg2To5Msg >> dispatch) ]
+        Bulma.column [ prop.text model.attributeName ]
+        Bulma.column [ Neg2To5.view model.level (Neg2To5Msg >> dispatch) ]
     ]

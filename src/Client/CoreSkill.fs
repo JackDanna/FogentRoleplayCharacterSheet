@@ -14,7 +14,7 @@ let init () = {
         level = Neg1To5.init ()
         dicePool = baseDicePool
     }
-    governingAttribute = ""
+    governingAttributeName = ""
 }
 
 let update msg model =
@@ -28,7 +28,7 @@ let update msg model =
       }
     | CalculateDicePool msg -> {
         model with
-            skill.dicePool = calculateCoreSkillDicePool msg model.skill.level model.governingAttribute
+            skill.dicePool = calculateCoreSkillDicePool msg model.skill.level model.governingAttributeName
       }
 
 open Feliz
