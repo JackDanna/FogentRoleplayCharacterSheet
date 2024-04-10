@@ -126,25 +126,9 @@ module FogentRoleplayServerData =
             magicResource = string row.["magicResourceClass"]
         })
 
-    // let magicSkillMap =
-    //     List.map (fun (magicSkill: MagicSkill) -> magicSkill.name, magicSkill) magicSkillData
-    //     |> Map.ofList
-
-    // // MagicCombat
-    // let magicCombatData =
-    //     makeFogentRoleplayData "MagicCombatData.csv" (fun row ->
-    //         { name = string row.["Description"]
-    //           lvlRequirment = int row.["Lvl Requirment"] |> intToNeg1To4
-    //           dicePoolMod = parseDicePoolModString row.["Dice Mod"]
-    //           penetration = uint row.["Penetration"]
-    //           range = rangeMap.Item(string row.["Range"])
-    //           engageableOpponents = engageableOpponentsMap row.["Engageable Opponents"]
-    //           minResourceRequirment = uint row.["Resource Requirment"]
-    //           areaOfEffect = AreaOfEffectOptionMap.Item row.["Area Of Effect"] })
-
-    // let magicCombatMap =
-    //     List.map (fun (magicCombat: MagicCombat) -> magicCombat.name, magicCombat) magicCombatData
-    //     |> Map.ofList
+    let magicSkillMap =
+        List.map (fun (magicSkill: MagicSkillData) -> magicSkill.name, magicSkill) magicSkillData
+        |> Map.ofList
 
     // WeaponClass
     let weaponClassData =
