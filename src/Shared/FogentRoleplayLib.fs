@@ -297,15 +297,27 @@ module CoreSkill =
     open DicePoolMod
     open DicePool
     open Neg1To5
+    open Neg2To5
 
     type CoreSkill = {
         skill: Skill
         governingAttribute: Attribute
     }
 
-    let calculateCoreSkillDicePool (dicePoolCalculationData: DicePoolCalculationData) (skillLevel: Neg1To5) =
+    let calculateCoreSkillDicePool
+        (dicePoolCalculationData: DicePoolCalculationData)
+        (skillLevel: Neg1To5)
+        (skillGoveringAttribute: Attribute)
+        =
+
+        let attribute =
+            dicePoolCalculationData.AttributeStatList
+            |> List.find (fun attribute -> attribute.attribute = skillGoveringAttribute)
+
+
         modifyDicePoolByDicePoolModList (dicePoolCalculationData.baseDice |> Option.defaultValue baseDicePool) [
             skillLevel |> neg1To5ToInt |> intToD6DicePoolMod
+            attribute.stat |> neg2To5ToInt |> intToD6DicePoolMod
             dicePoolCalculationData.injuryDicePenalty |> RemoveDice
             dicePoolCalculationData.itemEffectDicePoolMod
             dicePoolCalculationData.weightClassDicePenalty |> RemoveDice

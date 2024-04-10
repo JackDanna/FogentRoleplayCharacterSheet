@@ -28,7 +28,7 @@ let update msg model =
       }
     | CalculateDicePool msg -> {
         model with
-            skill.dicePool = calculateCoreSkillDicePool msg model.skill.level
+            skill.dicePool = calculateCoreSkillDicePool msg model.skill.level model.governingAttribute
       }
 
 open Feliz
