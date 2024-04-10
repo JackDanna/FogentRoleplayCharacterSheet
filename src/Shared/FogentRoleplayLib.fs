@@ -265,10 +265,17 @@ module DicePoolMod =
         | "None" -> None
         | modString -> Some <| parseDicePoolModString modString
 
+module AttributeStat =
+    open Neg2To5
+    open Attribute
+
+    type AttributeStat = { attribute: Attribute; stat: Neg2To5 }
+
 module Skill =
     open Neg1To5
     open DicePool
     open DicePoolMod
+    open AttributeStat
 
     type Skill = {
         name: string
@@ -278,7 +285,7 @@ module Skill =
 
     type DicePoolCalculationData = {
         baseDice: DicePool option
-        attributeDicePoolMod: DicePoolMod
+        AttributeStatList: AttributeStat list
         injuryDicePenalty: DicePoolPenalty
         weightClassDicePenalty: DicePoolPenalty
         itemEffectDicePoolMod: DicePoolMod
@@ -304,12 +311,6 @@ module CoreSkill =
             dicePoolCalculationData.weightClassDicePenalty |> RemoveDice
         ]
 
-module AttributeStat =
-    open Neg2To5
-    open Attribute
-
-    type AttributeStat = { attribute: Attribute; stat: Neg2To5 }
-
 module AttributeAndCoreSkills =
     open Attribute
     open Neg2To5
@@ -317,12 +318,12 @@ module AttributeAndCoreSkills =
     open CoreSkill
 
     type AttributeAndCoreSkills = {
-        attribute: AttributeStat
+        attributeStat: AttributeStat
         coreSkills: CoreSkill list
     }
 
     let defaultAttributeAndCoreSkills (coreSkillList: CoreSkill list) (attribute: Attribute) : AttributeAndCoreSkills = {
-        attribute = { attribute = attribute; stat = Zero }
+        attributeStat = { attribute = attribute; stat = Zero }
         coreSkills =
             List.collect
                 (fun coreSkill ->

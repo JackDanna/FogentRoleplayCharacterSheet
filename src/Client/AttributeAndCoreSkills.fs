@@ -14,7 +14,7 @@ let update msg model =
     match msg with
     | AttributeMsg msg -> {
         model with
-            attribute = AttributeStat.update msg model.attribute
+            attributeStat = AttributeStat.update msg model.attributeStat
       }
     | CoreSkillListMsg msg -> {
         model with
@@ -30,6 +30,6 @@ open Feliz.Bulma
 
 let view model dispatch =
     Bulma.box [
-        AttributeStat.view model.attribute (AttributeMsg >> dispatch)
+        AttributeStat.view model.attributeStat (AttributeMsg >> dispatch)
         CoreSkillList.view model.coreSkills (CoreSkillListMsg >> dispatch)
     ]

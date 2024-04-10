@@ -5,6 +5,7 @@ open FogentRoleplayLib.Attribute
 open FogentRoleplayLib.CoreSkill
 open FogentRoleplayLib.Skill
 open FogentRoleplayLib.DicePoolMod
+open FogentRoleplayLib.AttributeAndCoreSkills
 
 type Msg =
     | SetName of string
@@ -22,7 +23,10 @@ let update msg (model: Character) =
 
         let calculationData: DicePoolCalculationData = {
             baseDice = None
-            attributeDicePoolMod = createD6DicePoolMod 0u
+            AttributeStatList =
+                List.map
+                    (fun attributeAndCoreSkills -> attributeAndCoreSkills.attributeStat)
+                    model.attributeAndCoreSkillsList
             injuryDicePenalty = 0u
             weightClassDicePenalty = 0u
             itemEffectDicePoolMod = createD6DicePoolMod 0u
