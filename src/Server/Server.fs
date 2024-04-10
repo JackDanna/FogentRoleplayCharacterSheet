@@ -55,14 +55,14 @@ module FogentRoleplayServerData =
     // Range
     let calculatedRangeData =
         makeFogentRoleplayData "CalculatedRangeData.csv" (fun row -> {
-            name = string row.["desc"]
+            name = string row.["name"]
             effectiveRange = uint row.["effectiveRange"]
             maxRange = uint row.["maxRange"]
         })
 
     let rangeCalculationData =
         makeFogentRoleplayData "RangeCalculationData.csv" (fun row -> {
-            name = string row.["desc"]
+            name = string row.["name"]
             numDicePerEffectiveRangeUnit = uint row.["numDicePerEffectiveRangeUnit"]
             ftPerEffectiveRangeUnit = uint row.["ftPerEffectiveRangeUnit"]
             roundEffectiveRangeUp = Bool row.["roundEffectiveRangeUp"]
