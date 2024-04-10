@@ -7,6 +7,9 @@ module StringUtils =
         let regex = Regex(@"^[0-9]+$")
         regex.IsMatch(number)
 
+    let stringListToStringSeperatedByCommas (damageTypes: string list) = String.concat ", " damageTypes
+
+
 module MathUtils =
     open System
 
@@ -45,8 +48,6 @@ module Penetration =
 module DamageType =
 
     type DamageType = string
-
-    let damageTypesToString (damageTypes: DamageType list) = String.concat ", " damageTypes
 
     let stringAndMapToDamageTypeList (damageTypeMap: Map<string, DamageType>) (damageTypesString: string) =
         if damageTypesString.Length = 0 then
