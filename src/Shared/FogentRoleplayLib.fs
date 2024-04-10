@@ -10,6 +10,8 @@ module StringUtils =
 module MathUtils =
     open System
 
+    let multiply x y = x * y
+
     let divideUintByUintThenRound numerator divisor roundDown =
         let floatCalculation = float numerator / float divisor
 
@@ -353,6 +355,206 @@ module DicePoolMod =
 
 module BattleMapUOM =
     let feetPerBattleMapUOM = 5u
+
+module Range =
+
+    open System
+    open MathUtils
+
+    type CalculatedRange = {
+        name: string
+        effectiveRange: uint
+        maxRange: uint
+    }
+
+    type RangeCalculation = {
+        name: string
+        numDicePerEffectiveRangeUnit: uint
+        ftPerEffectiveRangeUnit: uint
+        roundEffectiveRangeUp: bool // If true, round up the effective range if decimal in calculation, otherwise round down
+        maxRange: uint
+    }
+
+    type Range =
+        | CalculatedRange of CalculatedRange
+        | RangeCalculation of RangeCalculation
+
+    //type RangeAdjustment = int
+
+    let calculatedRangeToString calculatedRange =
+        sprintf "%u/%u" calculatedRange.effectiveRange calculatedRange.maxRange
+
+    let calculateRangeCalculation numDice rangeCalculation = {
+        name = rangeCalculation.name
+        effectiveRange =
+            if rangeCalculation.roundEffectiveRangeUp then
+                float numDice / float rangeCalculation.numDicePerEffectiveRangeUnit
+                |> Math.Ceiling
+                |> uint
+                |> multiply rangeCalculation.ftPerEffectiveRangeUnit
+            else
+                float numDice / float rangeCalculation.numDicePerEffectiveRangeUnit
+                |> Math.Floor
+                |> uint
+                |> multiply rangeCalculation.ftPerEffectiveRangeUnit
+        maxRange = rangeCalculation.maxRange
+    }
+
+    let rangeToCalculatedRange (numDice: uint) (range: Range) : CalculatedRange =
+        match range with
+        | CalculatedRange calculatedRange -> calculatedRange
+        | RangeCalculation rangeCalculation -> calculateRangeCalculation numDice rangeCalculation
+
+    let determineGreatestRange numDice (primaryRange: Range) (optionalRange: Range option) =
+        let calculatedPrimaryRange = rangeToCalculatedRange numDice primaryRange
+
+        match optionalRange with
+        | Some secondaryRange ->
+            let calculatedSecondaryRange = rangeToCalculatedRange numDice secondaryRange
+
+            if calculatedPrimaryRange.effectiveRange >= calculatedSecondaryRange.effectiveRange then
+                calculatedPrimaryRange
+            else
+                calculatedSecondaryRange
+        | None -> calculatedPrimaryRange
+
+    let calculatedRangeListToRangeMap calculatedRangeList =
+        List.map
+            (fun (calculatedRange: CalculatedRange) -> calculatedRange.name, CalculatedRange calculatedRange)
+            calculatedRangeList
+        |> Map.ofList
+
+    let rangeCalculationListToRangeMap rangeCalculationList =
+        List.map
+            (fun (rangeCalculation: RangeCalculation) -> rangeCalculation.name, RangeCalculation rangeCalculation)
+            rangeCalculationList
+        |> Map.ofList
+
+    let createRangeMap calculatedRanges rangeCalculations : Map<string, Range> =
+        Map.fold
+            (fun acc key value -> Map.add key value acc)
+            (calculatedRangeListToRangeMap calculatedRanges)
+            (rangeCalculationListToRangeMap rangeCalculations)
+
+    let isMeleeOrReachRange range =
+        match range with
+        | CalculatedRange calculatedRange ->
+            match calculatedRange.name with
+            | "Melee"
+            | "Reach" -> true
+            | _ -> false
+        | _ -> false
+
+module AreaOfEffect =
+    type AreaOfEffect =
+        | Cone
+        | Sphere
+
+    let AreaOfEffectOptionMap =
+        Map [ ("Cone", Some Cone); ("Sphere", Some Sphere); ("None", None) ]
+
+module CalculatedAOE =
+    open System
+    open AreaOfEffect
+    open BattleMapUOM
+
+    type CalculatedCone = {
+        area: float
+        distance: uint
+        angle: float
+    }
+
+    type CalculatedSphere = { area: float; radius: float }
+
+    type CalculatedAOE =
+        | ConeToCalculatedCone of CalculatedCone
+        | SphereToCalculatedSphere of CalculatedSphere
+
+    let calculatedConeToString decimalPlaces (calculatedCone: CalculatedCone) =
+        let decimalLimitedArea =
+            calculatedCone.area.ToString("F" + decimalPlaces.ToString())
+
+        let decimalLimitedAngle =
+            calculatedCone.angle.ToString("F" + decimalPlaces.ToString())
+
+        sprintf
+            "area: %s ft^2, distance: %u ft, angle: %s θ"
+            decimalLimitedArea
+            calculatedCone.distance
+            decimalLimitedAngle
+
+    let calculatedSphereToString decimalPlaces calculatedSphere =
+        let decimalLimitedArea =
+            calculatedSphere.area.ToString("F" + decimalPlaces.ToString())
+
+        let decimalLimitedRadius =
+            calculatedSphere.radius.ToString("F" + decimalPlaces.ToString())
+
+        sprintf "area: %s ft^2, radius: %s ft" decimalLimitedArea decimalLimitedRadius
+
+    let calculatedAOEToString calculatedAOE =
+        let decimalPlaces = 1
+
+        match calculatedAOE with
+        | ConeToCalculatedCone calculatedCone -> calculatedConeToString decimalPlaces calculatedCone
+        | SphereToCalculatedSphere sphereShape -> calculatedSphereToString decimalPlaces sphereShape
+
+
+    let calculatedAOEOptionToString shapeOption =
+        match shapeOption with
+        | Some shape -> calculatedAOEToString shape
+        | None -> ""
+
+    let calcConeArea (distance: uint) (angle: float) : float =
+        float (distance * distance) * Math.Tan(angle / 2.0)
+
+    let calcConeDistance (area: uint) (angle: float) =
+        uint (Math.Sqrt(float area / Math.Tan(angle / 2.)))
+
+    let calcConeAngle (area: uint) (distance: uint) =
+        2. * Math.Atan(Math.Sqrt(float area / float (distance * distance)))
+
+    let calcCone (numDice: uint) : CalculatedCone =
+        let distance = numDice * feetPerBattleMapUOM
+        let angle = 53.0
+
+        {
+            area = calcConeArea distance angle
+            distance = distance
+            angle = angle
+        }
+
+    let calcCircle (numDice: uint) : CalculatedSphere =
+        let radius: float = 2.5 * float numDice
+
+        {
+            area = 2.0 * Math.PI * (radius ** 2)
+            radius = radius
+        }
+
+    let calcShape (numDice: uint) (aoe: AreaOfEffect) : CalculatedAOE =
+        match aoe with
+        | Cone -> ConeToCalculatedCone(calcCone numDice)
+        | Sphere -> SphereToCalculatedSphere(calcCircle numDice)
+
+    let determineAOEShapeOption numDice aoe =
+        match aoe with
+        | Some aoe -> Some(calcShape numDice aoe)
+        | None -> None
+
+    let compareAndDetermineAOEShapeOption
+        (numDice: uint)
+        (aoe: AreaOfEffect option)
+        (resourceAOE: AreaOfEffect option)
+        : CalculatedAOE option =
+        match resourceAOE with
+        | Some resourceAOE -> Some(calcShape numDice resourceAOE)
+        | None -> determineAOEShapeOption numDice aoe
+
+// Item Building
+
+module ResourceClass =
+    type ResourceClass = string
 
 // Character Building Blocks
 
