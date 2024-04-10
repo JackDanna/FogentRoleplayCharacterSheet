@@ -97,6 +97,25 @@ module EngageableOpponents =
         else
             Calculated 0u
 
+module ZeroToFive =
+
+    type ZeroToFive =
+        | Zero
+        | One
+        | Two
+        | Three
+        | Four
+        | Five
+
+    let zeroToFiveToUint zeroToFour =
+        match zeroToFour with
+        | Zero -> 0u
+        | One -> 1u
+        | Two -> 2u
+        | Three -> 3u
+        | Four -> 4u
+        | Five -> 5u
+
 module Neg1To5 =
     type Neg1To5 =
         | NegOne
@@ -633,13 +652,13 @@ module CoreSkill =
             dicePoolCalculationData.weightClassDicePenalty |> RemoveDice
         ]
 
-module CombatSkill =
-    open AttributeName
+module VocationalSkill =
     open Skill
+    open AttributeName
 
-    type CombatSkill = {
+    type VocationalSkill = {
         skill: Skill
-        governingAttributeNames: AttributeName
+        governingAttributes: AttributeName list
     }
 // Magic
 
@@ -657,27 +676,19 @@ module MagicResourcePool =
     }
 
 module MagicSkill =
-    open CombatSkill
+    open VocationalSkill
     open DamageType
     open MagicResource
 
     type MagicSkill = {
-        combatSkill: CombatSkill
+        vocationalSkill: VocationalSkill
         damageTypes: DamageType list
         isMeleeCapable: bool
         isRangeCapable: bool
         magicResource: MagicResource
     }
 
-
-module VocationalSkill =
-    open Skill
-    open AttributeName
-
-    type VocationalSkill = {
-        skill: Skill
-        governingAttributes: AttributeName list
-    }
+// Larger Character Building Blocks
 
 module AttributeAndCoreSkills =
     open AttributeName
@@ -708,6 +719,57 @@ module AttributeAndCoreSkills =
                             [])
                     coreSkillList
         }
+
+module MundaneVocationSkill =
+    open VocationalSkill
+
+    type MundaneVocationSkill =
+        | VocationalSkill of VocationalSkill
+        | WeaponSkill of VocationalSkill
+
+module MagicVocationSkill =
+    open MagicSkill
+    open VocationalSkill
+
+    type MagicVocationSkill =
+        | VocationalSkill of VocationalSkill
+        | MagicSkill of MagicSkill
+
+module VocationStat =
+    open ZeroToFive
+    open DicePool
+
+    type VocationStat = {
+        name: string
+        level: ZeroToFive
+        dicePool: DicePool
+    }
+
+module MundaneVocation =
+    open VocationStat
+    open MundaneVocationSkill
+
+    type MundaneVocation = {
+        vocationStat: VocationStat
+        mundaneVocationSkillList: MundaneVocationSkill list
+    }
+
+module MagicVocation =
+    open VocationStat
+    open MagicVocationSkill
+
+    type MagicVocation = {
+        vocationStat: VocationStat
+        magicVocationSkillList: MagicVocationSkill
+    }
+
+module Vocation =
+    open MundaneVocation
+    open MagicVocation
+
+    type Vocation =
+        | MundaneVocation of MundaneVocation
+        | MagicVocation of MagicVocation
 
 module Character =
     open AttributeName
