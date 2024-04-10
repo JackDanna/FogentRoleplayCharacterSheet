@@ -783,6 +783,30 @@ module Vocation =
         | MundaneVocation of MundaneVocation
         | MagicVocation of MagicVocation
 
+// ItemStat
+
+module WeaponClass =
+    open DicePoolMod
+    open Range
+    open DamageType
+    open EngageableOpponents
+    open AreaOfEffect
+    open Penetration
+    open ResourceClass
+
+    type WeaponClass = {
+        name: string
+        oneHandedWeaponDice: DicePoolMod option
+        twoHandedWeaponDice: DicePoolMod
+        penetration: Penetration
+        range: Range
+        damageTypes: DamageType list
+        engageableOpponents: EngageableOpponents
+        dualWieldableBonus: DicePoolMod option
+        areaOfEffect: AreaOfEffect option
+        resourceClass: ResourceClass option
+    }
+
 module Character =
     open AttributeName
     open CoreSkill
