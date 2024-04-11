@@ -24,7 +24,7 @@ let update msg model =
 open Feliz
 open Feliz.Bulma
 
-let view governingSkillColumn model dispatch =
+let view model dispatch governingSkillColumn =
 
     [ Bulma.column [ prop.text model.name ] ]
     @ match governingSkillColumn with

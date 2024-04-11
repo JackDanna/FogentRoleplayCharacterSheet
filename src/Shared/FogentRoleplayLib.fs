@@ -668,8 +668,45 @@ module VocationalSkill =
 
     type VocationalSkill = {
         skill: Skill
-        governingAttributes: AttributeName list
+        governingAttributeNames: AttributeName list
     }
+
+    open Attribute
+    open Neg1To5
+    open DicePoolMod
+    open Neg2To5
+    open DicePool
+
+    let findAttributeWithAttributeName attributeList attributeName =
+        List.collect
+            (fun attribute ->
+                if attribute.attributeName = attributeName then
+                    [ attribute ]
+                else
+                    [])
+            attributeList
+
+    let calculateVocationalSkillDicePool
+        (dicePoolCalculationData: DicePoolCalculationData)
+        (skillLevel: Neg1To5)
+        (skillGoveringAttributeNames: AttributeName list)
+        =
+
+        let attributes: Attribute list =
+            List.collect
+                (findAttributeWithAttributeName dicePoolCalculationData.AttributeList)
+                skillGoveringAttributeNames
+
+        modifyDicePoolByDicePoolModList (dicePoolCalculationData.baseDice |> Option.defaultValue baseDicePool) [
+            skillLevel |> neg1To5ToInt |> intToD6DicePoolMod
+            (attributes
+             |> List.map (fun attribute -> neg2To5ToInt attribute.level)
+             |> List.sum
+             |> intToD6DicePoolMod)
+            dicePoolCalculationData.injuryDicePenalty |> RemoveDice
+            dicePoolCalculationData.itemEffectDicePoolMod
+            dicePoolCalculationData.weightClassDicePenalty |> RemoveDice
+        ]
 // Magic
 
 module MagicResource =
