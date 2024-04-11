@@ -741,22 +741,15 @@ module VocationSkill =
         | WeaponSkill of VocationalSkill
         | MagicSkill of MagicSkill
 
-module VocationStat =
+module Vocation =
     open ZeroToFive
     open DicePool
-
-    type VocationStat = {
-        name: string
-        level: ZeroToFive
-        dicePool: DicePool
-    }
-
-module Vocation =
-    open VocationStat
     open VocationSkill
 
     type Vocation = {
-        vocationStat: VocationStat
+        name: string
+        level: ZeroToFive
+        dicePool: DicePool
         vocationSkillList: VocationSkill list
     }
 
