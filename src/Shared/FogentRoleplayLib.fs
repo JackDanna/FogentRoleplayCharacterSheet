@@ -732,19 +732,13 @@ module AttributeAndCoreSkills =
                     coreSkillList
         }
 
-module MundaneVocationSkill =
+module VocationSkill =
     open VocationalSkill
+    open MagicSkill
 
-    type MundaneVocationSkill =
+    type VocationSkill =
         | VocationalSkill of VocationalSkill
         | WeaponSkill of VocationalSkill
-
-module MagicVocationSkill =
-    open MagicSkill
-    open VocationalSkill
-
-    type MagicVocationSkill =
-        | VocationalSkill of VocationalSkill
         | MagicSkill of MagicSkill
 
 module VocationStat =
@@ -757,31 +751,14 @@ module VocationStat =
         dicePool: DicePool
     }
 
-module MundaneVocation =
-    open VocationStat
-    open MundaneVocationSkill
-
-    type MundaneVocation = {
-        vocationStat: VocationStat
-        mundaneVocationSkillList: MundaneVocationSkill list
-    }
-
-module MagicVocation =
-    open VocationStat
-    open MagicVocationSkill
-
-    type MagicVocation = {
-        vocationStat: VocationStat
-        magicVocationSkillList: MagicVocationSkill
-    }
-
 module Vocation =
-    open MundaneVocation
-    open MagicVocation
+    open VocationStat
+    open VocationSkill
 
-    type Vocation =
-        | MundaneVocation of MundaneVocation
-        | MagicVocation of MagicVocation
+    type Vocation = {
+        vocationStat: VocationStat
+        vocationSkillList: VocationSkill list
+    }
 
 // ItemStat
 
