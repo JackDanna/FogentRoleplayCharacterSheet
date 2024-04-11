@@ -107,6 +107,16 @@ module ZeroToFive =
         | Four
         | Five
 
+    let intToZeroToFiveOption num =
+        match num with
+        | 0 -> Some Zero
+        | 1 -> Some One
+        | 2 -> Some Two
+        | 3 -> Some Three
+        | 4 -> Some Four
+        | 5 -> Some Five
+        | _ -> None
+
     let zeroToFiveToUint zeroToFour =
         match zeroToFour with
         | Zero -> 0u
@@ -115,6 +125,8 @@ module ZeroToFive =
         | Three -> 3u
         | Four -> 4u
         | Five -> 5u
+
+
 
 module Neg1To5 =
     type Neg1To5 =
