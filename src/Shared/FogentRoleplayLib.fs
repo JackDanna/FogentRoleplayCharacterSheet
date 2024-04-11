@@ -7,7 +7,10 @@ module StringUtils =
         let regex = Regex(@"^[0-9]+$")
         regex.IsMatch(number)
 
-    let stringListToStringSeperatedByCommas (damageTypes: string list) = String.concat ", " damageTypes
+    let stringListToStringSeperatedByCommas (stringList: string list) = String.concat ", " stringList
+
+    let stringSetToStringSeperatedByCommas stringSet =
+        stringSet |> List.ofSeq |> stringListToStringSeperatedByCommas
 
 
 module MathUtils =
@@ -668,7 +671,7 @@ module VocationalSkill =
 
     type VocationalSkill = {
         skill: Skill
-        governingAttributeNames: AttributeName list
+        governingAttributeNames: AttributeName Set
     }
 
     open Attribute
@@ -689,13 +692,13 @@ module VocationalSkill =
     let calculateVocationalSkillDicePool
         (dicePoolCalculationData: DicePoolCalculationData)
         (skillLevel: Neg1To5)
-        (skillGoveringAttributeNames: AttributeName list)
+        (skillGoveringAttributeNames: AttributeName Set)
         =
 
         let attributes: Attribute list =
-            List.collect
-                (findAttributeWithAttributeName dicePoolCalculationData.AttributeList)
-                skillGoveringAttributeNames
+            skillGoveringAttributeNames
+            |> List.ofSeq
+            |> List.collect (findAttributeWithAttributeName dicePoolCalculationData.AttributeList)
 
         modifyDicePoolByDicePoolModList (dicePoolCalculationData.baseDice |> Option.defaultValue baseDicePool) [
             skillLevel |> neg1To5ToInt |> intToD6DicePoolMod
@@ -788,6 +791,12 @@ module VocationSkill =
         | VocationalSkill of VocationalSkill
         | WeaponSkill of VocationalSkill
         | MagicSkill of MagicSkill
+
+    let vocationSkillToVocationalSkill vocationSkill =
+        match vocationSkill with
+        | VocationalSkill vocationalSkill -> vocationalSkill
+        | WeaponSkill vocationalSkill -> vocationalSkill
+        | MagicSkill magicSkill -> magicSkill.vocationalSkill
 
 module Vocation =
     open ZeroToFive
