@@ -24,14 +24,14 @@ let update msg model =
 open Feliz
 open Feliz.Bulma
 
-let view model dispatch governingSkillColumn =
+let view model dispatch canUserChangeLevel governingSkillColumn =
 
     [ Bulma.column [ prop.text model.name ] ]
     @ match governingSkillColumn with
       | Some column -> column |> List.singleton
       | None -> List.Empty
     @ [
-        Bulma.column [ Neg1To5.view model.level (Neg1To5Msg >> dispatch) ]
+        Bulma.column [ Neg1To5.view model.level (Neg1To5Msg >> dispatch) canUserChangeLevel ]
         Bulma.column [ model.dicePool |> dicePoolToString |> prop.text ]
     ]
     |> Bulma.columns

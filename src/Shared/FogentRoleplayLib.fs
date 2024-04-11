@@ -707,6 +707,7 @@ module VocationalSkill =
             dicePoolCalculationData.itemEffectDicePoolMod
             dicePoolCalculationData.weightClassDicePenalty |> RemoveDice
         ]
+
 // Magic
 
 module MagicResource =

@@ -15,7 +15,6 @@
     <Compile Include="AttributeAndCoreSkillsList.fs" />
     <Compile Include="ZeroToFive.fs" />
     <Compile Include="VocationalSkill.fs" />
-    <Compile Include="MagicSkill.fs" />
     <Compile Include="VocationSkill.fs" />
     <Compile Include="Vocation.fs" />
     <Compile Include="Character.fs" />
@@ -23,8 +22,8 @@
     <None Include="tailwind.config.js" />
     <None Include="index.html" />
     <None Include="paket.references" />
-    <Compile Include="Index.fs" />
     <Compile Include="App.fs" />
+    <Compile Include="Index.fs" />
     <None Include="vite.config.mts" />
   </ItemGroup>
   <ItemGroup>
