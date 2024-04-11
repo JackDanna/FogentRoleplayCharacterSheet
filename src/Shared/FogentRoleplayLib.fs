@@ -811,10 +811,12 @@ module Character =
     open AttributeName
     open CoreSkill
     open AttributeAndCoreSkills
+    open Vocation
 
     type Character = {
         name: string
         attributeAndCoreSkillsList: AttributeAndCoreSkills list
+        vocationList: Vocation list
     }
 
     let defaultAttributeAndCoreSkillsList (attributeList: AttributeName list) (coreSkillList: CoreSkill list) =
