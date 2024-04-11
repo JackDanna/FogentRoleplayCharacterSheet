@@ -3,28 +3,19 @@ module VocationSkill
 open FogentRoleplayLib.VocationSkill
 
 type Msg =
-    | VocationalSkillMsg of Skill.Msg
-    | WeaponSkillMsg of Skill.Msg
-    | MagicSkillMsg of Skill.Msg
+    | VocationalSkillMsg of VocationalSkill.Msg
+    | WeaponSkillMsg of VocationalSkill.Msg
+    | MagicSkillMsg of VocationalSkill.Msg
 
 let update msg (model: VocationSkill) : VocationSkill =
     match msg, model with
     | VocationalSkillMsg msg, VocationalSkill vocationalSkill ->
-        {
-            vocationalSkill with
-                skill = Skill.update msg vocationalSkill.skill
-        }
-        |> VocationalSkill
-    | WeaponSkillMsg msg, WeaponSkill vocationalSkill ->
-        {
-            vocationalSkill with
-                skill = Skill.update msg vocationalSkill.skill
-        }
-        |> WeaponSkill
+        VocationalSkill.update msg vocationalSkill |> VocationalSkill
+    | WeaponSkillMsg msg, WeaponSkill vocationalSkill -> VocationalSkill.update msg vocationalSkill |> WeaponSkill
     | MagicSkillMsg msg, MagicSkill magicSkill ->
         {
             magicSkill with
-                vocationalSkill.skill = Skill.update msg magicSkill.vocationalSkill.skill
+                vocationalSkill = VocationalSkill.update msg magicSkill.vocationalSkill
         }
         |> MagicSkill
     | _ -> model
@@ -34,4 +25,6 @@ open Feliz.Bulma
 
 let view model dispatch =
     match model with
-    | VocationalSkill vocationalSkill -> VocationalSkill.view vocationalSkill (VocationalSkillMsg >> dispatch)
+    | VocationalSkill vocationalSkill -> VocationalSkill.view vocationalSkill (VocationalSkillMsg >> dispatch) false
+    | WeaponSkill vocationalSkill -> VocationalSkill.view vocationalSkill (VocationalSkillMsg >> dispatch) true
+    | MagicSkill magicSkill -> VocationalSkill.view magicSkill.vocationalSkill (VocationalSkillMsg >> dispatch) true
