@@ -4,11 +4,13 @@ open FogentRoleplayLib.VocationalSkill
 open FogentRoleplayLib.Skill
 open FogentRoleplayLib.StringUtils
 open FogentRoleplayLib.AttributeName
+open FogentRoleplayLib.Neg1To5
 
 type Msg =
     | SkillMsg of Skill.Msg
     | CalculateDicePool of DicePoolCalculationData
     | ToggleGoverningAttributes of AttributeName
+    | SetSkillLevel of Neg1To5
 
 let init () = {
     skill = Skill.init ()
@@ -40,6 +42,10 @@ let update msg model =
                         Set.add newAttributeName model.governingAttributeNames
                     else
                         Set.remove newAttributeName model.governingAttributeNames)
+      }
+    | SetSkillLevel newSkillLevel -> {
+        model with
+            skill.level = newSkillLevel
       }
 
 open Feliz
