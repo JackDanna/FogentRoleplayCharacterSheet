@@ -16,6 +16,7 @@
     <Compile Include="ZeroToFive.fs" />
     <Compile Include="VocationalSkill.fs" />
     <Compile Include="VocationSkill.fs" />
+    <Compile Include="VocationSkillList.fs" />
     <Compile Include="Vocation.fs" />
     <Compile Include="Character.fs" />
     <None Include="postcss.config.js" />
