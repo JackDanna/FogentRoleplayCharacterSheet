@@ -126,8 +126,6 @@ module ZeroToFive =
         | Four -> 4u
         | Five -> 5u
 
-
-
 module Neg1To5 =
     type Neg1To5 =
         | NegOne
