@@ -2,11 +2,13 @@ module VocationSkill
 
 open FogentRoleplayLib.VocationSkill
 open FogentRoleplayLib.Neg1To5
+open FogentRoleplayLib.Skill
 
 type Msg =
     | VocationalSkillMsg of VocationalSkill.Msg
     | WeaponSkillMsg of VocationalSkill.Msg
     | MagicSkillMsg of VocationalSkill.Msg
+    | CalculateDicePools of DicePoolCalculationData
     | SetSkillLevel of Neg1To5
 
 let update msg (model: VocationSkill) : VocationSkill =
@@ -20,6 +22,23 @@ let update msg (model: VocationSkill) : VocationSkill =
                 vocationalSkill = VocationalSkill.update msg magicSkill.vocationalSkill
         }
         |> MagicSkill
+    | CalculateDicePools dicePoolCalculationData, _ ->
+        match model with
+        | VocationalSkill vocationalSkill ->
+            VocationalSkill.update (VocationalSkill.CalculateDicePool(dicePoolCalculationData)) vocationalSkill
+            |> VocationalSkill
+        | WeaponSkill vocationalSkill ->
+            VocationalSkill.update (VocationalSkill.CalculateDicePool(dicePoolCalculationData)) vocationalSkill
+            |> WeaponSkill
+        | MagicSkill magicSkill ->
+            {
+                magicSkill with
+                    vocationalSkill =
+                        VocationalSkill.update
+                            (VocationalSkill.CalculateDicePool(dicePoolCalculationData))
+                            magicSkill.vocationalSkill
+            }
+            |> MagicSkill
     | SetSkillLevel newSkillLevel, _ ->
         match model with
         | VocationalSkill vocationalSkill ->

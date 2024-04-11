@@ -15,17 +15,16 @@ let update msg model =
         model
         |> List.mapi (fun index vocationSkill ->
             if index = position then
-                VocationalSkill.update msg vocationSkill
+                VocationSkill.update msg vocationSkill
             else
                 vocationSkill)
     | CalculateDicePools dicePoolCalculationData ->
         List.map
             (fun vocationSkill ->
-                VocationalSkill.update (VocationalSkill.CalculateDicePool(dicePoolCalculationData)) vocationSkill)
+                VocationSkill.update (VocationSkill.CalculateDicePools(dicePoolCalculationData)) vocationSkill)
             model
 
 open Feliz
-open Feliz.Bulma
 
 let view (model: VocationSkill list) dispatch =
     List.append
