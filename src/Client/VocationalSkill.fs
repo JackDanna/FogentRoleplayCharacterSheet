@@ -9,7 +9,7 @@ open FogentRoleplayLib.Neg1To5
 type Msg =
     | SkillMsg of Skill.Msg
     | CalculateDicePool of DicePoolCalculationData
-    | ToggleGoverningAttributes of AttributeName
+    | ToggleGoverningAttribute of AttributeName
     | SetSkillLevel of Neg1To5
 
 let init () = {
@@ -32,7 +32,7 @@ let update msg model =
                     ))
                     model.skill
       }
-    | ToggleGoverningAttributes newAttributeName -> {
+    | ToggleGoverningAttribute newAttributeName -> {
         model with
             governingAttributeNames = toggleAttributeNameSet model.governingAttributeNames newAttributeName
       }
@@ -45,26 +45,26 @@ open Feliz
 open Feliz.Bulma
 
 
-let governingAttributesToggle (model: VocationalSkill) dispatch (attributeNameSet: AttributeName Set) =
+let governingAttributesToggle
+    (model: AttributeName Set)
+    dispatchToggleGoverningAttribute
+    (attributeNameSet: AttributeName Set)
+    =
     Bulma.dropdown [
         dropdown.isHoverable
         prop.children [
-            Bulma.dropdownTrigger [
-                Bulma.button.button [ Html.span (stringSetToStringSeperatedByCommas model.governingAttributeNames) ]
-            ]
+            Bulma.dropdownTrigger [ Bulma.button.button [ Html.span (stringSetToStringSeperatedByCommas model) ] ]
             Bulma.dropdownMenu [
 
                 List.map
                     (fun attributeName ->
                         Bulma.dropdownItem.a [
-                            prop.onClick (fun _ -> dispatch (ToggleGoverningAttributes attributeName))
+                            prop.onClick (fun _ -> dispatchToggleGoverningAttribute attributeName)
                             prop.children [
                                 Bulma.columns [
                                     Bulma.column [
                                         Bulma.input.checkbox [
-                                            prop.isChecked (
-                                                List.contains attributeName (List.ofSeq model.governingAttributeNames)
-                                            )
+                                            prop.isChecked (List.contains attributeName (List.ofSeq model))
                                         ]
                                     ]
                                     Bulma.column [ prop.text attributeName ]
@@ -77,10 +77,10 @@ let governingAttributesToggle (model: VocationalSkill) dispatch (attributeNameSe
         ]
     ]
 
-let view model dispatch canUserChangeLevel =
+let view attributeNameSet model dispatch canUserChangeLevel =
 
     Bulma.column [
-        model.governingAttributeNames |> stringSetToStringSeperatedByCommas |> prop.text
+        governingAttributesToggle model.governingAttributeNames (ToggleGoverningAttribute >> dispatch) attributeNameSet
     ]
     |> Some
     |> Skill.view model.skill (SkillMsg >> dispatch) canUserChangeLevel

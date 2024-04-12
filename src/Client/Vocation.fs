@@ -1,4 +1,4 @@
-module vocationList
+module Vocation
 
 open FogentRoleplayLib.Vocation
 open FogentRoleplayLib.AttributeName
@@ -28,3 +28,26 @@ let update msg model =
         model with
             governingAttributeNames = toggleAttributeNameSet model.governingAttributeNames newAttributeName
       }
+
+open Feliz
+open Feliz.Bulma
+
+let view attributeNameSet model dispatch =
+    Bulma.box [
+        Bulma.columns [
+            Bulma.column [
+                Bulma.input.text [
+                    prop.value model.name
+                    prop.onTextChange (fun value -> dispatch (SetName value))
+                ]
+            ]
+            Bulma.column [
+                VocationalSkill.governingAttributesToggle
+                    attributeNameSet
+                    (ToggleGoveringAttribute >> dispatch)
+                    model.governingAttributeNames
+            ]
+            Bulma.column [ ZeroToFive.view model.level (ZeroToFiveMsg >> dispatch) ]
+            Bulma.column [ prop.text (dicePoolToString model.dicePool) ]
+        ]
+    ]

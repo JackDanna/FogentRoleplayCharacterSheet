@@ -18,13 +18,14 @@
     <Compile Include="VocationSkill.fs" />
     <Compile Include="VocationSkillList.fs" />
     <Compile Include="Vocation.fs" />
+    <Compile Include="VocationList.fs" />
     <Compile Include="Character.fs" />
     <None Include="postcss.config.js" />
     <None Include="tailwind.config.js" />
     <None Include="index.html" />
     <None Include="paket.references" />
-    <Compile Include="App.fs" />
     <Compile Include="Index.fs" />
+    <Compile Include="App.fs" />
     <None Include="vite.config.mts" />
   </ItemGroup>
   <ItemGroup>

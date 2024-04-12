@@ -858,5 +858,6 @@ module Character =
         vocationList: Vocation list
     }
 
-    let defaultAttributeAndCoreSkillsList (attributeList: AttributeName list) (coreSkillList: CoreSkill list) =
-        List.map (defaultAttributeAndCoreSkills coreSkillList) attributeList
+    let defaultAttributeAndCoreSkillsList (attributeList: AttributeName Set) (coreSkillList: CoreSkill list) =
+        Set.map (defaultAttributeAndCoreSkills coreSkillList) attributeList
+        |> List.ofSeq

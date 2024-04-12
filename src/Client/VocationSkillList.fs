@@ -31,11 +31,11 @@ let update msg model =
 
 open Feliz
 
-let view (model: VocationSkill list) dispatch =
+let view attributeNameSet (model: VocationSkill list) dispatch =
     List.append
         (List.mapi
             (fun position skillRow ->
-                VocationSkill.view skillRow (fun (msg: VocationSkill.Msg) ->
+                VocationSkill.view attributeNameSet skillRow (fun (msg: VocationSkill.Msg) ->
                     ((ModifiedVocationSkillAtPosition(position, msg)) |> dispatch)))
             model)
         [

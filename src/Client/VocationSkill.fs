@@ -62,8 +62,11 @@ let update msg (model: VocationSkill) : VocationSkill =
 open Feliz
 open Feliz.Bulma
 
-let view model dispatch =
+let view attributeNameSet model dispatch =
     match model with
-    | VocationalSkill vocationalSkill -> VocationalSkill.view vocationalSkill (VocationalSkillMsg >> dispatch) false
-    | WeaponSkill vocationalSkill -> VocationalSkill.view vocationalSkill (VocationalSkillMsg >> dispatch) true
-    | MagicSkill magicSkill -> VocationalSkill.view magicSkill.vocationalSkill (VocationalSkillMsg >> dispatch) true
+    | VocationalSkill vocationalSkill ->
+        VocationalSkill.view attributeNameSet vocationalSkill (VocationalSkillMsg >> dispatch) false
+    | WeaponSkill vocationalSkill ->
+        VocationalSkill.view attributeNameSet vocationalSkill (VocationalSkillMsg >> dispatch) true
+    | MagicSkill magicSkill ->
+        VocationalSkill.view attributeNameSet magicSkill.vocationalSkill (VocationalSkillMsg >> dispatch) true

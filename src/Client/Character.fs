@@ -11,9 +11,10 @@ type Msg =
     | SetName of string
     | AttributeAndCoreSkillsListMsg of AttributeAndCoreSkillsList.Msg
 
-let init (attributeData: AttributeName list) (coreSkillData: CoreSkill list) = {
+let init (attributeNameSet: AttributeName Set) (coreSkillData: CoreSkill list) = {
     name = ""
-    attributeAndCoreSkillsList = defaultAttributeAndCoreSkillsList attributeData coreSkillData
+    attributeAndCoreSkillsList = defaultAttributeAndCoreSkillsList attributeNameSet coreSkillData
+    vocationList = VocationList.init ()
 }
 
 let update msg (model: Character) =
