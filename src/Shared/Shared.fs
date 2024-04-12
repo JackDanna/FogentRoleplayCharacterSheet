@@ -17,7 +17,7 @@ module Route =
         sprintf "/api/%s/%s" typeName methodName
 
 type FogentRoleplayData = {
-    defaultAttributeList: AttributeName List
+    defaultAttributeSet: AttributeName Set
     defaultCoreSkillList: CoreSkill List
 //   allItemStackList: ItemStack list
 //   magicSkillMap: Map<string, MagicSkill>

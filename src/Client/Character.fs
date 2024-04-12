@@ -10,6 +10,7 @@ open FogentRoleplayLib.AttributeAndCoreSkills
 type Msg =
     | SetName of string
     | AttributeAndCoreSkillsListMsg of AttributeAndCoreSkillsList.Msg
+    | VocationListMsg of VocationList.Msg
 
 let init (attributeNameSet: AttributeName Set) (coreSkillData: CoreSkill list) = {
     name = ""
@@ -44,11 +45,15 @@ let update msg (model: Character) =
                         ))
                         newAttributeAndCoreSkillsList
         }
+    | VocationListMsg msg -> {
+        model with
+            vocationList = VocationList.update msg model.vocationList
+      }
 
 open Feliz
 open Feliz.Bulma
 
-let view (model: Character) dispatch =
+let view attributeNameSet (model: Character) dispatch =
     // let allItemStackNameList =
     //     (List.map (fun (itemStack: ItemStack) -> itemStack.item.name) allItemStackList)
 
@@ -74,12 +79,7 @@ let view (model: Character) dispatch =
 
         AttributeAndCoreSkillsList.view model.attributeAndCoreSkillsList (AttributeAndCoreSkillsListMsg >> dispatch)
 
-    // VocationList.view
-    //     combatVocationalSkill
-    //     (vocationDicePoolListToStringifiedVocationDicePoolList model.vocationDicePoolList)
-    //     (attributesToAttributeNames model.attributeList)
-    //     model.vocationList
-    //     (VocationListMsg >> dispatch)
+        VocationList.view attributeNameSet model.vocationList (VocationListMsg >> dispatch)
 
     // DestinyPoints.view model.destinyPoints (DestinyPointsMsg >> dispatch)
 

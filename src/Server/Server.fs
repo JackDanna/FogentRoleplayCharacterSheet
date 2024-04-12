@@ -42,9 +42,10 @@ module FogentRoleplayServerData =
     // DamageType
     let damageTypeData =
         makeFogentRoleplayData "DamageTypeData.csv" (fun row -> (DamageType row.["name"]))
+        |> Set.ofList
 
     let stringToDamageTypeList =
-        damageTypeData |> stringListToTypeMap |> stringAndMapToDamageTypeList
+        damageTypeData |> stringSetToTypeMap |> stringAndMapToDamageTypeList
 
     // EngageableOpponents
     let engageableOpponentsCalculationData =
@@ -84,8 +85,9 @@ module FogentRoleplayServerData =
     // ResourceClass
     let resourceClassData =
         makeFogentRoleplayData "ResourceClassData.csv" (fun row -> (ResourceClass row.["name"]))
+        |> Set.ofList
 
-    let resourceClassMap = stringListToTypeMap resourceClassData
+    let resourceClassMap = stringSetToTypeMap resourceClassData
 
     let resourceClassOptionMap string =
         match string with
@@ -93,8 +95,9 @@ module FogentRoleplayServerData =
         | _ -> Some <| resourceClassMap.Item string
 
     // AttributeAndCoreSkill
-    let attributeData: AttributeName list =
+    let attributeData: AttributeName Set =
         makeFogentRoleplayData "AttributeData.csv" (fun row -> AttributeName row.["desc"])
+        |> Set.ofList
 
     let coreSkillData: CoreSkill list =
         makeFogentRoleplayData "CoreSkillData.csv" (fun row -> {
@@ -106,7 +109,7 @@ module FogentRoleplayServerData =
             governingAttributeName = row.["governingAttribute"]
         })
 
-    let attributeMap = stringListToTypeMap attributeData
+    let attributeMap = stringSetToTypeMap attributeData
 
     let mapAndStringToAttributes (attributeMap: Map<string, AttributeName>) (input) =
         String.filter ((<>) ' ') input
@@ -398,7 +401,7 @@ let fallenDataApi: IFogentRoleplayDataApi = {
         fun () -> async {
             return {
                 defaultCoreSkillList = FogentRoleplayServerData.coreSkillData
-                defaultAttributeList = FogentRoleplayServerData.attributeData
+                defaultAttributeSet = FogentRoleplayServerData.attributeData
             //   allItemStackList = FallenServerData.itemStackData
             //   magicSkillMap = FallenServerData.magicSkillMap
             //   magicCombatMap = FallenServerData.magicCombatMap

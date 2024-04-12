@@ -22,15 +22,15 @@ let fogentRoleplayDataApi =
     |> Remoting.buildProxy<IFogentRoleplayDataApi>
 
 let init () : Model * Cmd<Msg> =
-    let defaultAttributeList = []
+    let defaultAttributeSet = Set.empty
     let defaultCoreSkillList = []
 
     {
         fogentRoleplayData = {
-            defaultAttributeList = defaultAttributeList
+            defaultAttributeSet = defaultAttributeSet
             defaultCoreSkillList = defaultCoreSkillList
         }
-        character = Character.init defaultAttributeList defaultCoreSkillList
+        character = Character.init defaultAttributeSet defaultCoreSkillList
     },
 
     Cmd.OfAsync.perform fogentRoleplayDataApi.getInitData () GotInitData
@@ -49,7 +49,7 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
         {
             model with
                 fogentRoleplayData = newFallenData
-                character = Character.init newFallenData.defaultAttributeList newFallenData.defaultCoreSkillList
+                character = Character.init newFallenData.defaultAttributeSet newFallenData.defaultCoreSkillList
         },
         Cmd.none
 
@@ -82,15 +82,7 @@ let view (model: Model) (dispatch: Msg -> unit) =
             ]
 
             Bulma.heroBody [
-                Character.view
-                    // (Seq.toList model.fallenData.carryWeightCalculationMap.Keys)
-                    // ((List.ofSeq model.fallenData.effectForDisplayMap.Keys)
-                    //  @ (List.ofSeq model.fallenData.carryWeightCalculationMap.Keys)
-                    //  @ (List.ofSeq model.fallenData.movementSpeedCalculationMap.Keys))
-                    // model.fallenData.combatVocationalSkill
-                    // model.fallenData.allItemStackList
-                    model.character
-                    (CharacterMsg >> dispatch)
+                Character.view model.fogentRoleplayData.defaultAttributeSet model.character (CharacterMsg >> dispatch)
             ]
         ]
     ]

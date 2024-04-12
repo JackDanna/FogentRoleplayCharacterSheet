@@ -39,8 +39,8 @@ module MathUtils =
 
 module TypeUtils =
 
-    let stringListToTypeMap (stringTypeArray: string list) =
-        List.zip stringTypeArray stringTypeArray |> Map.ofList
+    let stringSetToTypeMap (stringTypeArray: string Set) =
+        Seq.zip stringTypeArray stringTypeArray |> Map.ofSeq
 
 // Base Building Blocks
 
