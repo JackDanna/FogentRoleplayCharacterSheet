@@ -594,6 +594,16 @@ module ResourceClass =
 module AttributeName =
     type AttributeName = string
 
+    let toggleAttributeNameSet oldGoverningAttributeNames newGoverningAttributeName =
+        oldGoverningAttributeNames
+        |> Set.exists (fun attributeName -> attributeName = newGoverningAttributeName)
+        |> (fun attributeNameExists ->
+            if attributeNameExists then
+                Set.add newGoverningAttributeName oldGoverningAttributeNames
+            else
+                Set.remove newGoverningAttributeName oldGoverningAttributeNames)
+
+
 module Attribute =
     open Neg2To5
     open AttributeName
@@ -802,9 +812,11 @@ module Vocation =
     open ZeroToFive
     open DicePool
     open VocationSkill
+    open AttributeName
 
     type Vocation = {
         name: string
+        governingAttributeNames: AttributeName Set
         level: ZeroToFive
         dicePool: DicePool
         vocationSkillList: VocationSkill list

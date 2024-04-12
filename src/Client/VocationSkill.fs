@@ -11,6 +11,9 @@ type Msg =
     | CalculateDicePools of DicePoolCalculationData
     | SetSkillLevel of Neg1To5
 
+let init () =
+    VocationalSkill.init () |> VocationalSkill
+
 let update msg (model: VocationSkill) : VocationSkill =
     match msg, model with
     | VocationalSkillMsg msg, VocationalSkill vocationalSkill ->

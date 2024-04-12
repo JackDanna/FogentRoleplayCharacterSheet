@@ -34,14 +34,7 @@ let update msg model =
       }
     | ToggleGoverningAttributes newAttributeName -> {
         model with
-            governingAttributeNames =
-                model.governingAttributeNames
-                |> Set.exists (fun attributeName -> attributeName = newAttributeName)
-                |> (fun attributeNameExists ->
-                    if attributeNameExists then
-                        Set.add newAttributeName model.governingAttributeNames
-                    else
-                        Set.remove newAttributeName model.governingAttributeNames)
+            governingAttributeNames = toggleAttributeNameSet model.governingAttributeNames newAttributeName
       }
     | SetSkillLevel newSkillLevel -> {
         model with

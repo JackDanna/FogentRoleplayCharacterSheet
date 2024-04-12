@@ -4,13 +4,18 @@ open FogentRoleplayLib.Skill
 open FogentRoleplayLib.VocationSkill
 
 type Msg =
+    | InsertVocationalSkill
+    | InsertWeaponSkill
+    | InsertMagicSkill
+    | Remove
     | ModifiedVocationSkillAtPosition of int * VocationSkill.Msg
     | CalculateDicePools of DicePoolCalculationData
 
-// let init () =
+let init () = []
 
 let update msg model =
     match msg with
+    | InsertVocationalSkill -> List.append model [ VocationSkill.init () ]
     | ModifiedVocationSkillAtPosition(position, msg) ->
         model
         |> List.mapi (fun index vocationSkill ->
@@ -34,7 +39,7 @@ let view (model: VocationSkill list) dispatch =
                     ((ModifiedVocationSkillAtPosition(position, msg)) |> dispatch)))
             model)
         [
-        // Html.button [ prop.onClick (fun _ -> dispatch Insert); prop.text "+" ]
+            Html.button [ prop.onClick (fun _ -> dispatch InsertVocationalSkill); prop.text "+" ]
         // Html.button [ prop.onClick (fun _ -> dispatch Remove); prop.text "-" ]
         ]
     |> Html.ul
