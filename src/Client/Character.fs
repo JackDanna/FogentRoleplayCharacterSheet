@@ -59,8 +59,6 @@ open Feliz
 open Feliz.Bulma
 
 let view attributeNameSet (model: Character) dispatch =
-    // let allItemStackNameList =
-    //     (List.map (fun (itemStack: ItemStack) -> itemStack.item.name) allItemStackList)
 
     Bulma.container [
 
