@@ -599,9 +599,9 @@ module AttributeName =
         |> Set.exists (fun attributeName -> attributeName = newGoverningAttributeName)
         |> (fun attributeNameExists ->
             if attributeNameExists then
-                Set.add newGoverningAttributeName oldGoverningAttributeNames
+                Set.remove newGoverningAttributeName oldGoverningAttributeNames
             else
-                Set.remove newGoverningAttributeName oldGoverningAttributeNames)
+                Set.add newGoverningAttributeName oldGoverningAttributeNames)
 
 
 module Attribute =
