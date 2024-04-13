@@ -8,6 +8,7 @@ type Msg =
     | SetName of string
     | ZeroToFiveMsg of ZeroToFive.Msg
     | ToggleGoveringAttribute of AttributeName
+    | VocationSkillListMsg of VocationSkillList.Msg
 
 let init () : Vocation = {
     name = ""
@@ -27,6 +28,10 @@ let update msg model =
     | ToggleGoveringAttribute newAttributeName -> {
         model with
             governingAttributeNames = toggleAttributeNameSet model.governingAttributeNames newAttributeName
+      }
+    | VocationSkillListMsg msg -> {
+        model with
+            vocationSkillList = VocationSkillList.update msg model.vocationSkillList
       }
 
 open Feliz
@@ -50,4 +55,5 @@ let view attributeNameSet model dispatch =
             Bulma.column [ ZeroToFive.view model.level (ZeroToFiveMsg >> dispatch) ]
             Bulma.column [ prop.text (dicePoolToString model.dicePool) ]
         ]
+        VocationSkillList.view attributeNameSet model.vocationSkillList (VocationSkillListMsg >> dispatch)
     ]

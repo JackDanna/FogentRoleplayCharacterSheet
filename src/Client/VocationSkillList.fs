@@ -11,7 +11,7 @@ type Msg =
     | ModifiedVocationSkillAtPosition of int * VocationSkill.Msg
     | CalculateDicePools of DicePoolCalculationData
 
-let init () = []
+let init () = [ VocationSkill.init () ]
 
 let update msg model =
     match msg with
