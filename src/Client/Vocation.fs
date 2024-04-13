@@ -3,12 +3,14 @@ module Vocation
 open FogentRoleplayLib.Vocation
 open FogentRoleplayLib.AttributeName
 open FogentRoleplayLib.DicePool
+open FogentRoleplayLib.Skill
 
 type Msg =
     | SetName of string
     | ZeroToFiveMsg of ZeroToFive.Msg
     | ToggleGoveringAttribute of AttributeName
     | VocationSkillListMsg of VocationSkillList.Msg
+    | CalculateDicePools of DicePoolCalculationData
 
 let init () : Vocation = {
     name = ""
@@ -18,7 +20,7 @@ let init () : Vocation = {
     vocationSkillList = VocationSkillList.init ()
 }
 
-let update msg model =
+let update msg (model: Vocation) =
     match msg with
     | SetName newName -> { model with name = newName }
     | ZeroToFiveMsg msg -> {
@@ -33,11 +35,18 @@ let update msg model =
         model with
             vocationSkillList = VocationSkillList.update msg model.vocationSkillList
       }
+    | CalculateDicePools msg -> {
+        model with
+            dicePool = calculateVocationDicePool msg model.level model.governingAttributeNames
+            vocationSkillList =
+                VocationSkillList.update (VocationSkillList.CalculateDicePools(msg)) model.vocationSkillList
+      }
+
 
 open Feliz
 open Feliz.Bulma
 
-let view attributeNameSet model dispatch =
+let view attributeNameSet (model: Vocation) dispatch =
     Bulma.box [
         Bulma.columns [
             Bulma.column [

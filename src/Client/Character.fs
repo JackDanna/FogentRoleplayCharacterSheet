@@ -34,7 +34,7 @@ let update msg (model: Character) =
                         (AttributeAndCoreSkillsList.Msg.CalculateDicePools(
                             {
                                 baseDice = None
-                                AttributeList =
+                                attributeList =
                                     List.map
                                         (fun attributeAndCoreSkills -> attributeAndCoreSkills.attributeStat)
                                         newAttributeAndCoreSkillsList

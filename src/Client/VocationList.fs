@@ -1,12 +1,12 @@
 module VocationList
 
-open FogentRoleplayLib.Vocation
-open FogentRoleplayLib.AttributeName
+open FogentRoleplayLib.Skill
 
 type Msg =
     | Modify of int * Vocation.Msg
     | Insert
     | Remove of int
+    | CalculateDicePools of DicePoolCalculationData
 
 let init () = [ Vocation.init () ]
 
@@ -21,6 +21,9 @@ let update msg model =
                 vocation)
     | Insert -> List.append model [ Vocation.init () ]
     | Remove position -> List.removeAt position model
+    | CalculateDicePools msg ->
+        List.map (fun vocation -> Vocation.update (Vocation.CalculateDicePools(msg)) vocation) model
+
 
 open Feliz
 open Feliz.Bulma
