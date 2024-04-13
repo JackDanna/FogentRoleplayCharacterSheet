@@ -33,9 +33,9 @@ let view attributeNameSet model dispatch =
             columns.isCentered
             prop.children [
                 List.mapi
-                    (fun position vocationTable ->
+                    (fun position vocation ->
                         Bulma.column [
-                            Vocation.view attributeNameSet vocationTable (fun msg -> dispatch (Modify(position, msg)))
+                            Vocation.view attributeNameSet vocation (fun msg -> dispatch (Modify(position, msg)))
 
                             Bulma.button.button [ prop.onClick (fun _ -> dispatch (Remove position)); prop.text "-" ]
                         ])
