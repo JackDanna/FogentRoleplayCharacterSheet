@@ -1,7 +1,7 @@
 module CoreSkillList
 
 open FogentRoleplayLib.CoreSkill
-open FogentRoleplayLib.Skill
+open FogentRoleplayLib.DicePoolCalculation
 
 type Msg =
     | ModifiedCoreSkillAtPosition of int * CoreSkill.Msg

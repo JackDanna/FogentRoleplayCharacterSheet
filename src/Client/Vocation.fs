@@ -3,7 +3,7 @@ module Vocation
 open FogentRoleplayLib.Vocation
 open FogentRoleplayLib.AttributeName
 open FogentRoleplayLib.DicePool
-open FogentRoleplayLib.Skill
+open FogentRoleplayLib.DicePoolCalculation
 
 type Msg =
     | SetName of string

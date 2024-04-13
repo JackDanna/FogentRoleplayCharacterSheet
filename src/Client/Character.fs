@@ -3,7 +3,7 @@ module Character
 open FogentRoleplayLib.Character
 open FogentRoleplayLib.AttributeName
 open FogentRoleplayLib.CoreSkill
-open FogentRoleplayLib.Skill
+open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.DicePoolMod
 open FogentRoleplayLib.AttributeAndCoreSkills
 
@@ -49,8 +49,10 @@ let update msg (model: Character) =
                     VocationList.update (VocationList.CalculateDicePools(dicePoolCalculationData)) model.vocationList
         }
     | VocationListMsg msg -> {
+
         model with
             vocationList = VocationList.update msg model.vocationList
+      //|> VocationList.update (VocationList.CalculateDicePools())
       }
 
 open Feliz

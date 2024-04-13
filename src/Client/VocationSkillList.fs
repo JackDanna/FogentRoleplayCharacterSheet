@@ -1,6 +1,6 @@
 module VocationSkillList
 
-open FogentRoleplayLib.Skill
+open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.VocationSkill
 
 type Msg =

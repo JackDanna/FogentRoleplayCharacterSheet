@@ -1,7 +1,7 @@
 module AttributeAndCoreSkillsList
 
 open FogentRoleplayLib.AttributeAndCoreSkills
-open FogentRoleplayLib.Skill
+open FogentRoleplayLib.DicePoolCalculation
 
 type Msg =
     | ModifyAttributeAndCoreSkillsList of int * AttributeAndCoreSkills.Msg

@@ -5,6 +5,7 @@ open FogentRoleplayLib.Skill
 open FogentRoleplayLib.StringUtils
 open FogentRoleplayLib.AttributeName
 open FogentRoleplayLib.Neg1To5
+open FogentRoleplayLib.DicePoolCalculation
 
 type Msg =
     | SkillMsg of Skill.Msg

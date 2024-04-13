@@ -2,7 +2,7 @@ module VocationSkill
 
 open FogentRoleplayLib.VocationSkill
 open FogentRoleplayLib.Neg1To5
-open FogentRoleplayLib.Skill
+open FogentRoleplayLib.DicePoolCalculation
 
 type Msg =
     | VocationalSkillMsg of VocationalSkill.Msg

@@ -2,6 +2,7 @@ module CoreSkill
 
 open FogentRoleplayLib.CoreSkill
 open FogentRoleplayLib.Skill
+open FogentRoleplayLib.DicePoolCalculation
 
 type Msg =
     | SkillMsg of Skill.Msg
