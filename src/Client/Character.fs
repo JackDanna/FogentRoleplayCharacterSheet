@@ -27,17 +27,12 @@ let update msg (model: Character) =
         let newAttributeAndCoreSkillsList =
             AttributeAndCoreSkillsList.update msg model.attributeAndCoreSkillsList
 
-        let dicePoolCalculationData = {
-            baseDice = None
-            attributeList =
-                List.map
-                    (fun attributeAndCoreSkills -> attributeAndCoreSkills.attributeStat)
-                    newAttributeAndCoreSkillsList
-            injuryDicePenalty = 0u
-            weightClassDicePenalty = 0u
-            itemEffectDicePoolMod = createD6DicePoolMod 0u
-        }
-
+        let dicePoolCalculationData =
+            {
+                model with
+                    attributeAndCoreSkillsList = newAttributeAndCoreSkillsList
+            }
+            |> characterToDicePoolCalculation
 
         {
             model with
@@ -48,12 +43,17 @@ let update msg (model: Character) =
                 vocationList =
                     VocationList.update (VocationList.CalculateDicePools(dicePoolCalculationData)) model.vocationList
         }
-    | VocationListMsg msg -> {
+    | VocationListMsg(msg: VocationList.Msg) ->
 
-        model with
-            vocationList = VocationList.update msg model.vocationList
-      //|> VocationList.update (VocationList.CalculateDicePools())
-      }
+        let newVocationList = VocationList.update msg model.vocationList
+
+        {
+            model with
+                vocationList =
+                    VocationList.update
+                        (VocationList.CalculateDicePools(characterToDicePoolCalculation model))
+                        newVocationList
+        }
 
 open Feliz
 open Feliz.Bulma

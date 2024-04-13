@@ -862,12 +862,27 @@ module Character =
     open CoreSkill
     open AttributeAndCoreSkills
     open Vocation
+    open DicePoolCalculation
+    open DicePoolMod
 
     type Character = {
         name: string
         attributeAndCoreSkillsList: AttributeAndCoreSkills list
         vocationList: Vocation list
     }
+
+    let characterToDicePoolCalculation (character: Character) =
+
+        {
+            baseDice = None
+            attributeList =
+                List.map
+                    (fun attributeAndCoreSkills -> attributeAndCoreSkills.attributeStat)
+                    character.attributeAndCoreSkillsList
+            injuryDicePenalty = 0u
+            weightClassDicePenalty = 0u
+            itemEffectDicePoolMod = createD6DicePoolMod 0u
+        }
 
     let defaultAttributeAndCoreSkillsList (attributeList: AttributeName Set) (coreSkillList: CoreSkill list) =
         Set.map (defaultAttributeAndCoreSkills coreSkillList) attributeList
