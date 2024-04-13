@@ -808,23 +808,38 @@ module DicePoolCalculation =
         itemEffectDicePoolMod: DicePoolMod
     }
 
-    let calculateCoreSkillDicePool
+    let calculateDicePool
         (dicePoolCalculationData: DicePoolCalculationData)
-        (skillLevel: Neg1To5)
-        (skillGoveringAttribute: AttributeName)
+        (skillLevel: int)
+        (goveringAttributes: AttributeName Set)
         =
 
-        let attribute =
-            dicePoolCalculationData.attributeList
-            |> List.find (fun attribute -> attribute.attributeName = skillGoveringAttribute)
+        let attributes: Attribute list =
+            goveringAttributes
+            |> List.ofSeq
+            |> List.collect (findAttributeWithAttributeName dicePoolCalculationData.attributeList)
 
         modifyDicePoolByDicePoolModList (dicePoolCalculationData.baseDice |> Option.defaultValue baseDicePool) [
-            skillLevel |> neg1To5ToInt |> intToD6DicePoolMod
-            attribute.level |> neg2To5ToInt |> intToD6DicePoolMod
+            skillLevel |> intToD6DicePoolMod
+            (attributes
+             |> List.map (fun attribute -> neg2To5ToInt attribute.level)
+             |> List.sum
+             |> intToD6DicePoolMod)
             dicePoolCalculationData.injuryDicePenalty |> RemoveDice
             dicePoolCalculationData.itemEffectDicePoolMod
             dicePoolCalculationData.weightClassDicePenalty |> RemoveDice
         ]
+
+    let calculateCoreSkillDicePool
+        (dicePoolCalculationData: DicePoolCalculationData)
+        (skillLevel: Neg1To5)
+        (skillGoveringAttributeName: AttributeName)
+        =
+
+        calculateDicePool
+            dicePoolCalculationData
+            (skillLevel |> neg1To5ToInt)
+            (Set.empty.Add(skillGoveringAttributeName))
 
     let calculateVocationalSkillDicePool
         (dicePoolCalculationData: DicePoolCalculationData)
@@ -832,21 +847,7 @@ module DicePoolCalculation =
         (skillGoveringAttributeNames: AttributeName Set)
         =
 
-        let attributes: Attribute list =
-            skillGoveringAttributeNames
-            |> List.ofSeq
-            |> List.collect (findAttributeWithAttributeName dicePoolCalculationData.attributeList)
-
-        modifyDicePoolByDicePoolModList (dicePoolCalculationData.baseDice |> Option.defaultValue baseDicePool) [
-            skillLevel |> neg1To5ToInt |> intToD6DicePoolMod
-            (attributes
-             |> List.map (fun attribute -> neg2To5ToInt attribute.level)
-             |> List.sum
-             |> intToD6DicePoolMod)
-            dicePoolCalculationData.injuryDicePenalty |> RemoveDice
-            dicePoolCalculationData.itemEffectDicePoolMod
-            dicePoolCalculationData.weightClassDicePenalty |> RemoveDice
-        ]
+        calculateDicePool dicePoolCalculationData (skillLevel |> neg1To5ToInt) skillGoveringAttributeNames
 
     let calculateVocationDicePool
         (dicePoolCalculationData: DicePoolCalculationData)
@@ -854,22 +855,7 @@ module DicePoolCalculation =
         (skillGoveringAttributeNames: AttributeName Set)
         =
 
-        let attributes: Attribute list =
-            skillGoveringAttributeNames
-            |> List.ofSeq
-            |> List.collect (findAttributeWithAttributeName dicePoolCalculationData.attributeList)
-
-        modifyDicePoolByDicePoolModList (dicePoolCalculationData.baseDice |> Option.defaultValue baseDicePool) [
-            skillLevel |> zeroToFiveToUint |> int |> intToD6DicePoolMod
-            (attributes
-             |> List.map (fun attribute -> neg2To5ToInt attribute.level)
-             |> List.sum
-             |> intToD6DicePoolMod)
-            dicePoolCalculationData.injuryDicePenalty |> RemoveDice
-            dicePoolCalculationData.itemEffectDicePoolMod
-            dicePoolCalculationData.weightClassDicePenalty |> RemoveDice
-        ]
-
+        calculateDicePool dicePoolCalculationData (skillLevel |> zeroToFiveToUint |> int) skillGoveringAttributeNames
 
 module Character =
     open AttributeName
