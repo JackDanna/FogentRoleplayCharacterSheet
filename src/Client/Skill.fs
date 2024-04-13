@@ -4,6 +4,7 @@ open FogentRoleplayLib.Skill
 open FogentRoleplayLib.DicePool
 
 type Msg =
+    | SetName of string
     | Neg1To5Msg of Neg1To5.Msg
     | SetDicePool of DicePool
 
@@ -15,6 +16,7 @@ let init () = {
 
 let update msg model =
     match msg with
+    | SetName msg -> { model with name = msg }
     | Neg1To5Msg msg -> {
         model with
             level = Neg1To5.update msg model.level
@@ -24,9 +26,18 @@ let update msg model =
 open Feliz
 open Feliz.Bulma
 
-let view model dispatch canUserChangeLevel governingSkillColumn =
-
-    [ Bulma.column [ prop.text model.name ] ]
+let view model dispatch canUserChangeName canUserChangeLevel governingSkillColumn =
+    if canUserChangeName then
+        [
+            Bulma.column [
+                Bulma.input.text [
+                    prop.value model.name
+                    prop.onTextChange (fun value -> dispatch (SetName value))
+                ]
+            ]
+        ]
+    else
+        [ Bulma.column [ prop.text model.name ] ]
     @ match governingSkillColumn with
       | Some column -> column |> List.singleton
       | None -> List.Empty

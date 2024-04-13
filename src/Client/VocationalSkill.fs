@@ -83,4 +83,4 @@ let view attributeNameSet model dispatch canUserChangeLevel =
         governingAttributesToggle model.governingAttributeNames (ToggleGoverningAttribute >> dispatch) attributeNameSet
     ]
     |> Some
-    |> Skill.view model.skill (SkillMsg >> dispatch) canUserChangeLevel
+    |> Skill.view model.skill (SkillMsg >> dispatch) true canUserChangeLevel
