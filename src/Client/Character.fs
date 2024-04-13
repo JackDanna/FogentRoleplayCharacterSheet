@@ -27,23 +27,26 @@ let update msg (model: Character) =
         let newAttributeAndCoreSkillsList =
             AttributeAndCoreSkillsList.update msg model.attributeAndCoreSkillsList
 
+        let dicePoolCalculationData = {
+            baseDice = None
+            attributeList =
+                List.map
+                    (fun attributeAndCoreSkills -> attributeAndCoreSkills.attributeStat)
+                    newAttributeAndCoreSkillsList
+            injuryDicePenalty = 0u
+            weightClassDicePenalty = 0u
+            itemEffectDicePoolMod = createD6DicePoolMod 0u
+        }
+
+
         {
             model with
                 attributeAndCoreSkillsList =
                     AttributeAndCoreSkillsList.update
-                        (AttributeAndCoreSkillsList.Msg.CalculateDicePools(
-                            {
-                                baseDice = None
-                                attributeList =
-                                    List.map
-                                        (fun attributeAndCoreSkills -> attributeAndCoreSkills.attributeStat)
-                                        newAttributeAndCoreSkillsList
-                                injuryDicePenalty = 0u
-                                weightClassDicePenalty = 0u
-                                itemEffectDicePoolMod = createD6DicePoolMod 0u
-                            }
-                        ))
+                        (AttributeAndCoreSkillsList.Msg.CalculateDicePools(dicePoolCalculationData))
                         newAttributeAndCoreSkillsList
+                vocationList =
+                    VocationList.update (VocationList.CalculateDicePools(dicePoolCalculationData)) model.vocationList
         }
     | VocationListMsg msg -> {
         model with
