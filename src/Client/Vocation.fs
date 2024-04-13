@@ -48,9 +48,9 @@ let view attributeNameSet model dispatch =
             ]
             Bulma.column [
                 VocationalSkill.governingAttributesToggle
-                    attributeNameSet
-                    (ToggleGoveringAttribute >> dispatch)
                     model.governingAttributeNames
+                    (ToggleGoveringAttribute >> dispatch)
+                    attributeNameSet
             ]
             Bulma.column [ ZeroToFive.view model.level (ZeroToFiveMsg >> dispatch) ]
             Bulma.column [ prop.text (dicePoolToString model.dicePool) ]
