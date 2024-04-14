@@ -12,7 +12,7 @@ module StringUtils =
     let stringSetToStringSeperatedByCommas stringSet =
         stringSet |> List.ofSeq |> stringListToStringSeperatedByCommas
 
-    let mapAndStringToValueSet (map: Map<string, string>) (input: string) =
+    let mapAndStringToValueSet (map: Map<string, 'a>) (input: string) =
         if input.Length = 0 then
             Set.empty
         else
