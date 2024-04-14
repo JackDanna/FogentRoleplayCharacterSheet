@@ -27,6 +27,7 @@ module FogentRoleplayServerData =
 
     open FogentRoleplayLib.Container
     open FogentRoleplayLib.WeaponResource
+    open FogentRoleplayLib.ItemTier
 
     let makeFogentRoleplayDataPath fileName =
         __SOURCE_DIRECTORY__ + "../../../FogentRoleplayData/" + fileName
@@ -341,18 +342,19 @@ module FogentRoleplayServerData =
             weaponResourceClassData
         |> Map.ofSeq
 
-// // ItemTier
-// let itemTierData =
-//     makeFogentRoleplayData "ItemTierData.csv" (fun row ->
-//         { name = string row.["desc"]
-//           level = int row.["level"]
-//           runeSlots = uint row.["runeSlots"]
-//           baseDice = parseDicePoolString row.["baseDice"]
-//           durabilityMax = uint row.["durabilityMax"] })
+    // ItemTier
+    let itemTierData =
+        makeFogentRoleplayData "ItemTierData.csv" (fun row -> {
+            name = string row.["desc"]
+            level = int row.["level"]
+            baseDice = parseDicePoolString row.["baseDice"]
+            durabilityMax = uint row.["durabilityMax"]
+        })
+        |> Set.ofList
 
-// let itemTierMap =
-//     List.map (fun (itemTier: ItemTier) -> itemTier.name, itemTier) itemTierData
-//     |> Map.ofList
+    let itemTierMap =
+        Set.map (fun (itemTier: ItemTier) -> itemTier.name, itemTier) itemTierData
+        |> Map.ofSeq
 
 // // Item
 // let stringToItemClassList
