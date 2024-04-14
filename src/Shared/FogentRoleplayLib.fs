@@ -12,6 +12,15 @@ module StringUtils =
     let stringSetToStringSeperatedByCommas stringSet =
         stringSet |> List.ofSeq |> stringListToStringSeperatedByCommas
 
+    let mapAndStringToValueSet (map: Map<string, string>) (input: string) =
+        if input.Length = 0 then
+            Set.empty
+        else
+            String.filter ((<>) ' ') input
+            |> (fun s -> s.Split(',', System.StringSplitOptions.RemoveEmptyEntries))
+            |> Set.ofArray
+            |> Set.map (fun attributeString -> map.Item attributeString)
+
 
 module MathUtils =
     open System
@@ -51,14 +60,6 @@ module Penetration =
 module DamageType =
 
     type DamageType = string
-
-    let mapAndStringToDamageTypeSet (damageTypeMap: Map<string, DamageType>) (damageTypesString: string) =
-        if damageTypesString.Length = 0 then
-            Set.empty
-        else
-            damageTypesString.Split ", "
-            |> Set.ofArray
-            |> Set.map (fun (damageTypeString) -> damageTypeMap.Item damageTypeString)
 
 module EngageableOpponents =
 

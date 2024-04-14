@@ -9,6 +9,8 @@ open Shared
 module FogentRoleplayServerData =
     open FSharp.Data
 
+    open FogentRoleplayLib.StringUtils
+
     open FogentRoleplayLib.DamageType
     open FogentRoleplayLib.EngageableOpponents
     open FogentRoleplayLib.Range
@@ -47,41 +49,37 @@ module FogentRoleplayServerData =
         | _ -> failwith ("Error: returns " + boolString)
 
     // DamageType
-    let damageTypeSet =
-        makeFogentRoleplayDataSet "DamageTypeData.csv" (fun row -> (DamageType row.["name"]))
-
     let stringToDamageTypeSet =
-        damageTypeSet |> stringSetToTypeMap |> mapAndStringToDamageTypeSet
+        makeFogentRoleplayDataSet "DamageTypeData.csv" (fun row -> (DamageType row.["name"]))
+        |> stringSetToTypeMap
+        |> mapAndStringToValueSet
 
     // EngageableOpponents
-    let engageableOpponentsCalculationData =
+    let engageableOpponentsMap =
         makeFogentRoleplayDataSet "EngageableOpponentsCalculationData.csv" (fun row -> {
             name = string row.["name"]
             combatRollDivisor = uint row.["combatRollDivisor"]
             maxEO = parseMaxEngageableOpponentsString row.["maxEO"]
         })
-
-    let engageableOpponentsMap =
-        parseEngaeableOpponentsString (eoCalculationSetToMap engageableOpponentsCalculationData)
+        |> eoCalculationSetToMap
+        |> parseEngaeableOpponentsString
 
     // Range
-    let calculatedRangeData =
-        makeFogentRoleplayDataList "CalculatedRangeData.csv" (fun row -> {
+
+    let rangeMap =
+        (makeFogentRoleplayDataList "CalculatedRangeData.csv" (fun row -> {
             name = string row.["name"]
             effectiveRange = uint row.["effectiveRange"]
             maxRange = uint row.["maxRange"]
-        })
-
-    let rangeCalculationData =
-        makeFogentRoleplayDataList "RangeCalculationData.csv" (fun row -> {
-            name = string row.["name"]
-            numDicePerEffectiveRangeUnit = uint row.["numDicePerEffectiveRangeUnit"]
-            ftPerEffectiveRangeUnit = uint row.["ftPerEffectiveRangeUnit"]
-            roundEffectiveRangeUp = Bool row.["roundEffectiveRangeUp"]
-            maxRange = uint row.["maxRange"]
-        })
-
-    let rangeMap = createRangeMap calculatedRangeData rangeCalculationData
+         }),
+         makeFogentRoleplayDataList "RangeCalculationData.csv" (fun row -> {
+             name = string row.["name"]
+             numDicePerEffectiveRangeUnit = uint row.["numDicePerEffectiveRangeUnit"]
+             ftPerEffectiveRangeUnit = uint row.["ftPerEffectiveRangeUnit"]
+             roundEffectiveRangeUp = Bool row.["roundEffectiveRangeUp"]
+             maxRange = uint row.["maxRange"]
+         }))
+        ||> createRangeMap
 
     let rangeOptionMap string =
         match string with
@@ -99,9 +97,8 @@ module FogentRoleplayServerData =
         | _ -> resourceMap.Item string |> Some
 
     // AttributeAndCoreSkill
-    let attributeData: AttributeName Set =
-        makeFogentRoleplayDataList "AttributeData.csv" (fun row -> AttributeName row.["desc"])
-        |> Set.ofList
+    let attributeNameSet: AttributeName Set =
+        makeFogentRoleplayDataSet "AttributeData.csv" (fun row -> AttributeName row.["desc"])
 
     let coreSkillData: CoreSkill list =
         makeFogentRoleplayDataList "CoreSkillData.csv" (fun row -> {
@@ -113,15 +110,10 @@ module FogentRoleplayServerData =
             governingAttributeName = row.["governingAttribute"]
         })
 
-    let attributeMap = stringSetToTypeMap attributeData
+    let attributeNameMap = stringSetToTypeMap attributeNameSet
 
-    let mapAndStringToAttributes (attributeMap: Map<string, AttributeName>) (input) =
-        String.filter ((<>) ' ') input
-        |> (fun s -> s.Split(',', System.StringSplitOptions.RemoveEmptyEntries))
-        |> List.ofArray
-        |> List.map (fun attributeString -> attributeMap.Item attributeString)
 
-    let stringToAttributes = mapAndStringToAttributes attributeMap
+    let stringToAttributes = mapAndStringToValueSet attributeNameMap
 
     //MagicSkillData
     let magicSkillMap =
@@ -409,7 +401,7 @@ let fallenDataApi: IFogentRoleplayDataApi = {
         fun () -> async {
             return {
                 defaultCoreSkillList = FogentRoleplayServerData.coreSkillData
-                defaultAttributeSet = FogentRoleplayServerData.attributeData
+                defaultAttributeSet = FogentRoleplayServerData.attributeNameSet
             //   allItemStackList = FallenServerData.itemStackData
             //   magicSkillMap = FallenServerData.magicSkillMap
             //   magicCombatMap = FallenServerData.magicCombatMap
