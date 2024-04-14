@@ -1,12 +1,13 @@
 module Neg1To5
 
 open FogentRoleplayLib.Neg1To5
+open FogentRoleplayLib.ZeroToFive
 
 type Model = Neg1To5
 
 type Msg = ChangedNeg1To5 of int
 
-let init () = Zero
+let init () = Neg1To5.Zero
 
 let update (msg: Msg) (model: Neg1To5) : Model =
     match msg with

@@ -3,6 +3,7 @@ module VocationSkill
 open FogentRoleplayLib.VocationSkill
 open FogentRoleplayLib.Neg1To5
 open FogentRoleplayLib.DicePoolCalculation
+open FogentRoleplayLib.ZeroToFive
 
 type Msg =
     | VocationalSkillMsg of VocationalSkill.Msg
@@ -10,6 +11,7 @@ type Msg =
     | MagicSkillMsg of VocationalSkill.Msg
     | CalculateDicePools of DicePoolCalculationData
     | SetSkillLevel of Neg1To5
+    | CheckIfLevelCapExceeded of ZeroToFive
 
 let init () =
     VocationalSkill.init () |> VocationalSkill
@@ -57,6 +59,24 @@ let update msg (model: VocationSkill) : VocationSkill =
                         VocationalSkill.update (VocationalSkill.SetSkillLevel(newSkillLevel)) magicSkill.vocationalSkill
             }
             |> MagicSkill
+    | CheckIfLevelCapExceeded levelCap, _ ->
+        match model with
+        | VocationalSkill vocationalSkill ->
+            VocationalSkill.update (VocationalSkill.CheckIfLevelCapExceeded(levelCap)) vocationalSkill
+            |> VocationalSkill
+        | WeaponSkill vocationalSkill ->
+            VocationalSkill.update (VocationalSkill.CheckIfLevelCapExceeded(levelCap)) vocationalSkill
+            |> WeaponSkill
+        | MagicSkill magicSkill ->
+            {
+                magicSkill with
+                    vocationalSkill =
+                        VocationalSkill.update
+                            (VocationalSkill.CheckIfLevelCapExceeded(levelCap))
+                            magicSkill.vocationalSkill
+            }
+            |> MagicSkill
+
     | _ -> model
 
 open Feliz

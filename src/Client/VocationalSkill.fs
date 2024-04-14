@@ -6,12 +6,14 @@ open FogentRoleplayLib.StringUtils
 open FogentRoleplayLib.AttributeName
 open FogentRoleplayLib.Neg1To5
 open FogentRoleplayLib.DicePoolCalculation
+open FogentRoleplayLib.ZeroToFive
 
 type Msg =
     | SkillMsg of Skill.Msg
-    | CalculateDicePool of DicePoolCalculationData
     | ToggleGoverningAttribute of AttributeName
     | SetSkillLevel of Neg1To5
+    | CalculateDicePool of DicePoolCalculationData
+    | CheckIfLevelCapExceeded of ZeroToFive
 
 let init () = {
     skill = Skill.init ()
@@ -24,6 +26,14 @@ let update msg model =
         model with
             skill = Skill.update msg model.skill
       }
+    | ToggleGoverningAttribute newAttributeName -> {
+        model with
+            governingAttributeNames = toggleAttributeNameSet model.governingAttributeNames newAttributeName
+      }
+    | SetSkillLevel newSkillLevel -> {
+        model with
+            skill.level = newSkillLevel
+      }
     | CalculateDicePool msg -> {
         model with
             skill =
@@ -33,14 +43,15 @@ let update msg model =
                     ))
                     model.skill
       }
-    | ToggleGoverningAttribute newAttributeName -> {
-        model with
-            governingAttributeNames = toggleAttributeNameSet model.governingAttributeNames newAttributeName
-      }
-    | SetSkillLevel newSkillLevel -> {
-        model with
-            skill.level = newSkillLevel
-      }
+    | CheckIfLevelCapExceeded levelCap ->
+        if (model.skill.level |> neg1To5ToInt) > (levelCap |> zeroToFiveToUint |> int) then
+            {
+                model with
+                    skill.level = levelCap |> ZeroToFiveToNeg1To5
+            }
+        else
+            model
+
 
 open Feliz
 open Feliz.Bulma

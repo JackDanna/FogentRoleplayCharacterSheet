@@ -33,7 +33,9 @@ let update msg (model: Vocation) =
       }
     | VocationSkillListMsg msg -> {
         model with
-            vocationSkillList = VocationSkillList.update msg model.vocationSkillList
+            vocationSkillList =
+                VocationSkillList.update msg model.vocationSkillList
+                |> VocationSkillList.update (VocationSkillList.CheckIfLevelCapExceeded(model.level))
       }
     | CalculateDicePools msg -> {
         model with

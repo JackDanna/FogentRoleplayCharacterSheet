@@ -23,6 +23,7 @@ let update msg model =
       }
     | SetDicePool msg -> { model with dicePool = msg }
 
+
 open Feliz
 open Feliz.Bulma
 

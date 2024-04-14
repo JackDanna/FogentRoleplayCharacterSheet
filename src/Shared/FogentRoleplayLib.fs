@@ -130,6 +130,8 @@ module ZeroToFive =
         | Five -> 5u
 
 module Neg1To5 =
+    open ZeroToFive
+
     type Neg1To5 =
         | NegOne
         | Zero
@@ -159,6 +161,15 @@ module Neg1To5 =
         | Three -> 3
         | Four -> 4
         | Five -> 5
+
+    let ZeroToFiveToNeg1To5 zeroToFive =
+        match zeroToFive with
+        | ZeroToFive.Zero -> Zero
+        | ZeroToFive.One -> One
+        | ZeroToFive.Two -> Two
+        | ZeroToFive.Three -> Three
+        | ZeroToFive.Four -> Four
+        | ZeroToFive.Five -> Five
 
 module Neg2To5 =
     type Neg2To5 =

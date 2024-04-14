@@ -2,6 +2,7 @@ module VocationSkillList
 
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.VocationSkill
+open FogentRoleplayLib.ZeroToFive
 
 type Msg =
     | InsertVocationalSkill
@@ -10,6 +11,7 @@ type Msg =
     | Remove
     | ModifiedVocationSkillAtPosition of int * VocationSkill.Msg
     | CalculateDicePools of DicePoolCalculationData
+    | CheckIfLevelCapExceeded of ZeroToFive
 
 let init () = [ VocationSkill.init () ]
 
@@ -27,6 +29,11 @@ let update msg model =
         List.map
             (fun vocationSkill ->
                 VocationSkill.update (VocationSkill.CalculateDicePools(dicePoolCalculationData)) vocationSkill)
+            model
+    | CheckIfLevelCapExceeded levelCap ->
+        List.map
+            (fun vocationalSkill ->
+                VocationSkill.update (VocationSkill.CheckIfLevelCapExceeded(levelCap)) vocationalSkill)
             model
 
 open Feliz
