@@ -71,10 +71,10 @@ module EngageableOpponents =
         maxEO: uint option
     }
 
-    let eoCalculationListToMap eoCalculationList =
+    let eoCalculationSetToMap eoCalculationList =
         eoCalculationList
-        |> List.map (fun (eoCalculation) -> eoCalculation.name, eoCalculation)
-        |> Map.ofList
+        |> Set.map (fun (eoCalculation) -> eoCalculation.name, eoCalculation)
+        |> Map.ofSeq
 
     type CalculatedEngageableOpponents = uint
 

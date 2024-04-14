@@ -32,10 +32,13 @@ module FogentRoleplayServerData =
     let makeFogentRoleplayDataPath fileName =
         __SOURCE_DIRECTORY__ + "../../../FogentRoleplayData/" + fileName
 
-    let makeFogentRoleplayData fileName mappingFunc =
+    let makeFogentRoleplayDataList fileName mappingFunc =
         CsvFile.Load(makeFogentRoleplayDataPath fileName, hasHeaders = true).Rows
         |> Seq.map (mappingFunc)
         |> List.ofSeq
+
+    let makeFogentRoleplayDataSet fileName mappingFunc =
+        makeFogentRoleplayDataList fileName mappingFunc |> Set.ofList
 
     let Bool boolString =
         match boolString with
@@ -45,33 +48,32 @@ module FogentRoleplayServerData =
 
     // DamageType
     let damageTypeSet =
-        makeFogentRoleplayData "DamageTypeData.csv" (fun row -> (DamageType row.["name"]))
-        |> Set.ofList
+        makeFogentRoleplayDataSet "DamageTypeData.csv" (fun row -> (DamageType row.["name"]))
 
     let stringToDamageTypeSet =
         damageTypeSet |> stringSetToTypeMap |> mapAndStringToDamageTypeSet
 
     // EngageableOpponents
     let engageableOpponentsCalculationData =
-        makeFogentRoleplayData "EngageableOpponentsCalculationData.csv" (fun row -> {
+        makeFogentRoleplayDataSet "EngageableOpponentsCalculationData.csv" (fun row -> {
             name = string row.["name"]
             combatRollDivisor = uint row.["combatRollDivisor"]
             maxEO = parseMaxEngageableOpponentsString row.["maxEO"]
         })
 
     let engageableOpponentsMap =
-        parseEngaeableOpponentsString (eoCalculationListToMap engageableOpponentsCalculationData)
+        parseEngaeableOpponentsString (eoCalculationSetToMap engageableOpponentsCalculationData)
 
     // Range
     let calculatedRangeData =
-        makeFogentRoleplayData "CalculatedRangeData.csv" (fun row -> {
+        makeFogentRoleplayDataList "CalculatedRangeData.csv" (fun row -> {
             name = string row.["name"]
             effectiveRange = uint row.["effectiveRange"]
             maxRange = uint row.["maxRange"]
         })
 
     let rangeCalculationData =
-        makeFogentRoleplayData "RangeCalculationData.csv" (fun row -> {
+        makeFogentRoleplayDataList "RangeCalculationData.csv" (fun row -> {
             name = string row.["name"]
             numDicePerEffectiveRangeUnit = uint row.["numDicePerEffectiveRangeUnit"]
             ftPerEffectiveRangeUnit = uint row.["ftPerEffectiveRangeUnit"]
@@ -88,7 +90,7 @@ module FogentRoleplayServerData =
 
     // ResourceClass
     let resourceClassData =
-        makeFogentRoleplayData "ResourceClassData.csv" (fun row -> (ResourceName row.["name"]))
+        makeFogentRoleplayDataList "ResourceClassData.csv" (fun row -> (ResourceName row.["name"]))
         |> Set.ofList
 
     let resourceClassMap = stringSetToTypeMap resourceClassData
@@ -100,11 +102,11 @@ module FogentRoleplayServerData =
 
     // AttributeAndCoreSkill
     let attributeData: AttributeName Set =
-        makeFogentRoleplayData "AttributeData.csv" (fun row -> AttributeName row.["desc"])
+        makeFogentRoleplayDataList "AttributeData.csv" (fun row -> AttributeName row.["desc"])
         |> Set.ofList
 
     let coreSkillData: CoreSkill list =
-        makeFogentRoleplayData "CoreSkillData.csv" (fun row -> {
+        makeFogentRoleplayDataList "CoreSkillData.csv" (fun row -> {
             skill = {
                 name = row.["name"]
                 level = Zero
@@ -125,7 +127,7 @@ module FogentRoleplayServerData =
 
     //MagicSkillData
     let magicSkillDataSet: MagicSkillData Set =
-        makeFogentRoleplayData "MagicSkillData.csv" (fun row -> {
+        makeFogentRoleplayDataList "MagicSkillData.csv" (fun row -> {
             name = string row.["name"]
             damageTypes = stringToDamageTypeSet (string row.["damageTypes"])
             isMeleeCapable = Bool row.["meleeCapable"]
@@ -140,7 +142,7 @@ module FogentRoleplayServerData =
 
     // WeaponClass
     let weaponClassData =
-        makeFogentRoleplayData "WeaponClassData.csv" (fun row -> {
+        makeFogentRoleplayDataList "WeaponClassData.csv" (fun row -> {
             name = string row.["name"]
             oneHandedWeaponDice = parseDicePoolModOptionString row.["oneHandedWeaponDice"]
             twoHandedWeaponDice = parseDicePoolModOptionString row.["twoHandedWeaponDice"]
@@ -185,7 +187,7 @@ module FogentRoleplayServerData =
 
     // Container
     let containerSet =
-        makeFogentRoleplayData "ContainerClassData.csv" (fun row -> {
+        makeFogentRoleplayDataList "ContainerClassData.csv" (fun row -> {
             name = string row.["Name"]
             weightCapacity = float row.["Weight Capacity"]
             volumeFtCubed = float row.["Volume"]
@@ -198,7 +200,7 @@ module FogentRoleplayServerData =
 
     // WeaponResource
     let weaponResourceClassSet: WeaponResource Set =
-        makeFogentRoleplayData "WeaponResourceClassData.csv" (fun row -> {
+        makeFogentRoleplayDataList "WeaponResourceClassData.csv" (fun row -> {
             name = string row.["desc"]
             resourceName = resourceClassMap.Item row.["resourceClass"]
             dicePoolMod = parseDicePoolModString row.["resourceDice"]
@@ -217,7 +219,7 @@ module FogentRoleplayServerData =
 
     // ItemTier
     let itemTierData =
-        makeFogentRoleplayData "ItemTierData.csv" (fun row -> {
+        makeFogentRoleplayDataList "ItemTierData.csv" (fun row -> {
             name = string row.["desc"]
             level = int row.["level"]
             baseDice = parseDicePoolString row.["baseDice"]
