@@ -1,7 +1,6 @@
 module Neg1To5
 
 open FogentRoleplayLib.Neg1To5
-open FogentRoleplayLib.ZeroToFive
 
 type Model = Neg1To5
 

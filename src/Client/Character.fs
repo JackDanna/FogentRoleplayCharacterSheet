@@ -3,9 +3,6 @@ module Character
 open FogentRoleplayLib.Character
 open FogentRoleplayLib.AttributeName
 open FogentRoleplayLib.CoreSkill
-open FogentRoleplayLib.DicePoolCalculation
-open FogentRoleplayLib.DicePoolMod
-open FogentRoleplayLib.AttributeAndCoreSkills
 
 type Msg =
     | SetName of string
