@@ -196,135 +196,8 @@ module FogentRoleplayServerData =
         Set.map (fun (containerClass: Container) -> containerClass.name, containerClass) containerSet
         |> Map.ofSeq
 
-    // // DefenseClass
-    // let physicalDefenseEffectData: PhysicalDefenseEffect list =
-    //     makeFogentRoleplayData "PhysicalDefenseEffect.csv" (fun row ->
-    //         { name = string row.["desc"]
-    //           physicalDefense = float row.["physicalDefense"] })
-
-    // let physicalDefenseEffectMap =
-    //     physicalDefenseEffectData
-    //     |> List.map (fun (defenseClass: PhysicalDefenseEffect) -> defenseClass.name, defenseClass)
-    //     |> Map.ofList
-
-    // // SkillDiceModEffect
-    // let skillDiceModEffectData: SkillDiceModEffect list =
-    //     makeFogentRoleplayData "SkillDiceModEffect.csv" (fun row ->
-    //         { name = string row.["Name"]
-    //           skillToEffect = string row.["Skill"]
-    //           diceMod = parseDicePoolModString row.["Dice Mod"] })
-
-    // let skillDiceModEffectMap =
-    //     skillDiceModEffectData
-    //     |> List.map (fun (skillAdjustment: SkillDiceModEffect) -> skillAdjustment.name, skillAdjustment)
-    //     |> Map.ofList
-
-    // // AttributeStatAdjustmentEffect
-    // let attributeStatAdjustmentEffectData =
-    //     makeFogentRoleplayData "AttributeStatAdjustmentEffect.csv" (fun row ->
-    //         { name = string row.["Name"]
-    //           attribute = AttributeName row.["Attribute"]
-    //           adjustment = int row.["Adjustment"] })
-
-    // let attributeStatAdjustmentEffectMap =
-    //     attributeStatAdjustmentEffectData
-    //     |> List.map (fun (attributeStatAdjustmentEffect: AttributeStatAdjustmentEffect) ->
-    //         attributeStatAdjustmentEffect.name, attributeStatAdjustmentEffect)
-    //     |> Map.ofList
-
-    // // AttributeDeterminedDiceModEffect
-    // let attributeDeterminedDiceModEffectData =
-    //     makeFogentRoleplayData "AttributeDeterminedDiceModEffectData.csv" (fun row ->
-    //         { name = row.["name"]
-    //           attributesToEffect = stringToAttributes row.["attributesToEffect"]
-    //           dicePoolMod = parseDicePoolModString row.["dicePoolMod"] })
-
-    // let attributeDeterminedDiceModEffectMap =
-    //     attributeDeterminedDiceModEffectData
-    //     |> List.map (fun (attributeDeterminedDiceModEffect: AttributeDeterminedDiceModEffect) ->
-    //         attributeDeterminedDiceModEffect.name, attributeDeterminedDiceModEffect)
-    //     |> Map.ofList
-
-    // // WeightClass
-    // let weightClassData: WeightClass list =
-    //     makeFogentRoleplayData "WeightClassData.csv" (fun row ->
-    //         { name = row.["name"]
-    //           bottomPercent = float row.["bottomPercent"]
-    //           topPercent = float row.["topPercent"]
-    //           attributeDeterminedDiceModEffect =
-    //             attributeDeterminedDiceModEffectMap.Item row.["attributeDeterminedDiceModEffect"] })
-
-    // // MovementSpeedCalculation
-    // let movementSpeedCalculationData =
-    //     makeFogentRoleplayData "MovementSpeedCalculationData.csv" (fun row ->
-    //         { name = string row.["desc"]
-    //           baseMovementSpeed = uint row.["baseMovementSpeed"]
-    //           governingAttribute = attributeMap.Item row.["governingAttributes"]
-    //           feetPerAttributeLvl = uint row.["feetPerAttributeLvl"]
-    //           governingSkill = string row.["governingSkill"]
-    //           feetPerSkillLvl = uint row.["feetPerSkillLvl"] })
-
-    // let movementSpeedCalculationMap =
-    //     movementSpeedCalculationData
-    //     |> List.map (fun movementSpeedCalculationData -> movementSpeedCalculationData.name, movementSpeedCalculationData)
-    //     |> Map.ofList
-
-    // // CarryWeightCalculation
-    // let carryWeightCalculationData =
-    //     makeFogentRoleplayData "CarryWeightCalculationData.csv" (fun row ->
-    //         { name = string row.["name"]
-    //           baseWeight = uint row.["baseWeight"]
-    //           governingAttribute = AttributeName row.["governingAttribute"]
-    //           weightIncreasePerAttribute = uint row.["weightIncreasePerAttribute"]
-    //           governingSkill = string row.["governingSkill"]
-    //           weightIncreasePerSkill = uint row.["weightIncreasePerSkill"] })
-
-    // let carryWeightCalculationMap =
-    //     carryWeightCalculationData
-    //     |> List.map (fun carryWeightCalculation -> carryWeightCalculation.name, carryWeightCalculation)
-    //     |> Map.ofList
-
-    // // Effect
-    // let effectData: Effect list =
-    //     List.map SkillDiceModEffect skillDiceModEffectData
-    //     @ List.map AttributeStatAdjustmentEffect attributeStatAdjustmentEffectData
-    //       @ List.map PhysicalDefenseEffect physicalDefenseEffectData
-    //         @ List.map AttributeDeterminedDiceModEffect attributeDeterminedDiceModEffectData
-    //           @ List.map MovementSpeedCalculation movementSpeedCalculationData
-
-    // let effectDataMap =
-    //     effectData
-    //     |> List.map (fun (effect: Effect) -> effectToEffectName effect, effect)
-    //     |> Map.ofList
-
-    // // TextEffectForDisplay
-    // let textEffectForDisplayData: TextEffectForDisplay list =
-    //     makeFogentRoleplayData "CharacterEffectForDisplayData.csv" (fun row ->
-    //         { name = string row.["Name"]
-    //           effect = string row.["Effect"]
-    //           durationAndSource =
-    //             { duration = string row.["Duration"]
-    //               source = string row.["Source"] } })
-
-    // // EffectForDisplay
-    // let effectForDisplayData: EffectForDisplay list =
-    //     let skillDiceModEffectForDisplayList =
-    //         List.map skillDiceModEffectToSkillDiceModEffectForDisplay skillDiceModEffectData
-
-    //     let attributeDeterminedDiceModEffectForDisplayList =
-    //         List.map attributeDeterminedDiceModEffectToForDisplay attributeDeterminedDiceModEffectData
-
-    //     List.map TextEffectForDisplay textEffectForDisplayData
-    //     @ List.map SkillDiceModEffectForDisplay skillDiceModEffectForDisplayList
-    //       @ List.map AttributeDeterminedDiceModEffectForDisplay attributeDeterminedDiceModEffectForDisplayList
-
-    // let effectForDisplayMap: Map<string, EffectForDisplay> =
-    //     effectForDisplayData
-    //     |> List.map (fun (characterEffect: EffectForDisplay) -> effectForDiplayToName characterEffect, characterEffect)
-    //     |> Map.ofList
-
     // WeaponResource
-    let weaponResourceClassData: WeaponResource Set =
+    let weaponResourceClassSet: WeaponResource Set =
         makeFogentRoleplayData "WeaponResourceClassData.csv" (fun row -> {
             name = string row.["desc"]
             resourceName = resourceClassMap.Item row.["resourceClass"]
@@ -336,10 +209,10 @@ module FogentRoleplayServerData =
         })
         |> Set.ofList
 
-    let weaponResourceClassMap =
+    let weaponResourceMap =
         Set.map
             (fun (weaponResourceClass: WeaponResource) -> weaponResourceClass.name, weaponResourceClass)
-            weaponResourceClassData
+            weaponResourceClassSet
         |> Map.ofSeq
 
     // ItemTier
@@ -355,6 +228,135 @@ module FogentRoleplayServerData =
     let itemTierMap =
         Set.map (fun (itemTier: ItemTier) -> itemTier.name, itemTier) itemTierData
         |> Map.ofSeq
+
+// // DefenseClass
+// let physicalDefenseEffectData: PhysicalDefenseEffect list =
+//     makeFogentRoleplayData "PhysicalDefenseEffect.csv" (fun row ->
+//         { name = string row.["desc"]
+//           physicalDefense = float row.["physicalDefense"] })
+
+// let physicalDefenseEffectMap =
+//     physicalDefenseEffectData
+//     |> List.map (fun (defenseClass: PhysicalDefenseEffect) -> defenseClass.name, defenseClass)
+//     |> Map.ofList
+
+// // SkillDiceModEffect
+// let skillDiceModEffectData: SkillDiceModEffect list =
+//     makeFogentRoleplayData "SkillDiceModEffect.csv" (fun row ->
+//         { name = string row.["Name"]
+//           skillToEffect = string row.["Skill"]
+//           diceMod = parseDicePoolModString row.["Dice Mod"] })
+
+// let skillDiceModEffectMap =
+//     skillDiceModEffectData
+//     |> List.map (fun (skillAdjustment: SkillDiceModEffect) -> skillAdjustment.name, skillAdjustment)
+//     |> Map.ofList
+
+// // AttributeStatAdjustmentEffect
+// let attributeStatAdjustmentEffectData =
+//     makeFogentRoleplayData "AttributeStatAdjustmentEffect.csv" (fun row ->
+//         { name = string row.["Name"]
+//           attribute = AttributeName row.["Attribute"]
+//           adjustment = int row.["Adjustment"] })
+
+// let attributeStatAdjustmentEffectMap =
+//     attributeStatAdjustmentEffectData
+//     |> List.map (fun (attributeStatAdjustmentEffect: AttributeStatAdjustmentEffect) ->
+//         attributeStatAdjustmentEffect.name, attributeStatAdjustmentEffect)
+//     |> Map.ofList
+
+// // AttributeDeterminedDiceModEffect
+// let attributeDeterminedDiceModEffectData =
+//     makeFogentRoleplayData "AttributeDeterminedDiceModEffectData.csv" (fun row ->
+//         { name = row.["name"]
+//           attributesToEffect = stringToAttributes row.["attributesToEffect"]
+//           dicePoolMod = parseDicePoolModString row.["dicePoolMod"] })
+
+// let attributeDeterminedDiceModEffectMap =
+//     attributeDeterminedDiceModEffectData
+//     |> List.map (fun (attributeDeterminedDiceModEffect: AttributeDeterminedDiceModEffect) ->
+//         attributeDeterminedDiceModEffect.name, attributeDeterminedDiceModEffect)
+//     |> Map.ofList
+
+// // WeightClass
+// let weightClassData: WeightClass list =
+//     makeFogentRoleplayData "WeightClassData.csv" (fun row ->
+//         { name = row.["name"]
+//           bottomPercent = float row.["bottomPercent"]
+//           topPercent = float row.["topPercent"]
+//           attributeDeterminedDiceModEffect =
+//             attributeDeterminedDiceModEffectMap.Item row.["attributeDeterminedDiceModEffect"] })
+
+// // MovementSpeedCalculation
+// let movementSpeedCalculationData =
+//     makeFogentRoleplayData "MovementSpeedCalculationData.csv" (fun row ->
+//         { name = string row.["desc"]
+//           baseMovementSpeed = uint row.["baseMovementSpeed"]
+//           governingAttribute = attributeMap.Item row.["governingAttributes"]
+//           feetPerAttributeLvl = uint row.["feetPerAttributeLvl"]
+//           governingSkill = string row.["governingSkill"]
+//           feetPerSkillLvl = uint row.["feetPerSkillLvl"] })
+
+// let movementSpeedCalculationMap =
+//     movementSpeedCalculationData
+//     |> List.map (fun movementSpeedCalculationData -> movementSpeedCalculationData.name, movementSpeedCalculationData)
+//     |> Map.ofList
+
+// // CarryWeightCalculation
+// let carryWeightCalculationData =
+//     makeFogentRoleplayData "CarryWeightCalculationData.csv" (fun row ->
+//         { name = string row.["name"]
+//           baseWeight = uint row.["baseWeight"]
+//           governingAttribute = AttributeName row.["governingAttribute"]
+//           weightIncreasePerAttribute = uint row.["weightIncreasePerAttribute"]
+//           governingSkill = string row.["governingSkill"]
+//           weightIncreasePerSkill = uint row.["weightIncreasePerSkill"] })
+
+// let carryWeightCalculationMap =
+//     carryWeightCalculationData
+//     |> List.map (fun carryWeightCalculation -> carryWeightCalculation.name, carryWeightCalculation)
+//     |> Map.ofList
+
+// // Effect
+// let effectData: Effect list =
+//     List.map SkillDiceModEffect skillDiceModEffectData
+//     @ List.map AttributeStatAdjustmentEffect attributeStatAdjustmentEffectData
+//       @ List.map PhysicalDefenseEffect physicalDefenseEffectData
+//         @ List.map AttributeDeterminedDiceModEffect attributeDeterminedDiceModEffectData
+//           @ List.map MovementSpeedCalculation movementSpeedCalculationData
+
+// let effectDataMap =
+//     effectData
+//     |> List.map (fun (effect: Effect) -> effectToEffectName effect, effect)
+//     |> Map.ofList
+
+// // TextEffectForDisplay
+// let textEffectForDisplayData: TextEffectForDisplay list =
+//     makeFogentRoleplayData "CharacterEffectForDisplayData.csv" (fun row ->
+//         { name = string row.["Name"]
+//           effect = string row.["Effect"]
+//           durationAndSource =
+//             { duration = string row.["Duration"]
+//               source = string row.["Source"] } })
+
+// // EffectForDisplay
+// let effectForDisplayData: EffectForDisplay list =
+//     let skillDiceModEffectForDisplayList =
+//         List.map skillDiceModEffectToSkillDiceModEffectForDisplay skillDiceModEffectData
+
+//     let attributeDeterminedDiceModEffectForDisplayList =
+//         List.map attributeDeterminedDiceModEffectToForDisplay attributeDeterminedDiceModEffectData
+
+//     List.map TextEffectForDisplay textEffectForDisplayData
+//     @ List.map SkillDiceModEffectForDisplay skillDiceModEffectForDisplayList
+//       @ List.map AttributeDeterminedDiceModEffectForDisplay attributeDeterminedDiceModEffectForDisplayList
+
+// let effectForDisplayMap: Map<string, EffectForDisplay> =
+//     effectForDisplayData
+//     |> List.map (fun (characterEffect: EffectForDisplay) -> effectForDiplayToName characterEffect, characterEffect)
+//     |> Map.ofList
+
+
 
 // // Item
 // let stringToItemClassList
