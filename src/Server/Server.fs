@@ -12,9 +12,9 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.DamageType
     open FogentRoleplayLib.EngageableOpponents
     open FogentRoleplayLib.Range
-    open FogentRoleplayLib.ResourceClass
+    open FogentRoleplayLib.ResourceName
     open FogentRoleplayLib.MagicSkillData
-    open FogentRoleplayLib.WeaponClass
+    open FogentRoleplayLib.Weapon
     open FogentRoleplayLib.DicePoolMod
     open FogentRoleplayLib.AreaOfEffect
 
@@ -42,12 +42,12 @@ module FogentRoleplayServerData =
         | _ -> failwith ("Error: returns " + boolString)
 
     // DamageType
-    let damageTypeData =
+    let damageTypeSet =
         makeFogentRoleplayData "DamageTypeData.csv" (fun row -> (DamageType row.["name"]))
         |> Set.ofList
 
-    let stringToDamageTypeList =
-        damageTypeData |> stringSetToTypeMap |> stringAndMapToDamageTypeList
+    let stringToDamageTypeSet =
+        damageTypeSet |> stringSetToTypeMap |> mapAndStringToDamageTypeSet
 
     // EngageableOpponents
     let engageableOpponentsCalculationData =
@@ -86,7 +86,7 @@ module FogentRoleplayServerData =
 
     // ResourceClass
     let resourceClassData =
-        makeFogentRoleplayData "ResourceClassData.csv" (fun row -> (ResourceClass row.["name"]))
+        makeFogentRoleplayData "ResourceClassData.csv" (fun row -> (ResourceName row.["name"]))
         |> Set.ofList
 
     let resourceClassMap = stringSetToTypeMap resourceClassData
@@ -122,28 +122,29 @@ module FogentRoleplayServerData =
     let stringToAttributes = mapAndStringToAttributes attributeMap
 
     //MagicSkillData
-    let magicSkillData: MagicSkillData list =
+    let magicSkillDataSet: MagicSkillData Set =
         makeFogentRoleplayData "MagicSkillData.csv" (fun row -> {
             name = string row.["name"]
-            damageTypes = stringToDamageTypeList (string row.["damageTypes"])
+            damageTypes = stringToDamageTypeSet (string row.["damageTypes"])
             isMeleeCapable = Bool row.["meleeCapable"]
             isRangeCapable = Bool row.["rangeCapable"]
             magicResource = string row.["magicResourceClass"]
         })
+        |> Set.ofList
 
     let magicSkillMap =
-        List.map (fun (magicSkill: MagicSkillData) -> magicSkill.name, magicSkill) magicSkillData
-        |> Map.ofList
+        Set.map (fun (magicSkill: MagicSkillData) -> magicSkill.name, magicSkill) magicSkillDataSet
+        |> Map.ofSeq
 
     // WeaponClass
     let weaponClassData =
         makeFogentRoleplayData "WeaponClassData.csv" (fun row -> {
             name = string row.["name"]
             oneHandedWeaponDice = parseDicePoolModOptionString row.["oneHandedWeaponDice"]
-            twoHandedWeaponDice = parseDicePoolModString row.["twoHandedWeaponDice"]
+            twoHandedWeaponDice = parseDicePoolModOptionString row.["twoHandedWeaponDice"]
             penetration = uint row.["penetration"]
             range = rangeMap.Item row.["range"]
-            damageTypes = stringToDamageTypeList row.["damageTypes"]
+            damageTypes = stringToDamageTypeSet row.["damageTypes"]
             engageableOpponents = engageableOpponentsMap row.["engageableOpponents"]
             dualWieldableBonus = parseDicePoolModOptionString row.["dualWieldableBonus"]
             areaOfEffect = AreaOfEffectOptionMap.Item row.["areaOfEffect"]
@@ -151,45 +152,47 @@ module FogentRoleplayServerData =
         })
 
     let weaponClassMap =
-        List.map (fun (weaponClass: WeaponClass) -> weaponClass.name, weaponClass) weaponClassData
+        List.map (fun (weaponClass: Weapon) -> weaponClass.name, weaponClass) weaponClassData
         |> Map.ofList
 
-// // ConduitClass
-// let conduitClassData =
-//     makeFogentRoleplayData "ConduitClassData.csv" (fun row ->
+    // // ConduitClass
+    // let conduitClassData =
+    //     makeFogentRoleplayData "ConduitClassData.csv" (fun row ->
 
-//         { name = string row.["desc"]
-//           oneHandedDice = parseDicePoolModOptionString row.["oneHandedDice"]
-//           twoHandedDice = parseDicePoolModString row.["twoHandedDice"]
-//           penetration = uint row.["penetration"]
-//           rangeAdjustment = int row.["rangeAdjustment"]
-//           damageTypes = stringToDamageTypeList row.["damageTypes"]
-//           engageableOpponents =
-//             match row.["engageableOpponents"] with
-//             | "None" -> None
-//             | something -> Some(engageableOpponentsMap something)
-//           dualWieldableBonus = parseDicePoolModOptionString row.["dualWieldableBonus"]
-//           areaOfEffect = AreaOfEffectOptionMap.Item row.["areaOfEffect"]
-//           resourceClass = resourceClassOptionMap row.["resourceClass"]
-//           effectedMagicSkills =
-//             row.["effectedMagicSkills"].Split ", "
-//             |> List.ofArray
-//             |> List.map (fun magicSkillStr -> magicSkillMap.Item magicSkillStr) })
+    //         { name = string row.["desc"]
+    //           oneHandedDice = parseDicePoolModOptionString row.["oneHandedDice"]
+    //           twoHandedDice = parseDicePoolModString row.["twoHandedDice"]
+    //           penetration = uint row.["penetration"]
+    //           rangeAdjustment = int row.["rangeAdjustment"]
+    //           damageTypes = stringToDamageTypeList row.["damageTypes"]
+    //           engageableOpponents =
+    //             match row.["engageableOpponents"] with
+    //             | "None" -> None
+    //             | something -> Some(engageableOpponentsMap something)
+    //           dualWieldableBonus = parseDicePoolModOptionString row.["dualWieldableBonus"]
+    //           areaOfEffect = AreaOfEffectOptionMap.Item row.["areaOfEffect"]
+    //           resourceClass = resourceClassOptionMap row.["resourceClass"]
+    //           effectedMagicSkills =
+    //             row.["effectedMagicSkills"].Split ", "
+    //             |> List.ofArray
+    //             |> List.map (fun magicSkillStr -> magicSkillMap.Item magicSkillStr) })
 
-// let conduitClassMap =
-//     List.map (fun (conduitClass: ConduitClass) -> conduitClass.name, conduitClass) conduitClassData
-//     |> Map.ofList
+    // let conduitClassMap =
+    //     List.map (fun (conduitClass: ConduitClass) -> conduitClass.name, conduitClass) conduitClassData
+    //     |> Map.ofList
 
-// ContainerClass
-let containerClassData =
-    makeFogentRoleplayData "ContainerClassData.csv" (fun row -> {
-        name = string row.["Name"]
-        weightCapacity = float row.["Weight Capacity"]
-    })
+    // Container
+    let containerSet =
+        makeFogentRoleplayData "ContainerClassData.csv" (fun row -> {
+            name = string row.["Name"]
+            weightCapacity = float row.["Weight Capacity"]
+            volumeFtCubed = float row.["Volume"]
+        })
+        |> Set.ofList
 
-let containerClassMap =
-    List.map (fun (containerClass: ContainerClass) -> containerClass.name, containerClass) containerClassData
-    |> Map.ofList
+    let containerClassMap =
+        Set.map (fun (containerClass: Container) -> containerClass.name, containerClass) containerSet
+        |> Map.ofSeq
 
 // // DefenseClass
 // let physicalDefenseEffectData: PhysicalDefenseEffect list =

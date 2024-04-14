@@ -52,13 +52,13 @@ module DamageType =
 
     type DamageType = string
 
-    let stringAndMapToDamageTypeList (damageTypeMap: Map<string, DamageType>) (damageTypesString: string) =
+    let mapAndStringToDamageTypeSet (damageTypeMap: Map<string, DamageType>) (damageTypesString: string) =
         if damageTypesString.Length = 0 then
-            []
+            Set.empty
         else
             damageTypesString.Split ", "
-            |> List.ofArray
-            |> List.map (fun (damageTypeString) -> damageTypeMap.Item damageTypeString)
+            |> Set.ofArray
+            |> Set.map (fun (damageTypeString) -> damageTypeMap.Item damageTypeString)
 
 module EngageableOpponents =
 
@@ -771,7 +771,7 @@ module MagicSkillData =
 
     type MagicSkillData = {
         name: string
-        damageTypes: DamageType list
+        damageTypes: DamageType Set
         isMeleeCapable: bool
         isRangeCapable: bool
         magicResource: MagicResource
@@ -784,7 +784,7 @@ module MagicSkill =
 
     type MagicSkill = {
         vocationalSkill: VocationalSkill
-        damageTypes: DamageType list
+        damageTypeSet: DamageType Set
         isMeleeCapable: bool
         isRangeCapable: bool
         magicResource: MagicResource
