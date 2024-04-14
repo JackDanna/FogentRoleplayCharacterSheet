@@ -597,8 +597,81 @@ module CalculatedAOE =
 
 // Item Building
 
-module ResourceClass =
-    type ResourceClass = string
+module ResourceName =
+    type ResourceName = string
+
+module ConduitClass =
+
+    type ConduitClass = { magicSkillEffected: string }
+
+module WeaponResource =
+
+    open DicePoolMod
+    open Range
+    open DamageType
+    open AreaOfEffect
+    open ResourceName
+    open Penetration
+
+    type WeaponResource = {
+        name: string
+        resourceName: ResourceName
+        dicePoolMod: DicePoolMod
+        penetration: Penetration
+        rangeOption: Range option
+        damageTypeSet: DamageType Set
+        areaOfEffectOption: AreaOfEffect option
+    }
+
+    let weaponResourceClassOptionToWeaponResourceClass (resource: WeaponResource option) =
+        match resource with
+        | Some resource ->
+            (" (" + resource.name + ")",
+             resource.dicePoolMod,
+             resource.penetration,
+             resource.rangeOption,
+             resource.damageTypeSet,
+             resource.areaOfEffectOption)
+        | None -> ("", createD6DicePoolMod (0u), 0u, None, Set.empty, None)
+
+module Weapon =
+    open DicePoolMod
+    open Range
+    open DamageType
+    open EngageableOpponents
+    open AreaOfEffect
+    open Penetration
+    open ResourceName
+
+    type Weapon = {
+        name: string
+        oneHandedWeaponDice: DicePoolMod option
+        twoHandedWeaponDice: DicePoolMod option
+        penetration: Penetration
+        range: Range
+        damageTypes: DamageType Set
+        engageableOpponents: EngageableOpponents
+        dualWieldableBonus: DicePoolMod option
+        areaOfEffect: AreaOfEffect option
+        resourceClass: ResourceName option
+    }
+
+module Container =
+    type Container = {
+        name: string
+        weightCapacity: float
+        volumeFtCubed: float
+    }
+
+module ItemTier =
+    open DicePool
+
+    type ItemTier = {
+        name: string
+        level: int
+        baseDice: DicePool
+        durabilityMax: uint
+    }
 
 // Character Building Blocks
 
@@ -779,28 +852,6 @@ module Vocation =
     }
 
 // ItemStat
-
-module WeaponClass =
-    open DicePoolMod
-    open Range
-    open DamageType
-    open EngageableOpponents
-    open AreaOfEffect
-    open Penetration
-    open ResourceClass
-
-    type WeaponClass = {
-        name: string
-        oneHandedWeaponDice: DicePoolMod option
-        twoHandedWeaponDice: DicePoolMod
-        penetration: Penetration
-        range: Range
-        damageTypes: DamageType list
-        engageableOpponents: EngageableOpponents
-        dualWieldableBonus: DicePoolMod option
-        areaOfEffect: AreaOfEffect option
-        resourceClass: ResourceClass option
-    }
 
 module DicePoolCalculation =
     open DicePool

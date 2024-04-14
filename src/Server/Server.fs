@@ -25,6 +25,8 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.Skill
     open FogentRoleplayLib.CoreSkill
 
+    open FogentRoleplayLib.Container
+
     let makeFogentRoleplayDataPath fileName =
         __SOURCE_DIRECTORY__ + "../../../FogentRoleplayData/" + fileName
 
@@ -178,15 +180,16 @@ module FogentRoleplayServerData =
 //     List.map (fun (conduitClass: ConduitClass) -> conduitClass.name, conduitClass) conduitClassData
 //     |> Map.ofList
 
-// // ContainerClass
-// let containerClassData =
-//     makeFogentRoleplayData "ContainerClassData.csv" (fun row ->
-//         { name = string row.["Name"]
-//           weightCapacity = float row.["Weight Capacity"] })
+// ContainerClass
+let containerClassData =
+    makeFogentRoleplayData "ContainerClassData.csv" (fun row -> {
+        name = string row.["Name"]
+        weightCapacity = float row.["Weight Capacity"]
+    })
 
-// let containerClassMap =
-//     List.map (fun (containerClass: ContainerClass) -> containerClass.name, containerClass) containerClassData
-//     |> Map.ofList
+let containerClassMap =
+    List.map (fun (containerClass: ContainerClass) -> containerClass.name, containerClass) containerClassData
+    |> Map.ofList
 
 // // DefenseClass
 // let physicalDefenseEffectData: PhysicalDefenseEffect list =
