@@ -31,12 +31,18 @@ let update msg (model: Vocation) =
         model with
             governingAttributeNames = toggleAttributeNameSet model.governingAttributeNames newAttributeName
       }
-    | VocationSkillListMsg msg -> {
-        model with
-            vocationSkillList =
-                VocationSkillList.update msg model.vocationSkillList
-                |> VocationSkillList.update (VocationSkillList.CheckIfLevelCapExceeded(model.level))
-      }
+    | VocationSkillListMsg msg ->
+        let newVocationSkillList = VocationSkillList.update msg model.vocationSkillList
+
+        {
+            model with
+                vocationSkillList =
+                    match msg with
+                    | VocationSkillList.ModifiedVocationSkillAtPosition(position, _) ->
+                        newVocationSkillList
+                        |> VocationSkillList.update (VocationSkillList.CheckIfLevelCapExceeded(position, model.level))
+                    | _ -> newVocationSkillList
+        }
     | CalculateDicePools msg -> {
         model with
             dicePool = calculateVocationDicePool msg model.level model.governingAttributeNames
