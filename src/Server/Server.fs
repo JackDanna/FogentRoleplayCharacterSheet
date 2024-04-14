@@ -89,16 +89,14 @@ module FogentRoleplayServerData =
         | _ -> rangeMap.Item string |> Some
 
     // ResourceClass
-    let resourceClassData =
-        makeFogentRoleplayDataList "ResourceClassData.csv" (fun row -> (ResourceName row.["name"]))
-        |> Set.ofList
+    let resourceMap =
+        makeFogentRoleplayDataSet "ResourceClassData.csv" (fun row -> (ResourceName row.["name"]))
+        |> stringSetToTypeMap
 
-    let resourceClassMap = stringSetToTypeMap resourceClassData
-
-    let resourceClassOptionMap string =
+    let resourceOptionMap string =
         match string with
         | "None" -> None
-        | _ -> Some <| resourceClassMap.Item string
+        | _ -> resourceMap.Item string |> Some
 
     // AttributeAndCoreSkill
     let attributeData: AttributeName Set =
@@ -126,23 +124,20 @@ module FogentRoleplayServerData =
     let stringToAttributes = mapAndStringToAttributes attributeMap
 
     //MagicSkillData
-    let magicSkillDataSet: MagicSkillData Set =
-        makeFogentRoleplayDataList "MagicSkillData.csv" (fun row -> {
+    let magicSkillMap =
+        makeFogentRoleplayDataSet "MagicSkillData.csv" (fun row -> {
             name = string row.["name"]
             damageTypes = stringToDamageTypeSet (string row.["damageTypes"])
             isMeleeCapable = Bool row.["meleeCapable"]
             isRangeCapable = Bool row.["rangeCapable"]
             magicResource = string row.["magicResourceClass"]
         })
-        |> Set.ofList
-
-    let magicSkillMap =
-        Set.map (fun (magicSkill: MagicSkillData) -> magicSkill.name, magicSkill) magicSkillDataSet
+        |> Set.map (fun (magicSkill: MagicSkillData) -> magicSkill.name, magicSkill)
         |> Map.ofSeq
 
     // WeaponClass
-    let weaponClassData =
-        makeFogentRoleplayDataList "WeaponClassData.csv" (fun row -> {
+    let weaponMap =
+        makeFogentRoleplayDataSet "WeaponClassData.csv" (fun row -> {
             name = string row.["name"]
             oneHandedWeaponDice = parseDicePoolModOptionString row.["oneHandedWeaponDice"]
             twoHandedWeaponDice = parseDicePoolModOptionString row.["twoHandedWeaponDice"]
@@ -152,12 +147,10 @@ module FogentRoleplayServerData =
             engageableOpponents = engageableOpponentsMap row.["engageableOpponents"]
             dualWieldableBonus = parseDicePoolModOptionString row.["dualWieldableBonus"]
             areaOfEffect = AreaOfEffectOptionMap.Item row.["areaOfEffect"]
-            resourceClass = resourceClassOptionMap row.["resourceClass"]
+            resourceClass = resourceOptionMap row.["resourceClass"]
         })
-
-    let weaponClassMap =
-        List.map (fun (weaponClass: Weapon) -> weaponClass.name, weaponClass) weaponClassData
-        |> Map.ofList
+        |> Set.map (fun (weaponClass: Weapon) -> weaponClass.name, weaponClass)
+        |> Map.ofSeq
 
     // // ConduitClass
     // let conduitClassData =
@@ -202,7 +195,7 @@ module FogentRoleplayServerData =
     let weaponResourceClassSet: WeaponResource Set =
         makeFogentRoleplayDataList "WeaponResourceClassData.csv" (fun row -> {
             name = string row.["desc"]
-            resourceName = resourceClassMap.Item row.["resourceClass"]
+            resourceName = resourceMap.Item row.["resourceClass"]
             dicePoolMod = parseDicePoolModString row.["resourceDice"]
             penetration = uint row.["penetration"]
             rangeOption = rangeOptionMap row.["range"]
