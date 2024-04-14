@@ -71,8 +71,8 @@ module EngageableOpponents =
         maxEO: uint option
     }
 
-    let eoCalculationSetToMap eoCalculationList =
-        eoCalculationList
+    let eoCalculationSetToMap eoCalculationSet =
+        eoCalculationSet
         |> Set.map (fun (eoCalculation) -> eoCalculation.name, eoCalculation)
         |> Map.ofSeq
 
