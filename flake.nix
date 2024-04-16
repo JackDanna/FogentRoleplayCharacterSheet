@@ -34,6 +34,7 @@
       buildInputs = with pkgs; [
         dotnet-sdk_8
         nodejs_20
+        postgresql_16
 
         gnome.gnome-terminal
         bashInteractive

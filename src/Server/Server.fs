@@ -183,9 +183,8 @@ module FogentRoleplayServerData =
         Set.map (fun (containerClass: Container) -> containerClass.name, containerClass) containerSet
         |> Map.ofSeq
 
-    // WeaponResource
-    let weaponResourceClassSet: WeaponResource Set =
-        makeFogentRoleplayDataList "WeaponResourceClassData.csv" (fun row -> {
+    let temp =
+        makeFogentRoleplayDataSet "WeaponResourceClassData.csv" (fun row -> {
             name = string row.["desc"]
             resourceName = resourceMap.Item row.["resourceClass"]
             dicePoolMod = parseDicePoolModString row.["resourceDice"]
@@ -194,26 +193,21 @@ module FogentRoleplayServerData =
             damageTypeSet = stringToDamageTypeSet row.["damageTypes"]
             areaOfEffectOption = AreaOfEffectOptionMap.Item row.["areaOfEffect"]
         })
-        |> Set.ofList
-
+    // WeaponResource
     let weaponResourceMap =
-        Set.map
-            (fun (weaponResourceClass: WeaponResource) -> weaponResourceClass.name, weaponResourceClass)
-            weaponResourceClassSet
+        temp
+        |> Set.map (fun (weaponResource: WeaponResource) -> weaponResource.name, weaponResource)
         |> Map.ofSeq
 
     // ItemTier
-    let itemTierData =
-        makeFogentRoleplayDataList "ItemTierData.csv" (fun row -> {
+    let itemTierMap =
+        makeFogentRoleplayDataSet "ItemTierData.csv" (fun row -> {
             name = string row.["desc"]
             level = int row.["level"]
             baseDice = parseDicePoolString row.["baseDice"]
             durabilityMax = uint row.["durabilityMax"]
         })
-        |> Set.ofList
-
-    let itemTierMap =
-        Set.map (fun (itemTier: ItemTier) -> itemTier.name, itemTier) itemTierData
+        |> Set.map (fun (itemTier: ItemTier) -> itemTier.name, itemTier)
         |> Map.ofSeq
 
 // // DefenseClass

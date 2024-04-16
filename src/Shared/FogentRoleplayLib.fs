@@ -398,8 +398,17 @@ module DicePoolMod =
         | "None" -> None
         | modString -> Some <| parseDicePoolModString modString
 
+module Feet =
+    type Feet = private Feet of float
+
+    // function used to extract data since type is private
+    // let value (String50 str) = str
+    let create feet =
+        if feet >= 0 then Some(Feet feet) else None
+
 module BattleMapUOM =
-    let feetPerBattleMapUOM = 5u
+    open Feet
+    let feetPerBattleMapUOM: Feet = 5.0
 
 module Range =
 
@@ -489,6 +498,15 @@ module Range =
             | "Reach" -> true
             | _ -> false
         | _ -> false
+
+module AreaOfEffectCalculation =
+    type SphereCalculation = {
+        name: string
+        initRadius: uint
+        radiusPerDice: uint
+    }
+
+    type AreaOfEffectCalculation = | SphereCaculation
 
 module AreaOfEffect =
     type AreaOfEffect =
