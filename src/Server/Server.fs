@@ -31,6 +31,8 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.WeaponResource
     open FogentRoleplayLib.ItemTier
 
+    open FogentRoleplayLib.PhysicalDefenseEffect
+
     let makeFogentRoleplayDataPath fileName =
         __SOURCE_DIRECTORY__ + "../../../FogentRoleplayData/" + fileName
 
@@ -128,21 +130,21 @@ module FogentRoleplayServerData =
         |> Map.ofSeq
 
     // WeaponClass
-    let weaponMap =
-        makeFogentRoleplayDataSet "WeaponClassData.csv" (fun row -> {
-            name = string row.["name"]
-            oneHandedWeaponDice = parseDicePoolModOptionString row.["oneHandedWeaponDice"]
-            twoHandedWeaponDice = parseDicePoolModOptionString row.["twoHandedWeaponDice"]
-            penetration = uint row.["penetration"]
-            range = rangeMap.Item row.["range"]
-            damageTypes = stringToDamageTypeSet row.["damageTypes"]
-            engageableOpponents = engageableOpponentsMap row.["engageableOpponents"]
-            dualWieldableBonus = parseDicePoolModOptionString row.["dualWieldableBonus"]
-            areaOfEffect = AreaOfEffectOptionMap.Item row.["areaOfEffect"]
-            resourceClass = resourceOptionMap row.["resourceClass"]
-        })
-        |> Set.map (fun (weaponClass: Weapon) -> weaponClass.name, weaponClass)
-        |> Map.ofSeq
+    // let weaponMap =
+    //     makeFogentRoleplayDataSet "WeaponClassData.csv" (fun row -> {
+    //         name = string row.["name"]
+    //         oneHandedWeaponDice = parseDicePoolModOptionString row.["oneHandedWeaponDice"]
+    //         twoHandedWeaponDice = parseDicePoolModOptionString row.["twoHandedWeaponDice"]
+    //         penetration = uint row.["penetration"]
+    //         range = rangeMap.Item row.["range"]
+    //         damageTypes = stringToDamageTypeSet row.["damageTypes"]
+    //         engageableOpponents = engageableOpponentsMap row.["engageableOpponents"]
+    //         dualWieldableBonus = parseDicePoolModOptionString row.["dualWieldableBonus"]
+    //         areaOfEffect = AreaOfEffectOptionMap.Item row.["areaOfEffect"]
+    //         resourceClass = resourceOptionMap row.["resourceClass"]
+    //     })
+    //     |> Set.map (fun (weaponClass: Weapon) -> weaponClass.name, weaponClass)
+    //     |> Map.ofSeq
 
     // // ConduitClass
     // let conduitClassData =
@@ -182,22 +184,19 @@ module FogentRoleplayServerData =
     let containerClassMap =
         Set.map (fun (containerClass: ContainerClass) -> containerClass.name, containerClass) containerSet
         |> Map.ofSeq
-
-    let temp =
-        makeFogentRoleplayDataSet "WeaponResourceClassData.csv" (fun row -> {
-            name = string row.["desc"]
-            resourceName = resourceMap.Item row.["resourceClass"]
-            dicePoolMod = parseDicePoolModString row.["resourceDice"]
-            penetration = uint row.["penetration"]
-            rangeOption = rangeOptionMap row.["range"]
-            damageTypeSet = stringToDamageTypeSet row.["damageTypes"]
-            areaOfEffectOption = AreaOfEffectOptionMap.Item row.["areaOfEffect"]
-        })
-    // WeaponResource
-    let weaponResourceMap =
-        temp
-        |> Set.map (fun (weaponResource: WeaponResource) -> weaponResource.name, weaponResource)
-        |> Map.ofSeq
+    // //WeaponResourceu
+    // let weaponResourceMap =
+    //     makeFogentRoleplayDataSet "WeaponResourceClassData.csv" (fun row -> {
+    //         name = string row.["desc"]
+    //         resourceName = resourceMap.Item row.["resourceClass"]
+    //         dicePoolMod = parseDicePoolModString row.["resourceDice"]
+    //         penetration = uint row.["penetration"]
+    //         rangeOption = rangeOptionMap row.["range"]
+    //         damageTypeSet = stringToDamageTypeSet row.["damageTypes"]
+    //         areaOfEffectOption = AreaOfEffectOptionMap.Item row.["areaOfEffect"]
+    //     })
+    //     |> Set.map (fun (weaponResource: WeaponResource) -> weaponResource.name, weaponResource)
+    //     |> Map.ofSeq
 
     // ItemTier
     let itemTierMap =
@@ -210,16 +209,15 @@ module FogentRoleplayServerData =
         |> Set.map (fun (itemTier: ItemTier) -> itemTier.name, itemTier)
         |> Map.ofSeq
 
-// // DefenseClass
-// let physicalDefenseEffectData: PhysicalDefenseEffect list =
-//     makeFogentRoleplayData "PhysicalDefenseEffect.csv" (fun row ->
-//         { name = string row.["desc"]
-//           physicalDefense = float row.["physicalDefense"] })
+    // DefenseClass
 
-// let physicalDefenseEffectMap =
-//     physicalDefenseEffectData
-//     |> List.map (fun (defenseClass: PhysicalDefenseEffect) -> defenseClass.name, defenseClass)
-//     |> Map.ofList
+    let physicalDefenseEffectMap =
+        makeFogentRoleplayDataSet "PhysicalDefenseEffect.csv" (fun row -> {
+            name = string row.["name"]
+            physicalDefense = float row.["physicalDefense"]
+        })
+        |> Set.map (fun (defenseClass: PhysicalDefenseEffect) -> defenseClass.name, defenseClass)
+        |> Map.ofSeq
 
 // // SkillDiceModEffect
 // let skillDiceModEffectData: SkillDiceModEffect list =

@@ -500,73 +500,92 @@ module Range =
         | _ -> false
 
 module AreaOfEffectCalculation =
+
     type SphereCalculation = {
-        name: string
         initRadius: uint
         radiusPerDice: uint
     }
 
-    type AreaOfEffectCalculation = | SphereCaculation
-
-module AreaOfEffect =
-    type AreaOfEffect =
-        | Cone
-        | Sphere
-
-    let AreaOfEffectOptionMap =
-        Map [ ("Cone", Some Cone); ("Sphere", Some Sphere); ("None", None) ]
-
-module CalculatedAOE =
-    open System
-    open AreaOfEffect
-    open BattleMapUOM
-
-    type CalculatedCone = {
-        area: float
-        distance: uint
-        angle: float
+    type ConeCalculation = {
+        initTrigangleBaseAndHeight: float
+        baseAndHeightPerDice: float
     }
 
-    type CalculatedSphere = { area: float; radius: float }
+    type NamedSphereCalculation = {
+        name: string
+        sphereCalculation: SphereCalculation
+    }
 
-    type CalculatedAOE =
-        | ConeToCalculatedCone of CalculatedCone
-        | SphereToCalculatedSphere of CalculatedSphere
+    type NamedConeCalculation = {
+        name: string
+        coneCalculation: ConeCalculation
+    }
 
-    let calculatedConeToString decimalPlaces (calculatedCone: CalculatedCone) =
-        let decimalLimitedArea =
-            calculatedCone.area.ToString("F" + decimalPlaces.ToString())
+    type NamedAreaOfEffectCalculation =
+        | NamedSphereCaculation of NamedSphereCalculation
+        | NamedConeCalculation of NamedConeCalculation
 
-        let decimalLimitedAngle =
-            calculatedCone.angle.ToString("F" + decimalPlaces.ToString())
+module CalculatedAreaOfEffect =
+    open System
+    open BattleMapUOM
 
-        sprintf
-            "area: %s ft^2, distance: %u ft, angle: %s θ"
-            decimalLimitedArea
-            calculatedCone.distance
-            decimalLimitedAngle
+    type CalculatedCone = { baseAndHeight: uint; angle: float }
 
-    let calculatedSphereToString decimalPlaces calculatedSphere =
-        let decimalLimitedArea =
-            calculatedSphere.area.ToString("F" + decimalPlaces.ToString())
+    type CalculatedSphere = { radius: float }
 
-        let decimalLimitedRadius =
-            calculatedSphere.radius.ToString("F" + decimalPlaces.ToString())
+    type NamedCalculatedCone = {
+        name: string
+        calculatedCone: CalculatedCone
+    }
 
-        sprintf "area: %s ft^2, radius: %s ft" decimalLimitedArea decimalLimitedRadius
+    type NamedCalculatedSphere = {
+        name: string
+        calculatedSphere: CalculatedSphere
+    }
 
-    let calculatedAOEToString calculatedAOE =
-        let decimalPlaces = 1
+    type NamedCalculatedAOE =
+        | NamedConeToCalculatedCone of NamedCalculatedCone
+        | NamedSphereToCalculatedSphere of NamedCalculatedSphere
 
-        match calculatedAOE with
-        | ConeToCalculatedCone calculatedCone -> calculatedConeToString decimalPlaces calculatedCone
-        | SphereToCalculatedSphere sphereShape -> calculatedSphereToString decimalPlaces sphereShape
+// let calculatedConeToString decimalPlaces (calculatedCone: CalculatedCone) =
+//     let decimalLimitedArea =
+//         calculatedCone.area.ToString("F" + decimalPlaces.ToString())
+
+//     let decimalLimitedAngle =
+//         calculatedCone.angle.ToString("F" + decimalPlaces.ToString())
+
+//     sprintf
+//         "area: %s ft^2, distance: %u ft, angle: %s θ"
+//         decimalLimitedArea
+//         calculatedCone.baseAndHeight
+//         decimalLimitedAngle
+
+// let calculatedSphereToString decimalPlaces calculatedSphere =
+//     let decimalLimitedArea =
+//         calculatedSphere.area.ToString("F" + decimalPlaces.ToString())
+
+//     let decimalLimitedRadius =
+//         calculatedSphere.radius.ToString("F" + decimalPlaces.ToString())
+
+//     sprintf "area: %s ft^2, radius: %s ft" decimalLimitedArea decimalLimitedRadius
+
+// let calculatedAOEToString calculatedAOE =
+//     let decimalPlaces = 1
+
+//     match calculatedAOE with
+//     | ConeToCalculatedCone calculatedCone -> calculatedConeToString decimalPlaces calculatedCone
+//     | SphereToCalculatedSphere sphereShape -> calculatedSphereToString decimalPlaces sphereShape
 
 
-    let calculatedAOEOptionToString shapeOption =
-        match shapeOption with
-        | Some shape -> calculatedAOEToString shape
-        | None -> ""
+// let calculatedAOEOptionToString shapeOption =
+//     match shapeOption with
+//     | Some shape -> calculatedAOEToString shape
+//     | None -> ""
+
+module AreaOfEffect =
+    open System
+    open AreaOfEffectCalculation
+    open CalculatedAreaOfEffect
 
     let calcConeArea (distance: uint) (angle: float) : float =
         float (distance * distance) * Math.Tan(angle / 2.0)
@@ -577,42 +596,44 @@ module CalculatedAOE =
     let calcConeAngle (area: uint) (distance: uint) =
         2. * Math.Atan(Math.Sqrt(float area / float (distance * distance)))
 
-    let calcCone (numDice: uint) : CalculatedCone =
-        let distance = numDice * feetPerBattleMapUOM
-        let angle = 53.0
+    // let calcCone (numDice: uint) (coneCalculation: ConeCalculation) : CalculatedCone =
+    //     let distance = numDice * feetPerBattleMapUOM
+    //     let angle = 53.0
 
-        {
-            area = calcConeArea distance angle
-            distance = distance
-            angle = angle
-        }
+    //     {
+    //         name = ""
+    //         area = calcConeArea distance a
+    //         baseAndHeight = distance
+    //         angle = coneCalculation.
+    //     }
 
     let calcCircle (numDice: uint) : CalculatedSphere =
         let radius: float = 2.5 * float numDice
 
-        {
-            area = 2.0 * Math.PI * (radius ** 2)
-            radius = radius
-        }
+        { radius = radius }
 
-    let calcShape (numDice: uint) (aoe: AreaOfEffect) : CalculatedAOE =
-        match aoe with
-        | Cone -> ConeToCalculatedCone(calcCone numDice)
-        | Sphere -> SphereToCalculatedSphere(calcCircle numDice)
+    type AreaOfEffect =
+        | AreaOfEffectCalculation
+        | CalculatedAreaOfEffect
 
-    let determineAOEShapeOption numDice aoe =
-        match aoe with
-        | Some aoe -> Some(calcShape numDice aoe)
-        | None -> None
+// let calcShape (numDice: uint) (aoe: AreaOfEffect) : CalculatedAOE =
+//     match aoe with
+//     | AreaOfEffectCalculation -> ConeToCalculatedCone(calcCone numDice)
+//     | CalculatedAreaOfEffect -> SphereToCalculatedSphere(calcCircle numDice)
 
-    let compareAndDetermineAOEShapeOption
-        (numDice: uint)
-        (aoe: AreaOfEffect option)
-        (resourceAOE: AreaOfEffect option)
-        : CalculatedAOE option =
-        match resourceAOE with
-        | Some resourceAOE -> Some(calcShape numDice resourceAOE)
-        | None -> determineAOEShapeOption numDice aoe
+// let determineAOEShapeOption numDice aoe =
+//     match aoe with
+//     | Some aoe -> Some(calcShape numDice aoe)
+//     | None -> None
+
+// let compareAndDetermineAOEShapeOption
+//     (numDice: uint)
+//     (aoe: AreaOfEffect option)
+//     (resourceAOE: AreaOfEffect option)
+//     : CalculatedAOE option =
+//     match resourceAOE with
+//     | Some resourceAOE -> Some(calcShape numDice resourceAOE)
+//     | None -> determineAOEShapeOption numDice aoe
 
 // Item Building
 
