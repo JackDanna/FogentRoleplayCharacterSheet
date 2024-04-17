@@ -13,6 +13,7 @@ let init (attributeNameSet: AttributeName Set) (coreSkillData: CoreSkill list) =
     name = ""
     attributeAndCoreSkillsList = defaultAttributeAndCoreSkillsList attributeNameSet coreSkillData
     vocationList = VocationList.init ()
+    equipmentList = []
 }
 
 let update msg (model: Character) =

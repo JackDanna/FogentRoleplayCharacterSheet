@@ -27,7 +27,7 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.Skill
     open FogentRoleplayLib.CoreSkill
 
-    open FogentRoleplayLib.Container
+    open FogentRoleplayLib.ContainerClass
     open FogentRoleplayLib.WeaponResource
     open FogentRoleplayLib.ItemTier
 
@@ -180,7 +180,7 @@ module FogentRoleplayServerData =
         |> Set.ofList
 
     let containerClassMap =
-        Set.map (fun (containerClass: Container) -> containerClass.name, containerClass) containerSet
+        Set.map (fun (containerClass: ContainerClass) -> containerClass.name, containerClass) containerSet
         |> Map.ofSeq
 
     let temp =

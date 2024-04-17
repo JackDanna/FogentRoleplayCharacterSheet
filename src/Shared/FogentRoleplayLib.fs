@@ -408,7 +408,7 @@ module Feet =
 
 module BattleMapUOM =
     open Feet
-    let feetPerBattleMapUOM: Feet = 5.0
+    let feetPerBattleMapUOM = 5u
 
 module Range =
 
@@ -675,8 +675,8 @@ module Weapon =
         resourceClass: ResourceName option
     }
 
-module Container =
-    type Container = {
+module ContainerClass =
+    type ContainerClass = {
         name: string
         weightCapacity: float
         volumeFtCubed: float
@@ -766,8 +766,6 @@ module VocationalSkill =
         skill: Skill
         governingAttributeNames: AttributeName Set
     }
-
-
 
 // Magic
 
@@ -870,6 +868,322 @@ module Vocation =
         vocationSkillList: VocationSkill list
     }
 
+
+// Effects
+
+module AttributeDeterminedDiceModEffect =
+    open AttributeName
+    open DicePoolMod
+
+    type AttributeDeterminedDiceModEffect = {
+        name: string
+        attributesToEffect: AttributeName list
+        dicePoolMod: DicePoolMod
+    }
+
+    let attributeDeterminedDiceModEffectToEffectString attributeDeterminedDiceModEffect =
+        let attributesString =
+            String.concat "," attributeDeterminedDiceModEffect.attributesToEffect
+
+        let dicePoolModString =
+            dicePoolModToString attributeDeterminedDiceModEffect.dicePoolMod
+
+        $"{dicePoolModString} {attributesString} ({attributeDeterminedDiceModEffect.name})"
+
+    let collectAttributeDeterminedDiceMod governingAttributesOfSkill attributeDeterminedDiceModList =
+        attributeDeterminedDiceModList
+        |> List.filter (fun attributeDeterminedDiceMod ->
+            attributeDeterminedDiceMod.attributesToEffect
+            |> List.exists (fun attribute -> List.contains attribute governingAttributesOfSkill))
+        |> List.map (fun attributeDeterminedDiceMod -> attributeDeterminedDiceMod.dicePoolMod)
+
+module PhysicalDefenseEffect =
+
+    type PhysicalDefenseEffect = { name: string; physicalDefense: float }
+
+    let physicalDefenseEffectToEffectString defenseClass =
+        $"{defenseClass.physicalDefense} Physical Defense"
+
+module SkillDiceModEffect =
+    open DicePoolMod
+
+    type SkillDiceModEffect = {
+        name: string
+        skillToEffect: string
+        diceMod: DicePoolMod
+    }
+
+    let skillDiceModEffectToEffectString skillDiceModEffect =
+        $"{dicePoolModToString skillDiceModEffect.diceMod} {skillDiceModEffect.skillToEffect}"
+
+    let collectSkillAdjustmentDiceMods skillName skillAdjustmentList =
+        skillAdjustmentList
+        |> List.filter (fun skillAdjustment -> skillAdjustment.skillToEffect = skillName)
+        |> List.map (fun skillAdjustment -> skillAdjustment.diceMod)
+
+module AttributeStatAdjustmentEffect =
+
+    open AttributeName
+
+    type AttributeStatAdjustmentEffect = {
+        name: string
+        attribute: AttributeName
+        adjustment: int
+    }
+
+    let attributeStatAdjustmentToEffectString attributeStatAdjustment =
+        $"{attributeStatAdjustment.adjustment} {attributeStatAdjustment.attribute}"
+
+module MovementSpeedEffect =
+
+    open AttributeName
+    open Attribute
+    open Neg1To5
+    open Neg2To5
+    open CoreSkill
+    open SkillDiceModEffect
+    open AttributeDeterminedDiceModEffect
+    open DicePoolMod
+
+    type MovementSpeedCalculation = {
+        name: string
+        baseMovementSpeed: uint
+        governingAttribute: AttributeName
+        feetPerAttributeLvl: uint
+        governingSkill: string
+        feetPerSkillLvl: uint
+    }
+
+    type CoreSkillAndAttributeData = {
+        coreSkillList: CoreSkill list
+        attributeList: Attribute list
+        skillDiceModEffectList: SkillDiceModEffect list
+        attributeDeterminedDiceModEffectList: AttributeDeterminedDiceModEffect list
+    }
+
+    let calculateMovementSpeed (coreSkillAndAttributeData: CoreSkillAndAttributeData) movementSpeedCalculation =
+
+        let attributeMod =
+            coreSkillAndAttributeData.attributeList
+            |> List.tryFind (fun attribute -> attribute.attributeName = movementSpeedCalculation.governingAttribute)
+            |> (fun attributeLevelOption ->
+                match attributeLevelOption with
+                | Some attribute -> neg2To5ToInt attribute.level * int movementSpeedCalculation.feetPerAttributeLvl
+                | None -> 0)
+
+
+        let coreSkillMod =
+            coreSkillAndAttributeData.coreSkillList
+            |> List.tryFind (fun coreSkill -> coreSkill.skill.name = movementSpeedCalculation.governingSkill)
+            |> (fun coreSkillOption ->
+                match coreSkillOption with
+                | Some coreSkill ->
+                    neg1To5ToInt coreSkill.skill.level
+                    * int movementSpeedCalculation.feetPerSkillLvl
+                | None -> 0)
+
+        let skillDiceModInt =
+            coreSkillAndAttributeData.skillDiceModEffectList
+            |> collectSkillAdjustmentDiceMods movementSpeedCalculation.governingSkill
+            |> List.map dicePoolModToInt
+            |> List.sum
+
+        let attributeDeterminedDiceModInt =
+            coreSkillAndAttributeData.attributeDeterminedDiceModEffectList
+            |> collectAttributeDeterminedDiceMod [ movementSpeedCalculation.governingAttribute ]
+            |> List.map dicePoolModToInt
+            |> List.sum
+
+        let movementSpeed =
+            List.sum [
+                int movementSpeedCalculation.baseMovementSpeed
+                attributeMod
+                coreSkillMod
+                skillDiceModInt
+                attributeDeterminedDiceModInt
+            ]
+
+        if movementSpeed >= 0 then movementSpeed else 0
+
+    let movementSpeedCalculationToSourceForDisplay movementSpeedCalculation =
+        $"{movementSpeedCalculation.baseMovementSpeed} ft (base), +{movementSpeedCalculation.feetPerAttributeLvl} ft (per {movementSpeedCalculation.governingAttribute}), +{movementSpeedCalculation.feetPerSkillLvl} ft (per {movementSpeedCalculation.governingSkill})"
+
+module Effect =
+    open SkillDiceModEffect
+    open AttributeStatAdjustmentEffect
+    open PhysicalDefenseEffect
+    open AttributeDeterminedDiceModEffect
+    open MovementSpeedEffect
+
+    type Effect =
+        | SkillDiceModEffect of SkillDiceModEffect
+        | AttributeStatAdjustmentEffect of AttributeStatAdjustmentEffect
+        | PhysicalDefenseEffect of PhysicalDefenseEffect
+        | AttributeDeterminedDiceModEffect of AttributeDeterminedDiceModEffect
+        | MovementSpeedCalculation of MovementSpeedCalculation
+
+    let effectToEffectName effect =
+        match effect with
+        | SkillDiceModEffect skillDiceModEffect -> skillDiceModEffect.name
+        | AttributeStatAdjustmentEffect attributeStatAdjustment -> attributeStatAdjustment.name
+        | PhysicalDefenseEffect defenseClass -> defenseClass.name
+        | AttributeDeterminedDiceModEffect addme -> addme.name
+        | MovementSpeedCalculation msc -> msc.name
+
+    let effectToSkillDiceModEffectList (effect: Effect) =
+        match effect with
+        | SkillDiceModEffect skillAdjustment -> [ skillAdjustment ]
+        | _ -> []
+
+    let effectToAttributeDeterminedDiceModEffectList (effect: Effect) =
+        match effect with
+        | AttributeDeterminedDiceModEffect addme -> [ addme ]
+        | _ -> []
+
+// Item
+
+module ItemClass =
+    open Weapon
+    open WeaponResource
+    open ConduitClass
+    open ContainerClass
+    open Effect
+
+
+    type ItemClass =
+        | WeaponClass of Weapon
+        | ConduitClass of ConduitClass
+        | WeaponResourceClass of WeaponResource
+        | ContainerClass of ContainerClass
+        | ItemEffect of Effect
+
+module Item =
+    open ItemTier
+    open Weapon
+    open WeaponResource
+    open ContainerClass
+    open Effect
+    open ItemClass
+
+    type Item = {
+        name: string
+        itemClasses: ItemClass list
+        itemTier: ItemTier
+        value: string
+        weight: float
+    }
+
+    let sumItemListWeight itemList =
+        if List.isEmpty itemList then
+            0.0
+        else
+            List.sumBy (fun item -> item.weight) itemList
+
+    let itemClassesToString itemClasses =
+        List.map
+            (fun itemClass ->
+                match itemClass with
+                | WeaponClass weaponClass -> weaponClass.name
+                //| ConduitClass conduitClass -> conduitClass.name
+                | WeaponResourceClass weaponResourceClass -> weaponResourceClass.name
+                | ContainerClass containerClass -> containerClass.name
+                | ItemEffect itemEffect -> effectToEffectName itemEffect)
+            itemClasses
+        |> String.concat ", "
+
+    let itemToWeaponClasses item =
+        item.itemClasses
+        |> List.collect (fun itemClass ->
+            match itemClass with
+            | WeaponClass specifiedItemClass -> [ specifiedItemClass ]
+            | _ -> [])
+
+    let itemToConduitClasses item =
+        item.itemClasses
+        |> List.collect (fun itemClass ->
+            match itemClass with
+            | ConduitClass specifiedItemClass -> [ specifiedItemClass ]
+            | _ -> [])
+
+    let itemToWeaponResourceClasses item =
+        item.itemClasses
+        |> List.collect (fun itemClass ->
+            match itemClass with
+            | WeaponResourceClass specifiedItemClass -> [ specifiedItemClass ]
+            | _ -> [])
+
+    let itemToItemNameAndContainerClasses item =
+        item.itemClasses
+        |> List.collect (fun itemClass ->
+            match itemClass with
+            | ContainerClass specifiedItemClass -> [ (item.name, specifiedItemClass) ]
+            | _ -> [])
+
+    let itemToContainerClassNames item =
+        item.itemClasses
+        |> List.collect (fun itemClass ->
+            match itemClass with
+            | ContainerClass _ -> [ item.name ]
+            | _ -> [])
+
+    let itemToItemEffectSubTypes (itemEffectToItemEffectSubType) (item: Item) =
+        item.itemClasses
+        |> List.collect (fun itemClass ->
+            match itemClass with
+            | ItemEffect itemEffect -> itemEffectToItemEffectSubType itemEffect
+            | _ -> [])
+
+    let itemToItemNameAndItemEffectList (item: Item) =
+        item.itemClasses
+        |> List.collect (fun itemClass ->
+            match itemClass with
+            | ItemEffect itemEffect -> [ (item.name, itemEffect) ]
+            | _ -> [])
+
+    let itemToSkillDiceModEffects =
+        itemToItemEffectSubTypes effectToSkillDiceModEffectList
+
+    let itemToAttributeDeterminedDiceModEffects =
+        itemToItemEffectSubTypes effectToAttributeDeterminedDiceModEffectList
+
+module ItemStack =
+    open Item
+
+    type ItemStack = { item: Item; quantity: uint }
+
+    let itemStackListToItemList itemStackList =
+        List.map (fun itemStack -> itemStack.item) itemStackList
+
+    let sumItemStackListWeight (itemStackList: ItemStack list) =
+        itemStackList
+        |> List.map (fun itemStack -> itemStack.item.weight * (float itemStack.quantity))
+        |> List.sum
+
+module Container =
+
+    open ContainerClass
+    open ItemStack
+
+    type Container = {
+        name: string
+        containerClass: ContainerClass
+        isEquipped: bool
+        itemStackList: ItemStack list
+    }
+
+    let itemNameAndContainerClassToContainer (itemName, containerClass: ContainerClass) = {
+        name = itemName
+        containerClass = containerClass
+        isEquipped = false
+        itemStackList = []
+    }
+
+    let sumContainerListWeight (containerList: Container list) =
+        containerList
+        |> List.map (fun container -> sumItemStackListWeight container.itemStackList)
+        |> List.sum
+
+
 // ItemStat
 
 module DicePoolCalculation =
@@ -945,11 +1259,13 @@ module Character =
     open Vocation
     open DicePoolCalculation
     open DicePoolMod
+    open ItemStack
 
     type Character = {
         name: string
         attributeAndCoreSkillsList: AttributeAndCoreSkills list
         vocationList: Vocation list
+        equipmentList: ItemStack list
     }
 
     let characterToDicePoolCalculation (character: Character) =
