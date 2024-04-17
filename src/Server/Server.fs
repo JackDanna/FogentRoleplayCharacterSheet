@@ -33,6 +33,9 @@ module FogentRoleplayServerData =
 
     open FogentRoleplayLib.PhysicalDefenseEffect
 
+    open FogentRoleplayLib.CalculatedAreaOfEffect
+    open FogentRoleplayLib.AreaOfEffectCalculation
+
     let makeFogentRoleplayDataPath fileName =
         __SOURCE_DIRECTORY__ + "../../../FogentRoleplayData/" + fileName
 
@@ -87,6 +90,22 @@ module FogentRoleplayServerData =
         match string with
         | "None" -> None
         | _ -> rangeMap.Item string |> Some
+
+    // AreaOfEffect
+    let namedSetConeSet: NamedCalculatedCone Set =
+        makeFogentRoleplayDataSet "AreaOfEffects/SetCone.csv" (fun row -> {
+            name = string row.["name"]
+            calculatedCone = {
+                baseAndHeight = uint row.["Triangle Base/Height (ft)"]
+                angle = float row.["Cone Angle (degrees)"]
+            }
+        })
+
+    let namedSetSphereSet: NamedCalculatedSphere Set =
+        makeFogentRoleplayDataSet "AreaOfEffects/SetSphere.csv" (fun row -> {
+            name = row.["Name"]
+            calculatedSphere = { radius = float row.["Radius(ft)"] }
+        })
 
     // ResourceClass
     let resourceMap =
