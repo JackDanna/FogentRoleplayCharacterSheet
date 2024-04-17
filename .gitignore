@@ -18,4 +18,5 @@ release.sh
 *.orig
 *.fsproj.user
 *.DotSettings.user
-.postgres_data/
+postgres_data/
+postgres/
