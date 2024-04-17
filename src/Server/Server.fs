@@ -18,7 +18,7 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.MagicSkillData
     open FogentRoleplayLib.Weapon
     open FogentRoleplayLib.DicePoolMod
-    open FogentRoleplayLib.AreaOfEffect
+    open FogentRoleplayLib.OldAreaOfEffect
 
     open FogentRoleplayLib.TypeUtils
     open FogentRoleplayLib.AttributeName
@@ -33,7 +33,7 @@ module FogentRoleplayServerData =
 
     open FogentRoleplayLib.PhysicalDefenseEffect
 
-    open FogentRoleplayLib.CalculatedAreaOfEffect
+    open FogentRoleplayLib.AreaOfEffect
     open FogentRoleplayLib.AreaOfEffectCalculation
 
     let makeFogentRoleplayDataPath fileName =
@@ -92,19 +92,19 @@ module FogentRoleplayServerData =
         | _ -> rangeMap.Item string |> Some
 
     // AreaOfEffect
-    let namedSetConeSet: NamedCalculatedCone Set =
+    let namedSetConeSet: NamedCone Set =
         makeFogentRoleplayDataSet "AreaOfEffects/SetCone.csv" (fun row -> {
             name = string row.["name"]
-            calculatedCone = {
+            cone = {
                 baseAndHeight = uint row.["Triangle Base/Height (ft)"]
                 angle = float row.["Cone Angle (degrees)"]
             }
         })
 
-    let namedSetSphereSet: NamedCalculatedSphere Set =
+    let namedSetSphereSet: NamedSphere Set =
         makeFogentRoleplayDataSet "AreaOfEffects/SetSphere.csv" (fun row -> {
             name = row.["Name"]
-            calculatedSphere = { radius = float row.["Radius(ft)"] }
+            sphere = { radius = float row.["Radius(ft)"] }
         })
 
     let namedConeCalculationSet: NamedConeCalculation Set =
@@ -112,7 +112,7 @@ module FogentRoleplayServerData =
             name = string row.["name"]
             coneCalculation = {
                 angle = float row.["angle"]
-                initTrigangleBaseAndHeight = float row.["init triangle base/height"]
+                initBaseAndHeight = float row.["init triangle base/height"]
                 baseAndHeightPerDice = float row.["base/height per unit"]
             }
         })

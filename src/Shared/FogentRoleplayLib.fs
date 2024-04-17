@@ -507,7 +507,7 @@ module AreaOfEffectCalculation =
     }
 
     type ConeCalculation = {
-        initTrigangleBaseAndHeight: float
+        initBaseAndHeight: float
         baseAndHeightPerDice: float
         angle: float
     }
@@ -522,31 +522,24 @@ module AreaOfEffectCalculation =
         coneCalculation: ConeCalculation
     }
 
-    type NamedAreaOfEffectCalculation =
-        | NamedSphereCaculation of NamedSphereCalculation
-        | NamedConeCalculation of NamedConeCalculation
-
-module CalculatedAreaOfEffect =
+module AreaOfEffect =
     open System
     open BattleMapUOM
+    open AreaOfEffectCalculation
 
-    type CalculatedCone = { baseAndHeight: uint; angle: float }
+    type Cone = { baseAndHeight: uint; angle: float }
 
-    type CalculatedSphere = { radius: float }
+    type Sphere = { radius: float }
 
-    type NamedCalculatedCone = {
-        name: string
-        calculatedCone: CalculatedCone
-    }
+    type NamedCone = { name: string; cone: Cone }
 
-    type NamedCalculatedSphere = {
-        name: string
-        calculatedSphere: CalculatedSphere
-    }
+    type NamedSphere = { name: string; sphere: Sphere }
 
-    type NamedCalculatedAOE =
-        | NamedConeToCalculatedCone of NamedCalculatedCone
-        | NamedSphereToCalculatedSphere of NamedCalculatedSphere
+    type AreaOfEffect =
+        | NamedCone of NamedCone
+        | NamedSphere of NamedSphere
+        | ConeCalculation of ConeCalculation
+        | SphereCalculation of SphereCalculation
 
 // let calculatedConeToString decimalPlaces (calculatedCone: CalculatedCone) =
 //     let decimalLimitedArea =
@@ -583,10 +576,10 @@ module CalculatedAreaOfEffect =
 //     | Some shape -> calculatedAOEToString shape
 //     | None -> ""
 
-module AreaOfEffect =
+module OldAreaOfEffect =
     open System
     open AreaOfEffectCalculation
-    open CalculatedAreaOfEffect
+    open AreaOfEffect
 
     let calcConeArea (distance: uint) (angle: float) : float =
         float (distance * distance) * Math.Tan(angle / 2.0)
@@ -608,7 +601,7 @@ module AreaOfEffect =
     //         angle = coneCalculation.
     //     }
 
-    let calcCircle (numDice: uint) : CalculatedSphere =
+    let calcCircle (numDice: uint) : Sphere =
         let radius: float = 2.5 * float numDice
 
         { radius = radius }
@@ -650,7 +643,7 @@ module WeaponResource =
     open DicePoolMod
     open Range
     open DamageType
-    open AreaOfEffect
+    open OldAreaOfEffect
     open ResourceName
     open Penetration
 
@@ -680,7 +673,7 @@ module Weapon =
     open Range
     open DamageType
     open EngageableOpponents
-    open AreaOfEffect
+    open OldAreaOfEffect
     open Penetration
     open ResourceName
 
