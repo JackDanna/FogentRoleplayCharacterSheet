@@ -117,6 +117,15 @@ module FogentRoleplayServerData =
             }
         })
 
+    let namedSphereCalculationSet: NamedSphereCalculation Set =
+        makeFogentRoleplayDataSet "AreaOfEffects/SphereCalculation.csv" (fun row -> {
+            name = string row.["name"]
+            sphereCalculation = {
+                initRadius = float row.["Init Radius"]
+                radiusPerDice = float row.["Radius per Dice"]
+            }
+        })
+
     // ResourceClass
     let resourceMap =
         makeFogentRoleplayDataSet "ResourceClassData.csv" (fun row -> (ResourceName row.["name"]))

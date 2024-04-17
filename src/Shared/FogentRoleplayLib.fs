@@ -502,8 +502,8 @@ module Range =
 module AreaOfEffectCalculation =
 
     type SphereCalculation = {
-        initRadius: uint
-        radiusPerDice: uint
+        initRadius: float
+        radiusPerDice: float
     }
 
     type ConeCalculation = {
