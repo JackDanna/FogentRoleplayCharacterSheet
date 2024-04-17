@@ -666,7 +666,7 @@ module Weapon =
     open Range
     open DamageType
     open EngageableOpponents
-    open OldAreaOfEffect
+    open AreaOfEffect
     open Penetration
     open ResourceName
 
@@ -679,7 +679,7 @@ module Weapon =
         damageTypes: DamageType Set
         engageableOpponents: EngageableOpponents
         dualWieldableBonus: DicePoolMod option
-        areaOfEffect: AreaOfEffect option
+        areaOfEffect: NamedAreaOfEffect option
         resourceClass: ResourceName option
     }
 

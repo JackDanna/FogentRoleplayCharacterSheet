@@ -140,6 +140,11 @@ module FogentRoleplayServerData =
         |> Set.map (fun areaOfEffect -> (areaOfEffect.name, areaOfEffect))
         |> Map.ofSeq
 
+    let namedAreaOfEffectOptionMap key =
+        match key with
+        | "" -> None
+        | _ -> namedAreaOfEffectMap.Item key |> Some
+
     // ResourceClass
     let resourceMap =
         makeFogentRoleplayDataSet "ResourceClassData.csv" (fun row -> (ResourceName row.["name"]))
@@ -182,21 +187,21 @@ module FogentRoleplayServerData =
         |> Map.ofSeq
 
     // WeaponClass
-    // let weaponMap =
-    //     makeFogentRoleplayDataSet "WeaponClassData.csv" (fun row -> {
-    //         name = string row.["name"]
-    //         oneHandedWeaponDice = parseDicePoolModOptionString row.["oneHandedWeaponDice"]
-    //         twoHandedWeaponDice = parseDicePoolModOptionString row.["twoHandedWeaponDice"]
-    //         penetration = uint row.["penetration"]
-    //         range = rangeMap.Item row.["range"]
-    //         damageTypes = stringToDamageTypeSet row.["damageTypes"]
-    //         engageableOpponents = engageableOpponentsMap row.["engageableOpponents"]
-    //         dualWieldableBonus = parseDicePoolModOptionString row.["dualWieldableBonus"]
-    //         areaOfEffect = AreaOfEffectOptionMap.Item row.["areaOfEffect"]
-    //         resourceClass = resourceOptionMap row.["resourceClass"]
-    //     })
-    //     |> Set.map (fun (weaponClass: Weapon) -> weaponClass.name, weaponClass)
-    //     |> Map.ofSeq
+    let weaponMap =
+        makeFogentRoleplayDataSet "WeaponClassData.csv" (fun row -> {
+            name = string row.["name"]
+            oneHandedWeaponDice = parseDicePoolModOptionString row.["oneHandedWeaponDice"]
+            twoHandedWeaponDice = parseDicePoolModOptionString row.["twoHandedWeaponDice"]
+            penetration = uint row.["penetration"]
+            range = rangeMap.Item row.["range"]
+            damageTypes = stringToDamageTypeSet row.["damageTypes"]
+            engageableOpponents = engageableOpponentsMap row.["engageableOpponents"]
+            dualWieldableBonus = parseDicePoolModOptionString row.["dualWieldableBonus"]
+            areaOfEffect = namedAreaOfEffectOptionMap row.["areaOfEffect"]
+            resourceClass = resourceOptionMap row.["resourceClass"]
+        })
+        |> Set.map (fun (weaponClass: Weapon) -> weaponClass.name, weaponClass)
+        |> Map.ofSeq
 
     // // ConduitClass
     // let conduitClassData =
