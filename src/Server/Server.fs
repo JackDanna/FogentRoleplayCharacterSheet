@@ -107,6 +107,16 @@ module FogentRoleplayServerData =
             calculatedSphere = { radius = float row.["Radius(ft)"] }
         })
 
+    let namedConeCalculationSet: NamedConeCalculation Set =
+        makeFogentRoleplayDataSet "AreaOfEffects/ConeCalculation.csv" (fun row -> {
+            name = string row.["name"]
+            coneCalculation = {
+                angle = float row.["angle"]
+                initTrigangleBaseAndHeight = float row.["init triangle base/height"]
+                baseAndHeightPerDice = float row.["base/height per unit"]
+            }
+        })
+
     // ResourceClass
     let resourceMap =
         makeFogentRoleplayDataSet "ResourceClassData.csv" (fun row -> (ResourceName row.["name"]))

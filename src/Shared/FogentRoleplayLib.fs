@@ -509,6 +509,7 @@ module AreaOfEffectCalculation =
     type ConeCalculation = {
         initTrigangleBaseAndHeight: float
         baseAndHeightPerDice: float
+        angle: float
     }
 
     type NamedSphereCalculation = {
