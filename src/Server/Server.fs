@@ -92,39 +92,53 @@ module FogentRoleplayServerData =
         | _ -> rangeMap.Item string |> Some
 
     // AreaOfEffect
-    let namedSetConeSet: NamedCone Set =
+    let namedConeSet: NamedAreaOfEffect Set =
         makeFogentRoleplayDataSet "AreaOfEffects/SetCone.csv" (fun row -> {
             name = string row.["name"]
-            cone = {
-                baseAndHeight = uint row.["Triangle Base/Height (ft)"]
-                angle = float row.["Cone Angle (degrees)"]
-            }
+            areaOfEffect =
+                {
+                    baseAndHeight = uint row.["Triangle Base/Height (ft)"]
+                    angle = float row.["Cone Angle (degrees)"]
+                }
+                |> Cone
         })
 
-    let namedSetSphereSet: NamedSphere Set =
+    let namedSphereSet =
         makeFogentRoleplayDataSet "AreaOfEffects/SetSphere.csv" (fun row -> {
             name = row.["Name"]
-            sphere = { radius = float row.["Radius(ft)"] }
+            areaOfEffect = { radius = float row.["Radius(ft)"] } |> Sphere
         })
 
-    let namedConeCalculationSet: NamedConeCalculation Set =
+    let namedConeCalculationSet =
         makeFogentRoleplayDataSet "AreaOfEffects/ConeCalculation.csv" (fun row -> {
             name = string row.["name"]
-            coneCalculation = {
-                angle = float row.["angle"]
-                initBaseAndHeight = float row.["init triangle base/height"]
-                baseAndHeightPerDice = float row.["base/height per unit"]
-            }
+            areaOfEffect =
+                {
+                    angle = float row.["angle"]
+                    initBaseAndHeight = float row.["init triangle base/height"]
+                    baseAndHeightPerDice = float row.["base/height per unit"]
+                }
+                |> ConeCalculation
         })
 
-    let namedSphereCalculationSet: NamedSphereCalculation Set =
+    let namedSphereCalculationSet =
         makeFogentRoleplayDataSet "AreaOfEffects/SphereCalculation.csv" (fun row -> {
             name = string row.["name"]
-            sphereCalculation = {
-                initRadius = float row.["Init Radius"]
-                radiusPerDice = float row.["Radius per Dice"]
-            }
+            areaOfEffect =
+                {
+                    initRadius = float row.["Init Radius"]
+                    radiusPerDice = float row.["Radius per Dice"]
+                }
+                |> SphereCalculation
         })
+
+    let namedAreaOfEffectMap =
+        namedConeSet
+        |> Set.union namedSphereSet
+        |> Set.union namedConeCalculationSet
+        |> Set.union namedSphereCalculationSet
+        |> Set.map (fun areaOfEffect -> (areaOfEffect.name, areaOfEffect))
+        |> Map.ofSeq
 
     // ResourceClass
     let resourceMap =

@@ -512,15 +512,7 @@ module AreaOfEffectCalculation =
         angle: float
     }
 
-    type NamedSphereCalculation = {
-        name: string
-        sphereCalculation: SphereCalculation
-    }
 
-    type NamedConeCalculation = {
-        name: string
-        coneCalculation: ConeCalculation
-    }
 
 module AreaOfEffect =
     open System
@@ -531,15 +523,16 @@ module AreaOfEffect =
 
     type Sphere = { radius: float }
 
-    type NamedCone = { name: string; cone: Cone }
-
-    type NamedSphere = { name: string; sphere: Sphere }
-
     type AreaOfEffect =
-        | NamedCone of NamedCone
-        | NamedSphere of NamedSphere
         | ConeCalculation of ConeCalculation
         | SphereCalculation of SphereCalculation
+        | Cone of Cone
+        | Sphere of Sphere
+
+    type NamedAreaOfEffect = {
+        name: string
+        areaOfEffect: AreaOfEffect
+    }
 
 // let calculatedConeToString decimalPlaces (calculatedCone: CalculatedCone) =
 //     let decimalLimitedArea =
