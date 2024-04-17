@@ -1001,7 +1001,7 @@ module MovementSpeedEffect =
 
         let attributeDeterminedDiceModInt =
             coreSkillAndAttributeData.attributeDeterminedDiceModEffectList
-            |> collectAttributeDeterminedDiceMod [ movementSpeedCalculation.governingAttribute ]
+            |> collectAttributeDeterminedDiceMod (Set.empty.Add(movementSpeedCalculation.governingAttribute))
             |> List.map dicePoolModToInt
             |> List.sum
 
