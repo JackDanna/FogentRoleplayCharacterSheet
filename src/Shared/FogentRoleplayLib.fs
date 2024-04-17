@@ -898,11 +898,14 @@ module AttributeDeterminedDiceModEffect =
 
         $"{dicePoolModString} {attributesString} ({attributeDeterminedDiceModEffect.name})"
 
-    let collectAttributeDeterminedDiceMod governingAttributesOfSkill attributeDeterminedDiceModList =
+    let collectAttributeDeterminedDiceMod
+        (governingAttributesOfSkill: AttributeName Set)
+        attributeDeterminedDiceModList
+        =
         attributeDeterminedDiceModList
         |> List.filter (fun attributeDeterminedDiceMod ->
             attributeDeterminedDiceMod.attributesToEffect
-            |> List.exists (fun attribute -> List.contains attribute governingAttributesOfSkill))
+            |> Set.exists (fun attributeName -> Set.contains attributeName governingAttributesOfSkill))
         |> List.map (fun attributeDeterminedDiceMod -> attributeDeterminedDiceMod.dicePoolMod)
 
 module PhysicalDefenseEffect =
@@ -1259,6 +1262,26 @@ module DicePoolCalculation =
         =
 
         calculateDicePool dicePoolCalculationData (skillLevel |> zeroToFiveToUint |> int) skillGoveringAttributeNames
+
+module WeightClass =
+    open AttributeDeterminedDiceModEffect
+
+    type WeightClass = {
+        name: string
+        bottomPercent: float
+        topPercent: float
+        attributeDeterminedDiceModEffect: AttributeDeterminedDiceModEffect
+    }
+
+    let determineWeightClass (maxCarryWeight: float) (inventoryWeight: float) (weightClassList: WeightClass list) =
+
+        let percentOfMaxCarryWeight = inventoryWeight / maxCarryWeight
+
+        List.find
+            (fun weightClass ->
+                (weightClass.topPercent >= percentOfMaxCarryWeight)
+                && (percentOfMaxCarryWeight >= weightClass.bottomPercent))
+            weightClassList
 
 module Character =
     open AttributeName

@@ -37,6 +37,7 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.AreaOfEffect
     open FogentRoleplayLib.AreaOfEffectCalculation
     open FogentRoleplayLib.AttributeDeterminedDiceModEffect
+    open FogentRoleplayLib.WeightClass
 
     let makeFogentRoleplayDataPath fileName =
         __SOURCE_DIRECTORY__ + "../../../FogentRoleplayData/" + fileName
@@ -314,14 +315,15 @@ module FogentRoleplayServerData =
             attributeDeterminedDiceModEffect.name, attributeDeterminedDiceModEffect)
         |> Map.ofSeq
 
-// // WeightClass
-// let weightClassData: WeightClass list =
-//     makeFogentRoleplayData "WeightClassData.csv" (fun row ->
-//         { name = row.["name"]
-//           bottomPercent = float row.["bottomPercent"]
-//           topPercent = float row.["topPercent"]
-//           attributeDeterminedDiceModEffect =
-//             attributeDeterminedDiceModEffectMap.Item row.["attributeDeterminedDiceModEffect"] })
+    // WeightClass
+    let weightClassData: WeightClass Set =
+        makeFogentRoleplayDataSet "WeightClassData.csv" (fun row -> {
+            name = row.["name"]
+            bottomPercent = float row.["bottomPercent"]
+            topPercent = float row.["topPercent"]
+            attributeDeterminedDiceModEffect =
+                attributeDeterminedDiceModEffectMap.Item row.["attributeDeterminedDiceModEffect"]
+        })
 
 // // MovementSpeedCalculation
 // let movementSpeedCalculationData =
