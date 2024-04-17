@@ -885,7 +885,7 @@ module AttributeDeterminedDiceModEffect =
 
     type AttributeDeterminedDiceModEffect = {
         name: string
-        attributesToEffect: AttributeName list
+        attributesToEffect: AttributeName Set
         dicePoolMod: DicePoolMod
     }
 

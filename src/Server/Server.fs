@@ -36,6 +36,7 @@ module FogentRoleplayServerData =
 
     open FogentRoleplayLib.AreaOfEffect
     open FogentRoleplayLib.AreaOfEffectCalculation
+    open FogentRoleplayLib.AttributeDeterminedDiceModEffect
 
     let makeFogentRoleplayDataPath fileName =
         __SOURCE_DIRECTORY__ + "../../../FogentRoleplayData/" + fileName
@@ -288,31 +289,30 @@ module FogentRoleplayServerData =
         |> Set.map (fun (skillAdjustment: SkillDiceModEffect) -> skillAdjustment.name, skillAdjustment)
         |> Map.ofSeq
 
-// // AttributeStatAdjustmentEffect
-// let attributeStatAdjustmentEffectData =
-//     makeFogentRoleplayData "AttributeStatAdjustmentEffect.csv" (fun row ->
-//         { name = string row.["Name"]
-//           attribute = AttributeName row.["Attribute"]
-//           adjustment = int row.["Adjustment"] })
+    // // AttributeStatAdjustmentEffect
+    // let attributeStatAdjustmentEffectData =
+    //     makeFogentRoleplayData "AttributeStatAdjustmentEffect.csv" (fun row ->
+    //         { name = string row.["Name"]
+    //           attribute = AttributeName row.["Attribute"]
+    //           adjustment = int row.["Adjustment"] })
 
-// let attributeStatAdjustmentEffectMap =
-//     attributeStatAdjustmentEffectData
-//     |> List.map (fun (attributeStatAdjustmentEffect: AttributeStatAdjustmentEffect) ->
-//         attributeStatAdjustmentEffect.name, attributeStatAdjustmentEffect)
-//     |> Map.ofList
+    // let attributeStatAdjustmentEffectMap =
+    //     attributeStatAdjustmentEffectData
+    //     |> List.map (fun (attributeStatAdjustmentEffect: AttributeStatAdjustmentEffect) ->
+    //         attributeStatAdjustmentEffect.name, attributeStatAdjustmentEffect)
+    //     |> Map.ofList
 
-// // AttributeDeterminedDiceModEffect
-// let attributeDeterminedDiceModEffectData =
-//     makeFogentRoleplayData "AttributeDeterminedDiceModEffectData.csv" (fun row ->
-//         { name = row.["name"]
-//           attributesToEffect = stringToAttributes row.["attributesToEffect"]
-//           dicePoolMod = parseDicePoolModString row.["dicePoolMod"] })
+    // AttributeDeterminedDiceModEffect
 
-// let attributeDeterminedDiceModEffectMap =
-//     attributeDeterminedDiceModEffectData
-//     |> List.map (fun (attributeDeterminedDiceModEffect: AttributeDeterminedDiceModEffect) ->
-//         attributeDeterminedDiceModEffect.name, attributeDeterminedDiceModEffect)
-//     |> Map.ofList
+    let attributeDeterminedDiceModEffectMap =
+        makeFogentRoleplayDataSet "AttributeDeterminedDiceModEffectData.csv" (fun row -> {
+            name = row.["name"]
+            attributesToEffect = stringToAttributes row.["attributesToEffect"]
+            dicePoolMod = parseDicePoolModString row.["dicePoolMod"]
+        })
+        |> Set.map (fun (attributeDeterminedDiceModEffect: AttributeDeterminedDiceModEffect) ->
+            attributeDeterminedDiceModEffect.name, attributeDeterminedDiceModEffect)
+        |> Map.ofSeq
 
 // // WeightClass
 // let weightClassData: WeightClass list =
