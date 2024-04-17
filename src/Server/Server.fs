@@ -32,6 +32,7 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.ItemTier
 
     open FogentRoleplayLib.PhysicalDefenseEffect
+    open FogentRoleplayLib.SkillDiceModEffect
 
     open FogentRoleplayLib.AreaOfEffect
     open FogentRoleplayLib.AreaOfEffectCalculation
@@ -277,17 +278,15 @@ module FogentRoleplayServerData =
         |> Set.map (fun (defenseClass: PhysicalDefenseEffect) -> defenseClass.name, defenseClass)
         |> Map.ofSeq
 
-// // SkillDiceModEffect
-// let skillDiceModEffectData: SkillDiceModEffect list =
-//     makeFogentRoleplayData "SkillDiceModEffect.csv" (fun row ->
-//         { name = string row.["Name"]
-//           skillToEffect = string row.["Skill"]
-//           diceMod = parseDicePoolModString row.["Dice Mod"] })
-
-// let skillDiceModEffectMap =
-//     skillDiceModEffectData
-//     |> List.map (fun (skillAdjustment: SkillDiceModEffect) -> skillAdjustment.name, skillAdjustment)
-//     |> Map.ofList
+    // SkillDiceModEffect
+    let skillDiceModEffectMap =
+        makeFogentRoleplayDataSet "SkillDiceModEffect.csv" (fun row -> {
+            name = string row.["Name"]
+            skillToEffect = string row.["Skill"]
+            diceMod = parseDicePoolModString row.["Dice Mod"]
+        })
+        |> Set.map (fun (skillAdjustment: SkillDiceModEffect) -> skillAdjustment.name, skillAdjustment)
+        |> Map.ofSeq
 
 // // AttributeStatAdjustmentEffect
 // let attributeStatAdjustmentEffectData =
