@@ -636,7 +636,7 @@ module WeaponResource =
     open DicePoolMod
     open Range
     open DamageType
-    open OldAreaOfEffect
+    open AreaOfEffect
     open ResourceName
     open Penetration
 
@@ -647,7 +647,7 @@ module WeaponResource =
         penetration: Penetration
         rangeOption: Range option
         damageTypeSet: DamageType Set
-        areaOfEffectOption: AreaOfEffect option
+        NamedAreaOfEffectOption: NamedAreaOfEffect option
     }
 
     let weaponResourceClassOptionToWeaponResourceClass (resource: WeaponResource option) =
@@ -658,7 +658,7 @@ module WeaponResource =
              resource.penetration,
              resource.rangeOption,
              resource.damageTypeSet,
-             resource.areaOfEffectOption)
+             resource.NamedAreaOfEffectOption)
         | None -> ("", createD6DicePoolMod (0u), 0u, None, Set.empty, None)
 
 module Weapon =
