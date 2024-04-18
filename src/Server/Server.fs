@@ -410,7 +410,7 @@ module FogentRoleplayServerData =
         |> Set.filter (fun effectName -> effectMap.Keys.Contains effectName)
         |> Set.map (fun effectName -> effectDataMap.Item effectName)
 
-    let itemStackData: ItemStack Set =
+    let itemStackMap =
         makeFogentRoleplayDataSet "ItemData.csv" (fun row -> {
             quantity = uint row.["quantity"]
             item = {
@@ -421,6 +421,9 @@ module FogentRoleplayServerData =
                 weight = float row.["weight"]
             }
         })
+        |> Set.map (fun itemStack -> (itemStack.item.name, itemStack))
+        |> Map.ofSeq
+
 
 // // CombatVocationSkills
 
@@ -435,7 +438,7 @@ let fallenDataApi: IFogentRoleplayDataApi = {
             return {
                 defaultCoreSkillList = FogentRoleplayServerData.coreSkillData
                 defaultAttributeSet = FogentRoleplayServerData.attributeNameSet
-            //   allItemStackList = FallenServerData.itemStackData
+                itemStackMap = FogentRoleplayServerData.itemStackMap
             //   magicSkillMap = FallenServerData.magicSkillMap
             //   magicCombatMap = FallenServerData.magicCombatMap
             //   rangeMap = FallenServerData.rangeMap

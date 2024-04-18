@@ -29,6 +29,7 @@ let init () : Model * Cmd<Msg> =
         fogentRoleplayData = {
             defaultAttributeSet = defaultAttributeSet
             defaultCoreSkillList = defaultCoreSkillList
+            itemStackMap = Map.empty
         }
         character = Character.init defaultAttributeSet defaultCoreSkillList
     },
@@ -82,7 +83,11 @@ let view (model: Model) (dispatch: Msg -> unit) =
             ]
 
             Bulma.heroBody [
-                Character.view model.fogentRoleplayData.defaultAttributeSet model.character (CharacterMsg >> dispatch)
+                Character.view
+                    model.fogentRoleplayData.defaultAttributeSet
+                    model.fogentRoleplayData.itemStackMap
+                    model.character
+                    (CharacterMsg >> dispatch)
             ]
         ]
     ]

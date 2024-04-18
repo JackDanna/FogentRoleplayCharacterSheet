@@ -3,11 +3,13 @@ module Character
 open FogentRoleplayLib.Character
 open FogentRoleplayLib.AttributeName
 open FogentRoleplayLib.CoreSkill
+open FogentRoleplayLib.ItemStack
 
 type Msg =
     | SetName of string
     | AttributeAndCoreSkillsListMsg of AttributeAndCoreSkillsList.Msg
     | VocationListMsg of VocationList.Msg
+    | EquipmentMsg of ItemStackList.Msg
 
 let init (attributeNameSet: AttributeName Set) (coreSkillData: CoreSkill list) = {
     name = ""
@@ -52,11 +54,15 @@ let update msg (model: Character) =
                         (VocationList.CalculateDicePools(characterToDicePoolCalculation model))
                         newVocationList
         }
+    | EquipmentMsg msg -> {
+        model with
+            equipmentList = ItemStackList.update msg model.equipmentList
+      }
 
 open Feliz
 open Feliz.Bulma
 
-let view attributeNameSet (model: Character) dispatch =
+let view attributeNameSet (allItemStackList: Map<string, ItemStack>) (model: Character) dispatch =
 
     Bulma.container [
 
@@ -82,21 +88,21 @@ let view attributeNameSet (model: Character) dispatch =
 
         VocationList.view attributeNameSet model.vocationList (VocationListMsg >> dispatch)
 
-    // DestinyPoints.view model.destinyPoints (DestinyPointsMsg >> dispatch)
+        // DestinyPoints.view model.destinyPoints (DestinyPointsMsg >> dispatch)
 
-    // CharacterEffectForDisplayList.view
-    //     characterEffectKeyList
-    //     model.characterEffectForDisplayList
-    //     (CharacterEffectListMsg >> dispatch)
+        // CharacterEffectForDisplayList.view
+        //     characterEffectKeyList
+        //     model.characterEffectForDisplayList
+        //     (CharacterEffectListMsg >> dispatch)
 
-    // CarryWeightStatOption.view
-    //     carryWeightCalculationNameList
-    //     model.carryWeightStatOption
-    //     (CarryWeightStatOptionMsg >> dispatch)
+        // CarryWeightStatOption.view
+        //     carryWeightCalculationNameList
+        //     model.carryWeightStatOption
+        //     (CarryWeightStatOptionMsg >> dispatch)
 
-    // EquipmentEffectForDisplayList.view model.equipmentEffectForDisplayList
+        // EquipmentEffectForDisplayList.view model.equipmentEffectForDisplayList
 
-    // EquipmentList.view allItemStackNameList model.equipmentList (EquipmentListMsg >> dispatch)
+        ItemStackList.view allItemStackList model.equipmentList (EquipmentMsg >> dispatch)
 
     // CombatRollTable.view model.combatRollList
 
