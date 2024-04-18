@@ -40,6 +40,7 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.WeightClass
     open FogentRoleplayLib.MovementSpeedEffect
     open FogentRoleplayLib.Effect
+    open FogentRoleplayLib.ItemClass
 
     let makeFogentRoleplayDataPath fileName =
         __SOURCE_DIRECTORY__ + "../../../FogentRoleplayData/" + fileName
@@ -371,66 +372,58 @@ module FogentRoleplayServerData =
         |> Set.map (fun (effect: Effect) -> effectToEffectName effect, effect)
         |> Map.ofSeq
 
-// // TextEffectForDisplay
-// let textEffectForDisplayData: TextEffectForDisplay list =
-//     makeFogentRoleplayData "CharacterEffectForDisplayData.csv" (fun row ->
-//         { name = string row.["Name"]
-//           effect = string row.["Effect"]
-//           durationAndSource =
-//             { duration = string row.["Duration"]
-//               source = string row.["Source"] } })
+    // // TextEffectForDisplay
+    // let textEffectForDisplayData: TextEffectForDisplay list =
+    //     makeFogentRoleplayData "CharacterEffectForDisplayData.csv" (fun row ->
+    //         { name = string row.["Name"]
+    //           effect = string row.["Effect"]
+    //           durationAndSource =
+    //             { duration = string row.["Duration"]
+    //               source = string row.["Source"] } })
 
-// // EffectForDisplay
-// let effectForDisplayData: EffectForDisplay list =
-//     let skillDiceModEffectForDisplayList =
-//         List.map skillDiceModEffectToSkillDiceModEffectForDisplay skillDiceModEffectData
+    // // EffectForDisplay
+    // let effectForDisplayData: EffectForDisplay list =
+    //     let skillDiceModEffectForDisplayList =
+    //         List.map skillDiceModEffectToSkillDiceModEffectForDisplay skillDiceModEffectData
 
-//     let attributeDeterminedDiceModEffectForDisplayList =
-//         List.map attributeDeterminedDiceModEffectToForDisplay attributeDeterminedDiceModEffectData
+    //     let attributeDeterminedDiceModEffectForDisplayList =
+    //         List.map attributeDeterminedDiceModEffectToForDisplay attributeDeterminedDiceModEffectData
 
-//     List.map TextEffectForDisplay textEffectForDisplayData
-//     @ List.map SkillDiceModEffectForDisplay skillDiceModEffectForDisplayList
-//       @ List.map AttributeDeterminedDiceModEffectForDisplay attributeDeterminedDiceModEffectForDisplayList
+    //     List.map TextEffectForDisplay textEffectForDisplayData
+    //     @ List.map SkillDiceModEffectForDisplay skillDiceModEffectForDisplayList
+    //       @ List.map AttributeDeterminedDiceModEffectForDisplay attributeDeterminedDiceModEffectForDisplayList
 
-// let effectForDisplayMap: Map<string, EffectForDisplay> =
-//     effectForDisplayData
-//     |> List.map (fun (characterEffect: EffectForDisplay) -> effectForDiplayToName characterEffect, characterEffect)
-//     |> Map.ofList
+    // let effectForDisplayMap: Map<string, EffectForDisplay> =
+    //     effectForDisplayData
+    //     |> List.map (fun (characterEffect: EffectForDisplay) -> effectForDiplayToName characterEffect, characterEffect)
+    //     |> Map.ofList
 
 
 
-// // Item
-// let stringToItemClassList
-//     (weaponClassMap: Map<string, WeaponClass>)
-//     (conduitClassMap: Map<string, ConduitClass>)
-//     (weaponResourceClassMap: Map<string, WeaponResourceClass>)
-//     (input: string)
-//     =
-//     input.Split ", "
-//     |> List.ofArray
-//     |> List.collect (fun className ->
-//         match className with
-//         | weaponClassName when weaponClassMap.Keys.Contains weaponClassName ->
-//             weaponClassMap.Item weaponClassName
-//             |> WeaponClass
-//             |> List.singleton
-//         | conduitClassName when conduitClassMap.Keys.Contains conduitClassName ->
-//             conduitClassMap.Item conduitClassName
-//             |> ConduitClass
-//             |> List.singleton
-//         | weaponResourceClassName when weaponResourceClassMap.Keys.Contains weaponResourceClassName ->
-//             weaponResourceClassMap.Item weaponResourceClassName
-//             |> WeaponResourceClass
-//             |> List.singleton
-//         | containerClassName when containerClassMap.Keys.Contains containerClassName ->
-//             containerClassMap.Item containerClassName
-//             |> ContainerClass
-//             |> List.singleton
-//         | itemEffectName when effectDataMap.Keys.Contains itemEffectName ->
-//             effectDataMap.Item itemEffectName
-//             |> ItemEffect
-//             |> List.singleton
-//         | _ -> [])
+    // Item
+    let stringToItemClassList
+        (weaponClassMap: Map<string, Weapon>)
+        //(conduitClassMap: Map<string, ConduitClass>)
+        (weaponResourceClassMap: Map<string, WeaponResource>)
+        (input: string)
+        =
+        input.Split ", "
+        |> List.ofArray
+        |> List.collect (fun className ->
+            match className with
+            | weaponClassName when weaponClassMap.Keys.Contains weaponClassName ->
+                weaponClassMap.Item weaponClassName |> Weapon |> List.singleton
+            // | conduitClassName when conduitClassMap.Keys.Contains conduitClassName ->
+            //     conduitClassMap.Item conduitClassName |> ConduitClass |> List.singleton
+            | weaponResourceClassName when weaponResourceClassMap.Keys.Contains weaponResourceClassName ->
+                weaponResourceClassMap.Item weaponResourceClassName
+                |> WeaponResourceClass
+                |> List.singleton
+            | containerClassName when containerClassMap.Keys.Contains containerClassName ->
+                containerClassMap.Item containerClassName |> ContainerClass |> List.singleton
+            | itemEffectName when effectDataMap.Keys.Contains itemEffectName ->
+                effectDataMap.Item itemEffectName |> ItemEffect |> List.singleton
+            | _ -> [])
 
 // let itemStackData =
 //     makeFogentRoleplayData "ItemData.csv" (fun row ->
