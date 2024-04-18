@@ -34,10 +34,9 @@ let view (allItemStackList: Map<string, ItemStack>) (model: ItemStack list) (dis
             prop.children [
                 Html.thead [
                     List.map (fun (thString: string) -> Html.th thString) [
-                        "On"
-                        "#"
                         "Name"
-                        "Type"
+                        "#"
+                        "Effect"
                         "Tier"
                         //"Dur."
                         "LB"
