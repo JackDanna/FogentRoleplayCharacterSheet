@@ -18,7 +18,6 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.MagicSkillData
     open FogentRoleplayLib.Weapon
     open FogentRoleplayLib.DicePoolMod
-    open FogentRoleplayLib.OldAreaOfEffect
 
     open FogentRoleplayLib.TypeUtils
     open FogentRoleplayLib.AttributeName
@@ -40,7 +39,8 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.WeightClass
     open FogentRoleplayLib.MovementSpeedEffect
     open FogentRoleplayLib.Effect
-    open FogentRoleplayLib.ItemClass
+    open FogentRoleplayLib.AttributeStatAdjustmentEffect
+    open FogentRoleplayLib.ItemStack
 
     let makeFogentRoleplayDataPath fileName =
         __SOURCE_DIRECTORY__ + "../../../FogentRoleplayData/" + fileName
@@ -193,7 +193,7 @@ module FogentRoleplayServerData =
         |> Map.ofSeq
 
     // WeaponClass
-    let weaponMap =
+    let weaponSet =
         makeFogentRoleplayDataSet "WeaponClassData.csv" (fun row -> {
             name = string row.["name"]
             oneHandedWeaponDice = parseDicePoolModOptionString row.["oneHandedWeaponDice"]
@@ -206,8 +206,8 @@ module FogentRoleplayServerData =
             areaOfEffect = namedAreaOfEffectOptionMap row.["areaOfEffect"]
             resourceClass = resourceOptionMap row.["resourceClass"]
         })
-        |> Set.map (fun (weaponClass: Weapon) -> weaponClass.name, weaponClass)
-        |> Map.ofSeq
+    // |> Set.map (fun (weaponClass: Weapon) -> weaponClass.name, weaponClass)
+    // |> Map.ofSeq
 
     // // ConduitClass
     // let conduitClassData =
@@ -249,7 +249,7 @@ module FogentRoleplayServerData =
         |> Map.ofSeq
 
     //WeaponResource
-    let weaponResourceMap =
+    let weaponResourceSet =
         makeFogentRoleplayDataSet "WeaponResourceClassData.csv" (fun row -> {
             name = string row.["desc"]
             resourceName = resourceMap.Item row.["resourceClass"]
@@ -259,8 +259,8 @@ module FogentRoleplayServerData =
             damageTypeSet = stringToDamageTypeSet row.["damageTypes"]
             NamedAreaOfEffectOption = namedAreaOfEffectOptionMap row.["areaOfEffect"]
         })
-        |> Set.map (fun (weaponResource: WeaponResource) -> weaponResource.name, weaponResource)
-        |> Map.ofSeq
+    // |> Set.map (fun (weaponResource: WeaponResource) -> weaponResource.name, weaponResource)
+    // |> Map.ofSeq
 
     // ItemTier
     let itemTierMap =
@@ -275,32 +275,30 @@ module FogentRoleplayServerData =
 
     // DefenseClass
 
-    let physicalDefenseEffectMap =
+    let physicalDefenseSet =
         makeFogentRoleplayDataSet "PhysicalDefenseEffect.csv" (fun row -> {
             name = string row.["name"]
             physicalDefense = float row.["physicalDefense"]
         })
-        |> Set.map (fun (defenseClass: PhysicalDefenseEffect) -> defenseClass.name, defenseClass)
-        |> Map.ofSeq
+    // |> Set.map (fun (defenseClass: PhysicalDefense) -> defenseClass.name, defenseClass)
+    // |> Map.ofSeq
 
     // SkillDiceModEffect
 
-    let skillDiceModEffectMap =
+    let skillDiceModEffectSet =
         makeFogentRoleplayDataSet "SkillDiceModEffect.csv" (fun row -> {
             name = string row.["Name"]
             skillToEffect = string row.["Skill"]
             diceMod = parseDicePoolModString row.["Dice Mod"]
         })
-        |> Set.map (fun (skillAdjustment: SkillDiceModEffect) -> skillAdjustment.name, skillAdjustment)
-        |> Map.ofSeq
-
-    let skillDiceModEffectSet = skillDiceModEffectMap.Values |> Set.ofSeq
+    // let skillDiceModEffectSet = skillDiceModEffectSet.Values |> Set.ofSeq
     // // AttributeStatAdjustmentEffect
-    // let attributeStatAdjustmentEffectData =
-    //     makeFogentRoleplayData "AttributeStatAdjustmentEffect.csv" (fun row ->
-    //         { name = string row.["Name"]
-    //           attribute = AttributeName row.["Attribute"]
-    //           adjustment = int row.["Adjustment"] })
+    let attributeStatAdjustmentEffectData =
+        makeFogentRoleplayDataSet "AttributeStatAdjustmentEffect.csv" (fun row -> {
+            name = string row.["Name"]
+            attribute = AttributeName row.["Attribute"]
+            adjustment = int row.["Adjustment"]
+        })
 
     // let attributeStatAdjustmentEffectMap =
     //     attributeStatAdjustmentEffectData
@@ -310,13 +308,16 @@ module FogentRoleplayServerData =
 
     // AttributeDeterminedDiceModEffect
 
-    let attributeDeterminedDiceModEffectMap =
+    let attributeDeterminedDiceModSet =
         makeFogentRoleplayDataSet "AttributeDeterminedDiceModEffectData.csv" (fun row -> {
             name = row.["name"]
             attributesToEffect = stringToAttributes row.["attributesToEffect"]
             dicePoolMod = parseDicePoolModString row.["dicePoolMod"]
         })
-        |> Set.map (fun (attributeDeterminedDiceModEffect: AttributeDeterminedDiceModEffect) ->
+
+    let attributeDeterminedDiceModMap =
+        attributeDeterminedDiceModSet
+        |> Set.map (fun (attributeDeterminedDiceModEffect: AttributeDeterminedDiceMod) ->
             attributeDeterminedDiceModEffect.name, attributeDeterminedDiceModEffect)
         |> Map.ofSeq
 
@@ -327,7 +328,7 @@ module FogentRoleplayServerData =
             bottomPercent = float row.["bottomPercent"]
             topPercent = float row.["topPercent"]
             attributeDeterminedDiceModEffect =
-                attributeDeterminedDiceModEffectMap.Item row.["attributeDeterminedDiceModEffect"]
+                attributeDeterminedDiceModMap.Item row.["attributeDeterminedDiceModEffect"]
         })
 
     // // MovementSpeedCalculation
@@ -359,16 +360,18 @@ module FogentRoleplayServerData =
     //     |> Map.ofList
 
     // Effect
-    let effectData: Effect Set =
-        Set.map SkillDiceModEffect (skillDiceModEffectMap.Values |> Set.ofSeq)
-        //Set.map AttributeStatAdjustmentEffect attributeStatAdjustmentEffectData
-        |> Set.union (Set.map PhysicalDefenseEffect (physicalDefenseEffectMap.Values |> Set.ofSeq))
-        |> Set.union (
-            Set.map AttributeDeterminedDiceModEffect (attributeDeterminedDiceModEffectMap.Values |> Set.ofSeq)
-        )
-
     let effectDataMap =
-        effectData
+        [
+            Set.map Weapon weaponSet
+            // Set.map Conduit conduitSet
+            Set.map WeaponResource weaponResourceSet
+            Set.map Container containerSet
+            Set.map SkillDiceMod skillDiceModEffectSet
+            //Set.map AttributeStatAdjustment attributeStatAdjustmentEffectData
+            Set.map PhysicalDefense physicalDefenseSet
+            Set.map AttributeDeterminedDiceMod attributeDeterminedDiceModSet
+        ]
+        |> Set.unionMany
         |> Set.map (fun (effect: Effect) -> effectToEffectName effect, effect)
         |> Map.ofSeq
 
@@ -401,40 +404,23 @@ module FogentRoleplayServerData =
 
 
     // Item
-    let stringToItemClassList
-        (weaponClassMap: Map<string, Weapon>)
-        //(conduitClassMap: Map<string, ConduitClass>)
-        (weaponResourceClassMap: Map<string, WeaponResource>)
-        (input: string)
-        =
+    let stringToEffectSet (effectMap: Map<string, Effect>) (input: string) =
         input.Split ", "
-        |> List.ofArray
-        |> List.collect (fun className ->
-            match className with
-            | weaponClassName when weaponClassMap.Keys.Contains weaponClassName ->
-                weaponClassMap.Item weaponClassName |> Weapon |> List.singleton
-            // | conduitClassName when conduitClassMap.Keys.Contains conduitClassName ->
-            //     conduitClassMap.Item conduitClassName |> ConduitClass |> List.singleton
-            | weaponResourceClassName when weaponResourceClassMap.Keys.Contains weaponResourceClassName ->
-                weaponResourceClassMap.Item weaponResourceClassName
-                |> WeaponResourceClass
-                |> List.singleton
-            | containerClassName when containerClassMap.Keys.Contains containerClassName ->
-                containerClassMap.Item containerClassName |> ContainerClass |> List.singleton
-            | itemEffectName when effectDataMap.Keys.Contains itemEffectName ->
-                effectDataMap.Item itemEffectName |> ItemEffect |> List.singleton
-            | _ -> [])
+        |> Set.ofArray
+        |> Set.filter (fun effectName -> effectMap.Keys.Contains effectName)
+        |> Set.map (fun effectName -> effectDataMap.Item effectName)
 
-// let itemStackData =
-//     makeFogentRoleplayData "ItemData.csv" (fun row ->
-//         { quantity = uint row.["quantity"]
-//           item =
-//             { name = string row.["desc"]
-//               itemClasses =
-//                 stringToItemClassList weaponClassMap conduitClassMap weaponResourceClassMap row.["itemClasses"]
-//               itemTier = itemTierMap.Item row.["itemTier"]
-//               value = string row.["value"]
-//               weight = float row.["weight"] } })
+    let itemStackData: ItemStack Set =
+        makeFogentRoleplayDataSet "ItemData.csv" (fun row -> {
+            quantity = uint row.["quantity"]
+            item = {
+                name = string row.["desc"]
+                itemEffectSet = stringToEffectSet effectDataMap row.["itemClasses"]
+                itemTier = itemTierMap.Item row.["itemTier"]
+                value = string row.["value"]
+                weight = float row.["weight"]
+            }
+        })
 
 // // CombatVocationSkills
 

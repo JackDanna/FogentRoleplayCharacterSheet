@@ -29,7 +29,7 @@ let itemRowColumns (itemMap: Map<string, Item>) (model: Item) (dispatch: Msg -> 
     [
         itemInput itemMap.Keys model.name (fun input -> dispatch (SetItem <| itemMap.Item input))
         |> Html.td
-        Html.td (itemClassesToString model.itemClasses)
+        Html.td (effectSetToString model.itemEffectSet)
         Html.td $"{model.itemTier.name} ({model.itemTier.level})"
         Html.td model.weight
         Html.td model.value

@@ -479,9 +479,9 @@ module Range =
         |> Map.ofList
 
     let rangeCalculationListToRangeMap rangeCalculationList =
-        List.map
-            (fun (rangeCalculation: RangeCalculation) -> rangeCalculation.name, RangeCalculation rangeCalculation)
-            rangeCalculationList
+        rangeCalculationList
+        |> List.map (fun (rangeCalculation: RangeCalculation) ->
+            rangeCalculation.name, RangeCalculation rangeCalculation)
         |> Map.ofList
 
     let createRangeMap calculatedRanges rangeCalculations : Map<string, Range> =
@@ -627,9 +627,12 @@ module OldAreaOfEffect =
 module ResourceName =
     type ResourceName = string
 
-module ConduitClass =
+module Conduit =
 
-    type ConduitClass = { magicSkillEffected: string }
+    type Conduit = {
+        name: string
+        magicSkillEffected: string
+    }
 
 module WeaponResource =
 
@@ -883,7 +886,7 @@ module AttributeDeterminedDiceModEffect =
     open AttributeName
     open DicePoolMod
 
-    type AttributeDeterminedDiceModEffect = {
+    type AttributeDeterminedDiceMod = {
         name: string
         attributesToEffect: AttributeName Set
         dicePoolMod: DicePoolMod
@@ -910,7 +913,7 @@ module AttributeDeterminedDiceModEffect =
 
 module PhysicalDefenseEffect =
 
-    type PhysicalDefenseEffect = { name: string; physicalDefense: float }
+    type PhysicalDefense = { name: string; physicalDefense: float }
 
     let physicalDefenseEffectToEffectString defenseClass =
         $"{defenseClass.physicalDefense} Physical Defense"
@@ -918,7 +921,7 @@ module PhysicalDefenseEffect =
 module SkillDiceModEffect =
     open DicePoolMod
 
-    type SkillDiceModEffect = {
+    type SkillDiceMod = {
         name: string
         skillToEffect: string
         diceMod: DicePoolMod
@@ -936,7 +939,7 @@ module AttributeStatAdjustmentEffect =
 
     open AttributeName
 
-    type AttributeStatAdjustmentEffect = {
+    type AttributeStatAdjustment = {
         name: string
         attribute: AttributeName
         adjustment: int
@@ -968,8 +971,8 @@ module MovementSpeedEffect =
     type CoreSkillAndAttributeData = {
         coreSkillList: CoreSkill list
         attributeList: Attribute list
-        skillDiceModEffectList: SkillDiceModEffect list
-        attributeDeterminedDiceModEffectList: AttributeDeterminedDiceModEffect list
+        skillDiceModEffectList: SkillDiceMod list
+        attributeDeterminedDiceModEffectList: AttributeDeterminedDiceMod list
     }
 
     let calculateMovementSpeed (coreSkillAndAttributeData: CoreSkillAndAttributeData) movementSpeedCalculation =
@@ -1025,60 +1028,57 @@ module Effect =
     open PhysicalDefenseEffect
     open AttributeDeterminedDiceModEffect
     open MovementSpeedEffect
+    open Weapon
+    open WeaponResource
+    open Conduit
+    open ContainerClass
 
     type Effect =
-        | SkillDiceModEffect of SkillDiceModEffect
-        | AttributeStatAdjustmentEffect of AttributeStatAdjustmentEffect
-        | PhysicalDefenseEffect of PhysicalDefenseEffect
-        | AttributeDeterminedDiceModEffect of AttributeDeterminedDiceModEffect
+        | Weapon of Weapon
+        | Conduit of Conduit
+        | WeaponResource of WeaponResource
+        | Container of ContainerClass
+        | SkillDiceMod of SkillDiceMod
+        | AttributeStatAdjustment of AttributeStatAdjustment
+        | PhysicalDefense of PhysicalDefense
+        | AttributeDeterminedDiceMod of AttributeDeterminedDiceMod
         | MovementSpeedCalculation of MovementSpeedCalculation
 
     let effectToEffectName effect =
         match effect with
-        | SkillDiceModEffect skillDiceModEffect -> skillDiceModEffect.name
-        | AttributeStatAdjustmentEffect attributeStatAdjustment -> attributeStatAdjustment.name
-        | PhysicalDefenseEffect defenseClass -> defenseClass.name
-        | AttributeDeterminedDiceModEffect addme -> addme.name
+        | Weapon weapon -> weapon.name
+        | Conduit conduit -> conduit.name
+        | WeaponResource weaponResource -> weaponResource.name
+        | Container container -> container.name
+        | SkillDiceMod skillDiceModEffect -> skillDiceModEffect.name
+        | AttributeStatAdjustment attributeStatAdjustment -> attributeStatAdjustment.name
+        | PhysicalDefense defenseClass -> defenseClass.name
+        | AttributeDeterminedDiceMod addme -> addme.name
         | MovementSpeedCalculation msc -> msc.name
 
     let effectToSkillDiceModEffectList (effect: Effect) =
         match effect with
-        | SkillDiceModEffect skillAdjustment -> [ skillAdjustment ]
+        | SkillDiceMod skillAdjustment -> [ skillAdjustment ]
         | _ -> []
 
     let effectToAttributeDeterminedDiceModEffectList (effect: Effect) =
         match effect with
-        | AttributeDeterminedDiceModEffect addme -> [ addme ]
+        | AttributeDeterminedDiceMod addme -> [ addme ]
         | _ -> []
 
 // Item
-
-module ItemClass =
-    open Weapon
-    open WeaponResource
-    open ConduitClass
-    open ContainerClass
-    open Effect
-
-
-    type ItemClass =
-        | WeaponClass of Weapon
-        | ConduitClass of ConduitClass
-        | WeaponResourceClass of WeaponResource
-        | ContainerClass of ContainerClass
-        | ItemEffect of Effect
 
 module Item =
     open ItemTier
     open Weapon
     open WeaponResource
+    open Conduit
     open ContainerClass
     open Effect
-    open ItemClass
 
     type Item = {
         name: string
-        itemClasses: ItemClass list
+        itemEffectSet: Effect Set
         itemTier: ItemTier
         value: string
         weight: float
@@ -1090,72 +1090,69 @@ module Item =
         else
             List.sumBy (fun item -> item.weight) itemList
 
-    let itemClassesToString itemClasses =
-        List.map
-            (fun itemClass ->
-                match itemClass with
-                | WeaponClass weaponClass -> weaponClass.name
-                //| ConduitClass conduitClass -> conduitClass.name
-                | WeaponResourceClass weaponResourceClass -> weaponResourceClass.name
-                | ContainerClass containerClass -> containerClass.name
-                | ItemEffect itemEffect -> effectToEffectName itemEffect)
-            itemClasses
-        |> String.concat ", "
+    let effectSetToString effectSet =
+        effectSet |> Set.map effectToEffectName |> String.concat ", "
 
-    let itemToWeaponClasses item =
-        item.itemClasses
-        |> List.collect (fun itemClass ->
-            match itemClass with
-            | WeaponClass specifiedItemClass -> [ specifiedItemClass ]
-            | _ -> [])
+    let itemToWeaponEffects item : Weapon Set =
+        item.itemEffectSet
+        |> Set.fold
+            (fun acc itemEffect ->
+                match itemEffect with
+                | Weapon weapon -> acc.Add(weapon)
+                | _ -> acc)
+            Set.empty
 
-    let itemToConduitClasses item =
-        item.itemClasses
-        |> List.collect (fun itemClass ->
-            match itemClass with
-            | ConduitClass specifiedItemClass -> [ specifiedItemClass ]
-            | _ -> [])
+    let itemToConduitSet item : Conduit Set =
+        item.itemEffectSet
+        |> Set.fold
+            (fun acc effect ->
+                match effect with
+                | Conduit conduit -> acc.Add(conduit)
+                | _ -> acc)
+            Set.empty
 
-    let itemToWeaponResourceClasses item =
-        item.itemClasses
-        |> List.collect (fun itemClass ->
-            match itemClass with
-            | WeaponResourceClass specifiedItemClass -> [ specifiedItemClass ]
-            | _ -> [])
+    let itemToWeaponResourceClasses item : WeaponResource Set =
+        item.itemEffectSet
+        |> Set.fold
+            (fun acc effect ->
+                match effect with
+                | WeaponResource weaponResource -> acc.Add(weaponResource)
+                | _ -> acc)
+            Set.empty
 
-    let itemToItemNameAndContainerClasses item =
-        item.itemClasses
-        |> List.collect (fun itemClass ->
-            match itemClass with
-            | ContainerClass specifiedItemClass -> [ (item.name, specifiedItemClass) ]
-            | _ -> [])
+// let itemToItemNameAndContainerClasses item =
+//     item.itemEffectSet
+//     |> List.collect (fun itemClass ->
+//         match itemClass with
+//         | Container specifiedItemClass -> [ (item.name, specifiedItemClass) ]
+//         | _ -> [])
 
-    let itemToContainerClassNames item =
-        item.itemClasses
-        |> List.collect (fun itemClass ->
-            match itemClass with
-            | ContainerClass _ -> [ item.name ]
-            | _ -> [])
+// let itemToContainerClassNames item =
+//     item.itemEffectSet
+//     |> List.collect (fun itemClass ->
+//         match itemClass with
+//         | Container _ -> [ item.name ]
+//         | _ -> [])
 
-    let itemToItemEffectSubTypes (itemEffectToItemEffectSubType) (item: Item) =
-        item.itemClasses
-        |> List.collect (fun itemClass ->
-            match itemClass with
-            | ItemEffect itemEffect -> itemEffectToItemEffectSubType itemEffect
-            | _ -> [])
+// let itemToItemEffectSubTypes (itemEffectToItemEffectSubType) (item: Item) =
+//     item.itemEffectSet
+//     |> List.collect (fun itemClass ->
+//         match itemClass with
+//         | ItemEffect itemEffect -> itemEffectToItemEffectSubType itemEffect
+//         | _ -> [])
 
-    let itemToItemNameAndItemEffectList (item: Item) =
-        item.itemClasses
-        |> List.collect (fun itemClass ->
-            match itemClass with
-            | ItemEffect itemEffect -> [ (item.name, itemEffect) ]
-            | _ -> [])
+// let itemToItemNameAndItemEffectList (item: Item) =
+//     item.itemEffectSet
+//     |> List.collect (fun itemClass ->
+//         match itemClass with
+//         | ItemEffect itemEffect -> [ (item.name, itemEffect) ]
+//         | _ -> [])
 
-    let itemToSkillDiceModEffects =
-        itemToItemEffectSubTypes effectToSkillDiceModEffectList
+// let itemToSkillDiceModEffects =
+//     itemToItemEffectSubTypes effectToSkillDiceModEffectList
 
-    let itemToAttributeDeterminedDiceModEffects =
-        itemToItemEffectSubTypes effectToAttributeDeterminedDiceModEffectList
+// let itemToAttributeDeterminedDiceModEffects =
+//     itemToItemEffectSubTypes effectToAttributeDeterminedDiceModEffectList
 
 module ItemStack =
     open Item
@@ -1170,29 +1167,29 @@ module ItemStack =
         |> List.map (fun itemStack -> itemStack.item.weight * (float itemStack.quantity))
         |> List.sum
 
-module Container =
+// module Container =
 
-    open ContainerClass
-    open ItemStack
+//     open Container
+//     open ItemStack
 
-    type Container = {
-        name: string
-        containerClass: ContainerClass
-        isEquipped: bool
-        itemStackList: ItemStack list
-    }
+//     type Container = {
+//         name: string
+//         containerClass: ContainerClass
+//         isEquipped: bool
+//         itemStackList: ItemStack list
+//     }
 
-    let itemNameAndContainerClassToContainer (itemName, containerClass: ContainerClass) = {
-        name = itemName
-        containerClass = containerClass
-        isEquipped = false
-        itemStackList = []
-    }
+//     let itemNameAndContainerClassToContainer (itemName, containerClass: ContainerClass) = {
+//         name = itemName
+//         containerClass = containerClass
+//         isEquipped = false
+//         itemStackList = []
+//     }
 
-    let sumContainerListWeight (containerList: Container list) =
-        containerList
-        |> List.map (fun container -> sumItemStackListWeight container.itemStackList)
-        |> List.sum
+//     let sumContainerListWeight (containerList: Container list) =
+//         containerList
+//         |> List.map (fun container -> sumItemStackListWeight container.itemStackList)
+//         |> List.sum
 
 
 // ItemStat
@@ -1270,7 +1267,7 @@ module WeightClass =
         name: string
         bottomPercent: float
         topPercent: float
-        attributeDeterminedDiceModEffect: AttributeDeterminedDiceModEffect
+        attributeDeterminedDiceModEffect: AttributeDeterminedDiceMod
     }
 
     let determineWeightClass (maxCarryWeight: float) (inventoryWeight: float) (weightClassList: WeightClass list) =
