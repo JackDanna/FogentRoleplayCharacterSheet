@@ -7,10 +7,10 @@ module StringUtils =
         let regex = Regex(@"^[0-9]+$")
         regex.IsMatch(number)
 
-    let stringListToStringSeperatedByCommas (stringList: string list) = String.concat ", " stringList
+    let stringSeqToStringSeperatedByCommas (stringList: string seq) = String.concat ", " stringList
 
     let stringSetToStringSeperatedByCommas stringSet =
-        stringSet |> List.ofSeq |> stringListToStringSeperatedByCommas
+        stringSet |> List.ofSeq |> stringSeqToStringSeperatedByCommas
 
     let mapAndStringToValueSet (map: Map<string, 'a>) (input: string) =
         if input.Length = 0 then
@@ -536,6 +536,45 @@ module SetAreaOfEffect =
         | SetCone of SetCone
         | SetSphere of SetSphere
 
+    let setConeToString decimalPlaces (setCone: SetCone) =
+        // let decimalLimitedArea =
+        //     calculatedCone.area.ToString("F" + decimalPlaces.ToString())
+
+        let decimalLimitedAngle = setCone.angle.ToString("F" + decimalPlaces.ToString())
+
+        sprintf
+            //"area: %s ft^2, distance: %u ft, angle: %s θ"
+            //decimalLimitedArea
+            "distance: %u ft, angle: %s θ"
+            setCone.baseAndHeight
+            decimalLimitedAngle
+
+    let setSphereToString decimalPlaces calculatedSphere =
+        // let decimalLimitedArea =
+        //     calculatedSphere.area.ToString("F" + decimalPlaces.ToString())
+
+        let decimalLimitedRadius =
+            calculatedSphere.radius.ToString("F" + decimalPlaces.ToString())
+
+        sprintf
+            // "area: %s ft^2, radius: %s ft"
+            // decimalLimitedArea
+            "radius: %s ft"
+            decimalLimitedRadius
+
+    let setAreaOfEffectToString (setAOE: SetAreaOfEffect) =
+        let decimalPlaces = 1
+
+        match setAOE with
+        | SetCone setCone -> setConeToString decimalPlaces setCone
+        | SetSphere sphereShape -> setSphereToString decimalPlaces sphereShape
+
+    let setAreaOfEffectOptionToString shapeOption =
+        match shapeOption with
+        | Some shape -> setAreaOfEffectToString shape
+        | None -> ""
+
+
 module AreaOfEffect =
     open System
     open MathUtils
@@ -566,42 +605,6 @@ module AreaOfEffect =
                 |> roundDownToNearestMultipleOf5
             angle = coneCalculation.angle
         }
-
-    // let calculatedConeToString decimalPlaces (calculatedCone: CalculatedCone) =
-    //     let decimalLimitedArea =
-    //         calculatedCone.area.ToString("F" + decimalPlaces.ToString())
-
-    //     let decimalLimitedAngle =
-    //         calculatedCone.angle.ToString("F" + decimalPlaces.ToString())
-
-    //     sprintf
-    //         "area: %s ft^2, distance: %u ft, angle: %s θ"
-    //         decimalLimitedArea
-    //         calculatedCone.baseAndHeight
-    //         decimalLimitedAngle
-
-    // let calculatedSphereToString decimalPlaces calculatedSphere =
-    //     let decimalLimitedArea =
-    //         calculatedSphere.area.ToString("F" + decimalPlaces.ToString())
-
-    //     let decimalLimitedRadius =
-    //         calculatedSphere.radius.ToString("F" + decimalPlaces.ToString())
-
-    //     sprintf "area: %s ft^2, radius: %s ft" decimalLimitedArea decimalLimitedRadius
-
-    // let calculatedAOEToString calculatedAOE =
-    //     let decimalPlaces = 1
-
-    //     match calculatedAOE with
-    //     | ConeToCalculatedCone calculatedCone -> calculatedConeToString decimalPlaces calculatedCone
-    //     | SphereToCalculatedSphere sphereShape -> calculatedSphereToString decimalPlaces sphereShape
-
-
-    // let calculatedAOEOptionToString shapeOption =
-    //     match shapeOption with
-    //     | Some shape -> calculatedAOEToString shape
-    //     | None -> ""
-
 
     let sphereCalculationToSetSphere (sphereCalculation: SphereCalculation) (numDice: uint) : SetSphere = {
         name = sphereCalculation.name

@@ -5,10 +5,12 @@ open FogentRoleplayLib.CombatRoll
 open FogentRoleplayLib.Attribute
 open FogentRoleplayLib.Vocation
 
-open FogentRoleplayLib.DicePoolMod
+open FogentRoleplayLib.DicePool
 open FogentRoleplayLib.Range
 open FogentRoleplayLib.SetAreaOfEffect
 open FogentRoleplayLib.ItemStack
+
+open FogentRoleplayLib.StringUtils
 
 open FogentRoleplayLib.MagicSkill
 open FogentRoleplayLib.AttributeDeterminedDiceModEffect
@@ -39,15 +41,15 @@ let update: CombatRoll list =
 open Feliz
 open Feliz.Bulma
 
-let combatRollRow (combatRoll: CombatRoll) =
+let combatRollRow (model: CombatRoll) =
     Html.tr [
-        Html.td combatRoll.name
-        Html.td (dicePoolToString combatRoll.dicePool)
-        Html.td (int combatRoll.penetration)
-        Html.td (calculatedRangeToString combatRoll.calculatedRange)
-        Html.td (damageTypesToString combatRoll.damageTypes)
-        Html.td (int combatRoll.engageableOpponents)
-        Html.td (calculatedAOEOptionToString combatRoll.areaOfEffectShape)
+        Html.td model.name
+        Html.td (dicePoolToString model.dicePool)
+        Html.td (int model.penetration)
+        Html.td (calculatedRangeToString model.calculatedRange)
+        Html.td (stringSetToStringSeperatedByCommas model.damageTypeSet)
+        Html.td (int model.calculatedEngageableOpponents)
+        Html.td (setAreaOfEffectOptionToString model.setAreaOfEffectOption)
     ]
 
 let view (model: CombatRoll list) =
@@ -57,9 +59,16 @@ let view (model: CombatRoll list) =
             table.isBordered
             prop.children [
                 Html.thead [
-                    List.map (fun (thString: string) -> Html.th thString) [
-                        "Name" "Dice Poll" "Penetration" "Effective/MaxRange" "Damage Type" "EO" "AOE"
+                    [
+                        "Name"
+                        "Dice Poll"
+                        "Penetration"
+                        "Effective/MaxRange"
+                        "Damage Type"
+                        "EO"
+                        "AOE"
                     ]
+                    |> List.map (fun (thString: string) -> Html.th thString)
                     |> Html.tr
                 ]
                 Html.tableBody (List.map combatRollRow model)
