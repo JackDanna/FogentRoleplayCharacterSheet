@@ -22,6 +22,7 @@
     <Compile Include="Item.fs" />
     <Compile Include="ItemStack.fs" />
     <Compile Include="ItemStackList.fs" />
+    <Compile Include="CombatRollList.fs" />
     <Compile Include="Character.fs" />
     <None Include="postcss.config.js" />
     <None Include="tailwind.config.js" />

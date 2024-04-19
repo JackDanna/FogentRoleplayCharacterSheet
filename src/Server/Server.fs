@@ -33,6 +33,7 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.PhysicalDefenseEffect
     open FogentRoleplayLib.SkillDiceModEffect
 
+    open FogentRoleplayLib.SetAreaOfEffect
     open FogentRoleplayLib.AreaOfEffect
     open FogentRoleplayLib.AreaOfEffectCalculation
     open FogentRoleplayLib.AttributeDeterminedDiceModEffect
@@ -98,58 +99,57 @@ module FogentRoleplayServerData =
         | _ -> rangeMap.Item string |> Some
 
     // AreaOfEffect
-    let namedConeSet: NamedAreaOfEffect Set =
+    let SetConeSet =
         makeFogentRoleplayDataSet "AreaOfEffects/SetCone.csv" (fun row -> {
             name = string row.["name"]
-            areaOfEffect =
-                {
-                    baseAndHeight = uint row.["Triangle Base/Height (ft)"]
-                    angle = float row.["Cone Angle (degrees)"]
-                }
-                |> Cone
+            baseAndHeight = uint row.["Triangle Base/Height (ft)"]
+            angle = float row.["Cone Angle (degrees)"]
         })
 
-    let namedSphereSet =
+    let SetSphereSet =
         makeFogentRoleplayDataSet "AreaOfEffects/SetSphere.csv" (fun row -> {
             name = row.["Name"]
-            areaOfEffect = { radius = float row.["Radius(ft)"] } |> Sphere
+            radius = uint row.["Radius(ft)"]
         })
 
-    let namedConeCalculationSet =
+    let coneCalculationSet =
         makeFogentRoleplayDataSet "AreaOfEffects/ConeCalculation.csv" (fun row -> {
             name = string row.["name"]
-            areaOfEffect =
-                {
-                    angle = float row.["angle"]
-                    initBaseAndHeight = float row.["init triangle base/height"]
-                    baseAndHeightPerDice = float row.["base/height per unit"]
-                }
-                |> ConeCalculation
+            angle = float row.["angle"]
+            initBaseAndHeight = float row.["init triangle base/height"]
+            baseAndHeightPerDice = float row.["base/height per unit"]
         })
 
-    let namedSphereCalculationSet =
+    let sphereCalculationSet =
         makeFogentRoleplayDataSet "AreaOfEffects/SphereCalculation.csv" (fun row -> {
             name = string row.["name"]
-            areaOfEffect =
-                {
-                    initRadius = float row.["Init Radius"]
-                    radiusPerDice = float row.["Radius per Dice"]
-                }
-                |> SphereCalculation
+            initRadius = float row.["Init Radius"]
+            radiusPerDice = float row.["Radius per Dice"]
         })
 
-    let namedAreaOfEffectMap =
-        namedConeSet
-        |> Set.union namedSphereSet
-        |> Set.union namedConeCalculationSet
-        |> Set.union namedSphereCalculationSet
-        |> Set.map (fun areaOfEffect -> (areaOfEffect.name, areaOfEffect))
+    let areaOfEffectMap =
+        [
+            Set.map (fun (setCone: SetCone) -> (setCone.name, setCone |> SetCone |> SetAreaOfEffect)) SetConeSet
+            Set.map
+                (fun (setSphere: SetSphere) -> (setSphere.name, setSphere |> SetSphere |> SetAreaOfEffect))
+                SetSphereSet
+            Set.map
+                (fun (coneCalculation: ConeCalculation) ->
+                    (coneCalculation.name, coneCalculation |> ConeCalculation |> AreaOfEffectCalculation))
+                coneCalculationSet
+            Set.map
+                (fun (sphereCalculation: SphereCalculation) ->
+                    (sphereCalculation.name, sphereCalculation |> SphereCalculation |> AreaOfEffectCalculation))
+                sphereCalculationSet
+        ]
+        |> Set.unionMany
         |> Map.ofSeq
+
 
     let namedAreaOfEffectOptionMap key =
         match key with
         | "" -> None
-        | _ -> namedAreaOfEffectMap.Item key |> Some
+        | _ -> areaOfEffectMap.Item key |> Some
 
     // ResourceClass
     let resourceMap =
@@ -170,7 +170,7 @@ module FogentRoleplayServerData =
             skill = {
                 name = row.["name"]
                 level = Zero
-                dicePool = baseDicePool
+                dicePool = base3d6DicePool
             }
             governingAttributeName = row.["governingAttribute"]
         })

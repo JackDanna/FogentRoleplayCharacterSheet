@@ -11,7 +11,7 @@ type Msg =
 let init () = {
     name = ""
     level = Neg1To5.init ()
-    dicePool = baseDicePool
+    dicePool = base3d6DicePool
 }
 
 let update msg model =

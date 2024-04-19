@@ -46,6 +46,8 @@ module MathUtils =
         | Some max -> if (max < result) then max else result
         | None -> result
 
+    let roundDownToNearestMultipleOf5 (value: float) : uint = Math.Floor(value / 5.0) * 5.0 |> uint
+
 module TypeUtils =
 
     let stringSetToTypeMap (stringTypeArray: string Set) =
@@ -225,7 +227,7 @@ module DicePool =
         d20 = 0u
     }
 
-    let baseDicePool = { emptyDicePool with d6 = 3u }
+    let base3d6DicePool = { emptyDicePool with d6 = 3u }
 
     let diceToString numDice diceTypeString =
         if numDice <> 0u then
@@ -286,6 +288,8 @@ module DicePoolMod =
 
     let createD6DicePoolMod (numDice: uint) =
         AddDice { emptyDicePool with d6 = numDice }
+
+    let emptyDicePoolMod = createD6DicePoolMod 0u
 
     let removeDice (dice: uint) (neg: uint) : uint * DicePoolPenalty =
         let result = int dice - int neg
@@ -502,77 +506,46 @@ module Range =
 module AreaOfEffectCalculation =
 
     type SphereCalculation = {
+        name: string
         initRadius: float
         radiusPerDice: float
     }
 
     type ConeCalculation = {
+        name: string
         initBaseAndHeight: float
         baseAndHeightPerDice: float
         angle: float
     }
 
+    type AreaOfEffectCalculation =
+        | SphereCalculation of SphereCalculation
+        | ConeCalculation of ConeCalculation
 
+module SetAreaOfEffect =
+
+    type SetCone = {
+        name: string
+        baseAndHeight: uint
+        angle: float
+    }
+
+    type SetSphere = { name: string; radius: uint }
+
+    type SetAreaOfEffect =
+        | SetCone of SetCone
+        | SetSphere of SetSphere
 
 module AreaOfEffect =
     open System
+    open MathUtils
     open BattleMapUOM
     open AreaOfEffectCalculation
-
-    type Cone = { baseAndHeight: uint; angle: float }
-
-    type Sphere = { radius: float }
+    open SetAreaOfEffect
 
     type AreaOfEffect =
-        | ConeCalculation of ConeCalculation
-        | SphereCalculation of SphereCalculation
-        | Cone of Cone
-        | Sphere of Sphere
-
-    type NamedAreaOfEffect = {
-        name: string
-        areaOfEffect: AreaOfEffect
-    }
-
-// let calculatedConeToString decimalPlaces (calculatedCone: CalculatedCone) =
-//     let decimalLimitedArea =
-//         calculatedCone.area.ToString("F" + decimalPlaces.ToString())
-
-//     let decimalLimitedAngle =
-//         calculatedCone.angle.ToString("F" + decimalPlaces.ToString())
-
-//     sprintf
-//         "area: %s ft^2, distance: %u ft, angle: %s θ"
-//         decimalLimitedArea
-//         calculatedCone.baseAndHeight
-//         decimalLimitedAngle
-
-// let calculatedSphereToString decimalPlaces calculatedSphere =
-//     let decimalLimitedArea =
-//         calculatedSphere.area.ToString("F" + decimalPlaces.ToString())
-
-//     let decimalLimitedRadius =
-//         calculatedSphere.radius.ToString("F" + decimalPlaces.ToString())
-
-//     sprintf "area: %s ft^2, radius: %s ft" decimalLimitedArea decimalLimitedRadius
-
-// let calculatedAOEToString calculatedAOE =
-//     let decimalPlaces = 1
-
-//     match calculatedAOE with
-//     | ConeToCalculatedCone calculatedCone -> calculatedConeToString decimalPlaces calculatedCone
-//     | SphereToCalculatedSphere sphereShape -> calculatedSphereToString decimalPlaces sphereShape
-
-
-// let calculatedAOEOptionToString shapeOption =
-//     match shapeOption with
-//     | Some shape -> calculatedAOEToString shape
-//     | None -> ""
-
-module OldAreaOfEffect =
-    open System
-    open AreaOfEffectCalculation
-    open AreaOfEffect
+        | SetAreaOfEffect of SetAreaOfEffect
+        | AreaOfEffectCalculation of AreaOfEffectCalculation
 
     let calcConeArea (distance: uint) (angle: float) : float =
         float (distance * distance) * Math.Tan(angle / 2.0)
@@ -583,44 +556,85 @@ module OldAreaOfEffect =
     let calcConeAngle (area: uint) (distance: uint) =
         2. * Math.Atan(Math.Sqrt(float area / float (distance * distance)))
 
-    // let calcCone (numDice: uint) (coneCalculation: ConeCalculation) : CalculatedCone =
-    //     let distance = numDice * feetPerBattleMapUOM
-    //     let angle = 53.0
+    let coneCalculationToSetCone (coneCalculation: ConeCalculation) (numDice: uint) =
 
-    //     {
-    //         name = ""
-    //         area = calcConeArea distance a
-    //         baseAndHeight = distance
-    //         angle = coneCalculation.
-    //     }
+        {
+            name = coneCalculation.name
+            baseAndHeight =
+                coneCalculation.initBaseAndHeight
+                + (coneCalculation.baseAndHeightPerDice * (float numDice))
+                |> roundDownToNearestMultipleOf5
+            angle = coneCalculation.angle
+        }
 
-    let calcCircle (numDice: uint) : Sphere =
-        let radius: float = 2.5 * float numDice
+    // let calculatedConeToString decimalPlaces (calculatedCone: CalculatedCone) =
+    //     let decimalLimitedArea =
+    //         calculatedCone.area.ToString("F" + decimalPlaces.ToString())
 
-        { radius = radius }
+    //     let decimalLimitedAngle =
+    //         calculatedCone.angle.ToString("F" + decimalPlaces.ToString())
 
-    type AreaOfEffect =
-        | AreaOfEffectCalculation
-        | CalculatedAreaOfEffect
+    //     sprintf
+    //         "area: %s ft^2, distance: %u ft, angle: %s θ"
+    //         decimalLimitedArea
+    //         calculatedCone.baseAndHeight
+    //         decimalLimitedAngle
 
-// let calcShape (numDice: uint) (aoe: AreaOfEffect) : CalculatedAOE =
-//     match aoe with
-//     | AreaOfEffectCalculation -> ConeToCalculatedCone(calcCone numDice)
-//     | CalculatedAreaOfEffect -> SphereToCalculatedSphere(calcCircle numDice)
+    // let calculatedSphereToString decimalPlaces calculatedSphere =
+    //     let decimalLimitedArea =
+    //         calculatedSphere.area.ToString("F" + decimalPlaces.ToString())
 
-// let determineAOEShapeOption numDice aoe =
-//     match aoe with
-//     | Some aoe -> Some(calcShape numDice aoe)
-//     | None -> None
+    //     let decimalLimitedRadius =
+    //         calculatedSphere.radius.ToString("F" + decimalPlaces.ToString())
 
-// let compareAndDetermineAOEShapeOption
-//     (numDice: uint)
-//     (aoe: AreaOfEffect option)
-//     (resourceAOE: AreaOfEffect option)
-//     : CalculatedAOE option =
-//     match resourceAOE with
-//     | Some resourceAOE -> Some(calcShape numDice resourceAOE)
-//     | None -> determineAOEShapeOption numDice aoe
+    //     sprintf "area: %s ft^2, radius: %s ft" decimalLimitedArea decimalLimitedRadius
+
+    // let calculatedAOEToString calculatedAOE =
+    //     let decimalPlaces = 1
+
+    //     match calculatedAOE with
+    //     | ConeToCalculatedCone calculatedCone -> calculatedConeToString decimalPlaces calculatedCone
+    //     | SphereToCalculatedSphere sphereShape -> calculatedSphereToString decimalPlaces sphereShape
+
+
+    // let calculatedAOEOptionToString shapeOption =
+    //     match shapeOption with
+    //     | Some shape -> calculatedAOEToString shape
+    //     | None -> ""
+
+
+    let sphereCalculationToSetSphere (sphereCalculation: SphereCalculation) (numDice: uint) : SetSphere = {
+        name = sphereCalculation.name
+        radius =
+            sphereCalculation.initRadius + (sphereCalculation.radiusPerDice * float numDice)
+            |> roundDownToNearestMultipleOf5
+    }
+
+    let areaOfEffectCalculationToSetAreaOfEffect areaOfEffectCalculation numDice =
+        match areaOfEffectCalculation with
+        | ConeCalculation coneCalculation -> coneCalculationToSetCone coneCalculation numDice |> SetCone
+        | SphereCalculation sphereCalculation -> sphereCalculationToSetSphere sphereCalculation numDice |> SetSphere
+
+    let areaOfEffectToSetAreaOfEffect (aoe: AreaOfEffect) (numDice: uint) : SetAreaOfEffect =
+        match aoe with
+        | AreaOfEffectCalculation areaOfEffectCalculation ->
+            areaOfEffectCalculationToSetAreaOfEffect areaOfEffectCalculation numDice
+        | SetAreaOfEffect setAreaOfEffect -> setAreaOfEffect
+
+    let determineAOEOption aoe numDice =
+        match aoe with
+        | Some aoe -> areaOfEffectToSetAreaOfEffect aoe numDice |> Some
+        | None -> None
+
+    let compareAndDetermineAOEShapeOption
+        (numDice: uint)
+        (aoe: AreaOfEffect option)
+        (resourceAOE: AreaOfEffect option)
+        : SetAreaOfEffect option =
+
+        match resourceAOE with
+        | Some resourceAOE -> Some(areaOfEffectToSetAreaOfEffect resourceAOE numDice)
+        | None -> determineAOEOption aoe numDice
 
 // Item Building
 
@@ -650,7 +664,7 @@ module WeaponResource =
         penetration: Penetration
         rangeOption: Range option
         damageTypeSet: DamageType Set
-        NamedAreaOfEffectOption: NamedAreaOfEffect option
+        NamedAreaOfEffectOption: AreaOfEffect option
     }
 
     let weaponResourceClassOptionToWeaponResourceClass (resource: WeaponResource option) =
@@ -682,7 +696,7 @@ module Weapon =
         damageTypes: DamageType Set
         engageableOpponents: EngageableOpponents
         dualWieldableBonus: DicePoolMod option
-        areaOfEffect: NamedAreaOfEffect option
+        areaOfEffect: AreaOfEffect option
         resourceClass: ResourceName option
     }
 
@@ -727,16 +741,39 @@ module Attribute =
         level: Neg2To5
     }
 
-    let findAttributeWithAttributeName attributeList attributeName =
-        List.collect
-            (fun attribute ->
-                if attribute.attributeName = attributeName then
-                    [ attribute ]
-                else
-                    [])
-            attributeList
+    let findAttributeWithAttributeName attributeSet attributeName =
+        Set.filter (fun attribute -> attribute.attributeName = attributeName) attributeSet
+
+    let collectAttributesWithAttributeNames attributeSet attributeNameSet =
+        Set.fold
+            (fun acc attributeName -> attributeName |> findAttributeWithAttributeName attributeSet |> Set.union acc)
+            Set.empty
+            attributeNameSet
+
+    let attributesToAttributeNames attributes =
+        Set.map (fun (attribute: Attribute) -> attribute.attributeName) attributes
 
 
+    open Neg2To5
+    open DicePoolMod
+
+    let sumAttributesLevels (attributeNameList: AttributeName Set) (attributeList: Attribute Set) =
+        attributeList
+        |> List.ofSeq
+        |> List.map (fun attribute ->
+            if Set.contains attribute.attributeName attributeNameList then
+                neg2To5ToInt attribute.level
+            else
+                0)
+        |> List.sum
+
+    let sumGoverningAttributeD6DiceMods attributeSet governingAttributeNameSet =
+        sumAttributesLevels governingAttributeNameSet attributeSet |> intToD6DicePoolMod
+
+// let governingAttributesToDicePoolMod (attributes: Attribute list) (governingAttributes: AttributeName list) =
+//     attributes
+//     |> List.filter (fun attribute -> (List.contains attribute.attributeName governingAttributes))
+//     |> List.map (fun governingAttribute -> neg1To5ToD6DicePoolMod governingAttribute.level)
 
 module Skill =
     open Neg1To5
@@ -1205,7 +1242,7 @@ module DicePoolCalculation =
 
     type DicePoolCalculationData = {
         baseDice: DicePool option
-        attributeList: Attribute list
+        attributeSet: Attribute Set
         injuryDicePenalty: DicePoolPenalty
         weightClassDicePenalty: DicePoolPenalty
         itemEffectDicePoolMod: DicePoolMod
@@ -1217,17 +1254,10 @@ module DicePoolCalculation =
         (goveringAttributes: AttributeName Set)
         =
 
-        let attributes: Attribute list =
-            goveringAttributes
-            |> List.ofSeq
-            |> List.collect (findAttributeWithAttributeName dicePoolCalculationData.attributeList)
-
-        modifyDicePoolByDicePoolModList (dicePoolCalculationData.baseDice |> Option.defaultValue baseDicePool) [
+        modifyDicePoolByDicePoolModList (dicePoolCalculationData.baseDice |> Option.defaultValue base3d6DicePool) [
             skillLevel |> intToD6DicePoolMod
-            (attributes
-             |> List.map (fun attribute -> neg2To5ToInt attribute.level)
-             |> List.sum
-             |> intToD6DicePoolMod)
+            (goveringAttributes
+             |> sumGoverningAttributeD6DiceMods dicePoolCalculationData.attributeSet)
             dicePoolCalculationData.injuryDicePenalty |> RemoveDice
             dicePoolCalculationData.itemEffectDicePoolMod
             dicePoolCalculationData.weightClassDicePenalty |> RemoveDice
@@ -1280,6 +1310,129 @@ module WeightClass =
                 && (percentOfMaxCarryWeight >= weightClass.bottomPercent))
             weightClassList
 
+module CombatRoll =
+
+    open DicePool
+    open Penetration
+    open Range
+    open DamageType
+    open SetAreaOfEffect
+    open EngageableOpponents
+
+    type CombatRoll = {
+        name: string
+        dicePool: DicePool
+        calculatedRange: CalculatedRange
+        penetration: Penetration
+        damageTypeSet: DamageType Set
+        setAreaOfEffectOption: SetAreaOfEffect Option
+        calculatedEngageableOpponents: CalculatedEngageableOpponents
+    }
+
+    open DicePool
+    open DicePoolMod
+
+
+    let createCombatRollDicePool
+        (baseDice: DicePool)
+        (skillDiceMod: DicePoolMod)
+        (attributeDicePoolMod: DicePoolMod)
+        (attributeDeterminedDiceModList: DicePoolMod list)
+        (weaponHandedDicePoolMod: DicePoolMod) // Last two parameters here for curring
+        (weaponResourceDiceMod: DicePoolMod) // Last two parameters here for curring
+        =
+        modifyDicePoolByDicePoolModList
+            baseDice
+            ([ skillDiceMod ]
+             @ [ attributeDicePoolMod ]
+             @ [ weaponHandedDicePoolMod ]
+             @ [ weaponResourceDiceMod ]
+             @ attributeDeterminedDiceModList)
+
+    open Weapon
+    open ItemTier
+    open Neg1To5
+    open AttributeName
+    open Attribute
+    open AttributeDeterminedDiceModEffect
+    open WeaponResource
+    open AreaOfEffect
+
+    let createWeaponCombatRoll
+        (name: string)
+        (weaponDiceMod: DicePoolMod)
+        (weaponPenetration: Penetration)
+        (weaponRange: Range)
+        (weaponDamageTypeSet: DamageType Set)
+        (weaponEO: EngageableOpponents)
+        (weaponAOEOption: AreaOfEffect option)
+        (itemTierBaseDice: DicePool)
+        (attributeDeterminedDiceModList: AttributeDeterminedDiceMod List)
+        (attributeSet: Attribute Set)
+        (skillLevel: Neg1To5)
+        (governingAttributeNameSet: AttributeName Set)
+        resource
+        descSuffix
+        wieldingDiceMods
+        : CombatRoll =
+
+        let (resourceDesc, resourceDice, resourcePenetration, resourceRange, resourceDamageTypeSet, resourceAreaOfEffect) =
+            weaponResourceClassOptionToWeaponResourceClass resource
+
+        let dicePool =
+            createCombatRollDicePool
+                itemTierBaseDice
+                (skillLevel |> neg1To5ToInt |> intToD6DicePoolMod)
+                (governingAttributeNameSet |> sumGoverningAttributeD6DiceMods attributeSet)
+                (attributeDeterminedDiceModList
+                 |> collectAttributeDeterminedDiceMod governingAttributeNameSet)
+                weaponDiceMod
+                resourceDice
+
+        let numDice = dicePoolToNumDice dicePool
+
+        {
+            name = name + resourceDesc + descSuffix
+            dicePool = dicePool
+            calculatedRange = determineGreatestRange numDice weaponRange resourceRange
+            penetration = weaponPenetration + resourcePenetration
+            damageTypeSet = Set.union weaponDamageTypeSet resourceDamageTypeSet
+            setAreaOfEffectOption = compareAndDetermineAOEShapeOption numDice weaponAOEOption resourceAreaOfEffect
+            calculatedEngageableOpponents = determineEngageableOpponents numDice weaponEO
+        }
+
+
+// let createCombatRoll
+//     (name: string)
+//     (itemTier:ItemTier)
+//     (weaponHandedDicePoolMod: DicePoolMod)
+//     (skillLevel: Neg1To5)
+//     (governingAttributeNamesSet: AttributeName Set)
+//     (attributeSet: Attribute Set)
+//     (attributeDeterminedDiceModList: AttributeDeterminedDiceMod list)
+//     (weaponResource: WeaponResource)
+//     : CombatRoll
+//     =
+//         {
+//             name = name
+//             dicePool =
+//                 createCombatRollDicePool
+//                     itemTier.baseDice
+//                     (skillLevel |> neg1To5ToInt |> intToD6DicePoolMod)
+//                     (governingAttributeNamesSet |> collectAttributesWithAttributeNames attributeSet)
+//                     (attributeDeterminedDiceModList |> collectAttributeDeterminedDiceMod governingAttributeNamesSet)
+//                     (weaponHandedDicePoolMod)
+//                     (weaponResource.dicePoolMod)
+//             calculatedRange =
+//         }
+
+// let createHandedVariationCombatRolls
+//     (twoHandedWeaponDice: DicePoolMod Option)
+//     (oneHandedWeaponDiceOption: DicePoolMod Option)
+//     (dualWieldableBonusOption: DicePoolMod Option)
+//     preloadedCreateCombatRoll
+//     =
+
 module Character =
     open AttributeName
     open CoreSkill
@@ -1300,10 +1453,11 @@ module Character =
 
         {
             baseDice = None
-            attributeList =
+            attributeSet =
                 List.map
                     (fun attributeAndCoreSkills -> attributeAndCoreSkills.attributeStat)
                     character.attributeAndCoreSkillsList
+                |> Set.ofList
             injuryDicePenalty = 0u
             weightClassDicePenalty = 0u
             itemEffectDicePoolMod = createD6DicePoolMod 0u
