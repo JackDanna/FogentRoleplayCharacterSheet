@@ -3,7 +3,6 @@ module ItemStackList
 open FogentRoleplayLib.ItemStack
 
 type Msg =
-    //| ItemRowMsg of Item.Msg
     | ModifyItemStack of int * ItemStack.Msg
     | Insert of ItemStack
     | Remove of int
@@ -38,7 +37,6 @@ let view (allItemStackList: Map<string, ItemStack>) (model: ItemStack list) (dis
                         "#"
                         "Effect"
                         "Tier"
-                        //"Dur."
                         "LB"
                         "Value"
                     ]
