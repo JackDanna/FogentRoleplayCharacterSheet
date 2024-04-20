@@ -574,7 +574,6 @@ module SetAreaOfEffect =
         | Some shape -> setAreaOfEffectToString shape
         | None -> ""
 
-
 module AreaOfEffect =
     open System
     open MathUtils
@@ -699,7 +698,7 @@ module Weapon =
         damageTypes: DamageType Set
         engageableOpponents: EngageableOpponents
         dualWieldableBonus: DicePoolMod option
-        areaOfEffect: AreaOfEffect option
+        areaOfEffectOption: AreaOfEffect option
         resourceClass: ResourceName option
     }
 
@@ -807,7 +806,6 @@ module CoreSkill =
         skill: Skill
         governingAttributeName: AttributeName
     }
-
 
 module VocationalSkill =
     open Skill
@@ -1336,24 +1334,22 @@ module CombatRoll =
     open DicePoolMod
 
 
-    let createCombatRollDicePool
-        (baseDice: DicePool)
-        (skillDiceMod: DicePoolMod)
-        (attributeDicePoolMod: DicePoolMod)
-        (attributeDeterminedDiceModList: DicePoolMod list)
-        (weaponHandedDicePoolMod: DicePoolMod) // Last two parameters here for curring
-        (weaponResourceDiceMod: DicePoolMod) // Last two parameters here for curring
-        =
-        modifyDicePoolByDicePoolModList
-            baseDice
-            ([ skillDiceMod ]
-             @ [ attributeDicePoolMod ]
-             @ [ weaponHandedDicePoolMod ]
-             @ [ weaponResourceDiceMod ]
-             @ attributeDeterminedDiceModList)
+    // let createCombatRollDicePool
+    //     (baseDice: DicePool)
+    //     (skillDiceMod: DicePoolMod)
+    //     (attributeDicePoolMod: DicePoolMod)
+    //     (attributeDeterminedDiceMod: DicePoolMod)
+    //     (weaponHandedDicePoolMod: DicePoolMod) // Last two parameters here for curring
+    //     (weaponResourceDiceMod: DicePoolMod) // Last two parameters here for curring
+    //     =
+    //     modifyDicePoolByDicePoolModList
+    //         baseDice
+    //         ([ skillDiceMod ]
+    //          @ [ attributeDicePoolMod ]
+    //          @ [ weaponHandedDicePoolMod ]
+    //          @ [ weaponResourceDiceMod ]
+    //          @ [ attributeDeterminedDiceMod ])
 
-    open Weapon
-    open ItemTier
     open Neg1To5
     open AttributeName
     open Attribute
@@ -1362,40 +1358,41 @@ module CombatRoll =
     open AreaOfEffect
 
     let createWeaponCombatRoll
-        (name: string)
-        (weaponDiceMod: DicePoolMod)
+        (weaponName: string)
         (weaponPenetration: Penetration)
         (weaponRange: Range)
         (weaponDamageTypeSet: DamageType Set)
         (weaponEO: EngageableOpponents)
         (weaponAOEOption: AreaOfEffect option)
         (itemTierBaseDice: DicePool)
-        (attributeDeterminedDiceModList: AttributeDeterminedDiceMod List)
-        (attributeSet: Attribute Set)
-        (skillLevel: Neg1To5)
-        (governingAttributeNameSet: AttributeName Set)
-        resource
-        descSuffix
-        wieldingDiceMods
+        (attributeDeterminedDiceMod: DicePoolMod list)
+        (skillDiceMod: DicePoolMod)
+        (governingAttributeSetDiceMod: DicePoolMod)
+        (resource: WeaponResource option)
+        (weaponHandedSuffixString: string)
+        (weaponDiceMod: DicePoolMod)
+        (offHandWeaponDiceMod: DicePoolMod)
         : CombatRoll =
 
         let (resourceDesc, resourceDice, resourcePenetration, resourceRange, resourceDamageTypeSet, resourceAreaOfEffect) =
             weaponResourceClassOptionToWeaponResourceClass resource
 
         let dicePool =
-            createCombatRollDicePool
+            modifyDicePoolByDicePoolModList
                 itemTierBaseDice
-                (skillLevel |> neg1To5ToInt |> intToD6DicePoolMod)
-                (governingAttributeNameSet |> sumGoverningAttributeD6DiceMods attributeSet)
-                (attributeDeterminedDiceModList
-                 |> collectAttributeDeterminedDiceMod governingAttributeNameSet)
-                weaponDiceMod
-                resourceDice
+                ([
+                    skillDiceMod
+                    governingAttributeSetDiceMod
+                    weaponDiceMod
+                    offHandWeaponDiceMod
+                    resourceDice
+                 ]
+                 @ attributeDeterminedDiceMod)
 
         let numDice = dicePoolToNumDice dicePool
 
         {
-            name = name + resourceDesc + descSuffix
+            name = weaponName + resourceDesc + weaponHandedSuffixString
             dicePool = dicePool
             calculatedRange = determineGreatestRange numDice weaponRange resourceRange
             penetration = weaponPenetration + resourcePenetration
@@ -1404,37 +1401,69 @@ module CombatRoll =
             calculatedEngageableOpponents = determineEngageableOpponents numDice weaponEO
         }
 
+    open Weapon
+    open ItemTier
 
-// let createCombatRoll
-//     (name: string)
-//     (itemTier:ItemTier)
-//     (weaponHandedDicePoolMod: DicePoolMod)
-//     (skillLevel: Neg1To5)
-//     (governingAttributeNamesSet: AttributeName Set)
-//     (attributeSet: Attribute Set)
-//     (attributeDeterminedDiceModList: AttributeDeterminedDiceMod list)
-//     (weaponResource: WeaponResource)
-//     : CombatRoll
-//     =
-//         {
-//             name = name
-//             dicePool =
-//                 createCombatRollDicePool
-//                     itemTier.baseDice
-//                     (skillLevel |> neg1To5ToInt |> intToD6DicePoolMod)
-//                     (governingAttributeNamesSet |> collectAttributesWithAttributeNames attributeSet)
-//                     (attributeDeterminedDiceModList |> collectAttributeDeterminedDiceMod governingAttributeNamesSet)
-//                     (weaponHandedDicePoolMod)
-//                     (weaponResource.dicePoolMod)
-//             calculatedRange =
-//         }
+    let temp
+        preloadedCreateWeaponCombatRoll
+        (handedVariationString: string)
+        (weaponHandedDicePoolModOption: DicePoolMod option)
+        =
+        match weaponHandedDicePoolModOption with
+        | Some weaponHandedDice -> [
+            preloadedCreateWeaponCombatRoll handedVariationString weaponHandedDice emptyDicePoolMod
+          ]
+        | None -> []
 
-// let createHandedVariationCombatRolls
-//     (twoHandedWeaponDice: DicePoolMod Option)
-//     (oneHandedWeaponDiceOption: DicePoolMod Option)
-//     (dualWieldableBonusOption: DicePoolMod Option)
-//     preloadedCreateCombatRoll
-//     =
+    let temp2
+        preloadedCreateWeaponCombatRoll
+        (handedVariationString: string)
+        (weaponHandedDicePoolModOption: DicePoolMod option)
+        (offHandedDicePoolModOption: DicePoolMod option)
+        =
+        match weaponHandedDicePoolModOption, offHandedDicePoolModOption with
+        | Some weaponHandedDice, Some offHandedDicePoolMod -> [
+            preloadedCreateWeaponCombatRoll handedVariationString weaponHandedDice offHandedDicePoolMod
+          ]
+        | _, _ -> []
+
+    let createCombatRoll
+        (weapon: Weapon)
+        (itemTier: ItemTier)
+        (skillLevel: Neg1To5)
+        (governingAttributeNameSet: AttributeName Set)
+        (attributeSet: Attribute Set)
+        (attributeDeterminedDiceModList: AttributeDeterminedDiceMod list)
+        (weaponResource: WeaponResource option)
+        : CombatRoll list =
+
+        let preloadedCreateWeaponCombatRoll =
+            createWeaponCombatRoll
+                weapon.name
+                weapon.penetration
+                weapon.range
+                weapon.damageTypes
+                weapon.engageableOpponents
+                weapon.areaOfEffectOption
+                itemTier.baseDice
+                (attributeDeterminedDiceModList
+                 |> collectAttributeDeterminedDiceMod governingAttributeNameSet)
+                (skillLevel |> neg1To5ToInt |> intToD6DicePoolMod)
+                (governingAttributeNameSet |> sumGoverningAttributeD6DiceMods attributeSet)
+                weaponResource
+
+        [
+            (temp preloadedCreateWeaponCombatRoll " (one-handed)" weapon.oneHandedWeaponDice)
+            (temp preloadedCreateWeaponCombatRoll " (two-handed)" weapon.twoHandedWeaponDice)
+            (temp2
+                preloadedCreateWeaponCombatRoll
+                " (dual-wielded)"
+                weapon.oneHandedWeaponDice
+                weapon.dualWieldableBonus)
+        ]
+        |> List.collect id
+
+
 
 module Character =
     open AttributeName

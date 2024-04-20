@@ -12,9 +12,6 @@ open FogentRoleplayLib.ItemStack
 
 open FogentRoleplayLib.StringUtils
 
-open FogentRoleplayLib.MagicSkill
-open FogentRoleplayLib.AttributeDeterminedDiceModEffect
-
 type CombatRollData = {
     attributeList: Attribute List
     vocationList: Vocation List
@@ -26,17 +23,17 @@ type CombatRollData = {
 
 let init () : CombatRoll list = []
 
-let update: CombatRoll list =
+// let update: CombatRoll list =
 
-    createCombatRolls
-        magicSkillMap
-        magicCombatMap
-        rangeMap
-        combatRollGoverningAttributeList
-        attributeDeterminedDiceModList
-        equipmentList
-        attributeStatList
-        vocationGroupList
+//     createCombatRolls
+//         magicSkillMap
+//         magicCombatMap
+//         rangeMap
+//         combatRollGoverningAttributeList
+//         attributeDeterminedDiceModList
+//         equipmentList
+//         attributeStatList
+//         vocationGroupList
 
 open Feliz
 open Feliz.Bulma
