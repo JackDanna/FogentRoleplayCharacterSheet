@@ -291,8 +291,6 @@ module DicePoolMod =
 
     let emptyDicePoolMod = createD6DicePoolMod 0u
 
-    let base3d6DicePoolMod = createD6DicePoolMod 3u
-
     let removeDice (dice: uint) (neg: uint) : uint * DicePoolPenalty =
         let result = int dice - int neg
         // If the result is negative, their are still dice to lose, but they are of a higher face value
@@ -1262,7 +1260,6 @@ module DicePoolCalculation =
     open ZeroToFive
 
     type DicePoolCalculationData = {
-        baseDice: DicePool option
         attributeSet: Attribute Set
         injuryDicePenalty: DicePoolPenalty
         weightClassDicePenalty: DicePoolPenalty
@@ -1276,9 +1273,6 @@ module DicePoolCalculation =
         =
 
         [
-            (dicePoolCalculationData.baseDice
-             |> Option.defaultValue base3d6DicePool
-             |> AddDice)
             skillLevel |> intToD6DicePoolMod
             (goveringAttributes
              |> sumGoverningAttributeD6DiceMods dicePoolCalculationData.attributeSet)
@@ -1540,7 +1534,6 @@ module Character =
     let characterToDicePoolCalculation (character: Character) =
 
         {
-            baseDice = None
             attributeSet =
                 List.map
                     (fun attributeAndCoreSkills -> attributeAndCoreSkills.attributeStat)
