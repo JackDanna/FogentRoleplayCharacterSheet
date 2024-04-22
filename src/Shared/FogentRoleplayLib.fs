@@ -926,7 +926,7 @@ module Vocation =
 
     type Vocation = {
         name: string
-        governingAttributeNames: AttributeName Set
+        governingAttributeNameSet: AttributeName Set
         level: ZeroToFive
         dicePoolModList: DicePoolMod List
         vocationSkillList: VocationSkill list

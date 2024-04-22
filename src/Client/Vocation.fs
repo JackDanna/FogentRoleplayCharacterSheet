@@ -15,7 +15,7 @@ type Msg =
 let init () : Vocation = {
     name = ""
     level = ZeroToFive.init ()
-    governingAttributeNames = Set.empty
+    governingAttributeNameSet = Set.empty
     dicePoolModList = []
     vocationSkillList = VocationSkillList.init ()
 }
@@ -29,7 +29,7 @@ let update msg (model: Vocation) =
       }
     | ToggleGoveringAttribute newAttributeName -> {
         model with
-            governingAttributeNames = toggleAttributeNameSet model.governingAttributeNames newAttributeName
+            governingAttributeNameSet = toggleAttributeNameSet model.governingAttributeNameSet newAttributeName
       }
     | VocationSkillListMsg msg ->
         let newVocationSkillList = VocationSkillList.update msg model.vocationSkillList
@@ -45,7 +45,7 @@ let update msg (model: Vocation) =
         }
     | CalculateDicePools msg -> {
         model with
-            dicePoolModList = calculateVocationDicePool msg model.level model.governingAttributeNames
+            dicePoolModList = calculateVocationDicePool msg model.level model.governingAttributeNameSet
             vocationSkillList =
                 VocationSkillList.update (VocationSkillList.CalculateDicePools(msg)) model.vocationSkillList
       }
@@ -65,7 +65,7 @@ let view attributeNameSet weaponSkillNameSet (model: Vocation) dispatch =
             ]
             Bulma.column [
                 VocationalSkill.governingAttributesToggle
-                    model.governingAttributeNames
+                    model.governingAttributeNameSet
                     (ToggleGoveringAttribute >> dispatch)
                     attributeNameSet
             ]
