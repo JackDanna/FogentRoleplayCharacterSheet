@@ -795,8 +795,10 @@ module Skill =
     open DicePool
     open DicePoolMod
 
+    type SkillName = string
+
     type Skill = {
-        name: string
+        name: SkillName
         level: Neg1To5
         baseDice: DicePool
         dicePoolModList: DicePoolMod List

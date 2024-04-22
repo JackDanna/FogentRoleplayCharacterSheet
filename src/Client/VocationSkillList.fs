@@ -42,7 +42,7 @@ let update msg model =
 
 open Feliz
 
-let view attributeNameSet (model: VocationSkill list) dispatch =
+let view attributeNameSet weaponSkillNameSet (model: VocationSkill list) dispatch =
     List.append
         (List.mapi
             (fun position skillRow ->

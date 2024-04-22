@@ -206,10 +206,11 @@ module FogentRoleplayServerData =
             dualWieldableBonus = parseDicePoolModOptionString row.["dualWieldableBonus"]
             areaOfEffectOption = namedAreaOfEffectOptionMap row.["areaOfEffect"]
             resourceNameOption = resourceOptionMap row.["resourceClass"]
-            governingSkillName = string row.["governingSkill"]
+            governingSkillName = SkillName row.["governingSkill"]
         })
 
-    let weaponGoverningSkillNameSet = Set.map (_.governingSkillName) weaponSet
+    let weaponGoverningSkillNameSet: SkillName Set =
+        Set.map (_.governingSkillName) weaponSet
 
     // |> Set.map (fun (weaponClass: Weapon) -> weaponClass.name, weaponClass)
     // |> Map.ofSeq
@@ -444,6 +445,7 @@ let fallenDataApi: IFogentRoleplayDataApi = {
                 defaultCoreSkillList = FogentRoleplayServerData.coreSkillData
                 defaultAttributeSet = FogentRoleplayServerData.attributeNameSet
                 itemStackMap = FogentRoleplayServerData.itemStackMap
+                weaponSkillNameSet = FogentRoleplayServerData.weaponGoverningSkillNameSet
             //   magicSkillMap = FallenServerData.magicSkillMap
             //   magicCombatMap = FallenServerData.magicCombatMap
             //   rangeMap = FallenServerData.rangeMap

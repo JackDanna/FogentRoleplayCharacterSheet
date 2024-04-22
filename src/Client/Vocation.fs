@@ -54,7 +54,7 @@ let update msg (model: Vocation) =
 open Feliz
 open Feliz.Bulma
 
-let view attributeNameSet (model: Vocation) dispatch =
+let view attributeNameSet weaponSkillNameSet (model: Vocation) dispatch =
     Bulma.box [
         Bulma.columns [
             Bulma.column [
@@ -72,5 +72,9 @@ let view attributeNameSet (model: Vocation) dispatch =
             Bulma.column [ ZeroToFive.view model.level (ZeroToFiveMsg >> dispatch) ]
             Bulma.column [ prop.text (model.dicePoolModList |> dicePoolModListToString) ]
         ]
-        VocationSkillList.view attributeNameSet model.vocationSkillList (VocationSkillListMsg >> dispatch)
+        VocationSkillList.view
+            attributeNameSet
+            weaponSkillNameSet
+            model.vocationSkillList
+            (VocationSkillListMsg >> dispatch)
     ]

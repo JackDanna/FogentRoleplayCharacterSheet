@@ -11,6 +11,7 @@ namespace Shared
 open FogentRoleplayLib.AttributeName
 open FogentRoleplayLib.CoreSkill
 open FogentRoleplayLib.ItemStack
+open FogentRoleplayLib.Skill
 // open FogentRoleplayLib.ItemStack
 
 module Route =
@@ -21,7 +22,7 @@ type FogentRoleplayData = {
     defaultAttributeSet: AttributeName Set
     defaultCoreSkillList: CoreSkill List
     itemStackMap: Map<string, ItemStack>
-//   allItemStackList: ItemStack list
+    weaponSkillNameSet: SkillName Set
 //   magicSkillMap: Map<string, MagicSkill>
 //   magicCombatMap: Map<string, MagicCombat>
 //   rangeMap: Map<string, Range>
