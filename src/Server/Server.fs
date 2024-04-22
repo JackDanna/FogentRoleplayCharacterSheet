@@ -205,7 +205,7 @@ module FogentRoleplayServerData =
             engageableOpponents = engageableOpponentsMap row.["engageableOpponents"]
             dualWieldableBonus = parseDicePoolModOptionString row.["dualWieldableBonus"]
             areaOfEffectOption = namedAreaOfEffectOptionMap row.["areaOfEffect"]
-            resourceClass = resourceOptionMap row.["resourceClass"]
+            resourceNameOption = resourceOptionMap row.["resourceClass"]
         })
     // |> Set.map (fun (weaponClass: Weapon) -> weaponClass.name, weaponClass)
     // |> Map.ofSeq

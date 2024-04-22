@@ -711,7 +711,7 @@ module Weapon =
         engageableOpponents: EngageableOpponents
         dualWieldableBonus: DicePoolMod option
         areaOfEffectOption: AreaOfEffect option
-        resourceClass: ResourceName option
+        resourceNameOption: ResourceName option
     }
 
 module ContainerClass =
@@ -1457,14 +1457,46 @@ module CombatRoll =
         ]
         |> List.collect id
 
-// let createWeaponItemCombatRolls
-//     (weapon: Weapon List)
-//     (skillDicePoolModList: DicePoolMod List)
-//     (weaponResource: WeaponResource option)
-//     : CombatRoll list =
+    open Effect
 
+    let createWeaponItemCombatRolls
+        (itemStackList: ItemStack List)
+        (skillDicePoolModList: DicePoolMod List)
+        : CombatRoll list =
 
+        let weaponResourceList =
+            itemStackList
+            |> List.collect (fun itemStack ->
+                itemStack.item.itemEffectSet
+                |> Set.toList
+                |> List.collect (fun effect ->
+                    match effect with
+                    | WeaponResource weaponResource -> [ weaponResource ]
+                    | _ -> []))
 
+        itemStackList
+        |> List.collect (fun itemStack ->
+
+            itemStack.item.itemEffectSet
+            |> Set.toList
+            |> List.collect (fun effect ->
+                match effect with
+                | Weapon weapon -> (weapon, itemStack.item.itemTier) |> List.singleton
+                | _ -> List.empty))
+        |> List.collect (fun (weapon, itemTier) ->
+
+            match weapon.resourceNameOption with
+            | Some resourceClass ->
+                weaponResourceList
+                |> List.collect (fun weaponResource ->
+                    if weaponResource.resourceName = resourceClass then
+                        (weapon, Some weaponResource, itemTier) |> List.singleton
+                    else
+                        List.empty)
+
+            | None -> [ (weapon, None, itemTier) ])
+        |> List.collect (fun (weapon, weaponResourceOption, itemTier) ->
+            createCombatRoll weapon itemTier.baseDice skillDicePoolModList weaponResourceOption)
 
 module Character =
     open AttributeName
