@@ -4,18 +4,21 @@ open FogentRoleplayLib.Character
 open FogentRoleplayLib.AttributeName
 open FogentRoleplayLib.CoreSkill
 open FogentRoleplayLib.ItemStack
+open FogentRoleplayLib.Vocation
 
 type Msg =
     | SetName of string
     | AttributeAndCoreSkillsListMsg of AttributeAndCoreSkillsList.Msg
     | VocationListMsg of VocationList.Msg
     | EquipmentMsg of ItemStackList.Msg
+//    | CombatRollListMsg of CombatRollList.Msg
 
 let init (attributeNameSet: AttributeName Set) (coreSkillData: CoreSkill list) = {
     name = ""
     attributeAndCoreSkillsList = defaultAttributeAndCoreSkillsList attributeNameSet coreSkillData
     vocationList = VocationList.init ()
     equipmentList = []
+    combatRollList = []
 }
 
 let update msg (model: Character) =
@@ -54,10 +57,20 @@ let update msg (model: Character) =
                         (VocationList.CalculateDicePools(characterToDicePoolCalculation model))
                         newVocationList
         }
-    | EquipmentMsg msg -> {
-        model with
-            equipmentList = ItemStackList.update msg model.equipmentList
-      }
+    | EquipmentMsg msg ->
+        let newEquipmentList = ItemStackList.update msg model.equipmentList
+
+        {
+            model with
+                equipmentList = newEquipmentList
+                combatRollList =
+                    CombatRollList.update (
+                        CombatRollList.RecalculateCombatRollList(
+                            newEquipmentList,
+                            vocationListToVocationSkillList model.vocationList
+                        )
+                    )
+        }
 
 open Feliz
 open Feliz.Bulma
@@ -104,7 +117,8 @@ let view attributeNameSet (allItemStackList: Map<string, ItemStack>) (weaponSkil
 
         ItemStackList.view allItemStackList model.equipmentList (EquipmentMsg >> dispatch)
 
-    // CombatRollTable.view model.combatRollList
+        CombatRollList.view model.combatRollList
+    //(CombatRollListMsg >> dispatch)
 
     // ContainerList.view
     //     (List.collect itemToContainerClassNames (itemStackListToItemList allItemStackList))

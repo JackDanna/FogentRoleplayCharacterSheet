@@ -934,6 +934,9 @@ module Vocation =
         vocationSkillList: VocationSkill list
     }
 
+    let vocationListToVocationSkillList vocationList =
+        vocationList |> List.collect (_.vocationSkillList)
+
 
 // Effects
 
@@ -1463,12 +1466,19 @@ module CombatRoll =
     open Effect
 
     let createWeaponItemCombatRolls
-        (itemStackList: ItemStack List)
-        (skillDicePoolModList: DicePoolMod List)
+        (equipmentList: ItemStack List)
+        (vocationSkillList: VocationSkill List)
         : CombatRoll list =
 
+        let weaponSkillList =
+            vocationSkillList
+            |> List.collect (fun vocationSkill ->
+                match vocationSkill with
+                | WeaponSkill weaponSkill -> [ weaponSkill ]
+                | _ -> [])
+
         let weaponResourceList =
-            itemStackList
+            equipmentList
             |> List.collect (fun itemStack ->
                 itemStack.item.itemEffectSet
                 |> Set.toList
@@ -1477,7 +1487,7 @@ module CombatRoll =
                     | WeaponResource weaponResource -> [ weaponResource ]
                     | _ -> []))
 
-        itemStackList
+        equipmentList
         |> List.collect (fun itemStack ->
 
             itemStack.item.itemEffectSet
@@ -1499,7 +1509,15 @@ module CombatRoll =
 
             | None -> [ (weapon, None, itemTier) ])
         |> List.collect (fun (weapon, weaponResourceOption, itemTier) ->
-            createCombatRoll weapon itemTier.baseDice skillDicePoolModList weaponResourceOption)
+            let skillDiceModList =
+                weaponSkillList
+                |> List.tryFind (fun weaponSkill -> weaponSkill.skill.name = weapon.governingSkillName)
+                |> (fun weaponSkillOption ->
+                    match weaponSkillOption with
+                    | Some weaponSkill -> weaponSkill.skill.dicePoolModList
+                    | None -> [])
+
+            createCombatRoll weapon itemTier.baseDice skillDiceModList weaponResourceOption)
 
 module Character =
     open AttributeName
@@ -1509,12 +1527,14 @@ module Character =
     open DicePoolCalculation
     open DicePoolMod
     open ItemStack
+    open CombatRoll
 
     type Character = {
         name: string
         attributeAndCoreSkillsList: AttributeAndCoreSkills list
         vocationList: Vocation list
         equipmentList: ItemStack list
+        combatRollList: CombatRoll List
     }
 
     let characterToDicePoolCalculation (character: Character) =
