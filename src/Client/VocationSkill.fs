@@ -85,8 +85,8 @@ open Feliz.Bulma
 let view attributeNameSet model dispatch =
     match model with
     | VocationalSkill vocationalSkill ->
-        VocationalSkill.view attributeNameSet vocationalSkill (VocationalSkillMsg >> dispatch) false
-    | WeaponSkill vocationalSkill ->
         VocationalSkill.view attributeNameSet vocationalSkill (VocationalSkillMsg >> dispatch) true
+    | WeaponSkill vocationalSkill ->
+        VocationalSkill.view attributeNameSet vocationalSkill (VocationalSkillMsg >> dispatch) false
     | MagicSkill magicSkill ->
-        VocationalSkill.view attributeNameSet magicSkill.vocationalSkill (VocationalSkillMsg >> dispatch) true
+        VocationalSkill.view attributeNameSet magicSkill.vocationalSkill (VocationalSkillMsg >> dispatch) false

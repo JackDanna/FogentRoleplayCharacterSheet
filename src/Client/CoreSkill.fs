@@ -33,4 +33,4 @@ open Feliz
 open Feliz.Bulma
 
 let view model dispatch =
-    Skill.view model.skill (SkillMsg >> dispatch) false false None
+    Skill.view model.skill (SkillMsg >> dispatch) false None

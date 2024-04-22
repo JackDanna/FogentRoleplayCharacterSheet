@@ -89,10 +89,10 @@ let governingAttributesToggle
         ]
     ]
 
-let view attributeNameSet model dispatch canUserChangeLevel =
+let view attributeNameSet model dispatch disableChangeLevel =
 
     Bulma.column [
         governingAttributesToggle model.governingAttributeNames (ToggleGoverningAttribute >> dispatch) attributeNameSet
     ]
     |> Some
-    |> Skill.view model.skill (SkillMsg >> dispatch) true canUserChangeLevel
+    |> Skill.view model.skill (SkillMsg >> dispatch) disableChangeLevel

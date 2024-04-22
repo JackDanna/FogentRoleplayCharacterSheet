@@ -18,11 +18,11 @@ let update (msg: Msg) (model: Neg1To5) : Model =
 open Feliz
 open Feliz.Bulma
 
-let view (model: Model) dispatch isUserInputDisabled =
+let view (model: Model) dispatch userInputDisabled =
     Bulma.input.number [
         prop.max 5
         prop.min -1
-        prop.disabled isUserInputDisabled
+        prop.disabled userInputDisabled
         prop.value (neg1To5ToInt model)
         prop.onChange (fun num -> dispatch (ChangedNeg1To5(num)))
     ]
