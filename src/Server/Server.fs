@@ -206,7 +206,11 @@ module FogentRoleplayServerData =
             dualWieldableBonus = parseDicePoolModOptionString row.["dualWieldableBonus"]
             areaOfEffectOption = namedAreaOfEffectOptionMap row.["areaOfEffect"]
             resourceNameOption = resourceOptionMap row.["resourceClass"]
+            governingSkillName = string row.["governingSkill"]
         })
+
+    let weaponGoverningSkillNameSet = Set.map (_.governingSkillName) weaponSet
+
     // |> Set.map (fun (weaponClass: Weapon) -> weaponClass.name, weaponClass)
     // |> Map.ofSeq
 

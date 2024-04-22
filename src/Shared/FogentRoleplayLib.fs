@@ -711,6 +711,7 @@ module Weapon =
         engageableOpponents: EngageableOpponents
         dualWieldableBonus: DicePoolMod option
         areaOfEffectOption: AreaOfEffect option
+        governingSkillName: string
         resourceNameOption: ResourceName option
     }
 
