@@ -48,14 +48,20 @@ let update msg (model: Character) =
         }
     | VocationListMsg(msg: VocationList.Msg) ->
 
-        let newVocationList = VocationList.update msg model.vocationList
+        let newVocationList =
+            VocationList.update msg model.vocationList
+            |> VocationList.update (VocationList.CalculateDicePools(characterToDicePoolCalculation model))
 
         {
             model with
-                vocationList =
-                    VocationList.update
-                        (VocationList.CalculateDicePools(characterToDicePoolCalculation model))
-                        newVocationList
+                vocationList = newVocationList
+                combatRollList =
+                    CombatRollList.update (
+                        CombatRollList.RecalculateCombatRollList(
+                            model.equipmentList,
+                            vocationListToVocationSkillList newVocationList
+                        )
+                    )
         }
     | EquipmentMsg msg ->
         let newEquipmentList = ItemStackList.update msg model.equipmentList
