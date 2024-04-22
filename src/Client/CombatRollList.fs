@@ -12,11 +12,7 @@ open FogentRoleplayLib.ItemStack
 
 open FogentRoleplayLib.StringUtils
 
-type CombatRollData = {
-    attributeList: Attribute List
-    vocationList: Vocation List
-    equipmentList: ItemStack List
-}
+
 
 // type Msg =
 //     | RecalculateCombatRollList of

@@ -1,17 +1,17 @@
 module Skill
 
 open FogentRoleplayLib.Skill
-open FogentRoleplayLib.DicePool
+open FogentRoleplayLib.DicePoolMod
 
 type Msg =
     | SetName of string
     | Neg1To5Msg of Neg1To5.Msg
-    | SetDicePool of DicePool
+    | SetDicePoolModList of DicePoolMod List
 
 let init () = {
     name = ""
     level = Neg1To5.init ()
-    dicePool = base3d6DicePool
+    dicePoolModList = base3d6DicePoolMod |> List.singleton
 }
 
 let update msg model =
@@ -21,7 +21,7 @@ let update msg model =
         model with
             level = Neg1To5.update msg model.level
       }
-    | SetDicePool msg -> { model with dicePool = msg }
+    | SetDicePoolModList msg -> { model with dicePoolModList = msg }
 
 
 open Feliz
@@ -44,7 +44,7 @@ let view model dispatch canUserChangeName canUserChangeLevel governingSkillColum
       | None -> List.Empty
     @ [
         Bulma.column [ Neg1To5.view model.level (Neg1To5Msg >> dispatch) canUserChangeLevel ]
-        Bulma.column [ model.dicePool |> dicePoolToString |> prop.text ]
+        Bulma.column [ model.dicePoolModList |> dicePoolModListToString |> prop.text ]
     ]
     |> Bulma.columns
     |> Bulma.content

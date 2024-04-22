@@ -170,7 +170,7 @@ module FogentRoleplayServerData =
             skill = {
                 name = row.["name"]
                 level = Zero
-                dicePool = base3d6DicePool
+                dicePoolModList = base3d6DicePoolMod |> List.singleton
             }
             governingAttributeName = row.["governingAttribute"]
         })

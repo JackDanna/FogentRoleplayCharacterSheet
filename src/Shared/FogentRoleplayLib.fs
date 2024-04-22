@@ -291,6 +291,8 @@ module DicePoolMod =
 
     let emptyDicePoolMod = createD6DicePoolMod 0u
 
+    let base3d6DicePoolMod = createD6DicePoolMod 3u
+
     let removeDice (dice: uint) (neg: uint) : uint * DicePoolPenalty =
         let result = int dice - int neg
         // If the result is negative, their are still dice to lose, but they are of a higher face value
@@ -327,8 +329,8 @@ module DicePoolMod =
         | AddDice dicePool -> dicePoolToNumDice dicePool |> int
         | RemoveDice dicePoolPenalty -> int dicePoolPenalty * -1
 
-    let modifyDicePoolByDicePoolModList dicePool dicePoolMods =
 
+    let dicePoolModListToDicePool dicePoolMods =
         let combinedDicePoolPenalty =
             List.fold
                 (fun acc diceMod ->
@@ -345,11 +347,21 @@ module DicePoolMod =
                     match diceMod with
                     | AddDice dicePool -> combineDicePools [ acc; dicePool ]
                     | _ -> acc)
-                dicePool
+                emptyDicePool
                 dicePoolMods
 
-        // Does the subtractions only at the end after combining
         modifyDicePool combinedPositiveDicePool combinedDicePoolPenalty
+
+    let dicePoolModListToString dicePoolModList =
+        dicePoolModList |> dicePoolModListToDicePool |> dicePoolToString
+
+    let modifyDicePoolByDicePoolModList dicePool dicePoolMods =
+
+        dicePool
+        |> AddDice
+        |> List.singleton
+        |> List.append dicePoolMods
+        |> dicePoolModListToDicePool
 
     let intToD6DicePoolMod (num: int) =
         if num < 0 then
@@ -779,12 +791,12 @@ module Attribute =
 
 module Skill =
     open Neg1To5
-    open DicePool
+    open DicePoolMod
 
     type Skill = {
         name: string
         level: Neg1To5
-        dicePool: DicePool
+        dicePoolModList: DicePoolMod List
     }
 
     let findSkillLvlWithDefault skillName (defaultLvl: Neg1To5) (skillList: Skill list) =
@@ -905,7 +917,7 @@ module VocationSkill =
 
 module Vocation =
     open ZeroToFive
-    open DicePool
+    open DicePoolMod
     open VocationSkill
     open AttributeName
 
@@ -913,7 +925,7 @@ module Vocation =
         name: string
         governingAttributeNames: AttributeName Set
         level: ZeroToFive
-        dicePool: DicePool
+        dicePoolModList: DicePoolMod List
         vocationSkillList: VocationSkill list
     }
 
@@ -1249,13 +1261,16 @@ module DicePoolCalculation =
         itemEffectDicePoolMod: DicePoolMod
     }
 
-    let calculateDicePool
+    let createDicePoolModList
         (dicePoolCalculationData: DicePoolCalculationData)
         (skillLevel: int)
         (goveringAttributes: AttributeName Set)
         =
 
-        modifyDicePoolByDicePoolModList (dicePoolCalculationData.baseDice |> Option.defaultValue base3d6DicePool) [
+        [
+            (dicePoolCalculationData.baseDice
+             |> Option.defaultValue base3d6DicePool
+             |> AddDice)
             skillLevel |> intToD6DicePoolMod
             (goveringAttributes
              |> sumGoverningAttributeD6DiceMods dicePoolCalculationData.attributeSet)
@@ -1264,13 +1279,13 @@ module DicePoolCalculation =
             dicePoolCalculationData.weightClassDicePenalty |> RemoveDice
         ]
 
-    let calculateCoreSkillDicePool
+    let createCoreSkillDicePoolModList
         (dicePoolCalculationData: DicePoolCalculationData)
         (skillLevel: Neg1To5)
         (skillGoveringAttributeName: AttributeName)
         =
 
-        calculateDicePool
+        createDicePoolModList
             dicePoolCalculationData
             (skillLevel |> neg1To5ToInt)
             (Set.empty.Add(skillGoveringAttributeName))
@@ -1281,7 +1296,7 @@ module DicePoolCalculation =
         (skillGoveringAttributeNames: AttributeName Set)
         =
 
-        calculateDicePool dicePoolCalculationData (skillLevel |> neg1To5ToInt) skillGoveringAttributeNames
+        createDicePoolModList dicePoolCalculationData (skillLevel |> neg1To5ToInt) skillGoveringAttributeNames
 
     let calculateVocationDicePool
         (dicePoolCalculationData: DicePoolCalculationData)
@@ -1289,7 +1304,10 @@ module DicePoolCalculation =
         (skillGoveringAttributeNames: AttributeName Set)
         =
 
-        calculateDicePool dicePoolCalculationData (skillLevel |> zeroToFiveToUint |> int) skillGoveringAttributeNames
+        createDicePoolModList
+            dicePoolCalculationData
+            (skillLevel |> zeroToFiveToUint |> int)
+            skillGoveringAttributeNames
 
 module WeightClass =
     open AttributeDeterminedDiceModEffect
@@ -1328,6 +1346,16 @@ module CombatRoll =
         damageTypeSet: DamageType Set
         setAreaOfEffectOption: SetAreaOfEffect Option
         calculatedEngageableOpponents: CalculatedEngageableOpponents
+    }
+
+    open Attribute
+    open VocationSkill
+    open AttributeDeterminedDiceModEffect
+    open ItemStack
+
+    type CombatRollData = {
+        vocationSkillList: VocationSkill list
+        equipmentList: ItemStack List
     }
 
     open DicePool

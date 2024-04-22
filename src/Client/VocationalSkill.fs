@@ -38,7 +38,7 @@ let update msg model =
         model with
             skill =
                 Skill.update
-                    (Skill.Msg.SetDicePool(
+                    (Skill.Msg.SetDicePoolModList(
                         calculateVocationalSkillDicePool msg model.skill.level model.governingAttributeNames
                     ))
                     model.skill
