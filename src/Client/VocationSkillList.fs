@@ -31,6 +31,8 @@ let update msg model =
         |> WeaponSkill
         |> List.singleton
         |> List.append model
+    //| InsertMagicSkill -> model
+    //| Remove -> model
     | ModifiedVocationSkillAtPosition(position, msg) ->
         model
         |> List.mapi (fun index vocationSkill ->

@@ -87,6 +87,6 @@ let view attributeNameSet model dispatch =
     | VocationalSkill vocationalSkill ->
         VocationalSkill.view attributeNameSet vocationalSkill (VocationalSkillMsg >> dispatch) true
     | WeaponSkill vocationalSkill ->
-        VocationalSkill.view attributeNameSet vocationalSkill (VocationalSkillMsg >> dispatch) false
+        VocationalSkill.view attributeNameSet vocationalSkill (WeaponSkillMsg >> dispatch) false
     | MagicSkill magicSkill ->
-        VocationalSkill.view attributeNameSet magicSkill.vocationalSkill (VocationalSkillMsg >> dispatch) false
+        VocationalSkill.view attributeNameSet magicSkill.vocationalSkill (MagicSkillMsg >> dispatch) false
