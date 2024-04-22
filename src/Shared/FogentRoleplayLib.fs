@@ -791,11 +791,13 @@ module Attribute =
 
 module Skill =
     open Neg1To5
+    open DicePool
     open DicePoolMod
 
     type Skill = {
         name: string
         level: Neg1To5
+        baseDice: DicePool
         dicePoolModList: DicePoolMod List
     }
 
@@ -1331,6 +1333,7 @@ module WeightClass =
 
 module CombatRoll =
 
+    open DicePool
     open DicePoolMod
     open Penetration
     open Range
@@ -1340,7 +1343,7 @@ module CombatRoll =
 
     type CombatRoll = {
         name: string
-        dicePoolModList: DicePoolMod List
+        dicePool: DicePool
         calculatedRange: CalculatedRange
         penetration: Penetration
         damageTypeSet: DamageType Set
@@ -1372,6 +1375,7 @@ module CombatRoll =
         (weaponDamageTypeSet: DamageType Set)
         (weaponEO: EngageableOpponents)
         (weaponAOEOption: AreaOfEffect option)
+        (baseDice: DicePool)
         (skillDicePoolModList: DicePoolMod List)
         (resource: WeaponResource option)
         (weaponHandedSuffixString: string)
@@ -1382,15 +1386,14 @@ module CombatRoll =
         let (resourceDesc, resourceDice, resourcePenetration, resourceRange, resourceDamageTypeSet, resourceAreaOfEffect) =
             weaponResourceClassOptionToWeaponResourceClass resource
 
-        let dicePoolModList =
-            [ weaponDiceMod; offHandWeaponDiceMod; resourceDice ] @ skillDicePoolModList
+        let dicePool = modifyDicePoolByDicePoolModList baseDice skillDicePoolModList
 
 
-        let numDice = dicePoolModList |> dicePoolModListToDicePool |> dicePoolToNumDice
+        let numDice = dicePool |> dicePoolToNumDice
 
         {
             name = weaponName + resourceDesc + weaponHandedSuffixString
-            dicePoolModList = dicePoolModList
+            dicePool = dicePool
             calculatedRange = determineGreatestRange numDice weaponRange resourceRange
             penetration = weaponPenetration + resourcePenetration
             damageTypeSet = Set.union weaponDamageTypeSet resourceDamageTypeSet
@@ -1426,6 +1429,7 @@ module CombatRoll =
 
     let createCombatRoll
         (weapon: Weapon)
+        (baseDice: DicePool)
         (skillDicePoolModList: DicePoolMod List)
         (weaponResource: WeaponResource option)
         : CombatRoll list =
@@ -1438,6 +1442,7 @@ module CombatRoll =
                 weapon.damageTypes
                 weapon.engageableOpponents
                 weapon.areaOfEffectOption
+                baseDice
                 skillDicePoolModList
                 weaponResource
 
@@ -1451,6 +1456,13 @@ module CombatRoll =
                 weapon.dualWieldableBonus)
         ]
         |> List.collect id
+
+// let createWeaponItemCombatRolls
+//     (weapon: Weapon List)
+//     (skillDicePoolModList: DicePoolMod List)
+//     (weaponResource: WeaponResource option)
+//     : CombatRoll list =
+
 
 
 
