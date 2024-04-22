@@ -2,10 +2,7 @@ module CombatRollTable
 
 open FogentRoleplayLib.CombatRoll
 
-open FogentRoleplayLib.Attribute
-open FogentRoleplayLib.Vocation
-
-open FogentRoleplayLib.DicePool
+open FogentRoleplayLib.DicePoolMod
 open FogentRoleplayLib.Range
 open FogentRoleplayLib.SetAreaOfEffect
 open FogentRoleplayLib.ItemStack
@@ -37,7 +34,7 @@ open Feliz.Bulma
 let combatRollRow (model: CombatRoll) =
     Html.tr [
         Html.td model.name
-        Html.td (dicePoolToString model.dicePool)
+        Html.td (model.dicePoolModList |> dicePoolModListToString)
         Html.td (int model.penetration)
         Html.td (calculatedRangeToString model.calculatedRange)
         Html.td (stringSetToStringSeperatedByCommas model.damageTypeSet)

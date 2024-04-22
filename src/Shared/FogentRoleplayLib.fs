@@ -1331,7 +1331,7 @@ module WeightClass =
 
 module CombatRoll =
 
-    open DicePool
+    open DicePoolMod
     open Penetration
     open Range
     open DamageType
@@ -1340,7 +1340,7 @@ module CombatRoll =
 
     type CombatRoll = {
         name: string
-        dicePool: DicePool
+        dicePoolModList: DicePoolMod List
         calculatedRange: CalculatedRange
         penetration: Penetration
         damageTypeSet: DamageType Set
@@ -1358,32 +1358,12 @@ module CombatRoll =
         equipmentList: ItemStack List
     }
 
-    open DicePool
-    open DicePoolMod
-
-
-    // let createCombatRollDicePool
-    //     (baseDice: DicePool)
-    //     (skillDiceMod: DicePoolMod)
-    //     (attributeDicePoolMod: DicePoolMod)
-    //     (attributeDeterminedDiceMod: DicePoolMod)
-    //     (weaponHandedDicePoolMod: DicePoolMod) // Last two parameters here for curring
-    //     (weaponResourceDiceMod: DicePoolMod) // Last two parameters here for curring
-    //     =
-    //     modifyDicePoolByDicePoolModList
-    //         baseDice
-    //         ([ skillDiceMod ]
-    //          @ [ attributeDicePoolMod ]
-    //          @ [ weaponHandedDicePoolMod ]
-    //          @ [ weaponResourceDiceMod ]
-    //          @ [ attributeDeterminedDiceMod ])
 
     open Neg1To5
     open AttributeName
-    open Attribute
-    open AttributeDeterminedDiceModEffect
     open WeaponResource
     open AreaOfEffect
+    open DicePool
 
     let createWeaponCombatRoll
         (weaponName: string)
@@ -1392,10 +1372,7 @@ module CombatRoll =
         (weaponDamageTypeSet: DamageType Set)
         (weaponEO: EngageableOpponents)
         (weaponAOEOption: AreaOfEffect option)
-        (itemTierBaseDice: DicePool)
-        (attributeDeterminedDiceMod: DicePoolMod list)
-        (skillDiceMod: DicePoolMod)
-        (governingAttributeSetDiceMod: DicePoolMod)
+        (skillDicePoolModList: DicePoolMod List)
         (resource: WeaponResource option)
         (weaponHandedSuffixString: string)
         (weaponDiceMod: DicePoolMod)
@@ -1405,23 +1382,15 @@ module CombatRoll =
         let (resourceDesc, resourceDice, resourcePenetration, resourceRange, resourceDamageTypeSet, resourceAreaOfEffect) =
             weaponResourceClassOptionToWeaponResourceClass resource
 
-        let dicePool =
-            modifyDicePoolByDicePoolModList
-                itemTierBaseDice
-                ([
-                    skillDiceMod
-                    governingAttributeSetDiceMod
-                    weaponDiceMod
-                    offHandWeaponDiceMod
-                    resourceDice
-                 ]
-                 @ attributeDeterminedDiceMod)
+        let dicePoolModList =
+            [ weaponDiceMod; offHandWeaponDiceMod; resourceDice ] @ skillDicePoolModList
 
-        let numDice = dicePoolToNumDice dicePool
+
+        let numDice = dicePoolModList |> dicePoolModListToDicePool |> dicePoolToNumDice
 
         {
             name = weaponName + resourceDesc + weaponHandedSuffixString
-            dicePool = dicePool
+            dicePoolModList = dicePoolModList
             calculatedRange = determineGreatestRange numDice weaponRange resourceRange
             penetration = weaponPenetration + resourcePenetration
             damageTypeSet = Set.union weaponDamageTypeSet resourceDamageTypeSet
@@ -1457,11 +1426,7 @@ module CombatRoll =
 
     let createCombatRoll
         (weapon: Weapon)
-        (itemTier: ItemTier)
-        (skillLevel: Neg1To5)
-        (governingAttributeNameSet: AttributeName Set)
-        (attributeSet: Attribute Set)
-        (attributeDeterminedDiceModList: AttributeDeterminedDiceMod list)
+        (skillDicePoolModList: DicePoolMod List)
         (weaponResource: WeaponResource option)
         : CombatRoll list =
 
@@ -1473,11 +1438,7 @@ module CombatRoll =
                 weapon.damageTypes
                 weapon.engageableOpponents
                 weapon.areaOfEffectOption
-                itemTier.baseDice
-                (attributeDeterminedDiceModList
-                 |> collectAttributeDeterminedDiceMod governingAttributeNameSet)
-                (skillLevel |> neg1To5ToInt |> intToD6DicePoolMod)
-                (governingAttributeNameSet |> sumGoverningAttributeD6DiceMods attributeSet)
+                skillDicePoolModList
                 weaponResource
 
         [
