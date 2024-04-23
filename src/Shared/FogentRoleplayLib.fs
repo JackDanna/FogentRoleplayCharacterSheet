@@ -1350,12 +1350,13 @@ module CombatRoll =
     type CombatRoll = {
         name: string
         dicePool: DicePool
-        weaponAndResourceDicePoolMod: string
+        weaponAndResourceDicePoolModString: string
         calculatedRange: CalculatedRange
         penetration: Penetration
         damageTypeSet: DamageType Set
         setAreaOfEffectOption: SetAreaOfEffect Option
         calculatedEngageableOpponents: CalculatedEngageableOpponents
+        eoName: string option
     }
 
     open VocationSkill
@@ -1395,12 +1396,16 @@ module CombatRoll =
         {
             name = weaponName + resourceDesc + weaponHandedSuffixString
             dicePool = dicePool
-            weaponAndResourceDicePoolMod = dicePoolModListToString [ weaponDiceMod; resourceDice ]
+            weaponAndResourceDicePoolModString = dicePoolModListToString [ weaponDiceMod; resourceDice ]
             calculatedRange = determineGreatestRange numDice weaponRange resourceRange
             penetration = weaponPenetration + resourcePenetration
             damageTypeSet = Set.union weaponDamageTypeSet resourceDamageTypeSet
             setAreaOfEffectOption = compareAndDetermineAOEShapeOption numDice weaponAOEOption resourceAreaOfEffect
             calculatedEngageableOpponents = determineEngageableOpponents numDice weaponEO
+            eoName =
+                (match weaponEO with
+                 | Calculation eoCalc -> Some eoCalc.name
+                 | Calculated _ -> None)
         }
 
     open Weapon

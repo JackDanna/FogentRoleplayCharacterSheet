@@ -28,11 +28,16 @@ open Feliz.Bulma
 let combatRollRow (model: CombatRoll) =
     Html.tr [
         Html.td model.name
-        Html.td (model.dicePool |> dicePoolToString)
+        Html.td (sprintf "%s (%s)" (model.dicePool |> dicePoolToString) model.weaponAndResourceDicePoolModString)
         Html.td (int model.penetration)
-        Html.td (calculatedRangeToString model.calculatedRange)
+        Html.td (sprintf "%s (%s)" (calculatedRangeToString model.calculatedRange) model.calculatedRange.name)
         Html.td (stringSetToStringSeperatedByCommas model.damageTypeSet)
-        Html.td (int model.calculatedEngageableOpponents)
+        Html.td (
+            match model.eoName with
+            | Some eoName -> eoName
+            | None -> ""
+            |> sprintf "%d (%s)" model.calculatedEngageableOpponents
+        )
         Html.td (setAreaOfEffectOptionToString model.setAreaOfEffectOption)
     ]
 
