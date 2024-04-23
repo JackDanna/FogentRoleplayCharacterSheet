@@ -750,7 +750,6 @@ module AttributeName =
             else
                 Set.add newGoverningAttributeName oldGoverningAttributeNames)
 
-
 module Attribute =
     open Neg2To5
     open AttributeName
@@ -788,11 +787,6 @@ module Attribute =
 
     let sumGoverningAttributeD6DiceMods attributeSet governingAttributeNameSet =
         sumAttributesLevels governingAttributeNameSet attributeSet |> intToD6DicePoolMod
-
-// let governingAttributesToDicePoolMod (attributes: Attribute list) (governingAttributes: AttributeName list) =
-//     attributes
-//     |> List.filter (fun attribute -> (List.contains attribute.attributeName governingAttributes))
-//     |> List.map (fun governingAttribute -> neg1To5ToD6DicePoolMod governingAttribute.level)
 
 module Skill =
     open Neg1To5
