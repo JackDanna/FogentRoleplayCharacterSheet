@@ -1351,9 +1351,7 @@ module CombatRoll =
         calculatedEngageableOpponents: CalculatedEngageableOpponents
     }
 
-    open Attribute
     open VocationSkill
-    open AttributeDeterminedDiceModEffect
     open ItemStack
 
     type CombatRollData = {
@@ -1361,12 +1359,8 @@ module CombatRoll =
         equipmentList: ItemStack List
     }
 
-
-    open Neg1To5
-    open AttributeName
     open WeaponResource
     open AreaOfEffect
-    open DicePool
 
     let createWeaponCombatRoll
         (weaponName: string)
