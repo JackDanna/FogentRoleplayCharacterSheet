@@ -1386,7 +1386,8 @@ module CombatRoll =
         let (resourceDesc, resourceDice, resourcePenetration, resourceRange, resourceDamageTypeSet, resourceAreaOfEffect) =
             weaponResourceClassOptionToWeaponResourceClass resource
 
-        let dicePool = modifyDicePoolByDicePoolModList baseDice skillDicePoolModList
+        let dicePool =
+            modifyDicePoolByDicePoolModList baseDice (skillDicePoolModList @ [ weaponDiceMod; offHandWeaponDiceMod ])
 
 
         let numDice = dicePool |> dicePoolToNumDice
