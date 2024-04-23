@@ -13,7 +13,7 @@ type Msg =
     | CalculateDicePools of DicePoolCalculationData
     | CheckIfLevelCapExceeded of int * ZeroToFive
 
-let init () = [ VocationSkill.init () ]
+let init () = []
 
 let update msg model =
     match msg with
