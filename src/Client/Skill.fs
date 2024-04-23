@@ -52,5 +52,3 @@ let view model dispatch disableChangeLevel governingSkillColumn =
             |> prop.text
         ]
     ]
-    |> Bulma.columns
-    |> Bulma.content

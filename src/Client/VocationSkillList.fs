@@ -62,17 +62,15 @@ let view attributeNameSet weaponSkillNameSet (model: VocationSkill list) dispatc
     List.append
         (List.mapi
             (fun position skillRow ->
-                Bulma.columns [
-                    Bulma.column [
-                        VocationSkill.view attributeNameSet skillRow (fun (msg: VocationSkill.Msg) ->
-                            ((ModifiedVocationSkillAtPosition(position, msg)) |> dispatch))
-                    ]
+                VocationSkill.view attributeNameSet skillRow (fun (msg: VocationSkill.Msg) ->
+                    ((ModifiedVocationSkillAtPosition(position, msg)) |> dispatch))
+                @ [
                     Bulma.column [
                         Html.button [ prop.onClick (fun _ -> dispatch (RemoveAtPostion position)); prop.text "-" ]
                     ]
                 ]
-
-            )
+                |> Bulma.columns
+                |> Bulma.content)
             model)
         [
             //Html.input [ prop.onClick (fun _ -> dispatch InsertVocationalSkill); prop.text "+" ]
@@ -82,9 +80,7 @@ let view attributeNameSet weaponSkillNameSet (model: VocationSkill list) dispatc
                     if Seq.contains input weaponSkillNameSet then
                         dispatch (InsertWeaponSkill input)
                     else
-                        dispatch (InsertVocationalSkill input)
-
-                )
+                        dispatch (InsertVocationalSkill input))
             ]
             Html.datalist [
                 prop.id "weaponSkillNameSet"

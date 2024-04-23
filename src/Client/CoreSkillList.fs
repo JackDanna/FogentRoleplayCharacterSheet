@@ -24,11 +24,14 @@ let update msg (model: CoreSkill list) =
             model
 
 open Feliz
+open Feliz.Bulma
 
 let view (model: CoreSkill list) (dispatch: Msg -> unit) =
 
     List.mapi
         (fun index coreSkill ->
-            CoreSkill.view coreSkill (fun msg -> ModifiedCoreSkillAtPosition(index, msg) |> dispatch))
+            CoreSkill.view coreSkill (fun msg -> ModifiedCoreSkillAtPosition(index, msg) |> dispatch)
+            |> Bulma.columns
+            |> Bulma.content)
         model
     |> Html.ul
