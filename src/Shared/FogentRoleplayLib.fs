@@ -306,38 +306,29 @@ module DicePoolMod =
         let d8, d10Neg = removeDice dicePool.d8 d8Neg
         let d10, d12Neg = removeDice dicePool.d10 d10Neg
         let d12, d20Neg = removeDice dicePool.d12 d12Neg
-        let d20, _ = removeDice dicePool.d20 d20Neg
+        let d20, remainingNeg = removeDice dicePool.d20 d20Neg
 
-        {
+        ({
             d4 = d4
             d6 = d6
             d8 = d8
             d10 = d10
             d12 = d12
             d20 = d20
-        }
+         },
+         remainingNeg)
 
     let modifyDicePool (dicePool: DicePool) (dicePoolMod: DicePoolMod) : DicePool =
         match dicePoolMod with
         | AddDice diceToAdd -> combineDicePools [ dicePool; diceToAdd ]
-        | RemoveDice diceToRemove -> removeDiceFromDicePool dicePool diceToRemove
+        | RemoveDice diceToRemove -> removeDiceFromDicePool dicePool diceToRemove |> (fun (dicePool, _) -> dicePool)
 
     let dicePoolModToInt dicePoolMod =
         match dicePoolMod with
         | AddDice dicePool -> dicePoolToNumDice dicePool |> int
         | RemoveDice dicePoolPenalty -> int dicePoolPenalty * -1
 
-
-    let dicePoolModListToDicePool dicePoolMods =
-        let combinedDicePoolPenalty =
-            List.fold
-                (fun acc diceMod ->
-                    match diceMod with
-                    | RemoveDice dicePoolPenalty -> acc + dicePoolPenalty
-                    | _ -> acc)
-                0u
-                dicePoolMods
-            |> RemoveDice
+    let combineDicePoolModList dicePoolModList =
 
         let combinedPositiveDicePool =
             List.fold
@@ -346,12 +337,33 @@ module DicePoolMod =
                     | AddDice dicePool -> combineDicePools [ acc; dicePool ]
                     | _ -> acc)
                 emptyDicePool
-                dicePoolMods
+                dicePoolModList
 
-        modifyDicePool combinedPositiveDicePool combinedDicePoolPenalty
+        let combinedDicePoolPenalty =
+            List.fold
+                (fun acc diceMod ->
+                    match diceMod with
+                    | RemoveDice dicePoolPenalty -> acc + dicePoolPenalty
+                    | _ -> acc)
+                0u
+                dicePoolModList
 
-    let dicePoolModListToString dicePoolModList =
-        dicePoolModList |> dicePoolModListToDicePool |> dicePoolToString
+        removeDiceFromDicePool combinedPositiveDicePool combinedDicePoolPenalty
+        |> (fun (dicePool, remainingNeg) ->
+            if remainingNeg > 0u then
+                RemoveDice remainingNeg
+            else
+                AddDice dicePool)
+
+    let dicePoolModListToDicePool =
+        combineDicePoolModList >> modifyDicePool emptyDicePool
+
+    let dicePoolModToString dicePoolMod =
+        match dicePoolMod with
+        | AddDice dicePool -> "+" + dicePoolToString dicePool
+        | RemoveDice dicePoolPenalty -> "-" + string dicePoolPenalty
+
+    let dicePoolModListToString = combineDicePoolModList >> dicePoolModToString
 
     let modifyDicePoolByDicePoolModList dicePool dicePoolMods =
 
@@ -366,12 +378,6 @@ module DicePoolMod =
             RemoveDice(uint (abs num))
         else
             createD6DicePoolMod (uint num)
-
-
-    let dicePoolModToString dicePoolMod =
-        match dicePoolMod with
-        | RemoveDice removeDice -> $"-{uint removeDice}d"
-        | AddDice addDice -> dicePoolToString addDice
 
     // Parsing Logic
     let createDicePoolMod (numDiceStr: string) (diceType: string) =
@@ -1344,6 +1350,7 @@ module CombatRoll =
     type CombatRoll = {
         name: string
         dicePool: DicePool
+        weaponAndResourceDicePoolMod: string
         calculatedRange: CalculatedRange
         penetration: Penetration
         damageTypeSet: DamageType Set
@@ -1388,6 +1395,7 @@ module CombatRoll =
         {
             name = weaponName + resourceDesc + weaponHandedSuffixString
             dicePool = dicePool
+            weaponAndResourceDicePoolMod = dicePoolModListToString [ weaponDiceMod; resourceDice ]
             calculatedRange = determineGreatestRange numDice weaponRange resourceRange
             penetration = weaponPenetration + resourcePenetration
             damageTypeSet = Set.union weaponDamageTypeSet resourceDamageTypeSet
