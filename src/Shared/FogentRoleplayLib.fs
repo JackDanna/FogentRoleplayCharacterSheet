@@ -920,6 +920,7 @@ module VocationSkill =
 
 module Vocation =
     open ZeroToFive
+    open DicePool
     open DicePoolMod
     open VocationSkill
     open AttributeName
@@ -928,6 +929,7 @@ module Vocation =
         name: string
         governingAttributeNameSet: AttributeName Set
         level: ZeroToFive
+        baseDice: DicePool
         dicePoolModList: DicePoolMod List
         vocationSkillList: VocationSkill list
     }
@@ -1292,7 +1294,7 @@ module DicePoolCalculation =
             (skillLevel |> neg1To5ToInt)
             (Set.empty.Add(skillGoveringAttributeName))
 
-    let calculateVocationalSkillDicePool
+    let calculateVocationalSkillDicePoolModList
         (dicePoolCalculationData: DicePoolCalculationData)
         (skillLevel: Neg1To5)
         (skillGoveringAttributeNames: AttributeName Set)
@@ -1300,7 +1302,7 @@ module DicePoolCalculation =
 
         createDicePoolModList dicePoolCalculationData (skillLevel |> neg1To5ToInt) skillGoveringAttributeNames
 
-    let calculateVocationDicePool
+    let calculateVocationDicePoolModList
         (dicePoolCalculationData: DicePoolCalculationData)
         (skillLevel: ZeroToFive)
         (skillGoveringAttributeNames: AttributeName Set)
@@ -1388,7 +1390,6 @@ module CombatRoll =
 
         let dicePool =
             modifyDicePoolByDicePoolModList baseDice (skillDicePoolModList @ [ weaponDiceMod; offHandWeaponDiceMod ])
-
 
         let numDice = dicePool |> dicePoolToNumDice
 

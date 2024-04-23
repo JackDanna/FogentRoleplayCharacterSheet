@@ -2,6 +2,7 @@ module Vocation
 
 open FogentRoleplayLib.Vocation
 open FogentRoleplayLib.AttributeName
+open FogentRoleplayLib.DicePool
 open FogentRoleplayLib.DicePoolMod
 open FogentRoleplayLib.DicePoolCalculation
 
@@ -16,6 +17,7 @@ let init () : Vocation = {
     name = ""
     level = ZeroToFive.init ()
     governingAttributeNameSet = Set.empty
+    baseDice = base3d6DicePool
     dicePoolModList = []
     vocationSkillList = VocationSkillList.init ()
 }
@@ -45,7 +47,7 @@ let update msg (model: Vocation) =
         }
     | CalculateDicePools msg -> {
         model with
-            dicePoolModList = calculateVocationDicePool msg model.level model.governingAttributeNameSet
+            dicePoolModList = calculateVocationDicePoolModList msg model.level model.governingAttributeNameSet
             vocationSkillList =
                 VocationSkillList.update (VocationSkillList.CalculateDicePools(msg)) model.vocationSkillList
       }
@@ -70,7 +72,12 @@ let view attributeNameSet weaponSkillNameSet (model: Vocation) dispatch =
                     attributeNameSet
             ]
             Bulma.column [ ZeroToFive.view model.level (ZeroToFiveMsg >> dispatch) ]
-            Bulma.column [ prop.text (model.dicePoolModList |> dicePoolModListToString) ]
+            Bulma.column [
+                prop.text (
+                    modifyDicePoolByDicePoolModList model.baseDice model.dicePoolModList
+                    |> dicePoolToString
+                )
+            ]
         ]
         VocationSkillList.view
             attributeNameSet
