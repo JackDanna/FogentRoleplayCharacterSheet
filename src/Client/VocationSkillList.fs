@@ -8,7 +8,7 @@ type Msg =
     | InsertVocationalSkill of string
     | InsertWeaponSkill of string
     | InsertMagicSkill
-    | Remove
+    | RemoveAtPostion of int
     | ModifiedVocationSkillAtPosition of int * VocationSkill.Msg
     | CalculateDicePools of DicePoolCalculationData
     | CheckIfLevelCapExceeded of int * ZeroToFive
@@ -32,7 +32,7 @@ let update msg model =
         |> List.singleton
         |> List.append model
     //| InsertMagicSkill -> model
-    //| Remove -> model
+    | RemoveAtPostion position -> List.removeAt position model
     | ModifiedVocationSkillAtPosition(position, msg) ->
         model
         |> List.mapi (fun index vocationSkill ->
@@ -62,8 +62,17 @@ let view attributeNameSet weaponSkillNameSet (model: VocationSkill list) dispatc
     List.append
         (List.mapi
             (fun position skillRow ->
-                VocationSkill.view attributeNameSet skillRow (fun (msg: VocationSkill.Msg) ->
-                    ((ModifiedVocationSkillAtPosition(position, msg)) |> dispatch)))
+                Bulma.columns [
+                    Bulma.column [
+                        VocationSkill.view attributeNameSet skillRow (fun (msg: VocationSkill.Msg) ->
+                            ((ModifiedVocationSkillAtPosition(position, msg)) |> dispatch))
+                    ]
+                    Bulma.column [
+                        Html.button [ prop.onClick (fun _ -> dispatch (RemoveAtPostion position)); prop.text "-" ]
+                    ]
+                ]
+
+            )
             model)
         [
             //Html.input [ prop.onClick (fun _ -> dispatch InsertVocationalSkill); prop.text "+" ]
@@ -83,6 +92,5 @@ let view attributeNameSet weaponSkillNameSet (model: VocationSkill list) dispatc
                     Seq.map (fun (itemName: string) -> Html.option [ prop.value itemName ]) weaponSkillNameSet
                 )
             ]
-        // Html.button [ prop.onClick (fun _ -> dispatch Remove); prop.text "-" ]
         ]
     |> Html.ul
