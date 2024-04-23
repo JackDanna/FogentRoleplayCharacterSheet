@@ -1253,11 +1253,9 @@ module ItemStack =
 // ItemStat
 
 module DicePoolCalculation =
-    open DicePool
     open Attribute
     open DicePoolMod
     open Neg1To5
-    open Neg2To5
     open AttributeName
     open ZeroToFive
 
