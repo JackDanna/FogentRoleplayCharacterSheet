@@ -44,6 +44,7 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.ItemStack
 
     open FogentRoleplayLib.WeaponSpell
+    open FogentRoleplayLib.MagicSystem
 
     let makeFogentRoleplayDataPath fileName =
         __SOURCE_DIRECTORY__ + "../../../FogentRoleplayData/" + fileName
@@ -196,9 +197,25 @@ module FogentRoleplayServerData =
                  damageTypes = stringToDamageTypeSet (string row.["damageTypes"])
                  isMeleeCapable = Bool row.["meleeCapable"]
                  isRangeCapable = Bool row.["rangeCapable"]
-                 magicResource = string row.["magicResourceClass"]
              }))
         |> Map.ofSeq
+
+    let magicSkillNameMap =
+        magicSkillDataMap.Keys |> Seq.map (fun key -> (key, key)) |> Map.ofSeq
+
+    // MagicSystem
+    let magicSystemData =
+        makeFogentRoleplayDataSet "MagicSystemData.csv" (fun row -> {
+            name = row.["name"]
+            vocationName = row.["vocationName"]
+            vocationGoverningAttributeSet = stringToAttributes row.["vocationGoverningAttributeSet"]
+            resourceName = row.["resourceName"]
+            governingCoreSkill = row.["governingCoreSkill"]
+            magicSkillNameSet =
+                row.["magicSkillNameSet"].Split ", "
+                |> Set.ofSeq
+                |> Set.map (fun key -> magicSkillNameMap.Item key)
+        })
 
     // WeaponClass
     let weaponSet =

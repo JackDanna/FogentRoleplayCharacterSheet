@@ -871,13 +871,11 @@ module MagicResourcePool =
 module MagicSkill =
     open VocationalSkill
     open DamageType
-    open MagicResource
 
     type MagicSkillData = {
         damageTypes: DamageType Set
         isMeleeCapable: bool
         isRangeCapable: bool
-        magicResource: MagicResource
     }
 
     type MagicSkill = {
@@ -894,7 +892,7 @@ module MagicSystem =
         vocationGoverningAttributeSet: AttributeName Set
         resourceName: string
         governingCoreSkill: string
-        magicSkills: string Set
+        magicSkillNameSet: string Set
     }
 
 // Larger Character Building Blocks
