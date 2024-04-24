@@ -220,18 +220,18 @@ module FogentRoleplayServerData =
         Set.map (_.governingSkillName) weaponSet
 
     // WeaponSpell
-    // let weaponSpellSet: WeaponSpell Set =
-    //     makeFogentRoleplayDataSet "WeaponSpellData.csv" (fun row -> {
-    //         name = string row.["name"]
-    //         oneHandedWeaponDice = parseDicePoolModOptionString row.["oneHandedWeaponDice"]
-    //         twoHandedWeaponDice = parseDicePoolModOptionString row.["twoHandedWeaponDice"]
-    //         dualWieldableBonus = parseDicePoolModOptionString row.["dualWieldableBonus"]
-    //         penetration = uint row.["penetration"]
-    //         range = rangeMap.Item row.["range"]
-    //         engageableOpponents = engageableOpponentsMap row.["engageableOpponents"]
-    //         areaOfEffectOption = namedAreaOfEffectOptionMap row.["areaOfEffect"]
-    //         magicResourceAmount = uint row.["magicResourceAmount"]
-    //     })
+    let weaponSpellSet: WeaponSpell Set =
+        makeFogentRoleplayDataSet "WeaponSpellData.csv" (fun row -> {
+            name = string row.["name"]
+            oneHandedWeaponDice = parseDicePoolModOptionString row.["oneHandedWeaponDice"]
+            twoHandedWeaponDice = parseDicePoolModOptionString row.["twoHandedWeaponDice"]
+            dualWieldableBonus = parseDicePoolModOptionString row.["dualWieldableBonus"]
+            penetration = uint row.["penetration"]
+            range = rangeMap.Item row.["range"]
+            engageableOpponents = engageableOpponentsMap row.["engageableOpponents"]
+            areaOfEffectOption = namedAreaOfEffectOptionMap row.["areaOfEffect"]
+            magicResourceAmount = uint row.["magicResourceAmount"]
+        })
 
     // |> Set.map (fun (weaponClass: Weapon) -> weaponClass.name, weaponClass)
     // |> Map.ofSeq
