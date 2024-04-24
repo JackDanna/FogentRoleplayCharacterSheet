@@ -437,7 +437,7 @@ module Range =
     type CalculatedRange = {
         name: string
         effectiveRange: uint
-        maxRange: uint
+        maxRangeOption: uint option
     }
 
     type RangeCalculation = {
@@ -445,7 +445,7 @@ module Range =
         numDicePerEffectiveRangeUnit: uint
         ftPerEffectiveRangeUnit: uint
         roundEffectiveRangeUp: bool // If true, round up the effective range if decimal in calculation, otherwise round down
-        maxRange: uint
+        maxRangeOption: uint option
     }
 
     type Range =
@@ -454,8 +454,11 @@ module Range =
 
     //type RangeAdjustment = int
 
-    let calculatedRangeToString calculatedRange =
-        sprintf "%u/%u" calculatedRange.effectiveRange calculatedRange.maxRange
+    let calculatedRangeToString (calculatedRange: CalculatedRange) =
+        match calculatedRange.maxRangeOption with
+        | Some maxRange -> sprintf "%d" maxRange
+        | None -> ""
+        |> sprintf "%d/%s" calculatedRange.effectiveRange
 
     let calculateRangeCalculation numDice rangeCalculation = {
         name = rangeCalculation.name
@@ -470,7 +473,7 @@ module Range =
                 |> Math.Floor
                 |> uint
                 |> multiply rangeCalculation.ftPerEffectiveRangeUnit
-        maxRange = rangeCalculation.maxRange
+        maxRangeOption = rangeCalculation.maxRangeOption
     }
 
     let rangeToCalculatedRange (numDice: uint) (range: Range) : CalculatedRange =

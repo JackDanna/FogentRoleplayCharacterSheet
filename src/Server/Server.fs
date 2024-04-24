@@ -43,6 +43,8 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.AttributeStatAdjustmentEffect
     open FogentRoleplayLib.ItemStack
 
+    open FogentRoleplayLib.WeaponSpell
+
     let makeFogentRoleplayDataPath fileName =
         __SOURCE_DIRECTORY__ + "../../../FogentRoleplayData/" + fileName
 
@@ -78,18 +80,23 @@ module FogentRoleplayServerData =
 
     // Range
 
+    let parseMaxRangeOption input =
+        match input with
+        | "" -> None
+        | validInput -> Some(uint validInput)
+
     let rangeMap =
         (makeFogentRoleplayDataList "CalculatedRangeData.csv" (fun row -> {
             name = string row.["name"]
             effectiveRange = uint row.["effectiveRange"]
-            maxRange = uint row.["maxRange"]
+            maxRangeOption = parseMaxRangeOption row.["maxRangeOption"]
          }),
          makeFogentRoleplayDataList "RangeCalculationData.csv" (fun row -> {
              name = string row.["name"]
              numDicePerEffectiveRangeUnit = uint row.["numDicePerEffectiveRangeUnit"]
              ftPerEffectiveRangeUnit = uint row.["ftPerEffectiveRangeUnit"]
              roundEffectiveRangeUp = Bool row.["roundEffectiveRangeUp"]
-             maxRange = uint row.["maxRange"]
+             maxRangeOption = parseMaxRangeOption row.["maxRangeOption"]
          }))
         ||> createRangeMap
 
@@ -211,6 +218,20 @@ module FogentRoleplayServerData =
 
     let weaponGoverningSkillNameSet: SkillName Set =
         Set.map (_.governingSkillName) weaponSet
+
+    // WeaponSpell
+    // let weaponSpellSet: WeaponSpell Set =
+    //     makeFogentRoleplayDataSet "WeaponSpellData.csv" (fun row -> {
+    //         name = string row.["name"]
+    //         oneHandedWeaponDice = parseDicePoolModOptionString row.["oneHandedWeaponDice"]
+    //         twoHandedWeaponDice = parseDicePoolModOptionString row.["twoHandedWeaponDice"]
+    //         dualWieldableBonus = parseDicePoolModOptionString row.["dualWieldableBonus"]
+    //         penetration = uint row.["penetration"]
+    //         range = rangeMap.Item row.["range"]
+    //         engageableOpponents = engageableOpponentsMap row.["engageableOpponents"]
+    //         areaOfEffectOption = namedAreaOfEffectOptionMap row.["areaOfEffect"]
+    //         magicResourceAmount = uint row.["magicResourceAmount"]
+    //     })
 
     // |> Set.map (fun (weaponClass: Weapon) -> weaponClass.name, weaponClass)
     // |> Map.ofSeq
