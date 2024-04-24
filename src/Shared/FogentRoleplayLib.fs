@@ -874,7 +874,6 @@ module MagicSkill =
     open MagicResource
 
     type MagicSkillData = {
-        governingVocationSet: string Set
         damageTypes: DamageType Set
         isMeleeCapable: bool
         isRangeCapable: bool

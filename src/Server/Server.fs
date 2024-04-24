@@ -193,7 +193,6 @@ module FogentRoleplayServerData =
         makeFogentRoleplayDataSet "MagicSkillData.csv" (fun row ->
             (string row.["name"],
              {
-                 governingVocationSet = row.["governingVocationSet"].Split ", " |> Set.ofSeq
                  damageTypes = stringToDamageTypeSet (string row.["damageTypes"])
                  isMeleeCapable = Bool row.["meleeCapable"]
                  isRangeCapable = Bool row.["rangeCapable"]
