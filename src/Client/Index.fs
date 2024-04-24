@@ -32,7 +32,6 @@ let init () : Model * Cmd<Msg> =
             itemStackMap = Map.empty
             weaponSpellSet = Set.empty
             vocationSkillData = {
-                magicSkillDataMap = Map.empty
                 weaponGoverningSkillNameSet = Set.empty
                 magicSystemMap = Map.empty
             }

@@ -201,9 +201,6 @@ module FogentRoleplayServerData =
              }))
         |> Map.ofSeq
 
-    let magicSkillNameMap =
-        magicSkillDataMap.Keys |> Seq.map (fun key -> (key, key)) |> Map.ofSeq
-
     // MagicSystem
     let magicSystemData =
         makeFogentRoleplayDataSet "MagicSystemData.csv" (fun row -> {
@@ -212,10 +209,10 @@ module FogentRoleplayServerData =
             vocationGoverningAttributeSet = stringToAttributes row.["vocationGoverningAttributeSet"]
             resourceName = row.["resourceName"]
             governingCoreSkill = row.["governingCoreSkill"]
-            magicSkillNameSet =
+            magicSkillDataSet =
                 row.["magicSkillNameSet"].Split ", "
                 |> Set.ofSeq
-                |> Set.map (fun key -> magicSkillNameMap.Item key)
+                |> Set.map (fun key -> magicSkillDataMap.Item key)
         })
         |> Set.map (fun magicSystem -> magicSystem.name, magicSystem)
         |> Map.ofSeq
@@ -489,7 +486,6 @@ let fallenDataApi: IFogentRoleplayDataApi = {
                 weaponSpellSet = FogentRoleplayServerData.weaponSpellSet
                 vocationSkillData = {
                     weaponGoverningSkillNameSet = FogentRoleplayServerData.weaponGoverningSkillNameSet
-                    magicSkillDataMap = FogentRoleplayServerData.magicSkillDataMap
                     magicSystemMap = FogentRoleplayServerData.magicSystemData
                 }
             //   magicSkillMap = FallenServerData.magicSkillMap

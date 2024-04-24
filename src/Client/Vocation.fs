@@ -5,6 +5,7 @@ open FogentRoleplayLib.AttributeName
 open FogentRoleplayLib.DicePool
 open FogentRoleplayLib.DicePoolMod
 open FogentRoleplayLib.DicePoolCalculation
+open FogentRoleplayLib.Character
 
 type Msg =
     | SetName of string
@@ -56,7 +57,7 @@ let update msg (model: Vocation) =
 open Feliz
 open Feliz.Bulma
 
-let view attributeNameSet vocationSkillData (model: Vocation) dispatch =
+let view attributeNameSet (vocationSkillData: VocationSkillData) (model: Vocation) dispatch =
     Bulma.box [
         Bulma.columns [
             Bulma.column [
@@ -81,7 +82,12 @@ let view attributeNameSet vocationSkillData (model: Vocation) dispatch =
         ]
         VocationSkillList.view
             attributeNameSet
-            vocationSkillData
+            (if vocationSkillData.magicSystemMap.ContainsKey model.name then
+                 let magicSystem = vocationSkillData.magicSystemMap.Item model.name
+                 magicSystem.magicSkillDataSet
+             else
+                 Set.empty)
+            vocationSkillData.weaponGoverningSkillNameSet
             model.vocationSkillList
             (VocationSkillListMsg >> dispatch)
     ]

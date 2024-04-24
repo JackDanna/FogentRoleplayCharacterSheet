@@ -11,7 +11,7 @@ open FogentRoleplayLib.MagicSkill
 type Msg =
     | InsertVocationalSkill of string
     | InsertWeaponSkill of string
-    | InsertMagicSkill of string * MagicSkillData
+    | InsertMagicSkill of MagicSkillData
     | RemoveAtPostion of int
     | ModifiedVocationSkillAtPosition of int * VocationSkill.Msg
     | CalculateDicePools of DicePoolCalculationData
@@ -41,14 +41,14 @@ let update msg model =
         |> WeaponSkill
         |> List.singleton
         |> List.append model
-    | InsertMagicSkill(magicSkillName, magicSkillData) ->
+    | InsertMagicSkill magicSkillData ->
 
         let initVocationalSkill = VocationalSkill.init ()
 
         {
             vocationalSkill = {
                 initVocationalSkill with
-                    skill.name = magicSkillName
+                    skill.name = magicSkillData.name
             }
             magicSkillData = magicSkillData
         }
@@ -82,7 +82,7 @@ let update msg model =
 open Feliz
 open Feliz.Bulma
 
-let view attributeNameSet vocationSkillData (model: VocationSkill list) dispatch =
+let view attributeNameSet magicSkillDataSet weaponGoverningSkillNameSet (model: VocationSkill list) dispatch =
     List.append
         (List.mapi
             (fun position skillRow ->
@@ -97,13 +97,13 @@ let view attributeNameSet vocationSkillData (model: VocationSkill list) dispatch
                 |> Bulma.content)
             model)
         [
-            //Html.input [ prop.onClick (fun _ -> dispatch InsertVocationalSkill); prop.text "+" ]
             Bulma.input.text [
                 prop.list "vocationSkillNameSet"
                 prop.onTextChange (fun input ->
-                    if Seq.contains input vocationSkillData.magicSkillDataMap.Keys then
-                        (input, (vocationSkillData.magicSkillDataMap.Item input)) |> InsertMagicSkill
-                    elif Seq.contains input vocationSkillData.weaponGoverningSkillNameSet then
+                    if Seq.contains input (Seq.map (_.name) magicSkillDataSet) then
+                        (Seq.find (fun magicSkillData -> magicSkillData.name = input) magicSkillDataSet)
+                        |> InsertMagicSkill
+                    elif Seq.contains input weaponGoverningSkillNameSet then
                         InsertWeaponSkill input
                     else
                         InsertVocationalSkill input
@@ -112,10 +112,7 @@ let view attributeNameSet vocationSkillData (model: VocationSkill list) dispatch
             Html.datalist [
                 prop.id "vocationSkillNameSet"
                 prop.children (
-                    [
-                        vocationSkillData.magicSkillDataMap.Keys
-                        vocationSkillData.weaponGoverningSkillNameSet
-                    ]
+                    [ (Seq.map (_.name) magicSkillDataSet); weaponGoverningSkillNameSet ]
                     |> Seq.collect id
                     |> Seq.map (fun (itemName: string) -> Html.option [ prop.value itemName ])
                 )

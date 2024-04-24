@@ -886,6 +886,7 @@ module MagicSkill =
 
 module MagicSystem =
     open AttributeName
+    open MagicSkill
 
     type MagicSystem = {
         name: string
@@ -893,7 +894,7 @@ module MagicSystem =
         vocationGoverningAttributeSet: AttributeName Set
         resourceName: string
         governingCoreSkill: string
-        magicSkillNameSet: string Set
+        magicSkillDataSet: MagicSkillData Set
     }
 
 // Larger Character Building Blocks
@@ -1548,12 +1549,10 @@ module Character =
     open DicePoolMod
     open ItemStack
     open CombatRoll
-    open MagicSkill
     open MagicSystem
 
     type VocationSkillData = {
         weaponGoverningSkillNameSet: string Set
-        magicSkillDataMap: Map<string, MagicSkillData>
         magicSystemMap: Map<string, MagicSystem>
     }
 
