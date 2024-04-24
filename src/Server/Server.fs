@@ -194,6 +194,7 @@ module FogentRoleplayServerData =
         makeFogentRoleplayDataSet "MagicSkillData.csv" (fun row ->
             (string row.["name"],
              {
+                 name = string row.["name"]
                  damageTypes = stringToDamageTypeSet (string row.["damageTypes"])
                  isMeleeCapable = Bool row.["meleeCapable"]
                  isRangeCapable = Bool row.["rangeCapable"]

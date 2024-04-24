@@ -873,6 +873,7 @@ module MagicSkill =
     open DamageType
 
     type MagicSkillData = {
+        name: string
         damageTypes: DamageType Set
         isMeleeCapable: bool
         isRangeCapable: bool
