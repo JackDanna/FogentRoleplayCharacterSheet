@@ -735,6 +735,26 @@ module ItemTier =
         durabilityMax: uint
     }
 
+module WeaponSpell =
+
+    open DicePoolMod
+    open Penetration
+    open Range
+    open EngageableOpponents
+    open AreaOfEffect
+
+    type WeaponSpell = {
+        name: string
+        oneHandedWeaponDice: DicePoolMod option
+        twoHandedWeaponDice: DicePoolMod option
+        dualWieldableBonus: DicePoolMod option
+        penetration: Penetration
+        range: Range
+        engageableOpponents: EngageableOpponents
+        areaOfEffectOption: AreaOfEffect option
+        magicResourceAmount: uint
+    }
+
 // Character Building Blocks
 
 module AttributeName =
