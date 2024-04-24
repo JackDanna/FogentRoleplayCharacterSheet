@@ -15,6 +15,7 @@ open FogentRoleplayLib.Skill
 open FogentRoleplayLib.WeaponSpell
 open FogentRoleplayLib.MagicSkill
 open FogentRoleplayLib.Character
+open FogentRoleplayLib.MagicSystem
 // open FogentRoleplayLib.ItemStack
 
 module Route =

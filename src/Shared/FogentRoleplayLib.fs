@@ -1548,10 +1548,12 @@ module Character =
     open ItemStack
     open CombatRoll
     open MagicSkill
+    open MagicSystem
 
     type VocationSkillData = {
         weaponGoverningSkillNameSet: string Set
         magicSkillDataMap: Map<string, MagicSkillData>
+        magicSystemMap: Map<string, MagicSystem>
     }
 
     type Character = {

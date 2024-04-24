@@ -34,6 +34,7 @@ let init () : Model * Cmd<Msg> =
             vocationSkillData = {
                 magicSkillDataMap = Map.empty
                 weaponGoverningSkillNameSet = Set.empty
+                magicSystemMap = Map.empty
             }
         }
         character = Character.init defaultAttributeSet defaultCoreSkillList

@@ -216,6 +216,8 @@ module FogentRoleplayServerData =
                 |> Set.ofSeq
                 |> Set.map (fun key -> magicSkillNameMap.Item key)
         })
+        |> Set.map (fun magicSystem -> magicSystem.name, magicSystem)
+        |> Map.ofSeq
 
     // WeaponClass
     let weaponSet =
@@ -487,6 +489,7 @@ let fallenDataApi: IFogentRoleplayDataApi = {
                 vocationSkillData = {
                     weaponGoverningSkillNameSet = FogentRoleplayServerData.weaponGoverningSkillNameSet
                     magicSkillDataMap = FogentRoleplayServerData.magicSkillDataMap
+                    magicSystemMap = FogentRoleplayServerData.magicSystemData
                 }
             //   magicSkillMap = FallenServerData.magicSkillMap
             //   magicCombatMap = FallenServerData.magicCombatMap
