@@ -868,29 +868,22 @@ module MagicResourcePool =
         poolMax: uint
     }
 
-module MagicSkillData =
+module MagicSkill =
+    open VocationalSkill
     open DamageType
     open MagicResource
 
     type MagicSkillData = {
-        name: string
+        governingVocationSet: string Set
         damageTypes: DamageType Set
         isMeleeCapable: bool
         isRangeCapable: bool
         magicResource: MagicResource
     }
 
-module MagicSkill =
-    open VocationalSkill
-    open DamageType
-    open MagicResource
-
     type MagicSkill = {
         vocationalSkill: VocationalSkill
-        damageTypeSet: DamageType Set
-        isMeleeCapable: bool
-        isRangeCapable: bool
-        magicResource: MagicResource
+        magicSkillData: MagicSkillData
     }
 
 // Larger Character Building Blocks

@@ -15,7 +15,7 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.EngageableOpponents
     open FogentRoleplayLib.Range
     open FogentRoleplayLib.ResourceName
-    open FogentRoleplayLib.MagicSkillData
+    open FogentRoleplayLib.MagicSkill
     open FogentRoleplayLib.Weapon
     open FogentRoleplayLib.DicePoolMod
 
@@ -189,15 +189,16 @@ module FogentRoleplayServerData =
     let stringToAttributes = mapAndStringToValueSet attributeNameMap
 
     //MagicSkillData
-    let magicSkillMap =
-        makeFogentRoleplayDataSet "MagicSkillData.csv" (fun row -> {
-            name = string row.["name"]
-            damageTypes = stringToDamageTypeSet (string row.["damageTypes"])
-            isMeleeCapable = Bool row.["meleeCapable"]
-            isRangeCapable = Bool row.["rangeCapable"]
-            magicResource = string row.["magicResourceClass"]
-        })
-        |> Set.map (fun (magicSkill: MagicSkillData) -> magicSkill.name, magicSkill)
+    let magicSkillDataMap =
+        makeFogentRoleplayDataSet "MagicSkillData.csv" (fun row ->
+            (string row.["name"],
+             {
+                 governingVocationSet = row.["governingVocationSet"].Split ", " |> Set.ofSeq
+                 damageTypes = stringToDamageTypeSet (string row.["damageTypes"])
+                 isMeleeCapable = Bool row.["meleeCapable"]
+                 isRangeCapable = Bool row.["rangeCapable"]
+                 magicResource = string row.["magicResourceClass"]
+             }))
         |> Map.ofSeq
 
     // WeaponClass
@@ -468,6 +469,7 @@ let fallenDataApi: IFogentRoleplayDataApi = {
                 itemStackMap = FogentRoleplayServerData.itemStackMap
                 weaponSkillNameSet = FogentRoleplayServerData.weaponGoverningSkillNameSet
                 weaponSpellSet = FogentRoleplayServerData.weaponSpellSet
+                magicSkillDataMap = FogentRoleplayServerData.magicSkillDataMap
             //   magicSkillMap = FallenServerData.magicSkillMap
             //   magicCombatMap = FallenServerData.magicCombatMap
             //   rangeMap = FallenServerData.rangeMap
