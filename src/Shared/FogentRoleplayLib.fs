@@ -21,7 +21,6 @@ module StringUtils =
             |> Set.ofArray
             |> Set.map (fun attributeString -> map.Item attributeString)
 
-
 module MathUtils =
     open System
 
