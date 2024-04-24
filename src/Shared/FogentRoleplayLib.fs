@@ -885,6 +885,18 @@ module MagicSkill =
         magicSkillData: MagicSkillData
     }
 
+module MagicSystem =
+    open AttributeName
+
+    type MagicSystem = {
+        name: string
+        vocationName: string
+        vocationGoverningAttributeSet: AttributeName Set
+        resourceName: string
+        governingCoreSkill: string
+        magicSkills: string Set
+    }
+
 // Larger Character Building Blocks
 
 module AttributeAndCoreSkills =
