@@ -31,6 +31,7 @@ let init () : Model * Cmd<Msg> =
             defaultCoreSkillList = defaultCoreSkillList
             itemStackMap = Map.empty
             weaponSkillNameSet = Set.empty
+            weaponSpellSet = Set.empty
         }
         character = Character.init defaultAttributeSet defaultCoreSkillList
     },

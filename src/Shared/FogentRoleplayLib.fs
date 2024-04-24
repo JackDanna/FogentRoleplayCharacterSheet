@@ -1546,6 +1546,13 @@ module Character =
     open ItemStack
     open CombatRoll
 
+    open WeaponSpell
+
+    type VocationSkillData = {
+        weaponSkillNameSet: string Set
+        weaponSpellSet: WeaponSpell Set
+    }
+
     type Character = {
         name: string
         attributeAndCoreSkillsList: AttributeAndCoreSkills list
