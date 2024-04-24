@@ -22,20 +22,40 @@ let init () = []
 let update msg model =
     match msg with
     | InsertVocationalSkill name ->
-        let temp = VocationalSkill.init ()
+        let initVocationalSkill = VocationalSkill.init ()
 
-        { temp with skill.name = name }
+        {
+            initVocationalSkill with
+                skill.name = name
+        }
         |> VocationalSkill
         |> List.singleton
         |> List.append model
     | InsertWeaponSkill name ->
-        let temp = VocationalSkill.init ()
+        let initVocationalSkill = VocationalSkill.init ()
 
-        { temp with skill.name = name }
+        {
+            initVocationalSkill with
+                skill.name = name
+        }
         |> WeaponSkill
         |> List.singleton
         |> List.append model
-    //| InsertMagicSkill -> model
+    | InsertMagicSkill(magicSkillName, magicSkillData) ->
+
+        let initVocationalSkill = VocationalSkill.init ()
+
+        {
+            vocationalSkill = {
+                initVocationalSkill with
+                    skill.name = magicSkillName
+            }
+            magicSkillData = magicSkillData
+        }
+        |> MagicSkill
+        |> List.singleton
+        |> List.append model
+
     | RemoveAtPostion position -> List.removeAt position model
     | ModifiedVocationSkillAtPosition(position, msg) ->
         model
@@ -79,7 +99,7 @@ let view attributeNameSet vocationSkillData (model: VocationSkill list) dispatch
         [
             //Html.input [ prop.onClick (fun _ -> dispatch InsertVocationalSkill); prop.text "+" ]
             Bulma.input.text [
-                prop.list "weaponSkillNameSet"
+                prop.list "vocationSkillNameSet"
                 prop.onTextChange (fun input ->
                     if Seq.contains input vocationSkillData.magicSkillDataMap.Keys then
                         (input, (vocationSkillData.magicSkillDataMap.Item input)) |> InsertMagicSkill
@@ -90,11 +110,14 @@ let view attributeNameSet vocationSkillData (model: VocationSkill list) dispatch
                     |> dispatch)
             ]
             Html.datalist [
-                prop.id "weaponSkillNameSet"
+                prop.id "vocationSkillNameSet"
                 prop.children (
-                    Seq.map
-                        (fun (itemName: string) -> Html.option [ prop.value itemName ])
+                    [
                         vocationSkillData.magicSkillDataMap.Keys
+                        vocationSkillData.weaponGoverningSkillNameSet
+                    ]
+                    |> Seq.collect id
+                    |> Seq.map (fun (itemName: string) -> Html.option [ prop.value itemName ])
                 )
             ]
         ]
