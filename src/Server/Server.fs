@@ -467,9 +467,11 @@ let fallenDataApi: IFogentRoleplayDataApi = {
                 defaultCoreSkillList = FogentRoleplayServerData.coreSkillData
                 defaultAttributeSet = FogentRoleplayServerData.attributeNameSet
                 itemStackMap = FogentRoleplayServerData.itemStackMap
-                weaponSkillNameSet = FogentRoleplayServerData.weaponGoverningSkillNameSet
                 weaponSpellSet = FogentRoleplayServerData.weaponSpellSet
-                magicSkillDataMap = FogentRoleplayServerData.magicSkillDataMap
+                vocationSkillData = {
+                    weaponGoverningSkillNameSet = FogentRoleplayServerData.weaponGoverningSkillNameSet
+                    magicSkillDataMap = FogentRoleplayServerData.magicSkillDataMap
+                }
             //   magicSkillMap = FallenServerData.magicSkillMap
             //   magicCombatMap = FallenServerData.magicCombatMap
             //   rangeMap = FallenServerData.rangeMap

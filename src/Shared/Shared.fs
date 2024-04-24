@@ -14,6 +14,7 @@ open FogentRoleplayLib.ItemStack
 open FogentRoleplayLib.Skill
 open FogentRoleplayLib.WeaponSpell
 open FogentRoleplayLib.MagicSkill
+open FogentRoleplayLib.Character
 // open FogentRoleplayLib.ItemStack
 
 module Route =
@@ -24,9 +25,8 @@ type FogentRoleplayData = {
     defaultAttributeSet: AttributeName Set
     defaultCoreSkillList: CoreSkill List
     itemStackMap: Map<string, ItemStack>
-    weaponSkillNameSet: SkillName Set
     weaponSpellSet: WeaponSpell Set
-    magicSkillDataMap: Map<string, MagicSkillData>
+    vocationSkillData: VocationSkillData
 //   magicSkillMap: Map<string, MagicSkill>
 //   magicCombatMap: Map<string, MagicCombat>
 //   rangeMap: Map<string, Range>

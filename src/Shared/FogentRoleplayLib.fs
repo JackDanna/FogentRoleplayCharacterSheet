@@ -1538,12 +1538,11 @@ module Character =
     open DicePoolMod
     open ItemStack
     open CombatRoll
-
-    open WeaponSpell
+    open MagicSkill
 
     type VocationSkillData = {
-        weaponSkillNameSet: string Set
-        weaponSpellSet: WeaponSpell Set
+        weaponGoverningSkillNameSet: string Set
+        magicSkillDataMap: Map<string, MagicSkillData>
     }
 
     type Character = {

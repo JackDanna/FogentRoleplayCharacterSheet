@@ -81,7 +81,13 @@ let update msg (model: Character) =
 open Feliz
 open Feliz.Bulma
 
-let view attributeNameSet (allItemStackList: Map<string, ItemStack>) (weaponSkillNameSet) (model: Character) dispatch =
+let view
+    attributeNameSet
+    (allItemStackList: Map<string, ItemStack>)
+    (vocationSkillData: VocationSkillData)
+    (model: Character)
+    dispatch
+    =
 
     Bulma.container [
 
@@ -105,7 +111,7 @@ let view attributeNameSet (allItemStackList: Map<string, ItemStack>) (weaponSkil
 
         AttributeAndCoreSkillsList.view model.attributeAndCoreSkillsList (AttributeAndCoreSkillsListMsg >> dispatch)
 
-        VocationList.view attributeNameSet weaponSkillNameSet model.vocationList (VocationListMsg >> dispatch)
+        VocationList.view attributeNameSet vocationSkillData model.vocationList (VocationListMsg >> dispatch)
 
         // DestinyPoints.view model.destinyPoints (DestinyPointsMsg >> dispatch)
 

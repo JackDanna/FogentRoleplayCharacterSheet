@@ -30,9 +30,11 @@ let init () : Model * Cmd<Msg> =
             defaultAttributeSet = defaultAttributeSet
             defaultCoreSkillList = defaultCoreSkillList
             itemStackMap = Map.empty
-            weaponSkillNameSet = Set.empty
             weaponSpellSet = Set.empty
-            magicSkillDataMap = Map.empty
+            vocationSkillData = {
+                magicSkillDataMap = Map.empty
+                weaponGoverningSkillNameSet = Set.empty
+            }
         }
         character = Character.init defaultAttributeSet defaultCoreSkillList
     },
@@ -90,7 +92,7 @@ let view (model: Model) (dispatch: Msg -> unit) =
                 Character.view
                     model.fogentRoleplayData.defaultAttributeSet
                     model.fogentRoleplayData.itemStackMap
-                    model.fogentRoleplayData.weaponSkillNameSet
+                    model.fogentRoleplayData.vocationSkillData
                     model.character
                     (CharacterMsg >> dispatch)
             ]

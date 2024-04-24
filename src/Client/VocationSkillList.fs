@@ -4,10 +4,14 @@ open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.VocationSkill
 open FogentRoleplayLib.ZeroToFive
 
+open FogentRoleplayLib.Character
+
+open FogentRoleplayLib.MagicSkill
+
 type Msg =
     | InsertVocationalSkill of string
     | InsertWeaponSkill of string
-    | InsertMagicSkill
+    | InsertMagicSkill of string * MagicSkillData
     | RemoveAtPostion of int
     | ModifiedVocationSkillAtPosition of int * VocationSkill.Msg
     | CalculateDicePools of DicePoolCalculationData
@@ -58,7 +62,7 @@ let update msg model =
 open Feliz
 open Feliz.Bulma
 
-let view attributeNameSet weaponSkillNameSet (model: VocationSkill list) dispatch =
+let view attributeNameSet vocationSkillData (model: VocationSkill list) dispatch =
     List.append
         (List.mapi
             (fun position skillRow ->
@@ -77,15 +81,20 @@ let view attributeNameSet weaponSkillNameSet (model: VocationSkill list) dispatc
             Bulma.input.text [
                 prop.list "weaponSkillNameSet"
                 prop.onTextChange (fun input ->
-                    if Seq.contains input weaponSkillNameSet then
-                        dispatch (InsertWeaponSkill input)
+                    if Seq.contains input vocationSkillData.magicSkillDataMap.Keys then
+                        (input, (vocationSkillData.magicSkillDataMap.Item input)) |> InsertMagicSkill
+                    elif Seq.contains input vocationSkillData.weaponGoverningSkillNameSet then
+                        InsertWeaponSkill input
                     else
-                        dispatch (InsertVocationalSkill input))
+                        InsertVocationalSkill input
+                    |> dispatch)
             ]
             Html.datalist [
                 prop.id "weaponSkillNameSet"
                 prop.children (
-                    Seq.map (fun (itemName: string) -> Html.option [ prop.value itemName ]) weaponSkillNameSet
+                    Seq.map
+                        (fun (itemName: string) -> Html.option [ prop.value itemName ])
+                        vocationSkillData.magicSkillDataMap.Keys
                 )
             ]
         ]

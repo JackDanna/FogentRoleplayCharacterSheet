@@ -28,7 +28,7 @@ let update msg model =
 open Feliz
 open Feliz.Bulma
 
-let view attributeNameSet weaponSkillNameSet model dispatch =
+let view attributeNameSet vocationSkillData model dispatch =
     Bulma.container [
         Bulma.label [ prop.text "Vocations and Vocational Skills:" ] |> Bulma.content
         Bulma.button.button [ prop.onClick (fun _ -> dispatch Insert); prop.text "+" ]
@@ -38,7 +38,7 @@ let view attributeNameSet weaponSkillNameSet model dispatch =
                 List.mapi
                     (fun position vocation ->
                         Bulma.column [
-                            Vocation.view attributeNameSet weaponSkillNameSet vocation (fun msg ->
+                            Vocation.view attributeNameSet vocationSkillData vocation (fun msg ->
                                 dispatch (Modify(position, msg)))
 
                             Bulma.button.button [ prop.onClick (fun _ -> dispatch (Remove position)); prop.text "-" ]

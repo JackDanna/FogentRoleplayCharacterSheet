@@ -56,7 +56,7 @@ let update msg (model: Vocation) =
 open Feliz
 open Feliz.Bulma
 
-let view attributeNameSet weaponSkillNameSet (model: Vocation) dispatch =
+let view attributeNameSet vocationSkillData (model: Vocation) dispatch =
     Bulma.box [
         Bulma.columns [
             Bulma.column [
@@ -81,7 +81,7 @@ let view attributeNameSet weaponSkillNameSet (model: Vocation) dispatch =
         ]
         VocationSkillList.view
             attributeNameSet
-            weaponSkillNameSet
+            vocationSkillData
             model.vocationSkillList
             (VocationSkillListMsg >> dispatch)
     ]
