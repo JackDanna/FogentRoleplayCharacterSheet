@@ -1,46 +1,61 @@
 module Vocation
 
 open FogentRoleplayLib.Vocation
-open FogentRoleplayLib.AttributeName
-open FogentRoleplayLib.DicePool
-open FogentRoleplayLib.DicePoolMod
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.Character
 
+open FogentRoleplayLib.MagicSystem
+
 type Msg =
-    | SetName of string
-    | ZeroToFiveMsg of ZeroToFive.Msg
-    | ToggleGoveringAttribute of AttributeName
+    | VocationStatMsg of VocationStat.Msg
     | VocationSkillListMsg of VocationSkillList.Msg
     | CalculateDicePools of DicePoolCalculationData
 
 let init () : Vocation = {
-    name = ""
-    level = ZeroToFive.init ()
-    governingAttributeNameSet = Set.empty
-    baseDice = base3d6DicePool
-    dicePoolModList = []
+    vocationStat = VocationStat.init ()
     vocationSkillList = VocationSkillList.init ()
 }
 
 let update msg (model: Vocation) =
     match msg with
-    | SetName newName -> { model with name = newName }
-    | ZeroToFiveMsg msg ->
-        let newLevel = ZeroToFive.update msg model.level
+    // | SetName newName -> { model with name = newName }
+    // | SetMagicVocation (name, newAttributeNameSet) ->
+    //     {
+    //         model with
+    //             name =
+    //     }
+    // | ZeroToFiveMsg msg ->
+    //     let newLevel = ZeroToFive.update msg model.level
 
-        {
+    //     {
+    //         model with
+    //             level = newLevel
+    //             vocationSkillList =
+    //                 VocationSkillList.update
+    //                     (VocationSkillList.Msg.CheckIfLevelCapExeededForAll newLevel)
+    //                     model.vocationSkillList
+    //     }
+    // | ToggleGoveringAttribute newAttributeName -> {
+    //     model with
+    //         governingAttributeNameSet = toggleAttributeNameSet model.governingAttributeNameSet newAttributeName
+    //   }
+    | VocationStatMsg msg ->
+        let newVocationStat = VocationStat.update msg model.vocationStat
+
+        match msg with
+        | VocationStat.ZeroToFiveMsg _ -> {
             model with
-                level = newLevel
+                vocationStat = newVocationStat
                 vocationSkillList =
                     VocationSkillList.update
-                        (VocationSkillList.Msg.CheckIfLevelCapExeededForAll newLevel)
+                        (VocationSkillList.CheckIfLevelCapExeededForAll newVocationStat.level)
                         model.vocationSkillList
-        }
-    | ToggleGoveringAttribute newAttributeName -> {
-        model with
-            governingAttributeNameSet = toggleAttributeNameSet model.governingAttributeNameSet newAttributeName
-      }
+          }
+        | _ -> {
+            model with
+                vocationStat = newVocationStat
+          }
+
     | VocationSkillListMsg msg ->
         let newVocationSkillList = VocationSkillList.update msg model.vocationSkillList
 
@@ -49,15 +64,17 @@ let update msg (model: Vocation) =
                 vocationSkillList =
                     match msg with
                     | VocationSkillList.ModifiedVocationSkillAtPosition(position, _) ->
-                        newVocationSkillList
-                        |> VocationSkillList.update (VocationSkillList.CheckIfLevelCapExceeded(position, model.level))
+                        VocationSkillList.update
+                            (VocationSkillList.CheckIfLevelCapExceeded(position, model.vocationStat.level))
+                            newVocationSkillList
+
                     | _ -> newVocationSkillList
         }
     | CalculateDicePools msg -> {
         model with
-            dicePoolModList = calculateVocationDicePoolModList msg model.level model.governingAttributeNameSet
+            vocationStat = VocationStat.update (VocationStat.CalculateDicePool msg) model.vocationStat
             vocationSkillList =
-                VocationSkillList.update (VocationSkillList.CalculateDicePools(msg)) model.vocationSkillList
+                VocationSkillList.update (VocationSkillList.CalculateDicePools msg) model.vocationSkillList
       }
 
 
@@ -66,31 +83,11 @@ open Feliz.Bulma
 
 let view attributeNameSet (vocationSkillData: VocationSkillData) (model: Vocation) dispatch =
     Bulma.box [
-        Bulma.columns [
-            Bulma.column [
-                Bulma.input.text [
-                    prop.value model.name
-                    prop.onTextChange (fun value -> dispatch (SetName value))
-                ]
-            ]
-            Bulma.column [
-                VocationalSkill.governingAttributesToggle
-                    model.governingAttributeNameSet
-                    (ToggleGoveringAttribute >> dispatch)
-                    attributeNameSet
-            ]
-            Bulma.column [ ZeroToFive.view model.level (ZeroToFiveMsg >> dispatch) ]
-            Bulma.column [
-                prop.text (
-                    modifyDicePoolByDicePoolModList model.baseDice model.dicePoolModList
-                    |> dicePoolToString
-                )
-            ]
-        ]
+        VocationStat.view attributeNameSet model.vocationStat (VocationStatMsg >> dispatch)
         VocationSkillList.view
             attributeNameSet
-            (if vocationSkillData.magicSystemMap.ContainsKey model.name then
-                 let magicSystem = vocationSkillData.magicSystemMap.Item model.name
+            (if vocationSkillData.magicSystemMap.ContainsKey model.vocationStat.name then
+                 let magicSystem = vocationSkillData.magicSystemMap.Item model.vocationStat.name
                  magicSystem.magicSkillDataSet
              else
                  Set.empty)

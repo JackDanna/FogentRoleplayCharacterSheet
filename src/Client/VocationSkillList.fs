@@ -4,8 +4,6 @@ open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.VocationSkill
 open FogentRoleplayLib.ZeroToFive
 
-open FogentRoleplayLib.Character
-
 open FogentRoleplayLib.MagicSkill
 
 type Msg =

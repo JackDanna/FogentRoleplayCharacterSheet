@@ -17,6 +17,7 @@
     <Compile Include="VocationalSkill.fs" />
     <Compile Include="VocationSkill.fs" />
     <Compile Include="VocationSkillList.fs" />
+    <Compile Include="VocationStat.fs" />
     <Compile Include="Vocation.fs" />
     <Compile Include="VocationList.fs" />
     <Compile Include="Item.fs" />

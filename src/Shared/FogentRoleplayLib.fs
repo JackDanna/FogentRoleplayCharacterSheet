@@ -944,19 +944,26 @@ module VocationSkill =
         | WeaponSkill vocationalSkill -> vocationalSkill
         | MagicSkill magicSkill -> magicSkill.vocationalSkill
 
-module Vocation =
+module VocationStat =
     open ZeroToFive
     open DicePool
     open DicePoolMod
-    open VocationSkill
     open AttributeName
 
-    type Vocation = {
+    type VocationStat = {
         name: string
         governingAttributeNameSet: AttributeName Set
         level: ZeroToFive
         baseDice: DicePool
         dicePoolModList: DicePoolMod List
+    }
+
+module Vocation =
+    open VocationSkill
+    open VocationStat
+
+    type Vocation = {
+        vocationStat: VocationStat
         vocationSkillList: VocationSkill list
     }
 
@@ -1326,7 +1333,7 @@ module DicePoolCalculation =
 
         createDicePoolModList dicePoolCalculationData (skillLevel |> neg1To5ToInt) skillGoveringAttributeNames
 
-    let calculateVocationDicePoolModList
+    let calculateVocationStatDicePoolModList
         (dicePoolCalculationData: DicePoolCalculationData)
         (skillLevel: ZeroToFive)
         (skillGoveringAttributeNames: AttributeName Set)
