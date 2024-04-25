@@ -39,11 +39,8 @@ let view (model: AttributeAndCoreSkills list) dispatch =
                 List.mapi
                     (fun position attributeAndCoreSkills ->
                         Bulma.column [
-                            Bulma.box [
-
-                                AttributeAndCoreSkills.view attributeAndCoreSkills (fun msg ->
-                                    ModifyAttributeAndCoreSkillsList(position, msg) |> dispatch)
-                            ]
+                            AttributeAndCoreSkills.view attributeAndCoreSkills (fun msg ->
+                                ModifyAttributeAndCoreSkillsList(position, msg) |> dispatch)
                         ])
                     model
                 |> Bulma.columns
