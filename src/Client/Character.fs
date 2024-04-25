@@ -11,7 +11,6 @@ type Msg =
     | AttributeAndCoreSkillsListMsg of AttributeAndCoreSkillsList.Msg
     | VocationListMsg of VocationList.Msg
     | EquipmentMsg of ItemStackList.Msg
-    //    | CombatRollListMsg of CombatRollList.Msg
     | CharacterInformationMsg of CharacterInformation.Msg
 
 let init (attributeNameSet: AttributeName Set) (coreSkillData: CoreSkill list) = {
