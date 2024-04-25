@@ -11,7 +11,8 @@ type Msg =
     | AttributeAndCoreSkillsListMsg of AttributeAndCoreSkillsList.Msg
     | VocationListMsg of VocationList.Msg
     | EquipmentMsg of ItemStackList.Msg
-//    | CombatRollListMsg of CombatRollList.Msg
+    //    | CombatRollListMsg of CombatRollList.Msg
+    | CharacterInformationMsg of CharacterInformation.Msg
 
 let init (attributeNameSet: AttributeName Set) (coreSkillData: CoreSkill list) = {
     name = ""
@@ -19,6 +20,7 @@ let init (attributeNameSet: AttributeName Set) (coreSkillData: CoreSkill list) =
     vocationList = VocationList.init ()
     equipmentList = []
     combatRollList = []
+    characterInformation = CharacterInformation.init ()
 }
 
 let update msg (model: Character) =
@@ -77,6 +79,10 @@ let update msg (model: Character) =
                         )
                     )
         }
+    | CharacterInformationMsg msg -> {
+        model with
+            characterInformation = CharacterInformation.update msg model.characterInformation
+      }
 
 open Feliz
 open Feliz.Bulma
@@ -130,13 +136,13 @@ let view
         ItemStackList.view allItemStackList model.equipmentList (EquipmentMsg >> dispatch)
 
         CombatRollList.view model.combatRollList
-    //(CombatRollListMsg >> dispatch)
+        //(CombatRollListMsg >> dispatch)
 
-    // ContainerList.view
-    //     (List.collect itemToContainerClassNames (itemStackListToItemList allItemStackList))
-    //     allItemStackNameList
-    //     model.containerList
-    //     (ContainerListMsg >> dispatch)
+        // ContainerList.view
+        //     (List.collect itemToContainerClassNames (itemStackListToItemList allItemStackList))
+        //     allItemStackNameList
+        //     model.containerList
+        //     (ContainerListMsg >> dispatch)
 
-    // CharacterInformation.view model.characterInformation (CharacterInformationMsg >> dispatch)
+        CharacterInformation.view model.characterInformation (CharacterInformationMsg >> dispatch)
     ]

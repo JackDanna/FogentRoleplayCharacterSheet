@@ -1540,6 +1540,16 @@ module CombatRoll =
 
             createCombatRoll weapon itemTier.baseDice skillDiceModList weaponResourceOption)
 
+module CharacterInformation =
+    type CharacterInformation = {
+        notes: string
+        appearance: string
+        disposition: string
+        beliefsAndMorality: string
+        goalsAndAspirations: string
+        backstory: string
+    }
+
 module Character =
     open AttributeName
     open CoreSkill
@@ -1550,6 +1560,7 @@ module Character =
     open ItemStack
     open CombatRoll
     open MagicSystem
+    open CharacterInformation
 
     type VocationSkillData = {
         weaponGoverningSkillNameSet: string Set
@@ -1562,6 +1573,7 @@ module Character =
         vocationList: Vocation list
         equipmentList: ItemStack list
         combatRollList: CombatRoll List
+        characterInformation: CharacterInformation
     }
 
     let characterToDicePoolCalculation (character: Character) =
