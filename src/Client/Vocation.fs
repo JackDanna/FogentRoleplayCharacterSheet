@@ -18,27 +18,6 @@ let init () : Vocation = {
 
 let update msg (model: Vocation) =
     match msg with
-    // | SetName newName -> { model with name = newName }
-    // | SetMagicVocation (name, newAttributeNameSet) ->
-    //     {
-    //         model with
-    //             name =
-    //     }
-    // | ZeroToFiveMsg msg ->
-    //     let newLevel = ZeroToFive.update msg model.level
-
-    //     {
-    //         model with
-    //             level = newLevel
-    //             vocationSkillList =
-    //                 VocationSkillList.update
-    //                     (VocationSkillList.Msg.CheckIfLevelCapExeededForAll newLevel)
-    //                     model.vocationSkillList
-    //     }
-    // | ToggleGoveringAttribute newAttributeName -> {
-    //     model with
-    //         governingAttributeNameSet = toggleAttributeNameSet model.governingAttributeNameSet newAttributeName
-    //   }
     | VocationStatMsg msg ->
         let newVocationStat = VocationStat.update msg model.vocationStat
 
