@@ -26,10 +26,17 @@ let init () : Vocation = {
 let update msg (model: Vocation) =
     match msg with
     | SetName newName -> { model with name = newName }
-    | ZeroToFiveMsg msg -> {
-        model with
-            level = ZeroToFive.update msg model.level
-      }
+    | ZeroToFiveMsg msg ->
+        let newLevel = ZeroToFive.update msg model.level
+
+        {
+            model with
+                level = newLevel
+                vocationSkillList =
+                    VocationSkillList.update
+                        (VocationSkillList.Msg.CheckIfLevelCapExeededForAll newLevel)
+                        model.vocationSkillList
+        }
     | ToggleGoveringAttribute newAttributeName -> {
         model with
             governingAttributeNameSet = toggleAttributeNameSet model.governingAttributeNameSet newAttributeName

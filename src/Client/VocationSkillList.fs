@@ -16,6 +16,7 @@ type Msg =
     | ModifiedVocationSkillAtPosition of int * VocationSkill.Msg
     | CalculateDicePools of DicePoolCalculationData
     | CheckIfLevelCapExceeded of int * ZeroToFive
+    | CheckIfLevelCapExeededForAll of ZeroToFive
 
 let init () = []
 
@@ -78,6 +79,10 @@ let update msg model =
                     vocationSkill)
 
             model
+    | CheckIfLevelCapExeededForAll levelCap ->
+        model
+        |> List.map (fun vocationSkill ->
+            VocationSkill.update (VocationSkill.CheckIfLevelCapExceeded levelCap) vocationSkill)
 
 open Feliz
 open Feliz.Bulma
