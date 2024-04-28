@@ -11,7 +11,7 @@ type CommonVocationalSkillMsgs =
     | CheckIfLevelCapExceeded of int * ZeroToFive
     | CheckIfLevelCapExeededForAll of ZeroToFive
 
-let updateCommonVocationSkill msg model =
+let updateCommonVocationalSkill msg model =
     match msg with
     | RemoveAtPostion position -> List.removeAt position model
     | ModifiedVocationalSkillAtPosition(position, msg) ->
@@ -83,7 +83,7 @@ let update msg model =
         }
         |> List.singleton
         |> List.append model
-    | CommonVocationalSkillMsgs msg -> updateCommonVocationSkill msg model
+    | CommonVocationalSkillMsgs msg -> updateCommonVocationalSkill msg model
 
 
 let view attributeNameSet vocationalSkillNameSet (model: VocationalSkill list) dispatch =

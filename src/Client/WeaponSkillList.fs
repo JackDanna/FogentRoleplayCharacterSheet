@@ -1,11 +1,13 @@
 module WeaponSkillList
 
 open FogentRoleplayLib.VocationalSkill
+open FogentRoleplayLib.DicePoolCalculation
 open VocationalSkillList
 
 type Msg =
     | InsertWeaponSkill of string
     | CommonVocationalSkillMsgs of CommonVocationalSkillMsgs
+    | CalculateDicePools of DicePoolCalculationData
 
 let init () = []
 
@@ -20,7 +22,7 @@ let update msg model =
         }
         |> List.singleton
         |> List.append model
-    | CommonVocationalSkillMsgs msg -> updateCommonVocationSkill msg model
+    | CommonVocationalSkillMsgs msg -> updateCommonVocationalSkill msg model
 
 
 let view attributeNameSet vocationalSkillNameSet (model: VocationalSkill list) dispatch =

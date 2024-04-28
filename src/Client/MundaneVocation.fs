@@ -22,10 +22,10 @@ let update msg (model: MundaneVocation) =
         | VocationStat.ZeroToFiveMsg _ -> {
             model with
                 vocationStat = newVocationStat
-          // mundaneVocationSkills =
-          //     MundaneVocationSkills.update
-          //         (MundaneVocationSkills.CheckIfLevelCapExeededForAll newVocationStat.level)
-          //         model.mundaneVocationSkillList
+                mundaneVocationSkills =
+                    MundaneVocationSkills.update
+                        (MundaneVocationSkills.CheckIfLevelCapExceededForAll newVocationStat.level)
+                        model.mundaneVocationSkills
           }
         | _ -> {
             model with
@@ -41,12 +41,9 @@ let update msg (model: MundaneVocation) =
     | CalculateDicePools msg -> {
         model with
             vocationStat = VocationStat.update (VocationStat.CalculateDicePool msg) model.vocationStat
-      // mundaneVocationSkillList =
-      //     MundaneVocationSkillList.update
-      //         (MundaneVocationSkillList.CalculateDicePools msg)
-      //         model.mundaneVocationSkillList
+            mundaneVocationSkills =
+                MundaneVocationSkills.update (MundaneVocationSkills.CalculateDicePools msg) model.mundaneVocationSkills
       }
-
 
 open Feliz
 open Feliz.Bulma

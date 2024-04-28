@@ -3,6 +3,7 @@ module MundaneVocationSkills
 open FogentRoleplayLib.MundaneVocationSkills
 
 open FogentRoleplayLib.ZeroToFive
+open FogentRoleplayLib.DicePoolCalculation
 
 type Msg =
     | VocationalSkillListMsg of VocationalSkillList.Msg
@@ -11,6 +12,7 @@ type Msg =
     | WeaCheckIfLevelCapExceeded of int * ZeroToFive
     | CheckIfLevelCapExceededForAll of ZeroToFive
     | InsertSkill of string * string Set
+    | CalculateDicePools of DicePoolCalculationData
 
 let init () : MundaneVocationSkills = {
     vocationalSkills = []
@@ -42,7 +44,26 @@ let update msg model : MundaneVocationSkills =
                             (VocationalSkillList.InsertVocationalSkill newSkillName)
                             model.vocationalSkills
             }
+    | CheckIfLevelCapExceededForAll zeroToFive ->
+        let temp =
+            VocationalSkillList.updateCommonVocationalSkill (
+                VocationalSkillList.CheckIfLevelCapExeededForAll zeroToFive
+            )
 
+        {
+            weaponSkillList = temp model.weaponSkillList
+            vocationalSkills = temp model.vocationalSkills
+        }
+    | CalculateDicePools dicePoolCalculationData -> {
+        weaponSkillList =
+            VocationalSkillList.updateCommonVocationalSkill
+                (VocationalSkillList.CalculateDicePools dicePoolCalculationData)
+                model.weaponSkillList
+        vocationalSkills =
+            VocationalSkillList.updateCommonVocationalSkill
+                (VocationalSkillList.CalculateDicePools dicePoolCalculationData)
+                model.vocationalSkills
+      }
 
 //| VocCheckIfLevelCapExceeded (position, vocationLevel) ->
 //    VocationalSkillList.update (VocationalSkillList.ModifiedVocationalSkillAtPosition (position,vocationLevel))

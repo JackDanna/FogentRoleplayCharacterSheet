@@ -4,6 +4,9 @@ open FogentRoleplayLib.Vocation
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.Character
 
+open FogentRoleplayLib.MundaneVocation
+open FogentRoleplayLib.MagicVocation
+
 type Msg =
     | MundaneVocationMsg of MundaneVocation.Msg
     | MagicVocationMsg of MagicVocation.Msg
@@ -17,16 +20,9 @@ let update msg (model: Vocation) =
     | MundaneVocationMsg msg, MundaneVocation mundaneVocation ->
         MundaneVocation.update msg mundaneVocation |> MundaneVocation
     | MagicVocationMsg msg, MagicVocation magicVocation -> MagicVocation.update msg magicVocation |> MagicVocation
-
-    | CalculateDicePools msg, _ -> model
-    // {
-    //     model with
-    //         vocationStat = VocationStat.update (VocationStat.CalculateDicePool msg) model.vocationStat
-    //         vocationSkillList =
-    //             MundaneVocationSkillList.update
-    //                 (MundaneVocationSkillList.CalculateDicePools msg)
-    //                 model.vocationSkillList
-    // }
+    | CalculateDicePools msg, MundaneVocation mundaneVocation ->
+        MundaneVocation.update (MundaneVocation.CalculateDicePools msg) mundaneVocation
+        |> MundaneVocation
     | _, _ -> model
 
 
