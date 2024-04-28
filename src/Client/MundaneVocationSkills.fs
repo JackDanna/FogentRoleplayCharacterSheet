@@ -78,17 +78,9 @@ let view attributeNameSet (weaponSkillNameSet: string Set) model dispatch =
         (VocationalSkillList.view attributeNameSet Seq.empty model.vocationalSkills (VocationalSkillListMsg >> dispatch))
         (WeaponSkillList.view attributeNameSet Seq.empty model.weaponSkillList (WeaponSkillListMsg >> dispatch))
         [
-            Bulma.input.text [
-                prop.list "vocationalSkillNameSet"
-                prop.onTextChange (fun input -> InsertSkill(input, weaponSkillNameSet) |> dispatch)
-            ]
-            Html.datalist [
-                prop.id "vocationalSkillNameSet"
-                prop.children (
-                    weaponSkillNameSet
-                    |> Seq.map (fun (skillName: string) -> Html.option [ prop.value skillName ])
-                )
-            ]
+            ViewUtils.textInputWithDropdownSet
+                (fun input -> InsertSkill(input, weaponSkillNameSet) |> dispatch)
+                weaponSkillNameSet
         ]
     ]
     |> List.collect id

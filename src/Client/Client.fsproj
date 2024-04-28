@@ -5,6 +5,7 @@
     <DefineConstants>FABLE_COMPILER</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ViewUtils.fs" />
     <Compile Include="Neg2To5.fs" />
     <Compile Include="AttributeStat.fs" />
     <Compile Include="Neg1To5.fs" />

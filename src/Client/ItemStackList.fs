@@ -58,20 +58,9 @@ let view (allItemStackList: Map<string, ItemStack>) (model: ItemStack list) (dis
                         model
                 )
                 Html.tfoot [
-                    Html.div [
-                        Bulma.input.text [
-                            prop.list "allItemStackNames"
-                            prop.onTextChange (fun input -> dispatch (Insert <| allItemStackList.Item input))
-                        ]
-                        Html.datalist [
-                            prop.id "allItemStackNames"
-                            prop.children (
-                                Seq.map
-                                    (fun (itemName: string) -> Html.option [ prop.value itemName ])
-                                    allItemStackList.Keys
-                            )
-                        ]
-                    ]
+                    ViewUtils.textInputWithDropdownSet
+                        (fun input -> dispatch (Insert <| allItemStackList.Item input))
+                        allItemStackList.Keys
                 ]
             ]
         ]
