@@ -1,3 +1,0 @@
-module AttributeAndCoreSkills
-
-open 
