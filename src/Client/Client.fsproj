@@ -21,8 +21,6 @@
     <Compile Include="MagicSkillList.fs" />
     <Compile Include="MundaneVocationSkills.fs" />
     <Compile Include="MundaneVocation.fs" />
-    <Compile Include="MagicVocationSkill.fs" />
-    <Compile Include="MagicVocationSkills.fs" />
     <Compile Include="MagicVocation.fs" />
     <Compile Include="Vocation.fs" />
     <Compile Include="VocationList.fs" />
