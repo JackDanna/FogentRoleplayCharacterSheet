@@ -86,7 +86,7 @@ let view attributeNameSet (weaponSkillNameSet: string Set) model dispatch =
                 prop.id "vocationalSkillNameSet"
                 prop.children (
                     weaponSkillNameSet
-                    |> Seq.map (fun (itemName: string) -> Html.option [ prop.value itemName ])
+                    |> Seq.map (fun (skillName: string) -> Html.option [ prop.value skillName ])
                 )
             ]
         ]
