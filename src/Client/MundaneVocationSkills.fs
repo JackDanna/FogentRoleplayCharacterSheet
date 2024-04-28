@@ -10,6 +10,7 @@ type Msg =
     | VocCheckIfLevelCapExceeded of int * ZeroToFive
     | WeaCheckIfLevelCapExceeded of int * ZeroToFive
     | CheckIfLevelCapExceededForAll of ZeroToFive
+    | InsertSkill of string * string Set
 
 let init () : MundaneVocationSkills = {
     vocationalSkills = []
@@ -26,11 +27,47 @@ let update msg model : MundaneVocationSkills =
         model with
             weaponSkillList = WeaponSkillList.update msg model.weaponSkillList
       }
+    | InsertSkill(newSkillName, weaponSkillNameSet) ->
+        if weaponSkillNameSet.Contains newSkillName then
+            {
+                model with
+                    weaponSkillList =
+                        WeaponSkillList.update (WeaponSkillList.InsertWeaponSkill newSkillName) model.weaponSkillList
+            }
+        else
+            {
+                model with
+                    vocationalSkills =
+                        VocationalSkillList.update
+                            (VocationalSkillList.InsertVocationalSkill newSkillName)
+                            model.vocationalSkills
+            }
+
+
 //| VocCheckIfLevelCapExceeded (position, vocationLevel) ->
 //    VocationalSkillList.update (VocationalSkillList.ModifiedVocationalSkillAtPosition (position,vocationLevel))
 
+open Feliz
+open Feliz.Bulma
 
-let view attributeNameSet weaponSkillNames model dispatch =
-    List.append
+let view attributeNameSet (weaponSkillNameSet: string Set) model dispatch =
+
+    [
+
         (VocationalSkillList.view attributeNameSet Seq.empty model.vocationalSkills (VocationalSkillListMsg >> dispatch))
         (WeaponSkillList.view attributeNameSet Seq.empty model.weaponSkillList (WeaponSkillListMsg >> dispatch))
+        [
+            Bulma.input.text [
+                prop.list "vocationalSkillNameSet"
+                prop.onTextChange (fun input -> InsertSkill(input, weaponSkillNameSet) |> dispatch)
+            ]
+            Html.datalist [
+                prop.id "vocationalSkillNameSet"
+                prop.children (
+                    weaponSkillNameSet
+                    |> Seq.map (fun (itemName: string) -> Html.option [ prop.value itemName ])
+                )
+            ]
+        ]
+    ]
+    |> List.collect id

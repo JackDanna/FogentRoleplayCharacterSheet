@@ -51,12 +51,12 @@ let update msg (model: MundaneVocation) =
 open Feliz
 open Feliz.Bulma
 
-let view attributeNameSet (weaponSkillNames) (model: MundaneVocation) dispatch = [
-    VocationStat.view attributeNameSet model.vocationStat (VocationStatMsg >> dispatch)
-    MundaneVocationSkills.view
+let view attributeNameSet (weaponSkillNames) (model: MundaneVocation) dispatch =
+    [
+        VocationStat.view attributeNameSet model.vocationStat (VocationStatMsg >> dispatch)
+    ]
+    @ MundaneVocationSkills.view
         attributeNameSet
         weaponSkillNames
         model.mundaneVocationSkills
         (MundaneVocationSkillsMsg >> dispatch)
-    |> Html.ul
-]

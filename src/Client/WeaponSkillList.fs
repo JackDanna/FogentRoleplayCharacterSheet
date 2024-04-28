@@ -24,10 +24,4 @@ let update msg model =
 
 
 let view attributeNameSet vocationalSkillNameSet (model: VocationalSkill list) dispatch =
-    viewCommonVocationalSkill
-        attributeNameSet
-        vocationalSkillNameSet
-        (InsertWeaponSkill >> dispatch)
-        false
-        model
-        (CommonVocationalSkillMsgs >> dispatch)
+    viewCommonVocationalSkill attributeNameSet false model (CommonVocationalSkillMsgs >> dispatch)

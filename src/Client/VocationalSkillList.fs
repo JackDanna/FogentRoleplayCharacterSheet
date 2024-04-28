@@ -45,43 +45,26 @@ open Feliz.Bulma
 
 let viewCommonVocationalSkill
     attributeNameSet
-    vocationalSkillNameSet
-    onVocationalSkillChange
     disableChangeLevel
     (model: VocationalSkill list)
     (dispatch: CommonVocationalSkillMsgs -> unit)
     =
 
-    List.append
-        (List.mapi
-            (fun position skillRow ->
-                VocationalSkill.view
-                    attributeNameSet
-                    skillRow
-                    (fun (msg: VocationalSkill.Msg) ->
-                        ((ModifiedVocationalSkillAtPosition(position, msg)) |> dispatch))
-                    disableChangeLevel
-                @ [
-                    Bulma.column [
-                        Html.button [ prop.onClick (fun _ -> dispatch (RemoveAtPostion position)); prop.text "-" ]
-                    ]
+    List.mapi
+        (fun position skillRow ->
+            VocationalSkill.view
+                attributeNameSet
+                skillRow
+                (fun (msg: VocationalSkill.Msg) -> ((ModifiedVocationalSkillAtPosition(position, msg)) |> dispatch))
+                disableChangeLevel
+            @ [
+                Bulma.column [
+                    Html.button [ prop.onClick (fun _ -> dispatch (RemoveAtPostion position)); prop.text "-" ]
                 ]
-                |> Bulma.columns
-                |> Bulma.content)
-            model)
-        [
-            Bulma.input.text [
-                prop.list "vocationalSkillNameSet"
-                prop.onTextChange onVocationalSkillChange
             ]
-            Html.datalist [
-                prop.id "vocationalSkillNameSet"
-                prop.children (
-                    vocationalSkillNameSet
-                    |> Seq.map (fun (itemName: string) -> Html.option [ prop.value itemName ])
-                )
-            ]
-        ]
+            |> Bulma.columns
+            |> Bulma.content)
+        model
 
 type Msg =
     | InsertVocationalSkill of string
@@ -104,10 +87,4 @@ let update msg model =
 
 
 let view attributeNameSet vocationalSkillNameSet (model: VocationalSkill list) dispatch =
-    viewCommonVocationalSkill
-        attributeNameSet
-        vocationalSkillNameSet
-        (InsertVocationalSkill >> dispatch)
-        true
-        model
-        (CommonVocationalSkillMsgs >> dispatch)
+    viewCommonVocationalSkill attributeNameSet true model (CommonVocationalSkillMsgs >> dispatch)

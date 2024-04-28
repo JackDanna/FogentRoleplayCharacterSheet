@@ -44,7 +44,7 @@ let view attributeNameSet (vocationSkillData: VocationSkillData) (model: Vocatio
     | MagicVocation magicVocation ->
         MagicVocation.view
             attributeNameSet
-            vocationSkillData.magicSystemMap
+            vocationSkillData.weaponGoverningSkillNameSet
             magicVocation
             (MagicVocationMsg >> dispatch)
     |> Bulma.box
