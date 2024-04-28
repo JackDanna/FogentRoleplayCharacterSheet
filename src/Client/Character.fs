@@ -60,7 +60,7 @@ let update msg (model: Character) =
                     CombatRollList.update (
                         CombatRollList.RecalculateCombatRollList(
                             model.equipmentList,
-                            vocationListToVocationSkillList newVocationList
+                            vocationListToWeaponSkillList model.vocationList
                         )
                     )
         }
@@ -74,7 +74,7 @@ let update msg (model: Character) =
                     CombatRollList.update (
                         CombatRollList.RecalculateCombatRollList(
                             newEquipmentList,
-                            vocationListToVocationSkillList model.vocationList
+                            vocationListToWeaponSkillList model.vocationList
                         )
                     )
         }

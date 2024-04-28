@@ -4,73 +4,47 @@ open FogentRoleplayLib.Vocation
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.Character
 
-open FogentRoleplayLib.MagicSystem
-
 type Msg =
-    | VocationStatMsg of VocationStat.Msg
-    | VocationSkillListMsg of VocationSkillList.Msg
+    | MundaneVocationMsg of MundaneVocation.Msg
+    | MagicVocationMsg of MagicVocation.Msg
     | CalculateDicePools of DicePoolCalculationData
 
-let init () : Vocation = {
-    vocationStat = VocationStat.init ()
-    vocationSkillList = VocationSkillList.init ()
-}
+let init () : Vocation =
+    MundaneVocation.init () |> MundaneVocation
 
 let update msg (model: Vocation) =
-    match msg with
-    | VocationStatMsg msg ->
-        let newVocationStat = VocationStat.update msg model.vocationStat
+    match msg, model with
+    | MundaneVocationMsg msg, MundaneVocation mundaneVocation ->
+        MundaneVocation.update msg mundaneVocation |> MundaneVocation
+    | MagicVocationMsg msg, MagicVocation magicVocation -> MagicVocation.update msg magicVocation |> MagicVocation
 
-        match msg with
-        | VocationStat.ZeroToFiveMsg _ -> {
-            model with
-                vocationStat = newVocationStat
-                vocationSkillList =
-                    VocationSkillList.update
-                        (VocationSkillList.CheckIfLevelCapExeededForAll newVocationStat.level)
-                        model.vocationSkillList
-          }
-        | _ -> {
-            model with
-                vocationStat = newVocationStat
-          }
-
-    | VocationSkillListMsg msg ->
-        let newVocationSkillList = VocationSkillList.update msg model.vocationSkillList
-
-        {
-            model with
-                vocationSkillList =
-                    match msg with
-                    | VocationSkillList.ModifiedVocationSkillAtPosition(position, _) ->
-                        VocationSkillList.update
-                            (VocationSkillList.CheckIfLevelCapExceeded(position, model.vocationStat.level))
-                            newVocationSkillList
-
-                    | _ -> newVocationSkillList
-        }
-    | CalculateDicePools msg -> {
-        model with
-            vocationStat = VocationStat.update (VocationStat.CalculateDicePool msg) model.vocationStat
-            vocationSkillList =
-                VocationSkillList.update (VocationSkillList.CalculateDicePools msg) model.vocationSkillList
-      }
+    | CalculateDicePools msg, _ -> model
+    // {
+    //     model with
+    //         vocationStat = VocationStat.update (VocationStat.CalculateDicePool msg) model.vocationStat
+    //         vocationSkillList =
+    //             MundaneVocationSkillList.update
+    //                 (MundaneVocationSkillList.CalculateDicePools msg)
+    //                 model.vocationSkillList
+    // }
+    | _, _ -> model
 
 
 open Feliz
 open Feliz.Bulma
 
 let view attributeNameSet (vocationSkillData: VocationSkillData) (model: Vocation) dispatch =
-    Bulma.box [
-        VocationStat.view attributeNameSet model.vocationStat (VocationStatMsg >> dispatch)
-        VocationSkillList.view
+    match model with
+    | MundaneVocation mundaneVocation ->
+        MundaneVocation.view
             attributeNameSet
-            (if vocationSkillData.magicSystemMap.ContainsKey model.vocationStat.name then
-                 let magicSystem = vocationSkillData.magicSystemMap.Item model.vocationStat.name
-                 magicSystem.magicSkillDataSet
-             else
-                 Set.empty)
             vocationSkillData.weaponGoverningSkillNameSet
-            model.vocationSkillList
-            (VocationSkillListMsg >> dispatch)
-    ]
+            mundaneVocation
+            (MundaneVocationMsg >> dispatch)
+    | MagicVocation magicVocation ->
+        MagicVocation.view
+            attributeNameSet
+            vocationSkillData.magicSystemMap
+            magicVocation
+            (MagicVocationMsg >> dispatch)
+    |> Bulma.box

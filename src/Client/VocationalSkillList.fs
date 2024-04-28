@@ -1,4 +1,4 @@
-module VocationSkillList
+module VocationalSkillList
 
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.VocationalSkill
@@ -6,17 +6,15 @@ open FogentRoleplayLib.ZeroToFive
 
 type CommonVocationalSkillMsgs =
     | RemoveAtPostion of int
-    | ModifiedVocationSkillAtPosition of int * VocationalSkill.Msg
+    | ModifiedVocationalSkillAtPosition of int * VocationalSkill.Msg
     | CalculateDicePools of DicePoolCalculationData
     | CheckIfLevelCapExceeded of int * ZeroToFive
     | CheckIfLevelCapExeededForAll of ZeroToFive
 
-let init () = []
-
-let commonVocationSkillUpdate msg model =
+let updateCommonVocationSkill msg model =
     match msg with
     | RemoveAtPostion position -> List.removeAt position model
-    | ModifiedVocationSkillAtPosition(position, msg) ->
+    | ModifiedVocationalSkillAtPosition(position, msg) ->
         model
         |> List.mapi (fun index vocationSkill ->
             if index = position then
@@ -45,11 +43,12 @@ let commonVocationSkillUpdate msg model =
 open Feliz
 open Feliz.Bulma
 
-let view
+let viewCommonVocationalSkill
     attributeNameSet
-    vocationSkillNameSet
+    vocationalSkillNameSet
     onVocationalSkillChange
-    model
+    disableChangeLevel
+    (model: VocationalSkill list)
     (dispatch: CommonVocationalSkillMsgs -> unit)
     =
 
@@ -59,8 +58,9 @@ let view
                 VocationalSkill.view
                     attributeNameSet
                     skillRow
-                    (fun (msg: VocationalSkill.Msg) -> ((ModifiedVocationSkillAtPosition(position, msg)) |> dispatch))
-                    true
+                    (fun (msg: VocationalSkill.Msg) ->
+                        ((ModifiedVocationalSkillAtPosition(position, msg)) |> dispatch))
+                    disableChangeLevel
                 @ [
                     Bulma.column [
                         Html.button [ prop.onClick (fun _ -> dispatch (RemoveAtPostion position)); prop.text "-" ]
@@ -70,13 +70,44 @@ let view
                 |> Bulma.content)
             model)
         [
-            Bulma.input.text [ prop.list "vocationSkillNameSet"; prop.onTextChange onVocationalSkillChange ]
+            Bulma.input.text [
+                prop.list "vocationalSkillNameSet"
+                prop.onTextChange onVocationalSkillChange
+            ]
             Html.datalist [
-                prop.id "vocationSkillNameSet"
+                prop.id "vocationalSkillNameSet"
                 prop.children (
-                    vocationSkillNameSet
+                    vocationalSkillNameSet
                     |> Seq.map (fun (itemName: string) -> Html.option [ prop.value itemName ])
                 )
             ]
         ]
-    |> Html.ul
+
+type Msg =
+    | InsertVocationalSkill of string
+    | CommonVocationalSkillMsgs of CommonVocationalSkillMsgs
+
+let init () = []
+
+let update msg model =
+    match msg with
+    | InsertVocationalSkill name ->
+        let initVocationalSkill = VocationalSkill.init ()
+
+        {
+            initVocationalSkill with
+                skill.name = name
+        }
+        |> List.singleton
+        |> List.append model
+    | CommonVocationalSkillMsgs msg -> updateCommonVocationSkill msg model
+
+
+let view attributeNameSet vocationalSkillNameSet (model: VocationalSkill list) dispatch =
+    viewCommonVocationalSkill
+        attributeNameSet
+        vocationalSkillNameSet
+        (InsertVocationalSkill >> dispatch)
+        true
+        model
+        (CommonVocationalSkillMsgs >> dispatch)

@@ -1,6 +1,6 @@
-module VocationSkill
+module MundanceVocationSkill
 
-open FogentRoleplayLib.VocationSkill
+open FogentRoleplayLib.MundaneVocationSkill
 open FogentRoleplayLib.Neg1To5
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.ZeroToFive
@@ -8,7 +8,6 @@ open FogentRoleplayLib.ZeroToFive
 type Msg =
     | VocationalSkillMsg of VocationalSkill.Msg
     | WeaponSkillMsg of VocationalSkill.Msg
-    | MagicSkillMsg of VocationalSkill.Msg
     | CalculateDicePools of DicePoolCalculationData
     | SetSkillLevel of Neg1To5
     | CheckIfLevelCapExceeded of ZeroToFive
@@ -16,34 +15,21 @@ type Msg =
 let init () =
     VocationalSkill.init () |> VocationalSkill
 
-let update msg (model: VocationSkill) : VocationSkill =
+let update msg (model: MundaneVocationSkill) : MundaneVocationSkill =
     match msg, model with
     | VocationalSkillMsg msg, VocationalSkill vocationalSkill ->
         VocationalSkill.update msg vocationalSkill |> VocationalSkill
+
     | WeaponSkillMsg msg, WeaponSkill vocationalSkill -> VocationalSkill.update msg vocationalSkill |> WeaponSkill
-    | MagicSkillMsg msg, MagicSkill magicSkill ->
-        {
-            magicSkill with
-                vocationalSkill = VocationalSkill.update msg magicSkill.vocationalSkill
-        }
-        |> MagicSkill
+
     | CalculateDicePools dicePoolCalculationData, _ ->
+        let newVocationalSkill =
+            VocationalSkill.update (VocationalSkill.CalculateDicePool(dicePoolCalculationData)) vocationalSkill
+
         match model with
-        | VocationalSkill vocationalSkill ->
-            VocationalSkill.update (VocationalSkill.CalculateDicePool(dicePoolCalculationData)) vocationalSkill
-            |> VocationalSkill
-        | WeaponSkill vocationalSkill ->
-            VocationalSkill.update (VocationalSkill.CalculateDicePool(dicePoolCalculationData)) vocationalSkill
-            |> WeaponSkill
-        | MagicSkill magicSkill ->
-            {
-                magicSkill with
-                    vocationalSkill =
-                        VocationalSkill.update
-                            (VocationalSkill.CalculateDicePool(dicePoolCalculationData))
-                            magicSkill.vocationalSkill
-            }
-            |> MagicSkill
+        | VocationalSkill vocationalSkill -> newVocationalSkill |> VocationalSkill
+        | WeaponSkill vocationalSkill -> newVocationalSkill |> WeaponSkill
+
     | SetSkillLevel newSkillLevel, _ ->
         match model with
         | VocationalSkill vocationalSkill ->
@@ -52,13 +38,7 @@ let update msg (model: VocationSkill) : VocationSkill =
         | WeaponSkill vocationalSkill ->
             VocationalSkill.update (VocationalSkill.SetSkillLevel(newSkillLevel)) vocationalSkill
             |> WeaponSkill
-        | MagicSkill magicSkill ->
-            {
-                magicSkill with
-                    vocationalSkill =
-                        VocationalSkill.update (VocationalSkill.SetSkillLevel(newSkillLevel)) magicSkill.vocationalSkill
-            }
-            |> MagicSkill
+
     | CheckIfLevelCapExceeded levelCap, _ ->
         match model with
         | VocationalSkill vocationalSkill ->
@@ -67,15 +47,6 @@ let update msg (model: VocationSkill) : VocationSkill =
         | WeaponSkill vocationalSkill ->
             VocationalSkill.update (VocationalSkill.CheckIfLevelCapExceeded(levelCap)) vocationalSkill
             |> WeaponSkill
-        | MagicSkill magicSkill ->
-            {
-                magicSkill with
-                    vocationalSkill =
-                        VocationalSkill.update
-                            (VocationalSkill.CheckIfLevelCapExceeded(levelCap))
-                            magicSkill.vocationalSkill
-            }
-            |> MagicSkill
 
     | _ -> model
 
@@ -88,5 +59,3 @@ let view attributeNameSet model dispatch =
         VocationalSkill.view attributeNameSet vocationalSkill (VocationalSkillMsg >> dispatch) true
     | WeaponSkill vocationalSkill ->
         VocationalSkill.view attributeNameSet vocationalSkill (WeaponSkillMsg >> dispatch) false
-    | MagicSkill magicSkill ->
-        VocationalSkill.view attributeNameSet magicSkill.vocationalSkill (MagicSkillMsg >> dispatch) false

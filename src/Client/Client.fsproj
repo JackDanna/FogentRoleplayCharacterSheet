@@ -15,9 +15,15 @@
     <Compile Include="AttributeAndCoreSkillsList.fs" />
     <Compile Include="ZeroToFive.fs" />
     <Compile Include="VocationalSkill.fs" />
-    <Compile Include="VocationSkill.fs" />
-    <Compile Include="VocationSkillList.fs" />
     <Compile Include="VocationStat.fs" />
+    <Compile Include="VocationalSkillList.fs" />
+    <Compile Include="WeaponSkillList.fs" />
+    <Compile Include="MagicSkillList.fs" />
+    <Compile Include="MundaneVocationSkills.fs" />
+    <Compile Include="MundaneVocation.fs" />
+    <Compile Include="MagicVocationSkill.fs" />
+    <Compile Include="MagicVocationSkills.fs" />
+    <Compile Include="MagicVocation.fs" />
     <Compile Include="Vocation.fs" />
     <Compile Include="VocationList.fs" />
     <Compile Include="Item.fs" />

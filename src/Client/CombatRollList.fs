@@ -7,13 +7,13 @@ open FogentRoleplayLib.DicePoolMod
 open FogentRoleplayLib.Range
 open FogentRoleplayLib.SetAreaOfEffect
 open FogentRoleplayLib.ItemStack
-open FogentRoleplayLib.VocationSkill
+open FogentRoleplayLib.VocationalSkill
 
 open FogentRoleplayLib.StringUtils
 
 
 
-type Msg = RecalculateCombatRollList of ItemStack List * VocationSkill List
+type Msg = RecalculateCombatRollList of ItemStack List * VocationalSkill List
 
 let init () : CombatRoll list = []
 

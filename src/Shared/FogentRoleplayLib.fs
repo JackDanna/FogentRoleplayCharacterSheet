@@ -929,21 +929,6 @@ module AttributeAndCoreSkills =
                     coreSkillList
         }
 
-module VocationSkill =
-    open VocationalSkill
-    open MagicSkill
-
-    type VocationSkill =
-        | VocationalSkill of VocationalSkill
-        | WeaponSkill of VocationalSkill
-        | MagicSkill of MagicSkill
-
-    let vocationSkillToVocationalSkill vocationSkill =
-        match vocationSkill with
-        | VocationalSkill vocationalSkill -> vocationalSkill
-        | WeaponSkill vocationalSkill -> vocationalSkill
-        | MagicSkill magicSkill -> magicSkill.vocationalSkill
-
 module VocationStat =
     open ZeroToFive
     open DicePool
@@ -958,18 +943,43 @@ module VocationStat =
         dicePoolModList: DicePoolMod List
     }
 
-module Vocation =
-    open VocationSkill
-    open VocationStat
+module MundaneVocationSkills =
+    open VocationalSkill
 
-    type Vocation = {
-        vocationStat: VocationStat
-        vocationSkillList: VocationSkill list
+    type MundaneVocationSkills = {
+        vocationalSkills: VocationalSkill List
+        weaponSkillList: VocationalSkill List
     }
 
-    let vocationListToVocationSkillList vocationList =
-        vocationList |> List.collect (_.vocationSkillList)
+module MundaneVocation =
+    open VocationStat
+    open MundaneVocationSkills
 
+    type MundaneVocation = {
+        vocationStat: VocationStat
+        mundaneVocationSkills: MundaneVocationSkills
+    }
+
+module MagicVocation =
+    open MundaneVocation
+    open MagicSystem
+    open MagicSkill
+
+    type MagicVocation = {
+        mundaneVocation: MundaneVocation
+        magicVocationSkillList: MagicSkill List
+        magicSystem: MagicSystem
+        magicResourceCap: uint
+        currentMagicResource: uint
+    }
+
+module Vocation =
+    open MundaneVocation
+    open MagicVocation
+
+    type Vocation =
+        | MundaneVocation of MundaneVocation
+        | MagicVocation of MagicVocation
 
 // Effects
 
@@ -1386,11 +1396,11 @@ module CombatRoll =
         eoName: string option
     }
 
-    open VocationSkill
+    open VocationalSkill
     open ItemStack
 
     type CombatRollData = {
-        vocationSkillList: VocationSkill list
+        vocationSkillList: VocationalSkill list
         equipmentList: ItemStack List
     }
 
@@ -1492,18 +1502,12 @@ module CombatRoll =
         |> List.collect id
 
     open Effect
+    open VocationalSkill
 
     let createWeaponItemCombatRolls
         (equipmentList: ItemStack List)
-        (vocationSkillList: VocationSkill List)
+        (weaponSkillList: VocationalSkill List)
         : CombatRoll list =
-
-        let weaponSkillList =
-            vocationSkillList
-            |> List.collect (fun vocationSkill ->
-                match vocationSkill with
-                | WeaponSkill weaponSkill -> [ weaponSkill ]
-                | _ -> [])
 
         let weaponResourceList =
             equipmentList
@@ -1595,6 +1599,13 @@ module Character =
             weightClassDicePenalty = 0u
             itemEffectDicePoolMod = createD6DicePoolMod 0u
         }
+
+    let vocationListToWeaponSkillList (vocationList: Vocation List) =
+        vocationList
+        |> List.collect (fun vocation ->
+            match vocation with
+            | MagicVocation magicVocation -> magicVocation.mundaneVocation.mundaneVocationSkills.weaponSkillList
+            | MundaneVocation mundaneVocation -> mundaneVocation.mundaneVocationSkills.weaponSkillList)
 
     let defaultAttributeAndCoreSkillsList (attributeList: AttributeName Set) (coreSkillList: CoreSkill list) =
         Set.map (defaultAttributeAndCoreSkills coreSkillList) attributeList
