@@ -24,8 +24,6 @@ module StringUtils =
 module MathUtils =
     open System
 
-    let multiply x y = x * y
-
     let divideUintByUintThenRound numerator divisor roundDown =
         let floatCalculation = float numerator / float divisor
 
@@ -467,12 +465,12 @@ module Range =
                 float numDice / float rangeCalculation.numDicePerEffectiveRangeUnit
                 |> Math.Ceiling
                 |> uint
-                |> multiply rangeCalculation.ftPerEffectiveRangeUnit
+                |> (*) rangeCalculation.ftPerEffectiveRangeUnit
             else
                 float numDice / float rangeCalculation.numDicePerEffectiveRangeUnit
                 |> Math.Floor
                 |> uint
-                |> multiply rangeCalculation.ftPerEffectiveRangeUnit
+                |> (*) rangeCalculation.ftPerEffectiveRangeUnit
         maxRangeOption = rangeCalculation.maxRangeOption
     }
 
@@ -853,50 +851,6 @@ module VocationalSkill =
         governingAttributeNames: AttributeName Set
     }
 
-// Magic
-
-module MagicResource =
-    type MagicResource = string
-
-module MagicResourcePool =
-
-    open MagicResource
-
-    type MagicResourcePool = {
-        magicResource: MagicResource
-        remainingResources: uint
-        poolMax: uint
-    }
-
-module MagicSkill =
-    open VocationalSkill
-    open DamageType
-
-    type MagicSkillData = {
-        name: string
-        damageTypes: DamageType Set
-        isMeleeCapable: bool
-        isRangeCapable: bool
-    }
-
-    type MagicSkill = {
-        vocationalSkill: VocationalSkill
-        magicSkillData: MagicSkillData
-    }
-
-module MagicSystem =
-    open AttributeName
-    open MagicSkill
-
-    type MagicSystem = {
-        name: string
-        vocationName: string
-        vocationGoverningAttributeSet: AttributeName Set
-        resourceName: string
-        governingCoreSkill: string
-        magicSkillDataSet: MagicSkillData Set
-    }
-
 // Larger Character Building Blocks
 
 module AttributeAndCoreSkills =
@@ -958,6 +912,64 @@ module MundaneVocation =
     type MundaneVocation = {
         vocationStat: VocationStat
         mundaneVocationSkills: MundaneVocationSkills
+    }
+
+// Magic
+
+module MagicResource =
+    type MagicResource = string
+
+module MagicResourcePool =
+    open MathUtils
+    open MagicResource
+
+    type MagicResourcePool = {
+        magicResource: MagicResource
+        remainingResources: uint
+        poolMax: uint
+    }
+
+    open ZeroToFive
+
+    let calculateVocationMagicResource (vocationLevel: ZeroToFive) (vocationDicePoolSize: uint) =
+        vocationLevel
+        |> zeroToFiveToUint
+        |> (fun vocationLevelAsUint ->
+            if vocationLevelAsUint = 0u then
+                0.5
+            else
+                float vocationLevelAsUint)
+        |> (fun vocationLevelAsFloat -> vocationDicePoolSize |> float |> (*) vocationLevelAsFloat)
+
+
+
+module MagicSkill =
+    open VocationalSkill
+    open DamageType
+
+    type MagicSkillData = {
+        name: string
+        damageTypes: DamageType Set
+        isMeleeCapable: bool
+        isRangeCapable: bool
+    }
+
+    type MagicSkill = {
+        vocationalSkill: VocationalSkill
+        magicSkillData: MagicSkillData
+    }
+
+module MagicSystem =
+    open AttributeName
+    open MagicSkill
+
+    type MagicSystem = {
+        name: string
+        vocationName: string
+        vocationGoverningAttributeSet: AttributeName Set
+        resourceName: string
+        governingCoreSkill: string
+        magicSkillDataSet: MagicSkillData Set
     }
 
 module MagicVocation =
