@@ -129,6 +129,8 @@ module ZeroToFive =
         | Four -> 4u
         | Five -> 5u
 
+    let zeroToFiveToFloat = zeroToFiveToUint >> float
+
 module Neg1To5 =
     open ZeroToFive
 
@@ -161,6 +163,8 @@ module Neg1To5 =
         | Three -> 3
         | Four -> 4
         | Five -> 5
+
+    let neg1To5ToFloat = neg1To5ToInt >> float
 
     let ZeroToFiveToNeg1To5 zeroToFive =
         match zeroToFive with
@@ -920,7 +924,6 @@ module MagicResource =
     type MagicResource = string
 
 module MagicResourcePool =
-    open MathUtils
     open MagicResource
 
     type MagicResourcePool = {
@@ -929,19 +932,43 @@ module MagicResourcePool =
         poolMax: uint
     }
 
+    open Neg1To5
     open ZeroToFive
+    open System
+
+    let determineVocationLevelFloatForCalc vocationLevel =
+
+        match vocationLevel with
+        | Zero -> 0.5
+        | positiveLevel -> zeroToFiveToFloat positiveLevel
 
     let calculateVocationMagicResource (vocationLevel: ZeroToFive) (vocationDicePoolSize: uint) =
+        vocationDicePoolSize
+        |> float
+        |> (*) (determineVocationLevelFloatForCalc vocationLevel)
+
+    let determineGoverningCoreSkillLevelFloatForCalc governingCoreSkillLevel =
+        match governingCoreSkillLevel with
+        | NegOne -> 0.0
+        | Neg1To5.Zero -> 0.5
+        | positiveLevel -> neg1To5ToFloat positiveLevel
+
+    let calcGoverningSkillMagicResource (governingCoreSkillLevel: Neg1To5) (governingCoreSkillDicePoolSize: uint) =
+        governingCoreSkillDicePoolSize
+        |> float
+        |> (*) (determineGoverningCoreSkillLevelFloatForCalc governingCoreSkillLevel)
+        |> (/) 2.0
+
+    let calculateMagicResourcePool
         vocationLevel
-        |> zeroToFiveToUint
-        |> (fun vocationLevelAsUint ->
-            if vocationLevelAsUint = 0u then
-                0.5
-            else
-                float vocationLevelAsUint)
-        |> (fun vocationLevelAsFloat -> vocationDicePoolSize |> float |> (*) vocationLevelAsFloat)
-
-
+        vocationDicePoolSize
+        governingCoreSkillLevel
+        governingCoreSkillDicePoolSize
+        =
+        calculateVocationMagicResource vocationLevel vocationDicePoolSize
+        |> (+) (calcGoverningSkillMagicResource governingCoreSkillLevel governingCoreSkillDicePoolSize)
+        |> Math.Floor
+        |> uint
 
 module MagicSkill =
     open VocationalSkill
