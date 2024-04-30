@@ -46,7 +46,6 @@ let view attributeNameSet (weaponSkillNames) (model: MagicVocation) dispatch =
             ]
             Bulma.column [ sprintf "Max: %d" model.currentMagicResource |> prop.text ]
         ]
-
     ]
     |> List.append (
         MundaneVocation.view attributeNameSet weaponSkillNames model.mundaneVocation (MundaneVocationMsg >> dispatch)
