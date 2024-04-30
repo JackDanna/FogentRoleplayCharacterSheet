@@ -1,14 +1,19 @@
 module VocationList
 
 open FogentRoleplayLib.DicePoolCalculation
+open FogentRoleplayLib.MagicSystem
+open FogentRoleplayLib.MagicVocation
+open FogentRoleplayLib.Vocation
+open FogentRoleplayLib.Character
 
 type Msg =
     | Modify of int * Vocation.Msg
-    | Insert
+    | InsertMundaneVocation of string
+    | InsertMagicVocation of MagicSystem
     | Remove of int
     | CalculateDicePools of DicePoolCalculationData
 
-let init () = [ Vocation.init () ]
+let init () = []
 
 let update msg model =
     match msg with
@@ -19,7 +24,24 @@ let update msg model =
                 Vocation.update msg vocation
             else
                 vocation)
-    | Insert -> List.append model [ Vocation.init () ]
+    | InsertMagicVocation magicSystem ->
+
+        let currentMagicResource = 0u
+        let initMundaneVocation = MundaneVocation.init ()
+
+        {
+            mundaneVocation = {
+                initMundaneVocation with
+                    vocationStat.name = magicSystem.vocationName
+            }
+            magicVocationSkillList = MagicSkillList.init ()
+            magicSystem = magicSystem
+            magicResourceCap = currentMagicResource
+            currentMagicResource = currentMagicResource
+        }
+        |> MagicVocation
+        |> List.singleton
+        |> List.append model
     | Remove position -> List.removeAt position model
     | CalculateDicePools msg ->
         List.map (fun vocation -> Vocation.update (Vocation.CalculateDicePools(msg)) vocation) model
@@ -28,10 +50,14 @@ let update msg model =
 open Feliz
 open Feliz.Bulma
 
-let view attributeNameSet vocationSkillData model dispatch =
+let view attributeNameSet (vocationSkillData: VocationSkillData) model dispatch =
     Bulma.container [
         Bulma.label [ prop.text "Vocations and Vocational Skills:" ] |> Bulma.content
-        Bulma.button.button [ prop.onClick (fun _ -> dispatch Insert); prop.text "+" ]
+        //Bulma.button.button [ prop.onClick (fun _ -> dispatch Insert); prop.text "+" ]
+        ViewUtils.textInputWithDropdownSet
+            (fun input -> vocationSkillData.magicSystemMap.Item input |> InsertMagicVocation |> dispatch)
+            (vocationSkillData.magicSystemMap.Keys)
+            "vocationList"
         Bulma.columns [
             columns.isCentered
             prop.children [

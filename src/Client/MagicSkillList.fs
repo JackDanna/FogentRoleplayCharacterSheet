@@ -99,15 +99,8 @@ let view attributeNameSet (magicSkillDataMap: Map<string, MagicSkillData>) (mode
                 |> Bulma.content)
             model)
         [
-            Bulma.input.text [
-                prop.list "magicSkillNameSet"
-                prop.onTextChange (fun input -> magicSkillDataMap.Item input |> InsertMagicSkill |> dispatch)
-            ]
-            Html.datalist [
-                prop.id "magicSkillNameSet"
-                prop.children (
-                    magicSkillDataMap.Keys
-                    |> Seq.map (fun (itemName: string) -> Html.option [ prop.value itemName ])
-                )
-            ]
+            ViewUtils.textInputWithDropdownSet
+                (fun input -> magicSkillDataMap.Item input |> InsertMagicSkill |> dispatch)
+                magicSkillDataMap.Keys
+                "magiSkillList"
         ]

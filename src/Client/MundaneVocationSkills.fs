@@ -81,6 +81,7 @@ let view attributeNameSet (weaponSkillNameSet: string Set) model dispatch =
             ViewUtils.textInputWithDropdownSet
                 (fun input -> InsertSkill(input, weaponSkillNameSet) |> dispatch)
                 weaponSkillNameSet
+                "mundaneVocationSkills"
         ]
     ]
     |> List.collect id

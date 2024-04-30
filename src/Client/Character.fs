@@ -4,7 +4,6 @@ open FogentRoleplayLib.Character
 open FogentRoleplayLib.AttributeName
 open FogentRoleplayLib.CoreSkill
 open FogentRoleplayLib.ItemStack
-open FogentRoleplayLib.Vocation
 
 type Msg =
     | SetName of string

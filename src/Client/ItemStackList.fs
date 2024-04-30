@@ -61,6 +61,7 @@ let view (allItemStackList: Map<string, ItemStack>) (model: ItemStack list) (dis
                     ViewUtils.textInputWithDropdownSet
                         (fun input -> dispatch (Insert <| allItemStackList.Item input))
                         allItemStackList.Keys
+                        "ItemStackList"
                 ]
             ]
         ]
