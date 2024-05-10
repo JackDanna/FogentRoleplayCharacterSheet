@@ -1,16 +1,19 @@
 module CoreSkill
 
 open FogentRoleplayLib.CoreSkill
-open FogentRoleplayLib.Skill
 open FogentRoleplayLib.DicePoolCalculation
 
 type Msg =
     | SkillMsg of Skill.Msg
-    | CalculateDicePool of DicePoolCalculationData
+    | SetEffectDicePoolModList of DicePoolCalculationData
 
-let init () = {
-    skill = Skill.init ()
-    governingAttributeName = ""
+let init dicePoolCalculationData governingAttributeName coreSkillName = {
+    skill =
+        Skill.init
+            coreSkillName
+            dicePoolCalculationData.baseDiceEffectList
+            (determineCoreSkillEffectDicePoolModList dicePoolCalculationData governingAttributeName)
+    governingAttributeName = governingAttributeName
 }
 
 let update msg model =
@@ -19,12 +22,12 @@ let update msg model =
         model with
             skill = Skill.update msg model.skill
       }
-    | CalculateDicePool msg -> {
+    | SetEffectDicePoolModList dicePoolCalculationData -> {
         model with
             skill =
                 Skill.update
-                    (Skill.Msg.SetDicePoolModList(
-                        createCoreSkillDicePoolModList msg model.skill.level model.governingAttributeName
+                    (Skill.Msg.SetEffectDicePoolModList(
+                        determineCoreSkillEffectDicePoolModList dicePoolCalculationData model.governingAttributeName
                     ))
                     model.skill
       }

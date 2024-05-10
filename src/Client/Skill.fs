@@ -1,54 +1,43 @@
 module Skill
 
 open FogentRoleplayLib.Skill
-open FogentRoleplayLib.DicePool
 open FogentRoleplayLib.DicePoolMod
+open FogentRoleplayLib.BaseDiceEffect
 
 type Msg =
-    //| SetName of string
     | Neg1To5Msg of Neg1To5.Msg
-    | SetDicePoolModList of DicePoolMod List
+    | SetEffectDicePoolModList of DicePoolMod List
 
-let init () = {
-    name = ""
-    level = Neg1To5.init ()
-    baseDice = base3d6DicePool
-    dicePoolModList = []
-}
+let init name (baseDiceEffectList: BaseDiceEffect List) effectDicePoolModList =
+
+    {
+        name = name
+        level = Neg1To5.init ()
+        baseDice = findBaseDiceForSkill baseDiceEffectList name
+        effectDicePoolModList = effectDicePoolModList
+    }
 
 let update msg model =
     match msg with
-    //| SetName msg -> { model with name = msg }
     | Neg1To5Msg msg -> {
         model with
             level = Neg1To5.update msg model.level
       }
-    | SetDicePoolModList msg -> { model with dicePoolModList = msg }
+    | SetEffectDicePoolModList effectDicePoolModList -> {
+        model with
+            effectDicePoolModList = effectDicePoolModList
+      }
 
 
 open Feliz
 open Feliz.Bulma
 
-let view model dispatch disableChangeLevel governingSkillColumn =
-    // if canUserChangeName then
-    //     [
-    //         Bulma.column [
-    //             Bulma.input.text [
-    //                 prop.value model.name
-    //                 prop.onTextChange (fun value -> dispatch (SetName value))
-    //             ]
-    //         ]
-    //     ]
-    // else
+let view (model: Skill) dispatch disableChangeLevel governingSkillColumn =
     [ Bulma.column [ prop.text model.name ] ]
     @ match governingSkillColumn with
       | Some column -> column |> List.singleton
       | None -> List.Empty
     @ [
         Bulma.column [ Neg1To5.view model.level (Neg1To5Msg >> dispatch) disableChangeLevel ]
-        Bulma.column [
-            modifyDicePoolByDicePoolModList model.baseDice model.dicePoolModList
-            |> dicePoolToString
-            |> prop.text
-        ]
+        Bulma.column [ skillToDicePoolString model |> prop.text ]
     ]

@@ -2,12 +2,10 @@ module AttributeStat
 
 open FogentRoleplayLib.Attribute
 
-type Model = Attribute
-
 type Msg = Neg2To5Msg of Neg2To5.Msg
 
-let init () = {
-    attributeName = ""
+let init attributeName = {
+    attributeName = attributeName
     level = Neg2To5.init ()
 }
 

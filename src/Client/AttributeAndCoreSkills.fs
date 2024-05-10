@@ -1,6 +1,7 @@
 module AttributeAndCoreSkills
 
 open FogentRoleplayLib.AttributeAndCoreSkills
+open FogentRoleplayLib.AttributeAndCoreSkillsData
 open FogentRoleplayLib.DicePoolCalculation
 
 type Msg =
@@ -8,7 +9,11 @@ type Msg =
     | CoreSkillListMsg of CoreSkillList.Msg
     | CalculateDicePool of DicePoolCalculationData
 
-// let init () =
+let init dicePoolCalculationData attributeAndCoreSkillsData =
+    CoreSkillList.init
+        dicePoolCalculationData
+        attributeAndCoreSkillsData.governingAttributeName
+        attributeAndCoreSkillsData.coreSkillNameSet
 
 let update msg model =
     match msg with
@@ -22,7 +27,7 @@ let update msg model =
       }
     | CalculateDicePool msg -> {
         model with
-            coreSkills = CoreSkillList.update (CoreSkillList.Msg.CalculateDicePools(msg)) model.coreSkills
+            coreSkills = CoreSkillList.update (CoreSkillList.Msg.SetCoreSkillEffectDicePoolMods(msg)) model.coreSkills
       }
 
 open Feliz

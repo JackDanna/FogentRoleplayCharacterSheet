@@ -9,7 +9,7 @@ namespace Shared
 // open FogentRoleplayLib.MovementSpeedEffect
 // open FogentRoleplayLib.WeightClass
 open FogentRoleplayLib.AttributeName
-open FogentRoleplayLib.CoreSkill
+open FogentRoleplayLib.AttributeAndCoreSkillsData
 open FogentRoleplayLib.ItemStack
 open FogentRoleplayLib.Skill
 open FogentRoleplayLib.WeaponSpell
@@ -23,8 +23,8 @@ module Route =
         sprintf "/api/%s/%s" typeName methodName
 
 type FogentRoleplayData = {
-    defaultAttributeSet: AttributeName Set
-    defaultCoreSkillList: CoreSkill List
+    attributeNameSet: AttributeName Set
+    coreSkillDataSet: AttributeAndCoreSkillsData Set
     itemStackMap: Map<string, ItemStack>
     weaponSpellSet: WeaponSpell Set
     vocationSkillData: VocationSkillData

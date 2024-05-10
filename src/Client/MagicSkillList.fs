@@ -2,35 +2,32 @@ module MagicSkillList
 
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.MagicSkill
-open FogentRoleplayLib.ZeroToFive
-
-open FogentRoleplayLib.VocationalSkill
 
 type Msg =
-    | InsertMagicSkill of MagicSkillData
+    | InsertMagicSkill of string * option<DicePoolCalculationData> * option<Map<string, MagicSkillData>>
     | RemoveAtPostion of int
     | ModifiedVocationSkillAtPosition of int * VocationalSkill.Msg
-    | CalculateDicePools of DicePoolCalculationData
-    | CheckIfLevelCapExceeded of int * ZeroToFive
-    | CheckIfLevelCapExeededForAll of ZeroToFive
 
 let init () = []
 
 let update msg model =
     match msg with
-    | InsertMagicSkill magicSkillData ->
+    | InsertMagicSkill(skillName, dicePoolCalculationDataOption, magicSkillDataMapOption) ->
 
-        let initVocationalSkill = VocationalSkill.init ()
 
-        {
-            vocationalSkill = {
-                initVocationalSkill with
-                    skill.name = magicSkillData.name
-            }
-            magicSkillData = magicSkillData
-        }
-        |> List.singleton
-        |> List.append model
+        match dicePoolCalculationDataOption, magicSkillDataMapOption with
+        | Some dicePoolCalcualtionData, Some magicSkillDataMap ->
+            match magicSkillDataMap.TryFind skillName with
+            | None -> model
+            | Some magicSkillData ->
+
+                {
+                    vocationalSkill = VocationalSkill.init dicePoolCalcualtionData skillName
+                    magicSkillData = magicSkillData
+                }
+                |> List.singleton
+                |> List.append model
+        | _, _ -> model
 
     | RemoveAtPostion position -> List.removeAt position model
     | ModifiedVocationSkillAtPosition(position, msg) ->
@@ -43,45 +40,11 @@ let update msg model =
                 }
             else
                 magicSkill)
-    | CalculateDicePools dicePoolCalculationData ->
-        List.map
-            (fun magicSkill -> {
-                magicSkill with
-                    vocationalSkill =
-                        VocationalSkill.update
-                            (VocationalSkill.CalculateDicePool(dicePoolCalculationData))
-                            magicSkill.vocationalSkill
-            })
-            model
-    | CheckIfLevelCapExceeded(position, levelCap) ->
-        List.mapi
-            (fun index magicSkill ->
-                if index = position then
-                    {
-                        magicSkill with
-                            vocationalSkill =
-                                VocationalSkill.update
-                                    (VocationalSkill.CheckIfLevelCapExceeded(levelCap))
-                                    magicSkill.vocationalSkill
-                    }
-                else
-                    magicSkill)
-
-            model
-    | CheckIfLevelCapExeededForAll levelCap ->
-        model
-        |> List.map (fun magicSkill -> {
-            magicSkill with
-                vocationalSkill =
-                    VocationalSkill.update
-                        (VocationalSkill.CheckIfLevelCapExceeded levelCap)
-                        magicSkill.vocationalSkill
-        })
 
 open Feliz
 open Feliz.Bulma
 
-let view attributeNameSet (magicSkillDataMap: Map<string, MagicSkillData>) (model: MagicSkill list) dispatch =
+let view attributeNameSet (magicSkillNamesSet: string Set) (model: MagicSkill list) dispatch =
     List.append
         (List.mapi
             (fun position (skillRow: MagicSkill) ->
@@ -100,7 +63,7 @@ let view attributeNameSet (magicSkillDataMap: Map<string, MagicSkillData>) (mode
             model)
         [
             ViewUtils.textInputWithDropdownSet
-                (fun input -> magicSkillDataMap.Item input |> InsertMagicSkill |> dispatch)
-                magicSkillDataMap.Keys
+                (fun input -> InsertMagicSkill(input, None, None) |> dispatch)
+                magicSkillNamesSet
                 "magiSkillList"
         ]

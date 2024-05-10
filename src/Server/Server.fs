@@ -46,6 +46,10 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.WeaponSpell
     open FogentRoleplayLib.MagicSystem
 
+    open FogentRoleplayLib.AttributeName
+    open FogentRoleplayLib.SkillName
+    open FogentRoleplayLib.AttributeAndCoreSkillsData
+
     let makeFogentRoleplayDataPath fileName =
         __SOURCE_DIRECTORY__ + "../../../FogentRoleplayData/" + fileName
 
@@ -170,22 +174,30 @@ module FogentRoleplayServerData =
         | _ -> resourceMap.Item string |> Some
 
     // AttributeAndCoreSkill
-    let attributeNameSet: AttributeName Set =
-        makeFogentRoleplayDataSet "AttributeData.csv" (fun row -> AttributeName row.["desc"])
 
-    let coreSkillData: CoreSkill list =
-        makeFogentRoleplayDataList "CoreSkillData.csv" (fun row -> {
-            skill = {
-                name = row.["name"]
-                level = Zero
-                baseDice = base3d6DicePool
-                dicePoolModList = []
-            }
-            governingAttributeName = row.["governingAttribute"]
-        })
+    let coreSkillDataSet, attributeNameSet =
+        let attributeAndCoreSkillTupleSet =
+            makeFogentRoleplayDataSet "CoreSkillData.csv" (fun row ->
+                (SkillName row.["name"], AttributeName row.["governingAttribute"]))
+
+        let attributeNameSet: AttributeName Set =
+            attributeAndCoreSkillTupleSet
+            |> Set.map (fun (_, governingAttributeName) -> governingAttributeName)
+            |> Set.singleton
+            |> Set.unionMany
+
+        attributeNameSet
+        |> Set.map (fun governingAttributeName -> {
+            governingAttributeName = governingAttributeName
+            coreSkillNameSet =
+                attributeAndCoreSkillTupleSet
+                |> Set.filter (fun (_, tempGoveringAttributeName) ->
+                    tempGoveringAttributeName = governingAttributeName)
+                |> Set.map (fun (skillName, _) -> skillName)
+        }),
+        attributeNameSet
 
     let attributeNameMap = stringSetToTypeMap attributeNameSet
-
 
     let stringToAttributes = mapAndStringToValueSet attributeNameMap
 
@@ -480,8 +492,8 @@ let fallenDataApi: IFogentRoleplayDataApi = {
     getInitData =
         fun () -> async {
             return {
-                defaultCoreSkillList = FogentRoleplayServerData.coreSkillData
-                defaultAttributeSet = FogentRoleplayServerData.attributeNameSet
+                attributeNameSet = FogentRoleplayServerData.attributeNameSet
+                coreSkillDataSet = FogentRoleplayServerData.coreSkillDataSet
                 itemStackMap = FogentRoleplayServerData.itemStackMap
                 weaponSpellSet = FogentRoleplayServerData.weaponSpellSet
                 vocationSkillData = {

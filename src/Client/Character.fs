@@ -21,6 +21,26 @@ let init (attributeNameSet: AttributeName Set) (coreSkillData: CoreSkill list) =
     characterInformation = CharacterInformation.init ()
 }
 
+let (|InsertingVocationSkill|_|) =
+    function
+    | VocationListMsg(VocationList.Modify(position,
+                                          Vocation.MundaneVocationMsg(MundaneVocation.MundaneVocationSkillsMsg(MundaneVocationSkills.VocationalSkillListMsg(VocationalSkillList.AskParentToInsertVocationalSkill(skillName)))))) ->
+        Some(
+            VocationListMsg(
+                VocationList.Modify(
+                    position,
+                    Vocation.MundaneVocationMsg(
+                        MundaneVocation.MundaneVocationSkillsMsg(
+                            MundaneVocationSkills.VocationalSkillListMsg(
+                                VocationalSkillList.AskParentToInsertVocationalSkill(skillName)
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    | _ -> None
+
 let update msg (model: Character) =
 
     match msg with
@@ -48,21 +68,56 @@ let update msg (model: Character) =
         }
     | VocationListMsg(msg: VocationList.Msg) ->
 
-        let newVocationList =
-            VocationList.update msg model.vocationList
-            |> VocationList.update (VocationList.CalculateDicePools(characterToDicePoolCalculation model))
+        let temp, temp2 =
+            match msg with
+            //| VocationList.Modify(position,Vocation.MundaneVocationMsg(MundaneVocation.MundaneVocationSkillsMsg(MundaneVocationSkills.VocationalSkillListMsg(VocationalSkillList.AskParentToInsertVocationalSkill(skillName))))) ->
+            | VocationList.Modify(position, msg) ->
+                match msg with
+                | Vocation.MundaneVocationMsg(MundaneVocation.MundaneVocationSkillsMsg())->
+                    match munMsg with
+                    | MundaneVocation.MundaneVocationSkillsMsg(MundaneVocationSkills.VocationalSkillListMsg(VocationalSkillList.AskParentToInsertVocationalSkill(skillName)))
+                | Vocation.MagicVocationMsg magMsg->
+                
+                    (skillName, characterToDicePoolCalculation model)
+                    |> Some
+                    |> VocationalSkillList.InsertVocationalSkillFromParent
+                    |> MundaneVocationSkills.VocationalSkillListMsg
+                    |> MundaneVocation.MundaneVocationSkillsMsg
+                    |> Vocation.MundaneVocationMsg
+                    |> (fun munMsg -> (position, munMsg))
+                    |> VocationList.Modify, No
+            | _ -> msg, None
 
+    
         {
             model with
-                vocationList = newVocationList
-                combatRollList =
-                    CombatRollList.update (
-                        CombatRollList.RecalculateCombatRollList(
-                            model.equipmentList,
-                            vocationListToWeaponSkillList newVocationList
-                        )
-                    )
+                vocationList =
+                    match msg with
+                    | VocationList.Modify(position,Vocation.MundaneVocationMsg(MundaneVocation.MundaneVocationSkillsMsg(MundaneVocationSkills.VocationalSkillListMsg(VocationalSkillList.AskParentToInsertVocationalSkill(skillName))))) ->
+                        (skillName, characterToDicePoolCalculation model)
+                        |> Some
+                        |> VocationalSkillList.InsertVocationalSkillFromParent
+                        |> MundaneVocationSkills.VocationalSkillListMsg
+                        |> MundaneVocation.MundaneVocationSkillsMsg
+                        |> Vocation.MundaneVocationMsg
+                        |> (fun munMsg -> (position, munMsg))
+                        |> VocationList.Modify
+                    | _ -> msg
+                    |> VocationList.update
+                    <| model.vocationList
         }
+
+    // {
+    //     model with
+    //         vocationList = newVocationList
+    //         combatRollList =
+    //             CombatRollList.update (
+    //                 CombatRollList.RecalculateCombatRollList(
+    //                     model.equipmentList,
+    //                     vocationListToWeaponSkillList newVocationList
+    //                 )
+    //             )
+    // }
     | EquipmentMsg msg ->
         let newEquipmentList = ItemStackList.update msg model.equipmentList
 
@@ -134,7 +189,6 @@ let view
         ItemStackList.view allItemStackList model.equipmentList (EquipmentMsg >> dispatch)
 
         CombatRollList.view model.combatRollList
-        //(CombatRollListMsg >> dispatch)
 
         // ContainerList.view
         //     (List.collect itemToContainerClassNames (itemStackListToItemList allItemStackList))

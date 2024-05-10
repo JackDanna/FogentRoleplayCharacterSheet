@@ -2,8 +2,6 @@ module ZeroToFive
 
 open FogentRoleplayLib.ZeroToFive
 
-type Model = ZeroToFive
-
 type Msg = ChangedZeroToFive of int
 
 let init () = Zero
@@ -18,7 +16,7 @@ let update msg model =
 open Feliz
 open Feliz.Bulma
 
-let view (model: Model) dispatch =
+let view (model: ZeroToFive) dispatch =
     Bulma.input.number [
         prop.max 5
         prop.min 0

@@ -5,9 +5,11 @@ open FogentRoleplayLib.DicePoolCalculation
 
 type Msg =
     | ModifiedCoreSkillAtPosition of int * CoreSkill.Msg
-    | CalculateDicePools of DicePoolCalculationData
+    | SetCoreSkillEffectDicePoolMods of DicePoolCalculationData
 
-let init () = [ CoreSkill.init (); CoreSkill.init () ]
+let init dicePoolCalculationData governingAttributeName coreSkillNameSet =
+    coreSkillNameSet
+    |> Set.map (fun coreSkillName -> CoreSkill.init dicePoolCalculationData governingAttributeName coreSkillName)
 
 let update msg (model: CoreSkill list) =
     match msg with
@@ -18,9 +20,10 @@ let update msg (model: CoreSkill list) =
                 CoreSkill.update msg coreSkill
             else
                 coreSkill)
-    | CalculateDicePools dicePoolCalculationData ->
+    | SetCoreSkillEffectDicePoolMods dicePoolCalculationData ->
         List.map
-            (fun coreSkill -> CoreSkill.update (CoreSkill.Msg.CalculateDicePool dicePoolCalculationData) coreSkill)
+            (fun coreSkill ->
+                CoreSkill.update (CoreSkill.Msg.SetEffectDicePoolModList dicePoolCalculationData) coreSkill)
             model
 
 open Feliz

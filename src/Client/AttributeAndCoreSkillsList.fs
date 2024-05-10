@@ -7,6 +7,11 @@ type Msg =
     | ModifyAttributeAndCoreSkillsList of int * AttributeAndCoreSkills.Msg
     | CalculateDicePools of DicePoolCalculationData
 
+let init dicePoolCalculationData attributeAndCoreSkillsDataSet =
+    attributeAndCoreSkillsDataSet
+    |> Set.map (fun attributeAndCoreSkillsData ->
+        AttributeAndCoreSkills.init dicePoolCalculationData attributeAndCoreSkillsData)
+
 let update msg model =
     match msg with
     | ModifyAttributeAndCoreSkillsList(position, msg) ->

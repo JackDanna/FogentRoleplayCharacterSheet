@@ -23,12 +23,12 @@ let fogentRoleplayDataApi =
 
 let init () : Model * Cmd<Msg> =
     let defaultAttributeSet = Set.empty
-    let defaultCoreSkillList = []
+    let defaultCoreSkillList = Set.empty
 
     {
         fogentRoleplayData = {
-            defaultAttributeSet = defaultAttributeSet
-            defaultCoreSkillList = defaultCoreSkillList
+            attributeNameSet = defaultAttributeSet
+            coreSkillDataSet = defaultCoreSkillList
             itemStackMap = Map.empty
             weaponSpellSet = Set.empty
             vocationSkillData = {
@@ -56,7 +56,7 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
             model with
                 fogentRoleplayData = newFogentRoleplayData
                 character =
-                    Character.init newFogentRoleplayData.defaultAttributeSet newFogentRoleplayData.defaultCoreSkillList
+                    Character.init newFogentRoleplayData.attributeNameSet newFogentRoleplayData.defaultCoreSkillList
         },
         Cmd.none
 
@@ -90,7 +90,7 @@ let view (model: Model) (dispatch: Msg -> unit) =
 
             Bulma.heroBody [
                 Character.view
-                    model.fogentRoleplayData.defaultAttributeSet
+                    model.fogentRoleplayData.attributeNameSet
                     model.fogentRoleplayData.itemStackMap
                     model.fogentRoleplayData.vocationSkillData
                     model.character

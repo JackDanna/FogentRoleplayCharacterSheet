@@ -154,6 +154,8 @@ module Neg1To5 =
         | 5 -> Some Five
         | _ -> None
 
+
+
     let neg1To5ToInt neg1To5 =
         match neg1To5 with
         | NegOne -> -1
@@ -287,10 +289,10 @@ module DicePoolMod =
         | AddDice of DicePool
         | RemoveDice of DicePoolPenalty
 
-    let createD6DicePoolMod (numDice: uint) =
+    let uintToD6DicePoolMod (numDice: uint) =
         AddDice { emptyDicePool with d6 = numDice }
 
-    let emptyDicePoolMod = createD6DicePoolMod 0u
+    let emptyDicePoolMod = uintToD6DicePoolMod 0u
 
     let removeDice (dice: uint) (neg: uint) : uint * DicePoolPenalty =
         let result = int dice - int neg
@@ -378,7 +380,7 @@ module DicePoolMod =
         if num < 0 then
             RemoveDice(uint (abs num))
         else
-            createD6DicePoolMod (uint num)
+            uintToD6DicePoolMod (uint num)
 
     // Parsing Logic
     let createDicePoolMod (numDiceStr: string) (diceType: string) =
@@ -698,7 +700,7 @@ module WeaponResource =
              resource.rangeOption,
              resource.damageTypeSet,
              resource.NamedAreaOfEffectOption)
-        | None -> ("", createD6DicePoolMod (0u), 0u, None, Set.empty, None)
+        | None -> ("", uintToD6DicePoolMod (0u), 0u, None, Set.empty, None)
 
 module Weapon =
     open DicePoolMod
@@ -812,18 +814,20 @@ module Attribute =
     let sumGoverningAttributeD6DiceMods attributeSet governingAttributeNameSet =
         sumAttributesLevels governingAttributeNameSet attributeSet |> intToD6DicePoolMod
 
+module SkillName =
+    type SkillName = string
+
 module Skill =
     open Neg1To5
     open DicePool
     open DicePoolMod
-
-    type SkillName = string
+    open SkillName
 
     type Skill = {
         name: SkillName
         level: Neg1To5
         baseDice: DicePool
-        dicePoolModList: DicePoolMod List
+        effectDicePoolModList: DicePoolMod List
     }
 
     let findSkillLvlWithDefault skillName (defaultLvl: Neg1To5) (skillList: Skill list) =
@@ -836,6 +840,16 @@ module Skill =
                 list
                 |> List.maxBy (fun skill -> skill.level)
                 |> (fun skillList -> skillList.level))
+
+    let skillToDicePool skill =
+        skill.level
+        |> neg1To5ToInt
+        |> intToD6DicePoolMod
+        |> List.singleton
+        |> List.append skill.effectDicePoolModList
+        |> modifyDicePoolByDicePoolModList skill.baseDice
+
+    let skillToDicePoolString = skillToDicePool >> dicePoolToString
 
 module CoreSkill =
     open AttributeName
@@ -856,6 +870,15 @@ module VocationalSkill =
     }
 
 // Larger Character Building Blocks
+
+module AttributeAndCoreSkillsData =
+    open AttributeName
+    open SkillName
+
+    type AttributeAndCoreSkillsData = {
+        coreSkillNameSet: SkillName Set
+        governingAttributeName: AttributeName
+    }
 
 module AttributeAndCoreSkills =
     open AttributeName
@@ -898,7 +921,7 @@ module VocationStat =
         governingAttributeNameSet: AttributeName Set
         level: ZeroToFive
         baseDice: DicePool
-        dicePoolModList: DicePoolMod List
+        effectDicePoolModList: DicePoolMod List
     }
 
 module MundaneVocationSkills =
@@ -1162,6 +1185,23 @@ module MovementSpeedEffect =
     let movementSpeedCalculationToSourceForDisplay movementSpeedCalculation =
         $"{movementSpeedCalculation.baseMovementSpeed} ft (base), +{movementSpeedCalculation.feetPerAttributeLvl} ft (per {movementSpeedCalculation.governingAttribute}), +{movementSpeedCalculation.feetPerSkillLvl} ft (per {movementSpeedCalculation.governingSkill})"
 
+module BaseDiceEffect =
+    open DicePool
+
+    type BaseDiceEffect = {
+        name: string
+        effectedSkillName: string
+        baseDice: DicePool
+    }
+
+    let findBaseDiceForSkill baseDiceEffectList skillName =
+        baseDiceEffectList
+        |> List.tryFind (fun baseDiceEffect -> baseDiceEffect.effectedSkillName = skillName)
+        |> (fun baseDiceEffectOption ->
+            match baseDiceEffectOption with
+            | Some baseDiceEffect -> baseDiceEffect.baseDice
+            | None -> base3d6DicePool)
+
 module Effect =
     open SkillDiceModEffect
     open AttributeStatAdjustmentEffect
@@ -1172,6 +1212,7 @@ module Effect =
     open WeaponResource
     open Conduit
     open ContainerClass
+    open BaseDiceEffect
 
     type Effect =
         | Weapon of Weapon
@@ -1183,6 +1224,7 @@ module Effect =
         | PhysicalDefense of PhysicalDefense
         | AttributeDeterminedDiceMod of AttributeDeterminedDiceMod
         | MovementSpeedCalculation of MovementSpeedCalculation
+        | BaseDiceEffect of BaseDiceEffect
 
     let effectToEffectName effect =
         match effect with
@@ -1195,6 +1237,7 @@ module Effect =
         | PhysicalDefense defenseClass -> defenseClass.name
         | AttributeDeterminedDiceMod addme -> addme.name
         | MovementSpeedCalculation msc -> msc.name
+        | BaseDiceEffect baseDiceEffect -> baseDiceEffect.name
 
     let effectToSkillDiceModEffectList (effect: Effect) =
         match effect with
@@ -1340,22 +1383,22 @@ module DicePoolCalculation =
     open Neg1To5
     open AttributeName
     open ZeroToFive
+    open BaseDiceEffect
 
     type DicePoolCalculationData = {
         attributeSet: Attribute Set
         injuryDicePenalty: DicePoolPenalty
         weightClassDicePenalty: DicePoolPenalty
         itemEffectDicePoolMod: DicePoolMod
+        baseDiceEffectList: BaseDiceEffect List
     }
 
-    let createDicePoolModList
+    let determineEffectDicePoolModList
         (dicePoolCalculationData: DicePoolCalculationData)
-        (skillLevel: int)
         (goveringAttributes: AttributeName Set)
         =
 
         [
-            skillLevel |> intToD6DicePoolMod
             (goveringAttributes
              |> sumGoverningAttributeD6DiceMods dicePoolCalculationData.attributeSet)
             dicePoolCalculationData.injuryDicePenalty |> RemoveDice
@@ -1363,35 +1406,13 @@ module DicePoolCalculation =
             dicePoolCalculationData.weightClassDicePenalty |> RemoveDice
         ]
 
-    let createCoreSkillDicePoolModList
+    let determineCoreSkillEffectDicePoolModList
         (dicePoolCalculationData: DicePoolCalculationData)
-        (skillLevel: Neg1To5)
         (skillGoveringAttributeName: AttributeName)
         =
-
-        createDicePoolModList
-            dicePoolCalculationData
-            (skillLevel |> neg1To5ToInt)
-            (Set.empty.Add(skillGoveringAttributeName))
-
-    let calculateVocationalSkillDicePoolModList
-        (dicePoolCalculationData: DicePoolCalculationData)
-        (skillLevel: Neg1To5)
-        (skillGoveringAttributeNames: AttributeName Set)
-        =
-
-        createDicePoolModList dicePoolCalculationData (skillLevel |> neg1To5ToInt) skillGoveringAttributeNames
-
-    let calculateVocationStatDicePoolModList
-        (dicePoolCalculationData: DicePoolCalculationData)
-        (skillLevel: ZeroToFive)
-        (skillGoveringAttributeNames: AttributeName Set)
-        =
-
-        createDicePoolModList
-            dicePoolCalculationData
-            (skillLevel |> zeroToFiveToUint |> int)
-            skillGoveringAttributeNames
+        skillGoveringAttributeName
+        |> Set.singleton
+        |> determineEffectDicePoolModList dicePoolCalculationData
 
 module WeightClass =
     open AttributeDeterminedDiceModEffect
@@ -1585,7 +1606,7 @@ module CombatRoll =
                 |> List.tryFind (fun weaponSkill -> weaponSkill.skill.name = weapon.governingSkillName)
                 |> (fun weaponSkillOption ->
                     match weaponSkillOption with
-                    | Some weaponSkill -> weaponSkill.skill.dicePoolModList
+                    | Some weaponSkill -> weaponSkill.skill.effectDicePoolModList
                     | None -> [])
 
             createCombatRoll weapon itemTier.baseDice skillDiceModList weaponResourceOption)
@@ -1626,18 +1647,17 @@ module Character =
         characterInformation: CharacterInformation
     }
 
-    let characterToDicePoolCalculation (character: Character) =
-
-        {
-            attributeSet =
-                List.map
-                    (fun attributeAndCoreSkills -> attributeAndCoreSkills.attributeStat)
-                    character.attributeAndCoreSkillsList
-                |> Set.ofList
-            injuryDicePenalty = 0u
-            weightClassDicePenalty = 0u
-            itemEffectDicePoolMod = createD6DicePoolMod 0u
-        }
+    let characterToDicePoolCalculation (character: Character) = {
+        attributeSet =
+            List.map
+                (fun attributeAndCoreSkills -> attributeAndCoreSkills.attributeStat)
+                character.attributeAndCoreSkillsList
+            |> Set.ofList
+        baseDiceEffectList = []
+        injuryDicePenalty = 0u
+        weightClassDicePenalty = 0u
+        itemEffectDicePoolMod = uintToD6DicePoolMod 0u
+    }
 
     let vocationListToWeaponSkillList (vocationList: Vocation List) =
         vocationList

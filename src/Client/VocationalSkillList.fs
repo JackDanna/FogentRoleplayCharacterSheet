@@ -2,16 +2,13 @@ module VocationalSkillList
 
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.VocationalSkill
-open FogentRoleplayLib.ZeroToFive
 
 type CommonVocationalSkillMsgs =
     | RemoveAtPostion of int
     | ModifiedVocationalSkillAtPosition of int * VocationalSkill.Msg
-    | CalculateDicePools of DicePoolCalculationData
-    | CheckIfLevelCapExceeded of int * ZeroToFive
-    | CheckIfLevelCapExeededForAll of ZeroToFive
+    | SetEffectDicePoolModLists of DicePoolCalculationData
 
-let updateCommonVocationalSkill msg model =
+let commonVocationalSkillUpdate msg model =
     match msg with
     | RemoveAtPostion position -> List.removeAt position model
     | ModifiedVocationalSkillAtPosition(position, msg) ->
@@ -21,24 +18,14 @@ let updateCommonVocationalSkill msg model =
                 VocationalSkill.update msg vocationSkill
             else
                 vocationSkill)
-    | CalculateDicePools dicePoolCalculationData ->
+    | SetEffectDicePoolModLists dicePoolCalculationData ->
         List.map
-            (fun vocationSkill ->
-                VocationalSkill.update (VocationalSkill.CalculateDicePool(dicePoolCalculationData)) vocationSkill)
-            model
-    | CheckIfLevelCapExceeded(position, levelCap) ->
-        List.mapi
-            (fun index vocationSkill ->
-                if index = position then
-                    VocationalSkill.update (VocationalSkill.CheckIfLevelCapExceeded(levelCap)) vocationSkill
-                else
-                    vocationSkill)
 
+            (fun vocationSkill ->
+                VocationalSkill.update
+                    (VocationalSkill.SetEffectDicePoolModList(dicePoolCalculationData))
+                    vocationSkill)
             model
-    | CheckIfLevelCapExeededForAll levelCap ->
-        model
-        |> List.map (fun vocationSkill ->
-            VocationalSkill.update (VocationalSkill.CheckIfLevelCapExceeded levelCap) vocationSkill)
 
 open Feliz
 open Feliz.Bulma
@@ -49,42 +36,35 @@ let viewCommonVocationalSkill
     (model: VocationalSkill list)
     (dispatch: CommonVocationalSkillMsgs -> unit)
     =
-
-    List.mapi
-        (fun position skillRow ->
-            VocationalSkill.view
-                attributeNameSet
-                skillRow
-                (fun (msg: VocationalSkill.Msg) -> ((ModifiedVocationalSkillAtPosition(position, msg)) |> dispatch))
-                disableChangeLevel
-            @ [
-                Bulma.column [
-                    Html.button [ prop.onClick (fun _ -> dispatch (RemoveAtPostion position)); prop.text "-" ]
-                ]
+    model
+    |> List.mapi (fun position skillRow ->
+        VocationalSkill.view
+            attributeNameSet
+            skillRow
+            (fun (msg: VocationalSkill.Msg) -> ((ModifiedVocationalSkillAtPosition(position, msg)) |> dispatch))
+            disableChangeLevel
+        @ [
+            Bulma.column [
+                Html.button [ prop.onClick (fun _ -> dispatch (RemoveAtPostion position)); prop.text "-" ]
             ]
-            |> Bulma.columns
-            |> Bulma.content)
-        model
+        ]
+        |> Bulma.columns
+        |> Bulma.content)
 
 type Msg =
-    | InsertVocationalSkill of string
+    | InsertVocationalSkillFromParent of string * DicePoolCalculationData option
     | CommonVocationalSkillMsgs of CommonVocationalSkillMsgs
-
-let init () = []
 
 let update msg model =
     match msg with
-    | InsertVocationalSkill name ->
-        let initVocationalSkill = VocationalSkill.init ()
-
-        {
-            initVocationalSkill with
-                skill.name = name
-        }
-        |> List.singleton
-        |> List.append model
-    | CommonVocationalSkillMsgs msg -> updateCommonVocationalSkill msg model
-
+    | InsertVocationalSkillFromParent(skillName, dicePoolCalculationDataOption) ->
+        match dicePoolCalculationDataOption with
+        | Some dicePoolCalculationData ->
+            VocationalSkill.init dicePoolCalculationData skillName
+            |> List.singleton
+            |> List.append model
+        | _ -> model
+    | CommonVocationalSkillMsgs msg -> commonVocationalSkillUpdate msg model
 
 let view attributeNameSet vocationalSkillNameSet (model: VocationalSkill list) dispatch =
     viewCommonVocationalSkill attributeNameSet true model (CommonVocationalSkillMsgs >> dispatch)

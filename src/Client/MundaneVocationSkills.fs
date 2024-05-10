@@ -5,13 +5,19 @@ open FogentRoleplayLib.MundaneVocationSkills
 open FogentRoleplayLib.ZeroToFive
 open FogentRoleplayLib.DicePoolCalculation
 
+type InsetSkillMsgData = {
+    skillName: string
+    dicePoolCalculationData: DicePoolCalculationData option
+    weaponSkillNameSet: string Set option
+}
+
 type Msg =
     | VocationalSkillListMsg of VocationalSkillList.Msg
     | WeaponSkillListMsg of WeaponSkillList.Msg
     | VocCheckIfLevelCapExceeded of int * ZeroToFive
     | WeaCheckIfLevelCapExceeded of int * ZeroToFive
     | CheckIfLevelCapExceededForAll of ZeroToFive
-    | InsertSkill of string * string Set
+    | InsertSkill of InsetSkillMsgData
     | CalculateDicePools of DicePoolCalculationData
 
 let init () : MundaneVocationSkills = {
@@ -29,8 +35,8 @@ let update msg model : MundaneVocationSkills =
         model with
             weaponSkillList = WeaponSkillList.update msg model.weaponSkillList
       }
-    | InsertSkill(newSkillName, weaponSkillNameSet) ->
-        if weaponSkillNameSet.Contains newSkillName then
+    | InsertSkill insertSkillMsgData ->
+        if insertSkillMsgData.weaponSkillNameSet.Contains newSkillName then
             {
                 model with
                     weaponSkillList =
@@ -41,12 +47,16 @@ let update msg model : MundaneVocationSkills =
                 model with
                     vocationalSkills =
                         VocationalSkillList.update
-                            (VocationalSkillList.InsertVocationalSkill newSkillName)
+                            (VocationalSkillList.AskParentToInsertVocationalSkill(
+                                newSkillName,
+                                dicePoolCalculationDataOption,
+                                attributeNameSetOption
+                            ))
                             model.vocationalSkills
             }
     | CheckIfLevelCapExceededForAll zeroToFive ->
         let temp =
-            VocationalSkillList.updateCommonVocationalSkill (
+            VocationalSkillList.commonVocationalSkillUpdate (
                 VocationalSkillList.CheckIfLevelCapExeededForAll zeroToFive
             )
 
@@ -56,12 +66,12 @@ let update msg model : MundaneVocationSkills =
         }
     | CalculateDicePools dicePoolCalculationData -> {
         weaponSkillList =
-            VocationalSkillList.updateCommonVocationalSkill
-                (VocationalSkillList.CalculateDicePools dicePoolCalculationData)
+            VocationalSkillList.commonVocationalSkillUpdate
+                (VocationalSkillList.SetEffectDicePoolModLists dicePoolCalculationData)
                 model.weaponSkillList
         vocationalSkills =
-            VocationalSkillList.updateCommonVocationalSkill
-                (VocationalSkillList.CalculateDicePools dicePoolCalculationData)
+            VocationalSkillList.commonVocationalSkillUpdate
+                (VocationalSkillList.SetEffectDicePoolModLists dicePoolCalculationData)
                 model.vocationalSkills
       }
 
