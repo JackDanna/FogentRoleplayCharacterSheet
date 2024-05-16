@@ -3,24 +3,24 @@ module CombatRollList
 open FogentRoleplayLib.CombatRoll
 
 open FogentRoleplayLib.DicePool
-open FogentRoleplayLib.DicePoolMod
 open FogentRoleplayLib.Range
 open FogentRoleplayLib.SetAreaOfEffect
 open FogentRoleplayLib.ItemStack
 open FogentRoleplayLib.VocationalSkill
 
 open FogentRoleplayLib.StringUtils
+open FogentRoleplayLib.WeaponSkillData
 
 
 
-type Msg = RecalculateCombatRollList of ItemStack List * VocationalSkill List
+type Msg = RecalculateCombatRollList of ItemStack List * VocationalSkill List * Set<WeaponSkillData>
 
 let init () : CombatRoll list = []
 
-let update msg : CombatRoll list =
+let update msg model : CombatRoll list =
     match msg with
-    | RecalculateCombatRollList(equipmentList, vocationSkillList) ->
-        createWeaponItemCombatRolls equipmentList vocationSkillList
+    | RecalculateCombatRollList(equipmentList, vocationSkillList, weaponSkillDataSet) ->
+        createWeaponItemCombatRolls equipmentList vocationSkillList weaponSkillDataSet
 
 open Feliz
 open Feliz.Bulma

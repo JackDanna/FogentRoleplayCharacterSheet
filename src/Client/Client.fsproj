@@ -11,7 +11,7 @@
     <Compile Include="Neg1To5.fs" />
     <Compile Include="Skill.fs" />
     <Compile Include="CoreSkill.fs" />
-    <Compile Include="CoreSkillList.fs" />
+    <Compile Include="CoreSkills.fs" />
     <Compile Include="AttributeAndCoreSkills.fs" />
     <Compile Include="AttributeAndCoreSkillsList.fs" />
     <Compile Include="ZeroToFive.fs" />

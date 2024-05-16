@@ -2,37 +2,44 @@ module MagicSkillList
 
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.MagicSkill
+open FogentRoleplayLib.AttributeName
 
 type Msg =
-    | InsertMagicSkill of string * option<DicePoolCalculationData> * option<Map<string, MagicSkillData>>
+    | InsertMagicSkill of
+        string *
+        option<AttributeName Set> *
+        option<Map<string, MagicSkillData>> *
+        option<DicePoolCalculationData>
     | RemoveAtPostion of int
     | ModifiedVocationSkillAtPosition of int * VocationalSkill.Msg
+    | CalculateMagicSkillDicePool of DicePoolCalculationData
 
 let init () = []
 
-let update msg model =
+let update msg (model: MagicSkill Set) =
     match msg with
-    | InsertMagicSkill(skillName, dicePoolCalculationDataOption, magicSkillDataMapOption) ->
+    | InsertMagicSkill(skillName,
+                       Some magicVocationGoverningAttributeNames,
+                       Some magicSkillDataMap,
+                       Some dicePoolCalculationData) ->
 
+        match magicSkillDataMap.TryFind skillName with
+        | None -> model
+        | Some magicSkillData ->
 
-        match dicePoolCalculationDataOption, magicSkillDataMapOption with
-        | Some dicePoolCalcualtionData, Some magicSkillDataMap ->
-            match magicSkillDataMap.TryFind skillName with
-            | None -> model
-            | Some magicSkillData ->
+            {
+                vocationalSkill =
+                    VocationalSkill.init magicVocationGoverningAttributeNames dicePoolCalculationData skillName
+                magicSkillData = magicSkillData
+            }
+            |> Set.singleton
+            |> Set.union model
 
-                {
-                    vocationalSkill = VocationalSkill.init dicePoolCalcualtionData skillName
-                    magicSkillData = magicSkillData
-                }
-                |> List.singleton
-                |> List.append model
-        | _, _ -> model
-
-    | RemoveAtPostion position -> List.removeAt position model
+    | RemoveAtPostion position -> model |> Set.toSeq |> Seq.removeAt position |> Set.ofSeq
     | ModifiedVocationSkillAtPosition(position, msg) ->
         model
-        |> List.mapi (fun index magicSkill ->
+        |> Set.toSeq
+        |> Seq.mapi (fun index magicSkill ->
             if index = position then
                 {
                     magicSkill with
@@ -40,6 +47,18 @@ let update msg model =
                 }
             else
                 magicSkill)
+        |> Set.ofSeq
+    | CalculateMagicSkillDicePool dicePoolCalculationData ->
+        Set.map
+            (fun magicSkill -> {
+                magicSkill with
+                    vocationalSkill =
+                        VocationalSkill.update
+                            (VocationalSkill.CalculateVocationalSkillDicePool(dicePoolCalculationData))
+                            magicSkill.vocationalSkill
+            })
+            model
+    | _ -> model
 
 open Feliz
 open Feliz.Bulma
@@ -63,7 +82,7 @@ let view attributeNameSet (magicSkillNamesSet: string Set) (model: MagicSkill li
             model)
         [
             ViewUtils.textInputWithDropdownSet
-                (fun input -> InsertMagicSkill(input, None, None) |> dispatch)
+                (fun input -> InsertMagicSkill(input, None, None, None) |> dispatch)
                 magicSkillNamesSet
                 "magiSkillList"
         ]

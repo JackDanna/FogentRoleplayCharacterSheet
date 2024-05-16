@@ -1,6 +1,7 @@
 module Item
 
 open FogentRoleplayLib.Item
+open FogentRoleplayLib.Effect
 
 // type Msg = SetItem of Item
 
@@ -34,7 +35,7 @@ let view
         // itemInput itemMap.Keys model.name (fun input -> dispatch (SetItem <| itemMap.Item input))
         // |> Html.td
         Html.td model.name
-        Html.td (effectSetToString model.itemEffectSet)
+        Html.td (effectsToCommaSeperatedEffectNames model.itemEffectSet)
         Html.td $"{model.itemTier.name} ({model.itemTier.level})"
         Html.td model.weight
         Html.td model.value

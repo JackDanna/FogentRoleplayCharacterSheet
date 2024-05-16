@@ -1,13 +1,13 @@
 module VocationSkillList
 
-open FogentRoleplayLib.DicePoolCalculation
+open FogentRoleplayLib.Effects
 open FogentRoleplayLib.VocationalSkill
 open FogentRoleplayLib.ZeroToFive
 
 type CommonVocationalSkillMsgs =
     | RemoveAtPostion of int
     | ModifiedVocationSkillAtPosition of int * VocationalSkill.Msg
-    | CalculateDicePools of DicePoolCalculationData
+    | CalculateDicePools of Effects
     | CheckIfLevelCapExceeded of int * ZeroToFive
     | CheckIfLevelCapExeededForAll of ZeroToFive
 

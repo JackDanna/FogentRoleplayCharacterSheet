@@ -21,26 +21,22 @@ module FogentRoleplayServerData =
 
     open FogentRoleplayLib.TypeUtils
     open FogentRoleplayLib.AttributeName
-    open FogentRoleplayLib.Neg1To5
-    open FogentRoleplayLib.DicePool
-    open FogentRoleplayLib.Skill
-    open FogentRoleplayLib.CoreSkill
 
-    open FogentRoleplayLib.ContainerClass
+    open FogentRoleplayLib.Container
     open FogentRoleplayLib.WeaponResource
     open FogentRoleplayLib.ItemTier
 
-    open FogentRoleplayLib.PhysicalDefenseEffect
-    open FogentRoleplayLib.SkillDiceModEffect
+    open FogentRoleplayLib.PhysicalDefense
+    open FogentRoleplayLib.SkillDiceMod
 
     open FogentRoleplayLib.SetAreaOfEffect
     open FogentRoleplayLib.AreaOfEffect
     open FogentRoleplayLib.AreaOfEffectCalculation
-    open FogentRoleplayLib.AttributeDeterminedDiceModEffect
+    open FogentRoleplayLib.AttributeDeterminedDiceMod
     open FogentRoleplayLib.WeightClass
     open FogentRoleplayLib.MovementSpeedEffect
     open FogentRoleplayLib.Effect
-    open FogentRoleplayLib.AttributeStatAdjustmentEffect
+    open FogentRoleplayLib.AttributeStatAdjustment
     open FogentRoleplayLib.ItemStack
 
     open FogentRoleplayLib.WeaponSpell
@@ -49,6 +45,10 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.AttributeName
     open FogentRoleplayLib.SkillName
     open FogentRoleplayLib.AttributeAndCoreSkillsData
+
+    open FogentRoleplayLib.WeaponSkillData
+
+    open FogentRoleplayLib.ParsingUtils
 
     let makeFogentRoleplayDataPath fileName =
         __SOURCE_DIRECTORY__ + "../../../FogentRoleplayData/" + fileName
@@ -175,7 +175,7 @@ module FogentRoleplayServerData =
 
     // AttributeAndCoreSkill
 
-    let coreSkillDataSet, attributeNameSet =
+    let attributeAndCoreSkillDataSet, attributeNameSet =
         let attributeAndCoreSkillTupleSet =
             makeFogentRoleplayDataSet "CoreSkillData.csv" (fun row ->
                 (SkillName row.["name"], AttributeName row.["governingAttribute"]))
@@ -222,8 +222,8 @@ module FogentRoleplayServerData =
             resourceName = row.["resourceName"]
             governingCoreSkill = row.["governingCoreSkill"]
             magicSkillDataSet =
-                row.["magicSkillNameSet"].Split ", "
-                |> Set.ofSeq
+                row.["magicSkillNameSet"]
+                |> commaSeperatedStringToSet
                 |> Set.map (fun key -> magicSkillDataMap.Item key)
         })
         |> Set.map (fun magicSystem -> magicSystem.name, magicSystem)
@@ -242,11 +242,14 @@ module FogentRoleplayServerData =
             dualWieldableBonus = parseDicePoolModOptionString row.["dualWieldableBonus"]
             areaOfEffectOption = namedAreaOfEffectOptionMap row.["areaOfEffect"]
             resourceNameOption = resourceOptionMap row.["resourceClass"]
-            governingSkillName = SkillName row.["governingSkill"]
         })
 
-    let weaponGoverningSkillNameSet: SkillName Set =
-        Set.map (_.governingSkillName) weaponSet
+    let weaponSkillDataSet =
+        makeFogentRoleplayDataSet "WeaponSkillData.csv" (fun row -> {
+            name = string row.["name"]
+            governingAttributes = stringToAttributes row.["governingAttributes"]
+            governedWeapons = commaSeperatedStringToSet row.["weaponsGoverned"]
+        })
 
     // WeaponSpell
     let weaponSpellSet: WeaponSpell Set =
@@ -283,7 +286,7 @@ module FogentRoleplayServerData =
     //           areaOfEffect = AreaOfEffectOptionMap.Item row.["areaOfEffect"]
     //           resourceClass = resourceClassOptionMap row.["resourceClass"]
     //           effectedMagicSkills =
-    //             row.["effectedMagicSkills"].Split ", "
+    //             row.["effectedMagicSkills"].Split commaSeperated
     //             |> List.ofArray
     //             |> List.map (fun magicSkillStr -> magicSkillMap.Item magicSkillStr) })
 
@@ -301,7 +304,7 @@ module FogentRoleplayServerData =
         |> Set.ofList
 
     let containerClassMap =
-        Set.map (fun (containerClass: ContainerClass) -> containerClass.name, containerClass) containerSet
+        Set.map (fun (containerClass: Container) -> containerClass.name, containerClass) containerSet
         |> Map.ofSeq
 
     //WeaponResource
@@ -461,8 +464,8 @@ module FogentRoleplayServerData =
 
     // Item
     let stringToEffectSet (effectMap: Map<string, Effect>) (input: string) =
-        input.Split ", "
-        |> Set.ofArray
+        input
+        |> commaSeperatedStringToSet
         |> Set.filter (fun effectName -> effectMap.Keys.Contains effectName)
         |> Set.map (fun effectName -> effectDataMap.Item effectName)
 
@@ -480,30 +483,16 @@ module FogentRoleplayServerData =
         |> Set.map (fun itemStack -> (itemStack.item.name, itemStack))
         |> Map.ofSeq
 
-
-// // CombatVocationSkills
-
-// let combatVocationalSkill =
-//     List.append
-//         (List.map (fun (weaponClassData: WeaponClass) -> weaponClassData.name) weaponClassData)
-//         (List.map (fun (magicSkill: MagicSkill) -> magicSkill.name) magicSkillData)
-
 let fallenDataApi: IFogentRoleplayDataApi = {
     getInitData =
         fun () -> async {
             return {
                 attributeNameSet = FogentRoleplayServerData.attributeNameSet
-                coreSkillDataSet = FogentRoleplayServerData.coreSkillDataSet
+                attributeAndCoreSkillDataSet = FogentRoleplayServerData.attributeAndCoreSkillDataSet
                 itemStackMap = FogentRoleplayServerData.itemStackMap
                 weaponSpellSet = FogentRoleplayServerData.weaponSpellSet
-                vocationSkillData = {
-                    weaponGoverningSkillNameSet = FogentRoleplayServerData.weaponGoverningSkillNameSet
-                    magicSystemMap = FogentRoleplayServerData.magicSystemData
-                }
-            //   magicSkillMap = FallenServerData.magicSkillMap
-            //   magicCombatMap = FallenServerData.magicCombatMap
-            //   rangeMap = FallenServerData.rangeMap
-            //   combatVocationalSkill = FallenServerData.combatVocationalSkill
+                magicSystemMap = FogentRoleplayServerData.magicSystemData
+                weaponSkillData = FogentRoleplayServerData.weaponSkillDataSet
             //   effectForDisplayMap = FallenServerData.effectForDisplayMap
             //   carryWeightCalculationMap = FallenServerData.carryWeightCalculationMap
             //   weightClassList = FallenServerData.weightClassData

@@ -6,7 +6,7 @@ open FogentRoleplayLib.VocationalSkill
 type CommonVocationalSkillMsgs =
     | RemoveAtPostion of int
     | ModifiedVocationalSkillAtPosition of int * VocationalSkill.Msg
-    | SetEffectDicePoolModLists of DicePoolCalculationData
+    | CalculateVocationalSkillDicePoolList of DicePoolCalculationData
 
 let commonVocationalSkillUpdate msg model =
     match msg with
@@ -18,12 +18,12 @@ let commonVocationalSkillUpdate msg model =
                 VocationalSkill.update msg vocationSkill
             else
                 vocationSkill)
-    | SetEffectDicePoolModLists dicePoolCalculationData ->
+    | CalculateVocationalSkillDicePoolList dicePoolCalculationData ->
         List.map
 
             (fun vocationSkill ->
                 VocationalSkill.update
-                    (VocationalSkill.SetEffectDicePoolModList(dicePoolCalculationData))
+                    (VocationalSkill.CalculateVocationalSkillDicePool(dicePoolCalculationData))
                     vocationSkill)
             model
 
@@ -52,19 +52,17 @@ let viewCommonVocationalSkill
         |> Bulma.content)
 
 type Msg =
-    | InsertVocationalSkillFromParent of string * DicePoolCalculationData option
+    | InsertVocationalSkill of string * option<DicePoolCalculationData>
     | CommonVocationalSkillMsgs of CommonVocationalSkillMsgs
 
 let update msg model =
     match msg with
-    | InsertVocationalSkillFromParent(skillName, dicePoolCalculationDataOption) ->
-        match dicePoolCalculationDataOption with
-        | Some dicePoolCalculationData ->
-            VocationalSkill.init dicePoolCalculationData skillName
-            |> List.singleton
-            |> List.append model
-        | _ -> model
+    | InsertVocationalSkill(skillName, Some dicePoolCalculationData) ->
+        VocationalSkill.init Set.empty dicePoolCalculationData skillName
+        |> List.singleton
+        |> List.append model
     | CommonVocationalSkillMsgs msg -> commonVocationalSkillUpdate msg model
+    | _ -> model
 
-let view attributeNameSet vocationalSkillNameSet (model: VocationalSkill list) dispatch =
+let view attributeNameSet (model: VocationalSkill list) dispatch =
     viewCommonVocationalSkill attributeNameSet true model (CommonVocationalSkillMsgs >> dispatch)

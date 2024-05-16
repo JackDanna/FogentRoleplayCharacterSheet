@@ -26,17 +26,15 @@ let init () : Model * Cmd<Msg> =
     let defaultCoreSkillList = Set.empty
 
     {
+        character = Character.init Set.empty
         fogentRoleplayData = {
             attributeNameSet = defaultAttributeSet
-            coreSkillDataSet = defaultCoreSkillList
+            attributeAndCoreSkillDataSet = defaultCoreSkillList
             itemStackMap = Map.empty
             weaponSpellSet = Set.empty
-            vocationSkillData = {
-                weaponGoverningSkillNameSet = Set.empty
-                magicSystemMap = Map.empty
-            }
+            magicSystemMap = Map.empty
+            weaponSkillData = Set.empty
         }
-        character = Character.init defaultAttributeSet defaultCoreSkillList
     },
 
     Cmd.OfAsync.perform fogentRoleplayDataApi.getInitData () GotInitData
@@ -55,8 +53,7 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
         {
             model with
                 fogentRoleplayData = newFogentRoleplayData
-                character =
-                    Character.init newFogentRoleplayData.attributeNameSet newFogentRoleplayData.defaultCoreSkillList
+                character = Character.init newFogentRoleplayData.attributeAndCoreSkillDataSet
         },
         Cmd.none
 
@@ -92,7 +89,8 @@ let view (model: Model) (dispatch: Msg -> unit) =
                 Character.view
                     model.fogentRoleplayData.attributeNameSet
                     model.fogentRoleplayData.itemStackMap
-                    model.fogentRoleplayData.vocationSkillData
+                    (model.fogentRoleplayData.magicSystemMap.Keys |> Set.ofSeq)
+                    (model.fogentRoleplayData.weaponSkillData |> Set.map (_.name))
                     model.character
                     (CharacterMsg >> dispatch)
             ]

@@ -2,63 +2,59 @@ module VocationList
 
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.MagicSystem
-open FogentRoleplayLib.MagicVocation
 open FogentRoleplayLib.Vocation
-open FogentRoleplayLib.Character
+open FogentRoleplayLib.Skill
 
 type Msg =
-    | Modify of int * Vocation.Msg
-    | InsertMundaneVocation of string
-    | InsertMagicVocation of MagicSystem
+    | VocationMsgAtPosition of int * Vocation.Msg
+    | InsertVocation of
+        string *
+        option<Map<string, Skill>> *
+        option<DicePoolCalculationData> *
+        option<Map<string, MagicSystem>>
     | Remove of int
     | CalculateDicePools of DicePoolCalculationData
 
 let init () = []
 
-
-
 let update msg model =
     match msg with
-    | Modify(position, msg) ->
+    | VocationMsgAtPosition(position, msg) ->
         model
         |> List.mapi (fun index vocation ->
             if index = position then
                 Vocation.update msg vocation
             else
                 vocation)
-    | InsertMagicVocation magicSystem ->
+    | InsertVocation(vocationName, Some coreSkillMap, Some dicePoolCalculationData, Some magicSystemMap) ->
+        match magicSystemMap.TryFind vocationName with
+        | Some magicSystem ->
+            MagicVocation.init vocationName coreSkillMap magicSystem dicePoolCalculationData
+            |> MagicVocation
+            |> List.singleton
+            |> List.append model
 
-        let currentMagicResource = 0u
-        let initMundaneVocation = MundaneVocation.init ()
-
-        {
-            mundaneVocation = {
-                initMundaneVocation with
-                    vocationStat.name = magicSystem.vocationName
-            }
-            magicVocationSkillList = MagicSkillList.init ()
-            magicSystem = magicSystem
-            magicResourceCap = currentMagicResource
-            currentMagicResource = currentMagicResource
-        }
-        |> MagicVocation
-        |> List.singleton
-        |> List.append model
+        | None ->
+            MundaneVocation.init vocationName dicePoolCalculationData
+            |> MundaneVocation
+            |> List.singleton
+            |> List.append model
     | Remove position -> List.removeAt position model
     | CalculateDicePools msg ->
         List.map (fun vocation -> Vocation.update (Vocation.CalculateDicePools(msg)) vocation) model
+    | _ -> model
 
 
 open Feliz
 open Feliz.Bulma
 
-let view attributeNameSet (vocationSkillData: VocationSkillData) model dispatch =
+let view attributeNameSet (magicSystemNameSet) (weaponSkillNameSet) model dispatch =
     Bulma.container [
         Bulma.label [ prop.text "Vocations and Vocational Skills:" ] |> Bulma.content
         //Bulma.button.button [ prop.onClick (fun _ -> dispatch Insert); prop.text "+" ]
         ViewUtils.textInputWithDropdownSet
-            (fun input -> vocationSkillData.magicSystemMap.Item input |> InsertMagicVocation |> dispatch)
-            (vocationSkillData.magicSystemMap.Keys)
+            (fun input -> InsertVocation(input, None, None, None) |> dispatch)
+            (magicSystemNameSet)
             "vocationList"
         Bulma.columns [
             columns.isCentered
@@ -66,8 +62,8 @@ let view attributeNameSet (vocationSkillData: VocationSkillData) model dispatch 
                 List.mapi
                     (fun position vocation ->
                         Bulma.column [
-                            Vocation.view attributeNameSet vocationSkillData vocation (fun msg ->
-                                dispatch (Modify(position, msg)))
+                            Vocation.view attributeNameSet weaponSkillNameSet vocation (fun msg ->
+                                dispatch (VocationMsgAtPosition(position, msg)))
 
                             Bulma.button.button [ prop.onClick (fun _ -> dispatch (Remove position)); prop.text "-" ]
                         ])

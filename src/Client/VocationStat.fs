@@ -2,43 +2,56 @@ module VocationStat
 
 open FogentRoleplayLib.AttributeName
 open FogentRoleplayLib.DicePool
-open FogentRoleplayLib.DicePoolMod
-open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.VocationStat
+open FogentRoleplayLib.DicePoolCalculation
 
 type Msg =
     | SetName of string
-    | ZeroToFiveMsg of ZeroToFive.Msg
+    | ZeroToFiveMsg of ZeroToFive.Msg * option<DicePoolCalculationData>
     | ToggleGoveringAttribute of AttributeName * option<DicePoolCalculationData>
+    | CalculateDicePool of DicePoolCalculationData
 
-let init () : VocationStat = {
-    name = ""
-    level = ZeroToFive.init ()
-    governingAttributeNameSet = Set.empty
-    baseDice = base3d6DicePool
-    effectDicePoolModList = []
-}
+let init name dicePoolCalculationData : VocationStat =
+    let level = ZeroToFive.init ()
+    let governingAttributeNameSet = Set.empty
+
+    {
+        name = name
+        level = level
+        governingAttributeNameSet = governingAttributeNameSet
+        dicePool = calculateVocationStatDicePool name level governingAttributeNameSet dicePoolCalculationData
+    }
 
 let update msg (model: VocationStat) =
+    let temp dicePoolCalculationData =
+        calculateVocationStatDicePool model.name model.level model.governingAttributeNameSet dicePoolCalculationData
+
     match msg with
     | SetName newName -> { model with name = newName }
-    | ZeroToFiveMsg msg -> {
+    | ZeroToFiveMsg(msg, Some dicePoolCalculationData) -> {
         model with
             level = ZeroToFive.update msg model.level
+            dicePool = temp dicePoolCalculationData
       }
-    | ToggleGoveringAttribute(newAttributeName, dicePoolCalculationDataOption) ->
-        match dicePoolCalculationDataOption with
-        | Some dicePoolCalculationData ->
-            let newGoverningAttributeNameSet =
-                toggleAttributeNameSet model.governingAttributeNameSet newAttributeName
+    | ToggleGoveringAttribute(newAttributeName, Some dicePoolCalculationData) ->
+        let newGoverningAttributeNameSet =
+            toggleAttributeNameSet model.governingAttributeNameSet newAttributeName
 
-            {
-                model with
-                    governingAttributeNameSet = newGoverningAttributeNameSet
-                    effectDicePoolModList =
-                        determineEffectDicePoolModList dicePoolCalculationData model.governingAttributeNameSet
-            }
-        | None -> model
+        {
+            model with
+                governingAttributeNameSet = newGoverningAttributeNameSet
+                dicePool =
+                    calculateVocationStatDicePool
+                        model.name
+                        model.level
+                        newGoverningAttributeNameSet
+                        dicePoolCalculationData
+        }
+    | CalculateDicePool dicePoolCalculationData -> {
+        model with
+            dicePool = temp dicePoolCalculationData
+      }
+    | _ -> model
 
 
 open Feliz
@@ -58,11 +71,8 @@ let view attributeNameSet (model: VocationStat) dispatch =
                 model.governingAttributeNameSet
                 (fun toggledAttributeName -> ToggleGoveringAttribute(toggledAttributeName, None) |> dispatch)
         ]
-        Bulma.column [ ZeroToFive.view model.level (ZeroToFiveMsg >> dispatch) ]
         Bulma.column [
-            prop.text (
-                modifyDicePoolByDicePoolModList model.baseDice model.effectDicePoolModList
-                |> dicePoolToString
-            )
+            ZeroToFive.view model.level ((fun msg -> ZeroToFiveMsg(msg, None)) >> dispatch)
         ]
+        Bulma.column [ prop.text (model.dicePool |> dicePoolToString) ]
     ]

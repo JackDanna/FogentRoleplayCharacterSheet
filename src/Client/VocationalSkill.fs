@@ -4,53 +4,62 @@ open FogentRoleplayLib.VocationalSkill
 open FogentRoleplayLib.StringUtils
 open FogentRoleplayLib.AttributeName
 open FogentRoleplayLib.DicePoolCalculation
+open FogentRoleplayLib.ZeroToFive
 
 type Msg =
     | SkillMsg of Skill.Msg
     | ToggleGoverningAttribute of AttributeName * option<DicePoolCalculationData>
-    | SetEffectDicePoolModList of DicePoolCalculationData
+    | CalculateVocationalSkillDicePool of DicePoolCalculationData
+    | CheckIfLevelCapExceeded of ZeroToFive * DicePoolCalculationData
 
-let init dicePoolCalculationData skillName = {
-    skill =
-        Skill.init
-            skillName
-            dicePoolCalculationData.baseDiceEffectList
-            (determineEffectDicePoolModList dicePoolCalculationData Set.empty)
-    governingAttributeNames = Set.empty
-}
+let init governingAttributeSet dicePoolCalculationData skillName =
+
+    {
+        skill = Skill.init skillName governingAttributeSet dicePoolCalculationData
+        governingAttributeNames = governingAttributeSet
+    }
 
 let update msg model =
-    let temp dicePoolCalculationData =
-        Skill.update
-            (Skill.Msg.SetEffectDicePoolModList(
-                determineEffectDicePoolModList dicePoolCalculationData model.governingAttributeNames
-            ))
-            model.skill
 
     match msg with
     | SkillMsg msg -> {
         model with
             skill = Skill.update msg model.skill
       }
-    | ToggleGoverningAttribute(newAttributeName, dicePoolCalculationDataOption) ->
-        match dicePoolCalculationDataOption with
-        | Some dicePoolCalculationData ->
 
-            let newGoverningAttribteNameSet =
-                toggleAttributeNameSet model.governingAttributeNames newAttributeName
+    | ToggleGoverningAttribute(newAttributeName, Some dicePoolCalculationData) ->
+        let newGoverningAttribteNameSet =
+            toggleAttributeNameSet model.governingAttributeNames newAttributeName
 
-            {
-                model with
-                    governingAttributeNames = newGoverningAttribteNameSet
-                    skill = temp dicePoolCalculationData
-            }
-        | None -> model
+        {
+            model with
+                governingAttributeNames = newGoverningAttribteNameSet
+                skill =
+                    Skill.update
+                        (Skill.Msg.CalculateDicePool(newGoverningAttribteNameSet, dicePoolCalculationData))
+                        model.skill
+        }
 
-    | SetEffectDicePoolModList msg -> { model with skill = temp msg }
+    | CalculateVocationalSkillDicePool dicePoolCalculationData -> {
+        model with
+            skill =
+                Skill.update
+                    (Skill.Msg.CalculateDicePool(model.governingAttributeNames, dicePoolCalculationData))
+                    model.skill
+      }
+
+    | CheckIfLevelCapExceeded(levelCap, dicePoolCalculationData) -> {
+        model with
+            skill =
+                Skill.update
+                    (Skill.Msg.CheckIfLevelCapExceeded(levelCap, model.governingAttributeNames, dicePoolCalculationData))
+                    model.skill
+      }
+    | _ -> model
+
 
 open Feliz
 open Feliz.Bulma
-
 
 let governingAttributesToggle
     (attributeNameSet: AttributeName Set)
@@ -89,7 +98,6 @@ let view attributeNameSet model dispatch disableChangeLevel =
     Bulma.column [
         governingAttributesToggle attributeNameSet model.governingAttributeNames (fun toggledAttributeName ->
             ToggleGoverningAttribute(toggledAttributeName, None) |> dispatch)
-
     ]
     |> Some
     |> Skill.view model.skill (SkillMsg >> dispatch) disableChangeLevel

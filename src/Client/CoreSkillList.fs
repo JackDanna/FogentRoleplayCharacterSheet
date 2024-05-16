@@ -1,30 +1,24 @@
-module CoreSkillList
+module CoreSkills
 
 open FogentRoleplayLib.CoreSkill
-open FogentRoleplayLib.DicePoolCalculation
 
-type Msg =
-    | ModifiedCoreSkillAtPosition of int * CoreSkill.Msg
-    | SetCoreSkillEffectDicePoolMods of DicePoolCalculationData
+type Msg = ModifiedCoreSkillAtPosition of int * CoreSkill.Msg
 
-let init dicePoolCalculationData governingAttributeName coreSkillNameSet =
+let init coreSkillNameSet governingAttribute effects =
     coreSkillNameSet
-    |> Set.map (fun coreSkillName -> CoreSkill.init dicePoolCalculationData governingAttributeName coreSkillName)
+    |> Set.map (fun coreSkillName -> CoreSkill.init coreSkillName governingAttribute effects)
 
-let update msg (model: CoreSkill list) =
+let update msg model =
     match msg with
     | ModifiedCoreSkillAtPosition(position, msg) ->
         model
+        |> Set.toList
         |> List.mapi (fun index coreSkill ->
             if index = position then
                 CoreSkill.update msg coreSkill
             else
                 coreSkill)
-    | SetCoreSkillEffectDicePoolMods dicePoolCalculationData ->
-        List.map
-            (fun coreSkill ->
-                CoreSkill.update (CoreSkill.Msg.SetEffectDicePoolModList dicePoolCalculationData) coreSkill)
-            model
+        |> Set.ofList
 
 open Feliz
 open Feliz.Bulma

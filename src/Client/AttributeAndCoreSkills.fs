@@ -6,14 +6,19 @@ open FogentRoleplayLib.DicePoolCalculation
 
 type Msg =
     | AttributeMsg of AttributeStat.Msg
-    | CoreSkillListMsg of CoreSkillList.Msg
+    | CoreSkillListMsg of CoreSkills.Msg
     | CalculateDicePool of DicePoolCalculationData
 
-let init dicePoolCalculationData attributeAndCoreSkillsData =
-    CoreSkillList.init
-        dicePoolCalculationData
-        attributeAndCoreSkillsData.governingAttributeName
-        attributeAndCoreSkillsData.coreSkillNameSet
+let init (attributeAndCoreSkillsData: AttributeAndCoreSkillsData) (dicePoolCalculationData: DicePoolCalculationData) =
+
+    {
+        attributeStat = AttributeStat.init attributeAndCoreSkillsData.governingAttributeName
+        coreSkills =
+            CoreSkills.init
+                attributeAndCoreSkillsData.coreSkillNameSet
+                attributeAndCoreSkillsData.governingAttributeName
+                dicePoolCalculationData
+    }
 
 let update msg model =
     match msg with
@@ -23,12 +28,15 @@ let update msg model =
       }
     | CoreSkillListMsg msg -> {
         model with
-            coreSkills = CoreSkillList.update msg model.coreSkills
+            coreSkills = CoreSkills.update msg model.coreSkills
       }
-    | CalculateDicePool msg -> {
-        model with
-            coreSkills = CoreSkillList.update (CoreSkillList.Msg.SetCoreSkillEffectDicePoolMods(msg)) model.coreSkills
-      }
+    | CalculateDicePool dicePoolCalculationData ->
+
+        {
+            model with
+                coreSkills =
+                    CoreSkills.update (CoreSkills.CalculateCoreSkillDicePools(dicePoolCalculationData)) model.coreSkills
+        }
 
 open Feliz
 open Feliz.Bulma
@@ -36,5 +44,5 @@ open Feliz.Bulma
 let view model dispatch =
     Bulma.box [
         AttributeStat.view model.attributeStat (AttributeMsg >> dispatch)
-        CoreSkillList.view model.coreSkills (CoreSkillListMsg >> dispatch)
+        CoreSkills.view model.coreSkills (CoreSkillListMsg >> dispatch)
     ]

@@ -2,45 +2,42 @@ module Vocation
 
 open FogentRoleplayLib.Vocation
 open FogentRoleplayLib.DicePoolCalculation
-open FogentRoleplayLib.Character
-
-open FogentRoleplayLib.MundaneVocation
-open FogentRoleplayLib.MagicVocation
 
 type Msg =
     | MundaneVocationMsg of MundaneVocation.Msg
     | MagicVocationMsg of MagicVocation.Msg
     | CalculateDicePools of DicePoolCalculationData
 
-let init () : Vocation =
-    MundaneVocation.init () |> MundaneVocation
+let init name dicePoolCalculationData : Vocation =
+    MundaneVocation.init name dicePoolCalculationData |> MundaneVocation
 
 let update msg (model: Vocation) =
+
     match msg, model with
     | MundaneVocationMsg msg, MundaneVocation mundaneVocation ->
         MundaneVocation.update msg mundaneVocation |> MundaneVocation
     | MagicVocationMsg msg, MagicVocation magicVocation -> MagicVocation.update msg magicVocation |> MagicVocation
-    | CalculateDicePools msg, MundaneVocation mundaneVocation ->
-        MundaneVocation.update (MundaneVocation.CalculateDicePools msg) mundaneVocation
-        |> MundaneVocation
+    | CalculateDicePools dicePoolCalculationData, vocation ->
+        match vocation with
+        | MundaneVocation mundaneVocation ->
+            MundaneVocation.update (MundaneVocation.CalculateDicePools dicePoolCalculationData) mundaneVocation
+            |> MundaneVocation
+        | MagicVocation magicVocation ->
+            MagicVocation.update
+                (MagicVocation.CalculateMagicVocationSkillDicePools dicePoolCalculationData)
+                magicVocation
+            |> MagicVocation
+
     | _, _ -> model
 
 
 open Feliz
 open Feliz.Bulma
 
-let view attributeNameSet (vocationSkillData: VocationSkillData) (model: Vocation) dispatch =
+let view attributeNameSet (weaponSkillNameSet) (model: Vocation) dispatch =
     match model with
     | MundaneVocation mundaneVocation ->
-        MundaneVocation.view
-            attributeNameSet
-            vocationSkillData.weaponGoverningSkillNameSet
-            mundaneVocation
-            (MundaneVocationMsg >> dispatch)
+        MundaneVocation.view attributeNameSet weaponSkillNameSet mundaneVocation (MundaneVocationMsg >> dispatch)
     | MagicVocation magicVocation ->
-        MagicVocation.view
-            attributeNameSet
-            vocationSkillData.weaponGoverningSkillNameSet
-            magicVocation
-            (MagicVocationMsg >> dispatch)
+        MagicVocation.view attributeNameSet weaponSkillNameSet magicVocation (MagicVocationMsg >> dispatch)
     |> Bulma.box
