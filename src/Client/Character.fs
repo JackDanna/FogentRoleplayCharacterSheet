@@ -31,32 +31,57 @@ open Vocation
 open MundaneVocation
 open MundaneVocationSkills
 
+open AttributeAndCoreSkillsList
+open AttributeAndCoreSkills
+open CoreSkills
+open CoreSkill
+open Skill
+
 let update msg (model: Character) =
     let dicePoolCalculationData = characterToDicePoolCalculationData model
 
     match msg with
     | SetName newName -> { model with name = newName }
+
     | AttributeAndCoreSkillsListMsg msg ->
 
-        let newAttributeAndCoreSkillsList =
-            AttributeAndCoreSkillsList.update msg model.attributeAndCoreSkillsList
-
-        let dicePoolCalculationData =
-            {
-                model with
-                    attributeAndCoreSkillsList = newAttributeAndCoreSkillsList
-            }
-            |> characterToDicePoolCalculationData
-
-        {
+        match msg with
+        | ModifyAttributeAndCoreSkillsList(pos1,
+                                           CoreSkillListMsg(ModifiedCoreSkillAtPosition(pos2,
+                                                                                        SkillMsg(ModifySkillLevel(x,
+                                                                                                                  y,
+                                                                                                                  z,
+                                                                                                                  _))))) ->
+            ModifyAttributeAndCoreSkillsList(
+                pos1,
+                CoreSkillListMsg(
+                    ModifiedCoreSkillAtPosition(pos2, SkillMsg(ModifySkillLevel(x, y, z, Some dicePoolCalculationData)))
+                )
+            )
+        | _ -> msg
+        |> (fun msg -> {
             model with
-                attributeAndCoreSkillsList =
-                    AttributeAndCoreSkillsList.update
-                        (AttributeAndCoreSkillsList.Msg.CalculateDicePools(dicePoolCalculationData))
-                        newAttributeAndCoreSkillsList
-                vocationList =
-                    VocationList.update (VocationList.CalculateDicePools(dicePoolCalculationData)) model.vocationList
-        }
+                attributeAndCoreSkillsList = AttributeAndCoreSkillsList.update msg model.attributeAndCoreSkillsList
+        })
+    // let newAttributeAndCoreSkillsList =
+    //     AttributeAndCoreSkillsList.update msg model.attributeAndCoreSkillsList
+
+    // let dicePoolCalculationData =
+    //     {
+    //         model with
+    //             attributeAndCoreSkillsList = newAttributeAndCoreSkillsList
+    //     }
+    //     |> characterToDicePoolCalculationData
+
+    // {
+    //     model with
+    //         attributeAndCoreSkillsList =
+    //             AttributeAndCoreSkillsList.update
+    //                 (AttributeAndCoreSkillsList.Msg.CalculateDicePools(dicePoolCalculationData))
+    //                 newAttributeAndCoreSkillsList
+    //         vocationList =
+    //             VocationList.update (VocationList.CalculateDicePools(dicePoolCalculationData)) model.vocationList
+    // }
     // | VocationListMsg(VocationMsgAtPosition(pos, MundaneVocationMsg(MundaneVocationSkillsMsg(WeaponSkillListMsg(WeaponSkillList))))) ->
     //     match munMsg with
     //                 | MundaneVocationSkillsMsg(VocationalSkillListMsg())

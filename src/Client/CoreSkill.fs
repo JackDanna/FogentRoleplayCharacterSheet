@@ -15,10 +15,20 @@ let init coreSkillName governingAttribute dicePoolCalculationData = {
 
 let update msg model =
     match msg with
-    | SkillMsg msg -> {
-        model with
-            skill = Skill.update msg model.skill
-      }
+    | SkillMsg msg ->
+        match msg with
+        | Skill.ModifySkillLevel(msg, levelCapOption, _, dicePoolCalculationDataOption) ->
+            Skill.ModifySkillLevel(
+                msg,
+                levelCapOption,
+                Some(Set.ofList [ model.governingAttributeName ]),
+                dicePoolCalculationDataOption
+            )
+        | _ -> msg
+        |> (fun msg -> {
+            model with
+                skill = Skill.update msg model.skill
+        })
     | CalculateSkillDicePool(attributeName, effects) -> {
         model with
             skill = Skill.update (Skill.Msg.CalculateDicePool(Set.ofSeq [ attributeName ], effects)) model.skill
