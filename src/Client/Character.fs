@@ -116,7 +116,8 @@ let update msg (model: Character) =
                         (CombatRollList.RecalculateCombatRollList(
                             newEquipmentList,
                             vocationListToWeaponSkillList model.vocationList,
-                            weaponSkillData
+                            weaponSkillData,
+                            dicePoolCalculationData
                         ))
                         model.combatRollList
         }

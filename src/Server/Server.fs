@@ -34,7 +34,7 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.AreaOfEffectCalculation
     open FogentRoleplayLib.AttributeDeterminedDiceMod
     open FogentRoleplayLib.WeightClass
-    open FogentRoleplayLib.MovementSpeedEffect
+    //open FogentRoleplayLib.MovementSpeedEffect
     open FogentRoleplayLib.Effect
     open FogentRoleplayLib.AttributeStatAdjustment
     open FogentRoleplayLib.ItemStack
@@ -246,7 +246,7 @@ module FogentRoleplayServerData =
 
     let weaponSkillDataSet =
         makeFogentRoleplayDataSet "WeaponSkillData.csv" (fun row -> {
-            name = string row.["name"]
+            name = string row.["skillName"]
             governingAttributes = stringToAttributes row.["governingAttributes"]
             governedWeapons = commaSeperatedStringToSet row.["weaponsGoverned"]
         })

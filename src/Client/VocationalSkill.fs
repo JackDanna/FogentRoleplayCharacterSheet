@@ -12,12 +12,7 @@ type Msg =
     | CalculateVocationalSkillDicePool of DicePoolCalculationData
     | CheckIfLevelCapExceeded of ZeroToFive * DicePoolCalculationData
 
-let init governingAttributeSet dicePoolCalculationData skillName =
-
-    {
-        skill = Skill.init skillName governingAttributeSet dicePoolCalculationData
-        governingAttributeNames = governingAttributeSet
-    }
+let init = FogentRoleplayLib.VocationalSkill.init
 
 let update msg model =
 

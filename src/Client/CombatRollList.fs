@@ -10,17 +10,23 @@ open FogentRoleplayLib.VocationalSkill
 
 open FogentRoleplayLib.StringUtils
 open FogentRoleplayLib.WeaponSkillData
+open FogentRoleplayLib.DicePoolCalculation
 
 
 
-type Msg = RecalculateCombatRollList of ItemStack List * VocationalSkill List * Set<WeaponSkillData>
+type Msg =
+    | RecalculateCombatRollList of
+        ItemStack List *
+        VocationalSkill List *
+        Set<WeaponSkillData> *
+        DicePoolCalculationData
 
 let init () : CombatRoll list = []
 
 let update msg model : CombatRoll list =
     match msg with
-    | RecalculateCombatRollList(equipmentList, vocationSkillList, weaponSkillDataSet) ->
-        createWeaponItemCombatRolls equipmentList vocationSkillList weaponSkillDataSet
+    | RecalculateCombatRollList(equipmentList, weaponSkillList, weaponSkillDataSet, dicePoolCalculationData) ->
+        createWeaponItemCombatRolls equipmentList weaponSkillList weaponSkillDataSet dicePoolCalculationData
 
 open Feliz
 open Feliz.Bulma

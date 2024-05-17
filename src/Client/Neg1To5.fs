@@ -4,7 +4,7 @@ open FogentRoleplayLib.Neg1To5
 
 type Msg = ChangedNeg1To5 of int * option<Neg1To5>
 
-let init () = Zero
+let init = FogentRoleplayLib.Neg1To5.init
 
 let update (msg: Msg) (model: Neg1To5) : Neg1To5 =
     match msg with

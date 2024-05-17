@@ -12,14 +12,7 @@ type Msg =
     | CalculateDicePool of AttributeName Set * DicePoolCalculationData
     | CheckIfLevelCapExceeded of ZeroToFive * AttributeName Set * DicePoolCalculationData
 
-let init name governingAttributeSet effects =
-    let level = Neg1To5.init ()
-
-    {
-        name = name
-        level = level
-        dicePool = calculateSkillDicePool name level governingAttributeSet effects
-    }
+let init = FogentRoleplayLib.Skill.init
 
 let update msg (model: Skill) =
 
