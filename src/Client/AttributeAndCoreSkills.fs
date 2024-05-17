@@ -5,14 +5,14 @@ open FogentRoleplayLib.AttributeAndCoreSkillsData
 open FogentRoleplayLib.DicePoolCalculation
 
 type Msg =
-    | AttributeMsg of AttributeStat.Msg
+    | AttributeMsg of Attribute.Msg
     | CoreSkillListMsg of CoreSkills.Msg
     | CalculateDicePool of DicePoolCalculationData
 
 let init (attributeAndCoreSkillsData: AttributeAndCoreSkillsData) (dicePoolCalculationData: DicePoolCalculationData) =
 
     {
-        attributeStat = AttributeStat.init attributeAndCoreSkillsData.governingAttributeName
+        attributeStat = Attribute.init attributeAndCoreSkillsData.governingAttributeName
         coreSkills =
             CoreSkills.init
                 attributeAndCoreSkillsData.coreSkillNameSet
@@ -24,7 +24,7 @@ let update msg model =
     match msg with
     | AttributeMsg msg -> {
         model with
-            attributeStat = AttributeStat.update msg model.attributeStat
+            attributeStat = Attribute.update msg model.attributeStat
       }
     | CoreSkillListMsg msg -> {
         model with
@@ -43,6 +43,6 @@ open Feliz.Bulma
 
 let view model dispatch =
     Bulma.box [
-        AttributeStat.view model.attributeStat (AttributeMsg >> dispatch)
+        Attribute.view model.attributeStat (AttributeMsg >> dispatch)
         CoreSkills.view model.coreSkills (CoreSkillListMsg >> dispatch)
     ]

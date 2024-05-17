@@ -1,4 +1,4 @@
-module AttributeStat
+module Attribute
 
 open FogentRoleplayLib.Attribute
 

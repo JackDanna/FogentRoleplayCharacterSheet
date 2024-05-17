@@ -12,7 +12,7 @@ type Msg =
 let init (effects: Effect List) attributeAndCoreSkillsDataSet =
     let initAttributeSet =
         Set.map
-            (fun attributeAndCoreSkillsData -> AttributeStat.init attributeAndCoreSkillsData.governingAttributeName)
+            (fun attributeAndCoreSkillsData -> Attribute.init attributeAndCoreSkillsData.governingAttributeName)
             attributeAndCoreSkillsDataSet
 
     let dicePoolCalculationData = {
