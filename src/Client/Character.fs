@@ -46,18 +46,15 @@ let update msg (model: Character) =
     | AttributeAndCoreSkillsListMsg msg ->
 
         match msg with
-        | ModifyAttributeAndCoreSkillsList(pos1,
-                                           CoreSkillListMsg(ModifiedCoreSkillAtPosition(pos2,
-                                                                                        SkillMsg(ModifySkillLevel(x,
-                                                                                                                  y,
-                                                                                                                  z,
-                                                                                                                  _))))) ->
-            ModifyAttributeAndCoreSkillsList(
-                pos1,
+        | ModifyAttributeAndCoreSkillsList(pos1, tempMsg) ->
+            match tempMsg with
+            | CoreSkillListMsg(ModifiedCoreSkillAtPosition(pos2, SkillMsg(ModifySkillLevel(x, y, z, _)))) ->
                 CoreSkillListMsg(
                     ModifiedCoreSkillAtPosition(pos2, SkillMsg(ModifySkillLevel(x, y, z, Some dicePoolCalculationData)))
                 )
-            )
+            | AttributeMsg(msg, _) -> AttributeMsg(msg, Some dicePoolCalculationData.effects)
+            | _ -> tempMsg
+            |> (fun x -> ModifyAttributeAndCoreSkillsList(pos1, x))
         | _ -> msg
         |> (fun msg -> {
             model with
