@@ -5,6 +5,7 @@ open FogentRoleplayLib.DicePoolCalculation
 
 type Msg =
     | ModifiedCoreSkillAtPosition of int * CoreSkill.Msg
+    | ModifyAllCoreSkills of CoreSkill.Msg
     | CalculateCoreSkillDicePools of DicePoolCalculationData
 
 let init coreSkillNameSet governingAttribute effects =
@@ -22,6 +23,7 @@ let update msg model =
             else
                 coreSkill)
         |> Set.ofList
+    | ModifyAllCoreSkills msg -> model |> Set.map (fun coreSkill -> CoreSkill.update msg coreSkill)
     | CalculateCoreSkillDicePools dicePoolCalculationData ->
         Set.map
             (fun coreSkill ->
