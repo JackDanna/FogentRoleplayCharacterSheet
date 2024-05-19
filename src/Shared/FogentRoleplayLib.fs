@@ -1280,27 +1280,6 @@ module Skill =
             dicePool = calculateSkillDicePool name level governingAttributeSet effects
         }
 
-// let findSkillLvlWithDefault skillName (defaultLvl: Neg1To5) (skillList: Skill list) =
-//     skillList
-//     |> List.filter (fun skill -> skill.name = skillName)
-//     |> (fun list ->
-//         if list.Length = 0 then
-//             defaultLvl
-//         else
-//             list
-//             |> List.maxBy (fun skill -> skill.level)
-//             |> (fun skillList -> skillList.level))
-
-// let skillToDicePool skill =
-//     skill.level
-//     |> neg1To5ToInt
-//     |> intToD6DicePoolMod
-//     |> List.singleton
-//     |> List.append skill.effectDicePoolModList
-//     |> modifyDicePoolByDicePoolModList skill.baseDice
-
-// let skillToDicePoolString = skillToDicePool >> dicePoolToString
-
 module CoreSkill =
     open AttributeName
     open Skill
