@@ -90,11 +90,6 @@ let update msg (model: Character) =
                 attributeAndCoreSkillsList = AttributeAndCoreSkillsList.update msg model.attributeAndCoreSkillsList
           }
 
-    // | VocationListMsg(VocationMsgAtPosition(pos, MundaneVocationMsg(MundaneVocationSkillsMsg(WeaponSkillListMsg(WeaponSkillList))))) ->
-    //     match munMsg with
-    //                 | MundaneVocationSkillsMsg(VocationalSkillListMsg())
-    // | VocationListMsg(VocationMsgAtPosition(pos, MundaneVocationMsg(MundaneVocationSkillsMsg(WeaponSkillListMsg(WeaponSkillList))))) ->
-
     | VocationListMsg(msg: VocationList.Msg) ->
         let temp msg =
             match msg with
