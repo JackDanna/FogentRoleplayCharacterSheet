@@ -1307,8 +1307,15 @@ module AttributeAndCoreSkills =
         coreSkills: CoreSkill Set
     }
 
-    let attributeAndCoreSkillsToAttributes attributeAndCoreSkills =
+    let attributeAndCoreSkillsSetToAttributes attributeAndCoreSkills =
         attributeAndCoreSkills |> Set.map (_.attributeStat)
+
+    let attributeAndCoreSkillsSetToSkillMap (attributeAndCoreSkillsSet: AttributeAndCoreSkills Set) =
+        attributeAndCoreSkillsSet
+        |> Set.map (_.coreSkills)
+        |> Set.unionMany
+        |> Set.map (fun coreSkill -> (coreSkill.skill.name, coreSkill.skill))
+        |> Map.ofSeq
 
 module VocationalSkill =
     open Skill
@@ -1730,7 +1737,7 @@ module Character =
 
     let characterToDicePoolCalculationData character = {
         effects = character.characterEffects
-        attributes = attributeAndCoreSkillsToAttributes character.attributeAndCoreSkillsList
+        attributes = attributeAndCoreSkillsSetToAttributes character.attributeAndCoreSkillsList
     }
 
     let vocationListToWeaponSkillList (vocationList: Vocation List) =

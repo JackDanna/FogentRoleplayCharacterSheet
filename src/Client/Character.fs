@@ -79,7 +79,7 @@ let update msg (model: Character) =
                             VocationList.update
                                 (VocationList.CalculateDicePools {
                                     dicePoolCalculationData with
-                                        attributes = attributeAndCoreSkillsToAttributes newAttributeAndCoreSkillsList
+                                        attributes = attributeAndCoreSkillsSetToAttributes newAttributeAndCoreSkillsList
                                 })
                                 model.vocationList
                 }
@@ -98,6 +98,7 @@ let update msg (model: Character) =
     | VocationListMsg(msg: VocationList.Msg) ->
         let temp msg =
             match msg with
+
             | VocationMsgAtPosition(position, msg) ->
                 match msg with
                 | MundaneVocationMsg(MundaneVocationSkillsMsg(InsertSkill(skillName, weaponSkillDataMapOption, _))) ->
@@ -108,17 +109,14 @@ let update msg (model: Character) =
                         )
                     )
                 | _ -> msg
-                // | MagicVocationMsg magMsg->
-
-                //     (skillName, characterToDicePoolCalculation model)
-                //     |> Some
-                //     |> InsertVocationalSkill
-                //     |> VocationalSkillListMsg
-                //     |> MundaneVocationSkillsMsg
-                //     |> MundaneVocationMsg
-                //     |> (fun munMsg -> (position, munMsg))
-                //     |> VocationMsgAtPosition
                 |> (fun msg -> VocationMsgAtPosition(position, msg))
+            | InsertVocation(x, _, _, y) ->
+                (InsertVocation(
+                    x,
+                    Some(attributeAndCoreSkillsSetToSkillMap model.attributeAndCoreSkillsList),
+                    Some dicePoolCalculationData,
+                    y
+                ))
             | _ -> msg
 
 
