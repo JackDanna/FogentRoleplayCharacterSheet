@@ -37,6 +37,8 @@ open CoreSkills
 open CoreSkill
 open Skill
 
+open FogentRoleplayLib.AttributeAndCoreSkills
+
 let update msg (model: Character) =
     let dicePoolCalculationData = characterToDicePoolCalculationData model
 
@@ -48,37 +50,46 @@ let update msg (model: Character) =
         match msg with
         | ModifyAttributeAndCoreSkillsList(pos1, tempMsg) ->
             match tempMsg with
-            | CoreSkillListMsg(ModifiedCoreSkillAtPosition(pos2, SkillMsg(ModifySkillLevel(x, y, z, _)))) ->
-                CoreSkillListMsg(
-                    ModifiedCoreSkillAtPosition(pos2, SkillMsg(ModifySkillLevel(x, y, z, Some dicePoolCalculationData)))
-                )
-            | AttributeMsg(msg, _) -> AttributeMsg(msg, Some dicePoolCalculationData.effects)
-            | _ -> tempMsg
-            |> (fun x -> ModifyAttributeAndCoreSkillsList(pos1, x))
-        | _ -> msg
-        |> (fun msg -> {
+            | CoreSkillListMsg(ModifiedCoreSkillAtPosition(pos2, SkillMsg(ModifySkillLevel(x, y, z, _)))) -> {
+                model with
+                    attributeAndCoreSkillsList =
+                        AttributeAndCoreSkillsList.update
+                            (ModifyAttributeAndCoreSkillsList(
+                                pos1,
+                                CoreSkillListMsg(
+                                    ModifiedCoreSkillAtPosition(
+                                        pos2,
+                                        SkillMsg(ModifySkillLevel(x, y, z, Some dicePoolCalculationData))
+                                    )
+                                )
+                            ))
+                            model.attributeAndCoreSkillsList
+              }
+
+            | AttributeMsg(msg, _) ->
+                let newAttributeAndCoreSkillsList =
+                    AttributeAndCoreSkillsList.update
+                        (ModifyAttributeAndCoreSkillsList(pos1, AttributeMsg(msg, Some dicePoolCalculationData.effects)))
+                        model.attributeAndCoreSkillsList
+
+                {
+                    model with
+                        attributeAndCoreSkillsList = newAttributeAndCoreSkillsList
+                        vocationList =
+                            VocationList.update
+                                (VocationList.CalculateDicePools {
+                                    dicePoolCalculationData with
+                                        attributes = attributeAndCoreSkillsToAttributes newAttributeAndCoreSkillsList
+                                })
+                                model.vocationList
+                }
+            | _ -> model
+
+        | _ -> {
             model with
                 attributeAndCoreSkillsList = AttributeAndCoreSkillsList.update msg model.attributeAndCoreSkillsList
-        })
-    // let newAttributeAndCoreSkillsList =
-    //     AttributeAndCoreSkillsList.update msg model.attributeAndCoreSkillsList
+          }
 
-    // let dicePoolCalculationData =
-    //     {
-    //         model with
-    //             attributeAndCoreSkillsList = newAttributeAndCoreSkillsList
-    //     }
-    //     |> characterToDicePoolCalculationData
-
-    // {
-    //     model with
-    //         attributeAndCoreSkillsList =
-    //             AttributeAndCoreSkillsList.update
-    //                 (AttributeAndCoreSkillsList.Msg.CalculateDicePools(dicePoolCalculationData))
-    //                 newAttributeAndCoreSkillsList
-    //         vocationList =
-    //             VocationList.update (VocationList.CalculateDicePools(dicePoolCalculationData)) model.vocationList
-    // }
     // | VocationListMsg(VocationMsgAtPosition(pos, MundaneVocationMsg(MundaneVocationSkillsMsg(WeaponSkillListMsg(WeaponSkillList))))) ->
     //     match munMsg with
     //                 | MundaneVocationSkillsMsg(VocationalSkillListMsg())
