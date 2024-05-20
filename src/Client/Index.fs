@@ -42,12 +42,24 @@ let init () : Model * Cmd<Msg> =
 let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
     match msg with
     | CharacterMsg characterMsg ->
-
-        {
-            model with
-                character = Character.update characterMsg model.character
-        },
-        Cmd.none
+        match characterMsg with
+        | Character.VocationListMsg(VocationList.InsertVocation(x, y, z, _)) ->
+            {
+                model with
+                    character =
+                        Character.update
+                            (Character.VocationListMsg(
+                                VocationList.InsertVocation(x, y, z, Some model.fogentRoleplayData.magicSystemMap)
+                            ))
+                            model.character
+            },
+            Cmd.none
+        | _ ->
+            {
+                model with
+                    character = Character.update characterMsg model.character
+            },
+            Cmd.none
     | GotInitData newFogentRoleplayData ->
 
         {
