@@ -94,7 +94,7 @@ let view attributeNameSet (weaponSkillNames) (model: MagicVocation) dispatch =
                     prop.onChange (fun (num: int) -> dispatch (SetCurrentMagicResource(uint num)))
                 ]
             ]
-            Bulma.column [ sprintf "Max: %d" model.currentMagicResource |> prop.text ]
+            Bulma.column [ sprintf "Max: %d" model.magicResourceCap |> prop.text ]
         ]
     ]
     |> List.append (
