@@ -368,7 +368,7 @@ module FogentRoleplayServerData =
     // AttributeDeterminedDiceModEffect
 
     let attributeDeterminedDiceModSet =
-        makeFogentRoleplayDataSet "AttributeDeterminedDiceModEffectData.csv" (fun row -> {
+        makeFogentRoleplayDataSet "Effect/AttributeDeterminedDiceMod.csv" (fun row -> {
             name = row.["name"]
             attributesToEffect = stringToAttributes row.["attributesToEffect"]
             dicePoolMod = parseDicePoolModString row.["dicePoolMod"]
