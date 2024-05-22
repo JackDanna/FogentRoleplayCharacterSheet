@@ -350,20 +350,14 @@ module FogentRoleplayServerData =
             skillToEffect = string row.["Skill"]
             diceMod = parseDicePoolModString row.["Dice Mod"]
         })
-    // let skillDiceModEffectSet = skillDiceModEffectSet.Values |> Set.ofSeq
+
     // // AttributeStatAdjustmentEffect
     let attributeStatAdjustmentEffectData =
-        makeFogentRoleplayDataSet "AttributeStatAdjustmentEffect.csv" (fun row -> {
+        makeFogentRoleplayDataSet "Effect/AttributeStatAdjustment.csv" (fun row -> {
             name = string row.["Name"]
             attribute = AttributeName row.["Attribute"]
             adjustment = int row.["Adjustment"]
         })
-
-    // let attributeStatAdjustmentEffectMap =
-    //     attributeStatAdjustmentEffectData
-    //     |> List.map (fun (attributeStatAdjustmentEffect: AttributeStatAdjustmentEffect) ->
-    //         attributeStatAdjustmentEffect.name, attributeStatAdjustmentEffect)
-    //     |> Map.ofList
 
     // AttributeDeterminedDiceModEffect
 
