@@ -1004,6 +1004,15 @@ module BaseDiceMod =
             | Some baseDiceEffect -> baseDiceEffect.baseDice
             | None -> base3d6DicePool)
 
+module TextEffect =
+
+    type TextEffect = {
+        name: string
+        effect: string
+        duration: string
+        source: string
+    }
+
 module Effect =
     open StringUtils
     open SkillDiceMod
@@ -1015,6 +1024,7 @@ module Effect =
     open WeaponResource
     open Container
     open BaseDiceMod
+    open TextEffect
 
     type Effect =
         | Weapon of Weapon
@@ -1026,6 +1036,7 @@ module Effect =
         | AttributeDeterminedDiceMod of AttributeDeterminedDiceMod
         //| MovementSpeedCalculation of MovementSpeedCalculation
         | BaseDiceMod of BaseDiceMod
+        | TextEffect of TextEffect
 
     let effectToEffectName effect =
         match effect with
@@ -1038,6 +1049,7 @@ module Effect =
         | AttributeDeterminedDiceMod addme -> addme.name
         //| MovementSpeedCalculation msc -> msc.name
         | BaseDiceMod baseDiceEffect -> baseDiceEffect.name
+        | TextEffect textEffect -> textEffect.name
 
     let effectsToCommaSeperatedEffectNames effects =
         effects

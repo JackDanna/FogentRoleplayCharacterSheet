@@ -50,6 +50,8 @@ module FogentRoleplayServerData =
 
     open FogentRoleplayLib.ParsingUtils
 
+    open FogentRoleplayLib.TextEffect
+
     let makeFogentRoleplayDataPath fileName =
         __SOURCE_DIRECTORY__ + "../../../FogentRoleplayData/" + fileName
 
@@ -412,6 +414,15 @@ module FogentRoleplayServerData =
     //     |> List.map (fun carryWeightCalculation -> carryWeightCalculation.name, carryWeightCalculation)
     //     |> Map.ofList
 
+    // TextEffectForDisplay
+    let textEffect: TextEffect Set =
+        makeFogentRoleplayDataSet "Effect/NarrativeEffect.csv" (fun row -> {
+            name = string row.["Name"]
+            effect = string row.["Effect"]
+            duration = string row.["Duration"]
+            source = string row.["Source"]
+        })
+
     // Effect
     let effectDataMap =
         [
@@ -423,19 +434,11 @@ module FogentRoleplayServerData =
             //Set.map AttributeStatAdjustment attributeStatAdjustmentEffectData
             Set.map PhysicalDefense physicalDefenseSet
             Set.map AttributeDeterminedDiceMod attributeDeterminedDiceModSet
+            Set.map TextEffect textEffect
         ]
         |> Set.unionMany
         |> Set.map (fun (effect: Effect) -> effectToEffectName effect, effect)
         |> Map.ofSeq
-
-    // // TextEffectForDisplay
-    // let textEffectForDisplayData: TextEffectForDisplay list =
-    //     makeFogentRoleplayData "CharacterEffectForDisplayData.csv" (fun row ->
-    //         { name = string row.["Name"]
-    //           effect = string row.["Effect"]
-    //           durationAndSource =
-    //             { duration = string row.["Duration"]
-    //               source = string row.["Source"] } })
 
     // // EffectForDisplay
     // let effectForDisplayData: EffectForDisplay list =
