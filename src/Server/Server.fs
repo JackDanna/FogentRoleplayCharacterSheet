@@ -75,7 +75,6 @@ module FogentRoleplayServerData =
         |> parseEngaeableOpponentsString
 
     // Range
-
     let parseMaxRangeOption input =
         match input with
         | "" -> None
@@ -165,7 +164,6 @@ module FogentRoleplayServerData =
         | _ -> resourceMap.Item string |> Some
 
     // AttributeAndCoreSkill
-
     let attributeAndCoreSkillDataSet, attributeNameSet =
         let attributeAndCoreSkillTupleSet =
             makeFogentRoleplayDataSet "CoreSkillData.csv" (fun row ->
@@ -264,9 +262,6 @@ module FogentRoleplayServerData =
         })
         |> Set.ofList
 
-    let containerClassMap =
-        Set.map (fun (containerClass: Container) -> containerClass.name, containerClass) containerSet
-        |> Map.ofSeq
 
     //WeaponResource
     let weaponResourceSet =
@@ -291,8 +286,7 @@ module FogentRoleplayServerData =
         |> Set.map (fun (itemTier: ItemTier) -> itemTier.name, itemTier)
         |> Map.ofSeq
 
-    // DefenseClass
-
+    // PhysicalDefense
     let physicalDefenseSet =
         makeFogentRoleplayDataSet "PhysicalDefenseEffect.csv" (fun row -> {
             name = string row.["name"]
@@ -304,7 +298,6 @@ module FogentRoleplayServerData =
         })
 
     // SkillDiceModEffect
-
     let skillDiceModEffectSet =
         makeFogentRoleplayDataSet "SkillDiceModEffect.csv" (fun row -> {
             name = string row.["Name"]
@@ -329,7 +322,6 @@ module FogentRoleplayServerData =
         })
 
     // AttributeDeterminedDiceModEffect
-
     let attributeDeterminedDiceModSet =
         makeFogentRoleplayDataSet "Effect/AttributeDeterminedDiceMod.csv" (fun row -> {
             name = row.["name"]
@@ -346,6 +338,7 @@ module FogentRoleplayServerData =
         |> Set.map (fun (attributeDeterminedDiceModEffect: AttributeDeterminedDiceMod) ->
             attributeDeterminedDiceModEffect.name, attributeDeterminedDiceModEffect)
         |> Map.ofSeq
+
 
     // WeightClass
     let weightClassData: WeightClass Set =
@@ -411,25 +404,6 @@ module FogentRoleplayServerData =
         |> Set.unionMany
         |> Set.map (fun (effect: Effect) -> effectToEffectName effect, effect)
         |> Map.ofSeq
-
-    // // EffectForDisplay
-    // let effectForDisplayData: EffectForDisplay list =
-    //     let skillDiceModEffectForDisplayList =
-    //         List.map skillDiceModEffectToSkillDiceModEffectForDisplay skillDiceModEffectData
-
-    //     let attributeDeterminedDiceModEffectForDisplayList =
-    //         List.map attributeDeterminedDiceModEffectToForDisplay attributeDeterminedDiceModEffectData
-
-    //     List.map TextEffectForDisplay textEffectForDisplayData
-    //     @ List.map SkillDiceModEffectForDisplay skillDiceModEffectForDisplayList
-    //       @ List.map AttributeDeterminedDiceModEffectForDisplay attributeDeterminedDiceModEffectForDisplayList
-
-    // let effectForDisplayMap: Map<string, EffectForDisplay> =
-    //     effectForDisplayData
-    //     |> List.map (fun (characterEffect: EffectForDisplay) -> effectForDiplayToName characterEffect, characterEffect)
-    //     |> Map.ofList
-
-
 
     // Item
     let stringToEffectSet (effectMap: Map<string, Effect>) (input: string) =
