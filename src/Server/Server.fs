@@ -280,8 +280,6 @@ module FogentRoleplayServerData =
             damageTypeSet = stringToDamageTypeSet row.["damageTypes"]
             NamedAreaOfEffectOption = namedAreaOfEffectOptionMap row.["areaOfEffect"]
         })
-    // |> Set.map (fun (weaponResource: WeaponResource) -> weaponResource.name, weaponResource)
-    // |> Map.ofSeq
 
     // ItemTier
     let itemTierMap =
