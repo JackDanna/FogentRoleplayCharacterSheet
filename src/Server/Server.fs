@@ -303,8 +303,6 @@ module FogentRoleplayServerData =
                 source = row.["source"]
             }
         })
-    // |> Set.map (fun (defenseClass: PhysicalDefense) -> defenseClass.name, defenseClass)
-    // |> Map.ofSeq
 
     // SkillDiceModEffect
 
