@@ -1109,21 +1109,20 @@ module Effect =
              (stringSeqToStringSeperatedByCommaAndSpace addm.attributesToEffect),
          addm.durationAndSource)
 
-    let effectToTextEffect effect source duration =
+    let physicalDefenseToNameAndEffect (pd: PhysicalDefense) =
+        (pd.name, sprintf "+%.2f to Physical Defense" pd.physicalDefense, pd.durationAndSource)
 
+    let effectToTextEffect effect =
         match effect with
         | TextEffect te -> (te.name, te.effect, te.durationAndSource)
         | SkillDiceMod sdm -> skillDiceModToTextEffect sdm
         | AttributeDeterminedDiceMod addm -> attributeDeterminedDiceModToNameAndEffect addm
+        | PhysicalDefense pd -> physicalDefenseToNameAndEffect pd
         |> (fun (nameString, effectString, durationAndSource) -> {
             name = nameString
             effect = effectString
             durationAndSource = durationAndSource
         })
-
-    let effectToTextEffectWithBlankDurationAndSource effect =
-        effectToTextEffect effect emptyString emptyString
-
 
 // Item
 

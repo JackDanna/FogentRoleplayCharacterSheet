@@ -6,6 +6,7 @@ type Msg =
     | TextEffectMsg of InteractiveTextEffect.Msg
     | AttributeDeterminedDiceModMsg of PartiallyInteractiveTextEffect.Msg
     | SkillDiceModMsg of PartiallyInteractiveTextEffect.Msg
+    | PhysicalDefenseMsg of PartiallyInteractiveTextEffect.Msg
 
 let update msg (model: Effect) : Effect =
     match msg, model with
@@ -13,7 +14,7 @@ let update msg (model: Effect) : Effect =
     | AttributeDeterminedDiceModMsg msg, AttributeDeterminedDiceMod addm ->
         addm
         |> AttributeDeterminedDiceMod
-        |> effectToTextEffectWithBlankDurationAndSource
+        |> effectToTextEffect
         |> PartiallyInteractiveTextEffect.update msg
         |> (fun textEffect -> {
             addm with
@@ -23,12 +24,22 @@ let update msg (model: Effect) : Effect =
     | SkillDiceModMsg msg, SkillDiceMod sdm ->
         sdm
         |> SkillDiceMod
-        |> effectToTextEffectWithBlankDurationAndSource
+        |> effectToTextEffect
         |> (fun textEffect -> {
             sdm with
                 durationAndSource = textEffect.durationAndSource
         })
         |> SkillDiceMod
+    | PhysicalDefenseMsg msg, PhysicalDefense pd ->
+        pd
+        |> PhysicalDefense
+        |> effectToTextEffect
+        |> PartiallyInteractiveTextEffect.update msg
+        |> (fun textEffect -> {
+            pd with
+                durationAndSource = textEffect.durationAndSource
+        })
+        |> PhysicalDefense
     | _, _ -> model
 
 open Feliz
@@ -38,10 +49,10 @@ let view model dispatch =
     | TextEffect textEffect -> InteractiveTextEffect.view textEffect (TextEffectMsg >> dispatch)
     | AttributeDeterminedDiceMod addm ->
         PartiallyInteractiveTextEffect.view
-            (effectToTextEffectWithBlankDurationAndSource (AttributeDeterminedDiceMod addm))
+            (effectToTextEffect (AttributeDeterminedDiceMod addm))
             (AttributeDeterminedDiceModMsg >> dispatch)
     | SkillDiceMod sdm ->
-        PartiallyInteractiveTextEffect.view
-            (effectToTextEffectWithBlankDurationAndSource (SkillDiceMod sdm))
-            (SkillDiceModMsg >> dispatch)
+        PartiallyInteractiveTextEffect.view (effectToTextEffect (SkillDiceMod sdm)) (SkillDiceModMsg >> dispatch)
+    | PhysicalDefense pd ->
+        PartiallyInteractiveTextEffect.view (effectToTextEffect (PhysicalDefense pd)) (PhysicalDefenseMsg >> dispatch)
     |> List.map Html.td
