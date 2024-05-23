@@ -31,6 +31,8 @@ let update msg (model: Effect) : Effect =
         |> SkillDiceMod
     | _, _ -> model
 
+open Feliz
+
 let view model dispatch =
     match model with
     | TextEffect textEffect -> InteractiveTextEffect.view textEffect (TextEffectMsg >> dispatch)
@@ -42,3 +44,4 @@ let view model dispatch =
         PartiallyInteractiveTextEffect.view
             (effectToTextEffectWithBlankDurationAndSource (SkillDiceMod sdm))
             (SkillDiceModMsg >> dispatch)
+    |> List.map Html.td
