@@ -8,9 +8,7 @@ open Shared
 
 module FogentRoleplayServerData =
     open FSharp.Data
-
     open FogentRoleplayLib.StringUtils
-
     open FogentRoleplayLib.DamageType
     open FogentRoleplayLib.EngageableOpponents
     open FogentRoleplayLib.Range
@@ -18,17 +16,13 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.MagicSkill
     open FogentRoleplayLib.Weapon
     open FogentRoleplayLib.DicePoolMod
-
     open FogentRoleplayLib.TypeUtils
     open FogentRoleplayLib.AttributeName
-
     open FogentRoleplayLib.Container
     open FogentRoleplayLib.WeaponResource
     open FogentRoleplayLib.ItemTier
-
     open FogentRoleplayLib.PhysicalDefense
     open FogentRoleplayLib.SkillDiceMod
-
     open FogentRoleplayLib.SetAreaOfEffect
     open FogentRoleplayLib.AreaOfEffect
     open FogentRoleplayLib.AreaOfEffectCalculation
@@ -38,18 +32,13 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.Effect
     open FogentRoleplayLib.AttributeStatAdjustment
     open FogentRoleplayLib.ItemStack
-
     open FogentRoleplayLib.WeaponSpell
     open FogentRoleplayLib.MagicSystem
-
     open FogentRoleplayLib.AttributeName
     open FogentRoleplayLib.SkillName
     open FogentRoleplayLib.AttributeAndCoreSkillsData
-
     open FogentRoleplayLib.WeaponSkillData
-
     open FogentRoleplayLib.ParsingUtils
-
     open FogentRoleplayLib.TextEffect
 
     let makeFogentRoleplayDataPath fileName =
