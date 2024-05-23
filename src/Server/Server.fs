@@ -270,32 +270,6 @@ module FogentRoleplayServerData =
     // |> Set.map (fun (weaponClass: Weapon) -> weaponClass.name, weaponClass)
     // |> Map.ofSeq
 
-    // // ConduitClass
-    // let conduitClassData =
-    //     makeFogentRoleplayData "ConduitClassData.csv" (fun row ->
-
-    //         { name = string row.["desc"]
-    //           oneHandedDice = parseDicePoolModOptionString row.["oneHandedDice"]
-    //           twoHandedDice = parseDicePoolModString row.["twoHandedDice"]
-    //           penetration = uint row.["penetration"]
-    //           rangeAdjustment = int row.["rangeAdjustment"]
-    //           damageTypes = stringToDamageTypeList row.["damageTypes"]
-    //           engageableOpponents =
-    //             match row.["engageableOpponents"] with
-    //             | "None" -> None
-    //             | something -> Some(engageableOpponentsMap something)
-    //           dualWieldableBonus = parseDicePoolModOptionString row.["dualWieldableBonus"]
-    //           areaOfEffect = AreaOfEffectOptionMap.Item row.["areaOfEffect"]
-    //           resourceClass = resourceClassOptionMap row.["resourceClass"]
-    //           effectedMagicSkills =
-    //             row.["effectedMagicSkills"].Split commaSeperated
-    //             |> List.ofArray
-    //             |> List.map (fun magicSkillStr -> magicSkillMap.Item magicSkillStr) })
-
-    // let conduitClassMap =
-    //     List.map (fun (conduitClass: ConduitClass) -> conduitClass.name, conduitClass) conduitClassData
-    //     |> Map.ofList
-
     // Container
     let containerSet =
         makeFogentRoleplayDataList "ContainerClassData.csv" (fun row -> {
