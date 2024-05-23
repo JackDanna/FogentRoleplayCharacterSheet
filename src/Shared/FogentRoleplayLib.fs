@@ -863,12 +863,21 @@ module CombatSpeedCalculation =
         speed: SpeedCalculation
     }
 
+    let combatSpeedCalculationToDescription combatSpeedCalculation =
+        sprintf
+            "+%.1f ft (per %s Dice), +/-%.1f (per %s)"
+            combatSpeedCalculation.speed.feetPerGoverningSkillDice
+            combatSpeedCalculation.governingSkillName
+            combatSpeedCalculation.speed.feetPerReactionSpeedAttribute
+            combatSpeedCalculation.reactionSpeedAttributeName
+
 module CombatSpeed =
     open CombatSpeedCalculation
 
     type CombatSpeed = {
         calculatedSpeed: uint
         combatSpeedCalculation: CombatSpeedCalculation
+        description: string
     }
 
 // Effects

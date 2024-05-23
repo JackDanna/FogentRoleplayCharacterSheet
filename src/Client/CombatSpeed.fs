@@ -26,6 +26,8 @@ let init skills attributes combatSpeedCalculation : CombatSpeed =
 
         calculatedSpeed = calculateSpeed numDiceFromGoverningSkill lvlOfAttributeAsInt combatSpeedCalculation.speed
         combatSpeedCalculation = combatSpeedCalculation
+        description = combatSpeedCalculationToDescription combatSpeedCalculation
+
     }
 
 let update msg (model: CombatSpeed) : CombatSpeed =
@@ -38,4 +40,5 @@ open Feliz.Bulma
 let view (model: CombatSpeed) = [
     Html.td [ prop.text model.combatSpeedCalculation.name ]
     Html.td [ prop.text (float model.calculatedSpeed) ]
+    Html.td [ prop.text model.description ]
 ]
