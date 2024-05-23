@@ -55,6 +55,18 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
                             model.character
             },
             Cmd.none
+        | Character.EffectListMsg(EffectList.Insert(effectName, _)) ->
+            {
+                model with
+                    character =
+                        Character.update
+                            (Character.EffectListMsg(
+                                EffectList.Insert(effectName, Some model.fogentRoleplayData.effectMap)
+                            ))
+                            model.character
+            },
+            Cmd.none
+
         | _ ->
             {
                 model with
