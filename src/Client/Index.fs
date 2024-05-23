@@ -100,11 +100,11 @@ let view (model: Model) (dispatch: Msg -> unit) =
 
             Bulma.heroBody [
                 Character.view
-                    (model.fogentRoleplayData.effectMap.Keys |> Set.ofSeq)
                     model.fogentRoleplayData.attributeNameSet
                     (model.fogentRoleplayData.itemStackMap.Keys |> Set.ofSeq)
                     (model.fogentRoleplayData.magicSystemMap.Keys |> Set.ofSeq)
                     (model.fogentRoleplayData.weaponSkillData |> Set.map (_.name))
+                    (model.fogentRoleplayData.effectMap.Keys |> Set.ofSeq)
                     model.character
                     (CharacterMsg >> dispatch)
             ]

@@ -169,7 +169,7 @@ let view
     (allItemStackNameSet: string Set)
     (magicSystemNameSet: string Set)
     (weaponSkillNameSet)
-    (effectNameList: string Set)
+    (effectNameSet: string Set)
     (model: Character)
     dispatch
     =
@@ -205,7 +205,7 @@ let view
 
         // DestinyPoints.view model.destinyPoints (DestinyPointsMsg >> dispatch)
 
-        EffectList.view effectNameList model.characterEffects (EffectListMsg >> dispatch)
+        EffectList.view effectNameSet model.characterEffects (EffectListMsg >> dispatch)
 
         // CarryWeightStatOption.view
         //     carryWeightCalculationNameList
