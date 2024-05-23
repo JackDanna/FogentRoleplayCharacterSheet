@@ -8,11 +8,13 @@ open FogentRoleplayLib.Attribute
 open FogentRoleplayLib.Neg2To5
 open FogentRoleplayLib.SpeedCalculation
 
-type Msg = RecalculateCombatSpeed of Skill list * Attribute Set
+type Msg = RecalculateCombatSpeed of Skill Set * Attribute Set
 
 let init skills attributes combatSpeedCalculation : CombatSpeed =
     let numDiceFromGoverningSkill =
-        List.find (fun (skill: Skill) -> skill.name = combatSpeedCalculation.governingSkillName) skills
+        skills
+        |> Set.toList
+        |> List.find (fun (skill: Skill) -> skill.name = combatSpeedCalculation.governingSkillName)
         |> (fun (skill: Skill) -> dicePoolToNumDice skill.dicePool)
 
     let lvlOfAttributeAsInt =
@@ -28,7 +30,7 @@ let init skills attributes combatSpeedCalculation : CombatSpeed =
 
 let update msg (model: CombatSpeed) : CombatSpeed =
     match msg with
-    | RecalculateCombatSpeed(skills: Skill list, attributes) -> init skills attributes model.combatSpeedCalculation
+    | RecalculateCombatSpeed(skills, attributes) -> init skills attributes model.combatSpeedCalculation
 
 open Feliz
 open Feliz.Bulma

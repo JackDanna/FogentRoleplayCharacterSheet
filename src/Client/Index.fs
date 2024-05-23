@@ -68,6 +68,18 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
             },
             Cmd.none
 
+        | Character.CombatSpeedsMsg(CombatSpeeds.Insert(name, x, y, _)) ->
+            {
+                model with
+                    character =
+                        Character.update
+                            (Character.CombatSpeedsMsg(
+                                CombatSpeeds.Insert(name, x, y, Some model.fogentRoleplayData.combatSpeedCalculationMap)
+                            ))
+                            model.character
+            },
+            Cmd.none
+
         | _ ->
             {
                 model with

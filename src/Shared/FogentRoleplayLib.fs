@@ -1402,11 +1402,16 @@ module AttributeAndCoreSkills =
     let attributeAndCoreSkillsSetToAttributes attributeAndCoreSkills =
         attributeAndCoreSkills |> Set.map (_.attributeStat)
 
-    let attributeAndCoreSkillsSetToSkillMap (attributeAndCoreSkillsSet: AttributeAndCoreSkills Set) =
+    let attributeAndCoreSkillsSetToSkills attributeAndCoreSkillsSet =
         attributeAndCoreSkillsSet
         |> Set.map (_.coreSkills)
         |> Set.unionMany
-        |> Set.map (fun coreSkill -> (coreSkill.skill.name, coreSkill.skill))
+        |> Set.map (_.skill)
+
+    let attributeAndCoreSkillsSetToSkillMap (attributeAndCoreSkillsSet: AttributeAndCoreSkills Set) =
+        attributeAndCoreSkillsSet
+        |> attributeAndCoreSkillsSetToSkills
+        |> Set.map (fun skill -> (skill.name, skill))
         |> Map.ofSeq
 
 module VocationalSkill =

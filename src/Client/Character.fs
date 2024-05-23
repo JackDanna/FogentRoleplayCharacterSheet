@@ -153,16 +153,28 @@ let update msg (model: Character) =
             characterInformation = CharacterInformation.update msg model.characterInformation
       }
     | EffectListMsg msg ->
-        let newEffectList = EffectList.update msg model.characterEffects
+        let newEffectList: FogentRoleplayLib.Effect.Effect list =
+            EffectList.update msg model.characterEffects
 
         {
             model with
                 characterEffects = newEffectList
         }
-    | CombatSpeedsMsg msg -> {
-        model with
-            combatSpeeds = CombatSpeeds.update msg model.combatSpeeds
-      }
+    | CombatSpeedsMsg msg ->
+        match msg with
+        | CombatSpeeds.Insert(name, _, _, combatSpeedMapOption) ->
+            CombatSpeeds.Insert(
+                name,
+                Some(attributeAndCoreSkillsSetToSkills model.attributeAndCoreSkillsList),
+                Some(attributeAndCoreSkillsSetToAttributes model.attributeAndCoreSkillsList),
+                combatSpeedMapOption
+            )
+        | _ -> msg
+        |> (fun msg -> {
+            model with
+                combatSpeeds = CombatSpeeds.update msg model.combatSpeeds
+        })
+
     | _ -> model
 
 open Feliz

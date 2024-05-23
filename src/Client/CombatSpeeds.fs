@@ -6,8 +6,8 @@ open FogentRoleplayLib.Skill
 open FogentRoleplayLib.Attribute
 
 type Msg =
-    | RecalculateAllCombatSpeeds of option<Skill list> * option<Attribute Set>
-    | Insert of string * option<Skill list> * option<Attribute Set> * option<Map<string, CombatSpeedCalculation>>
+    | RecalculateAllCombatSpeeds of option<Skill Set> * option<Attribute Set>
+    | Insert of string * option<Skill Set> * option<Attribute Set> * option<Map<string, CombatSpeedCalculation>>
     | Remove of int
 
 let init () : CombatSpeed List = []
