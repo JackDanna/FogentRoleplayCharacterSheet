@@ -6,6 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ViewUtils.fs" />
+    <Compile Include="StringInput.fs" />
     <Compile Include="Neg2To5.fs" />
     <Compile Include="Attribute.fs" />
     <Compile Include="Neg1To5.fs" />
@@ -30,6 +31,12 @@
     <Compile Include="ItemStackList.fs" />
     <Compile Include="CombatRollList.fs" />
     <Compile Include="CharacterInformation.fs" />
+    <Compile Include="DurationAndSource.fs" />
+    <Compile Include="NonInteractiveTextEffect.fs" />
+    <Compile Include="PartiallyInteractiveTextEffect.fs" />
+    <Compile Include="InteractiveTextEffect.fs" />
+    <Compile Include="Effect.fs" />
+    <Compile Include="EffectList.fs" />
     <Compile Include="Character.fs" />
     <None Include="postcss.config.js" />
     <None Include="tailwind.config.js" />

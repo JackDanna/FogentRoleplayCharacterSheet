@@ -17,6 +17,8 @@ module StringUtils =
     open ParsingUtils
     open System.Text.RegularExpressions
 
+    let emptyString = ""
+
     let isNumeric (number: string) =
         let regex = Regex(@"^[0-9]+$")
         regex.IsMatch(number)
@@ -835,7 +837,11 @@ module SkillName =
 
 // Effects
 
+module DurationAndSource =
+    type DurationAndSource = { duration: string; source: string }
+
 module AttributeDeterminedDiceMod =
+    open DurationAndSource
     open AttributeName
     open DicePoolMod
 
@@ -843,6 +849,7 @@ module AttributeDeterminedDiceMod =
         name: string
         attributesToEffect: AttributeName Set
         dicePoolMod: DicePoolMod
+        durationAndSource: DurationAndSource
     }
 
     let attributeDeterminedDiceModToName attributeDeterminedDiceMod = attributeDeterminedDiceMod.name
@@ -868,7 +875,13 @@ module AttributeDeterminedDiceMod =
 
 module PhysicalDefense =
 
-    type PhysicalDefense = { name: string; physicalDefense: float }
+    open DurationAndSource
+
+    type PhysicalDefense = {
+        name: string
+        physicalDefense: float
+        durationAndSource: DurationAndSource
+    }
 
     let physicalDefenseToName physicalDefense = physicalDefense.name
 
@@ -876,12 +889,14 @@ module PhysicalDefense =
         $"{defenseClass.physicalDefense} Physical Defense"
 
 module SkillDiceMod =
+    open DurationAndSource
     open DicePoolMod
 
     type SkillDiceMod = {
         name: string
         skillToEffect: string
         diceMod: DicePoolMod
+        durationAndSource: DurationAndSource
     }
 
     let skillDiceModToName skillDiceMod = skillDiceMod.name
@@ -895,13 +910,14 @@ module SkillDiceMod =
         |> List.map (fun skillAdjustment -> skillAdjustment.diceMod)
 
 module AttributeStatAdjustment =
-
+    open DurationAndSource
     open AttributeName
 
     type AttributeStatAdjustment = {
         name: string
         attribute: AttributeName
         adjustment: int
+        durationAndSource: DurationAndSource
     }
 
     let attributeStatAdjustmentToName attributeStatAdjustment = attributeStatAdjustment.name
@@ -986,12 +1002,14 @@ module AttributeStatAdjustment =
 //         $"{movementSpeedCalculation.baseMovementSpeed} ft (base), +{movementSpeedCalculation.feetPerAttributeLvl} ft (per {movementSpeedCalculation.governingAttribute}), +{movementSpeedCalculation.feetPerSkillLvl} ft (per {movementSpeedCalculation.governingSkill})"
 
 module BaseDiceMod =
+    open DurationAndSource
     open DicePool
 
     type BaseDiceMod = {
         name: string
         effectedSkillName: string
         baseDice: DicePool
+        durationAndSource: DurationAndSource
     }
 
     let baseDiceModToName baseDiceMod = baseDiceMod.name
@@ -1005,12 +1023,12 @@ module BaseDiceMod =
             | None -> base3d6DicePool)
 
 module TextEffect =
+    open DurationAndSource
 
     type TextEffect = {
         name: string
         effect: string
-        duration: string
-        source: string
+        durationAndSource: DurationAndSource
     }
 
 module Effect =
@@ -1077,6 +1095,35 @@ module Effect =
         | _ -> []
 
     let effectsToBaseDiceModList = List.collect effectToBaseDiceMod
+
+    open DicePoolMod
+
+    let skillDiceModToTextEffect (sdm: SkillDiceMod) =
+        (sdm.name, sprintf "%s to %s" (dicePoolModToString sdm.diceMod) sdm.skillToEffect, sdm.durationAndSource)
+
+    let attributeDeterminedDiceModToNameAndEffect (addm: AttributeDeterminedDiceMod) =
+        (addm.name,
+         sprintf
+             "%s to %s"
+             (dicePoolModToString addm.dicePoolMod)
+             (stringSeqToStringSeperatedByCommaAndSpace addm.attributesToEffect),
+         addm.durationAndSource)
+
+    let effectToTextEffect effect source duration =
+
+        match effect with
+        | TextEffect te -> (te.name, te.effect, te.durationAndSource)
+        | SkillDiceMod sdm -> skillDiceModToTextEffect sdm
+        | AttributeDeterminedDiceMod addm -> attributeDeterminedDiceModToNameAndEffect addm
+        |> (fun (nameString, effectString, durationAndSource) -> {
+            name = nameString
+            effect = effectString
+            durationAndSource = durationAndSource
+        })
+
+    let effectToTextEffectWithBlankDurationAndSource effect =
+        effectToTextEffect effect emptyString emptyString
+
 
 // Item
 

@@ -340,6 +340,10 @@ module FogentRoleplayServerData =
         makeFogentRoleplayDataSet "PhysicalDefenseEffect.csv" (fun row -> {
             name = string row.["name"]
             physicalDefense = float row.["physicalDefense"]
+            durationAndSource = {
+                duration = row.["duration"]
+                source = row.["source"]
+            }
         })
     // |> Set.map (fun (defenseClass: PhysicalDefense) -> defenseClass.name, defenseClass)
     // |> Map.ofSeq
@@ -351,6 +355,10 @@ module FogentRoleplayServerData =
             name = string row.["Name"]
             skillToEffect = string row.["Skill"]
             diceMod = parseDicePoolModString row.["Dice Mod"]
+            durationAndSource = {
+                duration = row.["duration"]
+                source = row.["source"]
+            }
         })
 
     // // AttributeStatAdjustmentEffect
@@ -359,6 +367,10 @@ module FogentRoleplayServerData =
             name = string row.["Name"]
             attribute = AttributeName row.["Attribute"]
             adjustment = int row.["Adjustment"]
+            durationAndSource = {
+                duration = row.["duration"]
+                source = row.["source"]
+            }
         })
 
     // AttributeDeterminedDiceModEffect
@@ -368,6 +380,10 @@ module FogentRoleplayServerData =
             name = row.["name"]
             attributesToEffect = stringToAttributes row.["attributesToEffect"]
             dicePoolMod = parseDicePoolModString row.["dicePoolMod"]
+            durationAndSource = {
+                duration = row.["duration"]
+                source = row.["source"]
+            }
         })
 
     let attributeDeterminedDiceModMap =
@@ -419,8 +435,10 @@ module FogentRoleplayServerData =
         makeFogentRoleplayDataSet "Effect/NarrativeEffect.csv" (fun row -> {
             name = string row.["Name"]
             effect = string row.["Effect"]
-            duration = string row.["Duration"]
-            source = string row.["Source"]
+            durationAndSource = {
+                duration = row.["duration"]
+                source = row.["source"]
+            }
         })
 
     // Effect
