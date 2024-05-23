@@ -37,6 +37,8 @@
     <Compile Include="InteractiveTextEffect.fs" />
     <Compile Include="Effect.fs" />
     <Compile Include="EffectList.fs" />
+    <Compile Include="CombatSpeed.fs" />
+    <Compile Include="CombatSpeeds.fs" />
     <Compile Include="Character.fs" />
     <None Include="postcss.config.js" />
     <None Include="tailwind.config.js" />

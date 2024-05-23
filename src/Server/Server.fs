@@ -350,10 +350,10 @@ module FogentRoleplayServerData =
         })
 
     // Combat Speed
-    open FogentRoleplayLib.Speed
-    open FogentRoleplayLib.CombatSpeed
+    open FogentRoleplayLib.SpeedCalculation
+    open FogentRoleplayLib.CombatSpeedCalculation
 
-    let speedMap: Map<string, Speed> =
+    let speedMap: Map<string, SpeedCalculation> =
         makeFogentRoleplayDataSet "Speed.csv" (fun row -> {
             name = row.["name"]
             feetPerGoverningSkillDice = float row.["feetPerGoverningSkillDice"]

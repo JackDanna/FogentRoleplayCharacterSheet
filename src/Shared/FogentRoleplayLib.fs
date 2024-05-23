@@ -806,12 +806,15 @@ module Attribute =
 
     let attributesToAttributeNames attributes = Seq.map (_.attributeName) attributes
 
-    let findAttributeWithAttributeName attributeSet attributeName =
+    let findAttributeWithAttributeName (set: Attribute Set) name =
+        set |> Seq.find (fun attribute -> attribute.attributeName = name)
+
+    let filterAttributeWithAttributeName attributeSet attributeName =
         Set.filter (fun attribute -> attribute.attributeName = attributeName) attributeSet
 
     let collectAttributesWithAttributeNames attributeSet attributeNameSet =
         Set.fold
-            (fun acc attributeName -> attributeName |> findAttributeWithAttributeName attributeSet |> Set.union acc)
+            (fun acc attributeName -> attributeName |> filterAttributeWithAttributeName attributeSet |> Set.union acc)
             Set.empty
             attributeNameSet
 
@@ -834,24 +837,38 @@ module Attribute =
 module SkillName =
     type SkillName = string
 
-module Speed =
+module SpeedCalculation =
+    open MathUtils
 
-    type Speed = {
+    type SpeedCalculation = {
         name: string
         feetPerGoverningSkillDice: float
         feetPerReactionSpeedAttribute: float
     }
 
-module CombatSpeed =
+    let calculateSpeed (numGoverningSkillDice: uint) (reactionSPeedAttributeInt: int) speed =
+        (float numGoverningSkillDice * speed.feetPerGoverningSkillDice)
+        |> (+) (float reactionSPeedAttributeInt * speed.feetPerReactionSpeedAttribute)
+        |> roundDownToNearestMultipleOf5
+
+module CombatSpeedCalculation =
     open SkillName
     open AttributeName
-    open Speed
+    open SpeedCalculation
 
-    type CombatSpeed = {
+    type CombatSpeedCalculation = {
         name: string
         governingSkillName: SkillName
         reactionSpeedAttributeName: AttributeName
-        speed: Speed
+        speed: SpeedCalculation
+    }
+
+module CombatSpeed =
+    open CombatSpeedCalculation
+
+    type CombatSpeed = {
+        calculatedSpeed: uint
+        combatSpeedCalculation: CombatSpeedCalculation
     }
 
 // Effects
