@@ -12,6 +12,7 @@ type Msg =
     | VocationListMsg of VocationList.Msg
     | EquipmentMsg of ItemStackList.Msg * option<Set<WeaponSkillData>>
     | CharacterInformationMsg of CharacterInformation.Msg
+    | EffectListMsg of EffectList.Msg
 
 let init (attributeAndCoreSkillDataList: AttributeAndCoreSkillsData Set) =
     let effects: Effect List = []
@@ -151,6 +152,13 @@ let update msg (model: Character) =
         model with
             characterInformation = CharacterInformation.update msg model.characterInformation
       }
+    | EffectListMsg msg ->
+        let newEffectList = EffectList.update msg model.characterEffects
+
+        {
+            model with
+                characterEffects = newEffectList
+        }
     | _ -> model
 
 open Feliz
@@ -158,9 +166,10 @@ open Feliz.Bulma
 
 let view
     attributeNameSet
-    (allItemStackList: Map<string, ItemStack>)
+    (allItemStackNameSet: string Set)
     (magicSystemNameSet: string Set)
     (weaponSkillNameSet)
+    (effectNameList: string Set)
     (model: Character)
     dispatch
     =
@@ -196,10 +205,7 @@ let view
 
         // DestinyPoints.view model.destinyPoints (DestinyPointsMsg >> dispatch)
 
-        // CharacterEffectForDisplayList.view
-        //     characterEffectKeyList
-        //     model.characterEffectForDisplayList
-        //     (CharacterEffectListMsg >> dispatch)
+        EffectList.view effectNameList model.characterEffects (EffectListMsg >> dispatch)
 
         // CarryWeightStatOption.view
         //     carryWeightCalculationNameList
@@ -208,7 +214,7 @@ let view
 
         // EquipmentEffectForDisplayList.view model.equipmentEffectForDisplayList
 
-        ItemStackList.view allItemStackList model.equipmentList ((fun msg -> EquipmentMsg(msg, None)) >> dispatch)
+        ItemStackList.view allItemStackNameSet model.equipmentList ((fun msg -> EquipmentMsg(msg, None)) >> dispatch)
 
         CombatRollList.view model.combatRollList
 

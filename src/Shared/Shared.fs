@@ -6,6 +6,7 @@ open FogentRoleplayLib.ItemStack
 open FogentRoleplayLib.WeaponSpell
 open FogentRoleplayLib.MagicSystem
 open FogentRoleplayLib.WeaponSkillData
+open FogentRoleplayLib.Effect
 
 module Route =
     let builder typeName methodName =
@@ -18,7 +19,7 @@ type FogentRoleplayData = {
     weaponSpellSet: WeaponSpell Set
     magicSystemMap: Map<string, MagicSystem>
     weaponSkillData: WeaponSkillData Set
-//   effectForDisplayMap: Map<string, EffectForDisplay>
+    effectMap: Map<string, Effect>
 //   carryWeightCalculationMap: Map<string, CarryWeightCalculation>
 //   weightClassList: WeightClass List
 //   movementSpeedCalculationMap: Map<string, MovementSpeedCalculation>

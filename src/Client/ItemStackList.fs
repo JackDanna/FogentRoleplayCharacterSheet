@@ -4,7 +4,7 @@ open FogentRoleplayLib.ItemStack
 
 type Msg =
     | ModifyItemStack of int * ItemStack.Msg
-    | Insert of ItemStack
+    | Insert of string * option<Map<string, ItemStack>>
     | Remove of int
 
 let init () : ItemStack list = []
@@ -19,13 +19,17 @@ let update (msg: Msg) (model: ItemStack list) : ItemStack list =
                 else
                     equipment)
             model
-    | Insert itemStack -> List.append model [ itemStack ]
+    | Insert(itemStackName, Some itemStackMap) ->
+        match itemStackMap.TryFind itemStackName with
+        | Some itemStack -> List.append model [ itemStack ]
+        | None -> model
     | Remove position -> List.removeAt position model
+    | _ -> model
 
 open Feliz
 open Feliz.Bulma
 
-let view (allItemStackList: Map<string, ItemStack>) (model: ItemStack list) (dispatch: Msg -> unit) =
+let view (allItemStackSet: string Set) (model: ItemStack list) (dispatch: Msg -> unit) =
     Bulma.container [
         Bulma.label "Equipment List:"
         Bulma.table [
@@ -59,8 +63,8 @@ let view (allItemStackList: Map<string, ItemStack>) (model: ItemStack list) (dis
                 )
                 Html.tfoot [
                     ViewUtils.textInputWithDropdownSet
-                        (fun input -> dispatch (Insert <| allItemStackList.Item input))
-                        allItemStackList.Keys
+                        (fun input -> dispatch (Insert(input, None)))
+                        allItemStackSet
                         "ItemStackList"
                 ]
             ]

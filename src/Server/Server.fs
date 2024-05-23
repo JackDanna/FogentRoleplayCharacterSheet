@@ -445,11 +445,10 @@ module FogentRoleplayServerData =
     let effectDataMap =
         [
             Set.map Weapon weaponSet
-            // Set.map Conduit conduitSet
             Set.map WeaponResource weaponResourceSet
             Set.map Container containerSet
             Set.map SkillDiceMod skillDiceModEffectSet
-            //Set.map AttributeStatAdjustment attributeStatAdjustmentEffectData
+            Set.map AttributeStatAdjustment attributeStatAdjustmentEffectData
             Set.map PhysicalDefense physicalDefenseSet
             Set.map AttributeDeterminedDiceMod attributeDeterminedDiceModSet
             Set.map TextEffect textEffect
@@ -482,7 +481,7 @@ module FogentRoleplayServerData =
         input
         |> commaSeperatedStringToSet
         |> Set.filter (fun effectName -> effectMap.Keys.Contains effectName)
-        |> Set.map (fun effectName -> effectDataMap.Item effectName)
+        |> Set.map (fun effectName -> effectMap.Item effectName)
 
     let itemStackMap =
         makeFogentRoleplayDataSet "ItemData.csv" (fun row -> {
@@ -508,7 +507,7 @@ let fallenDataApi: IFogentRoleplayDataApi = {
                 weaponSpellSet = FogentRoleplayServerData.weaponSpellSet
                 magicSystemMap = FogentRoleplayServerData.magicSystemData
                 weaponSkillData = FogentRoleplayServerData.weaponSkillDataSet
-            //   effectForDisplayMap = FallenServerData.effectForDisplayMap
+                effectMap = FogentRoleplayServerData.effectDataMap
             //   carryWeightCalculationMap = FallenServerData.carryWeightCalculationMap
             //   weightClassList = FallenServerData.weightClassData
             //   movementSpeedCalculationMap = FallenServerData.movementSpeedCalculationMap

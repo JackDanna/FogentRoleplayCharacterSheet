@@ -34,6 +34,7 @@ let init () : Model * Cmd<Msg> =
             weaponSpellSet = Set.empty
             magicSystemMap = Map.empty
             weaponSkillData = Set.empty
+            effectMap = Map.empty
         }
     },
 
@@ -99,8 +100,9 @@ let view (model: Model) (dispatch: Msg -> unit) =
 
             Bulma.heroBody [
                 Character.view
+                    (model.fogentRoleplayData.effectMap.Keys |> Set.ofSeq)
                     model.fogentRoleplayData.attributeNameSet
-                    model.fogentRoleplayData.itemStackMap
+                    (model.fogentRoleplayData.itemStackMap.Keys |> Set.ofSeq)
                     (model.fogentRoleplayData.magicSystemMap.Keys |> Set.ofSeq)
                     (model.fogentRoleplayData.weaponSkillData |> Set.map (_.name))
                     model.character
