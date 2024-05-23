@@ -432,7 +432,7 @@ module FogentRoleplayServerData =
 
     // TextEffectForDisplay
     let textEffect: TextEffect Set =
-        makeFogentRoleplayDataSet "Effect/NarrativeEffect.csv" (fun row -> {
+        makeFogentRoleplayDataSet "Effect/TextEffect.csv" (fun row -> {
             name = string row.["Name"]
             effect = string row.["Effect"]
             durationAndSource = {
