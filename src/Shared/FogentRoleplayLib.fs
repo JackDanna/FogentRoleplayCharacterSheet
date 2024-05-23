@@ -834,6 +834,25 @@ module Attribute =
 module SkillName =
     type SkillName = string
 
+module Speed =
+
+    type Speed = {
+        name: string
+        feetPerGoverningSkillDice: float
+        feetPerReactionSpeedAttribute: float
+    }
+
+module CombatSpeed =
+    open SkillName
+    open AttributeName
+    open Speed
+
+    type CombatSpeed = {
+        name: string
+        governingSkillName: SkillName
+        reactionSpeedAttributeName: AttributeName
+        speed: Speed
+    }
 
 // Effects
 
@@ -1037,7 +1056,6 @@ module Effect =
     open AttributeStatAdjustment
     open PhysicalDefense
     open AttributeDeterminedDiceMod
-    //open MovementSpeedEffect
     open Weapon
     open WeaponResource
     open Container
@@ -1052,7 +1070,6 @@ module Effect =
         | AttributeStatAdjustment of AttributeStatAdjustment
         | PhysicalDefense of PhysicalDefense
         | AttributeDeterminedDiceMod of AttributeDeterminedDiceMod
-        //| MovementSpeedCalculation of MovementSpeedCalculation
         | BaseDiceMod of BaseDiceMod
         | TextEffect of TextEffect
 

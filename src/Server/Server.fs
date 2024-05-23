@@ -28,7 +28,6 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.AreaOfEffectCalculation
     open FogentRoleplayLib.AttributeDeterminedDiceMod
     open FogentRoleplayLib.WeightClass
-    //open FogentRoleplayLib.MovementSpeedEffect
     open FogentRoleplayLib.Effect
     open FogentRoleplayLib.AttributeStatAdjustment
     open FogentRoleplayLib.ItemStack
@@ -350,18 +349,28 @@ module FogentRoleplayServerData =
                 attributeDeterminedDiceModMap.Item row.["attributeDeterminedDiceModEffect"]
         })
 
-    // // MovementSpeedCalculation
-    // let movementSpeedCalculationMap =
-    //     makeFogentRoleplayDataSet "MovementSpeedCalculationData.csv" (fun row -> {
-    //         name = string row.["desc"]
-    //         baseMovementSpeed = uint row.["baseMovementSpeed"]
-    //         governingAttribute = attributeMap.Item row.["governingAttributes"]
-    //         feetPerAttributeLvl = uint row.["feetPerAttributeLvl"]
-    //         governingSkill = string row.["governingSkill"]
-    //         feetPerSkillLvl = uint row.["feetPerSkillLvl"]
-    //     })
-    //     |> Set.map (fun movementSpeedCalculationData -> movementSpeedCalculationData.name, movementSpeedCalculationData)
-    //     |> Map.ofSeq
+    // Combat Speed
+    open FogentRoleplayLib.Speed
+    open FogentRoleplayLib.CombatSpeed
+
+    let speedMap: Map<string, Speed> =
+        makeFogentRoleplayDataSet "Speed.csv" (fun row -> {
+            name = row.["name"]
+            feetPerGoverningSkillDice = float row.["feetPerGoverningSkillDice"]
+            feetPerReactionSpeedAttribute = float row.["feetPerReactionSpeedAttribute"]
+        })
+        |> Set.map (fun speed -> (speed.name, speed))
+        |> Map.ofSeq
+
+    let combatSpeedMap =
+        makeFogentRoleplayDataSet "CombatSpeed.csv" (fun row -> {
+            name = row.["name"]
+            governingSkillName = SkillName row.["governingSkillName"]
+            reactionSpeedAttributeName = AttributeName row.["reactionSpeedAttributeName"]
+            speed = speedMap.Item row.["speed"]
+        })
+        |> Set.map (fun combatSpeed -> combatSpeed.name, combatSpeed)
+        |> Map.ofSeq
 
     // // CarryWeightCalculationu
     // let carryWeightCalculationData =
