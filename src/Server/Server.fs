@@ -194,14 +194,13 @@ module FogentRoleplayServerData =
 
     //MagicSkillData
     let magicSkillDataMap =
-        makeFogentRoleplayDataSet "MagicSkillData.csv" (fun row ->
-            (string row.["name"],
-             {
-                 name = string row.["name"]
-                 damageTypes = stringToDamageTypeSet (string row.["damageTypes"])
-                 isMeleeCapable = Bool row.["meleeCapable"]
-                 isRangeCapable = Bool row.["rangeCapable"]
-             }))
+        makeFogentRoleplayDataSet "MagicSkillData.csv" (fun row -> {
+            name = string row.["name"]
+            damageTypes = stringToDamageTypeSet (string row.["damageTypes"])
+            isMeleeCapable = Bool row.["meleeCapable"]
+            isRangeCapable = Bool row.["rangeCapable"]
+        })
+        |> Set.map (fun magicSkill -> magicSkill.name, magicSkill)
         |> Map.ofSeq
 
     // MagicSystem
