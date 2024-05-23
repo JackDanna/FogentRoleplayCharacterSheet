@@ -35,6 +35,7 @@ let init () : Model * Cmd<Msg> =
             magicSystemMap = Map.empty
             weaponSkillData = Set.empty
             effectMap = Map.empty
+            combatSpeedCalculationMap = Map.empty
         }
     },
 
@@ -117,6 +118,7 @@ let view (model: Model) (dispatch: Msg -> unit) =
                     (model.fogentRoleplayData.magicSystemMap.Keys |> Set.ofSeq)
                     (model.fogentRoleplayData.weaponSkillData |> Set.map (_.name))
                     (model.fogentRoleplayData.effectMap.Keys |> Set.ofSeq)
+                    (model.fogentRoleplayData.combatSpeedCalculationMap.Keys |> Set.ofSeq)
                     model.character
                     (CharacterMsg >> dispatch)
             ]

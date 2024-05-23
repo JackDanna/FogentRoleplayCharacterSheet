@@ -362,7 +362,7 @@ module FogentRoleplayServerData =
         |> Set.map (fun speed -> (speed.name, speed))
         |> Map.ofSeq
 
-    let combatSpeedMap =
+    let combatSpeedCalculationMap =
         makeFogentRoleplayDataSet "CombatSpeed.csv" (fun row -> {
             name = row.["name"]
             governingSkillName = SkillName row.["governingSkillName"]
@@ -446,9 +446,9 @@ let fallenDataApi: IFogentRoleplayDataApi = {
                 magicSystemMap = FogentRoleplayServerData.magicSystemData
                 weaponSkillData = FogentRoleplayServerData.weaponSkillDataSet
                 effectMap = FogentRoleplayServerData.effectDataMap
-            //   carryWeightCalculationMap = FallenServerData.carryWeightCalculationMap
-            //   weightClassList = FallenServerData.weightClassData
-            //   movementSpeedCalculationMap = FallenServerData.movementSpeedCalculationMap
+                //   carryWeightCalculationMap = FallenServerData.carryWeightCalculationMap
+                //   weightClassList = FallenServerData.weightClassData
+                combatSpeedCalculationMap = FogentRoleplayServerData.combatSpeedCalculationMap
             }
         }
 }

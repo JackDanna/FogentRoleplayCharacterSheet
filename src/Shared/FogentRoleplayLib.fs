@@ -1816,6 +1816,7 @@ module Character =
     open CombatRoll
     open CharacterInformation
     open Effect
+    open CombatSpeed
 
     type Character = {
         name: string
@@ -1825,6 +1826,7 @@ module Character =
         combatRollList: CombatRoll List
         characterInformation: CharacterInformation
         characterEffects: Effect List
+        combatSpeeds: CombatSpeed List
     }
 
     let characterToDicePoolCalculationData character = {

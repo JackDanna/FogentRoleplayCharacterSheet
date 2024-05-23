@@ -1,8 +1,6 @@
 module Character
 
 open FogentRoleplayLib.Character
-open FogentRoleplayLib.ItemStack
-open FogentRoleplayLib.Effect
 open FogentRoleplayLib.WeaponSkillData
 open FogentRoleplayLib.AttributeAndCoreSkillsData
 
@@ -13,9 +11,10 @@ type Msg =
     | EquipmentMsg of ItemStackList.Msg * option<Set<WeaponSkillData>>
     | CharacterInformationMsg of CharacterInformation.Msg
     | EffectListMsg of EffectList.Msg
+    | CombatSpeedsMsg of CombatSpeeds.Msg
 
 let init (attributeAndCoreSkillDataList: AttributeAndCoreSkillsData Set) =
-    let effects: Effect List = []
+    let effects = EffectList.init ()
 
     {
         name = ""
@@ -25,6 +24,7 @@ let init (attributeAndCoreSkillDataList: AttributeAndCoreSkillsData Set) =
         combatRollList = CombatRollList.init ()
         characterInformation = CharacterInformation.init ()
         characterEffects = effects
+        combatSpeeds = CombatSpeeds.init ()
     }
 
 open VocationList
@@ -159,6 +159,10 @@ let update msg (model: Character) =
             model with
                 characterEffects = newEffectList
         }
+    | CombatSpeedsMsg msg -> {
+        model with
+            combatSpeeds = CombatSpeeds.update msg model.combatSpeeds
+      }
     | _ -> model
 
 open Feliz
@@ -170,6 +174,7 @@ let view
     (magicSystemNameSet: string Set)
     (weaponSkillNameSet)
     (effectNameSet: string Set)
+    combatSpeedsCalculationNames
     (model: Character)
     dispatch
     =
@@ -203,6 +208,8 @@ let view
             model.vocationList
             (VocationListMsg >> dispatch)
 
+        CombatSpeeds.view combatSpeedsCalculationNames model.combatSpeeds (CombatSpeedsMsg >> dispatch)
+
         // DestinyPoints.view model.destinyPoints (DestinyPointsMsg >> dispatch)
 
         EffectList.view effectNameSet model.characterEffects (EffectListMsg >> dispatch)
@@ -211,8 +218,6 @@ let view
         //     carryWeightCalculationNameList
         //     model.carryWeightStatOption
         //     (CarryWeightStatOptionMsg >> dispatch)
-
-        // EquipmentEffectForDisplayList.view model.equipmentEffectForDisplayList
 
         ItemStackList.view allItemStackNameSet model.equipmentList ((fun msg -> EquipmentMsg(msg, None)) >> dispatch)
 
