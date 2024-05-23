@@ -267,9 +267,6 @@ module FogentRoleplayServerData =
             magicResourceAmount = uint row.["magicResourceAmount"]
         })
 
-    // |> Set.map (fun (weaponClass: Weapon) -> weaponClass.name, weaponClass)
-    // |> Map.ofSeq
-
     // Container
     let containerSet =
         makeFogentRoleplayDataList "ContainerClassData.csv" (fun row -> {
