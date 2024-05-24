@@ -36,7 +36,7 @@ let view (combatSpeedCalculationNames: string Set) (model: CombatSpeed list) (di
             table.isBordered
             prop.children [
                 Html.thead [
-                    List.map (fun (thString: string) -> Html.th thString) [ "Name"; "Speed (ft)" ]
+                    List.map (fun (thString: string) -> Html.th thString) [ "Name"; "Speed (ft)"; "Description" ]
                     |> Html.tr
                 ]
                 Html.tableBody (
