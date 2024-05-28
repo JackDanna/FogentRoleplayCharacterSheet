@@ -13,7 +13,7 @@ type Msg =
     | AttributesMsg of Attributes.Msg
     | CoreSkillsMsg of Skills.Msg
     | VocationListMsg of VocationList.Msg
-    | EquipmentMsg of ItemStackList.Msg * option<WeaponSkillData Set>
+    | EquipmentMsg of ItemStackList.Msg * option<Map<string, WeaponSkillData>>
     | CharacterInformationMsg of CharacterInformation.Msg
     | EffectListMsg of EffectList.Msg
     | CombatSpeedsMsg of CombatSpeeds.Msg
@@ -98,43 +98,52 @@ let update msg (model: Character) =
         })
 
     | VocationListMsg(msg: VocationList.Msg) ->
+        let temp =
+            (fun msg -> {
+                model with
+                    vocationList = VocationList.update msg model.vocationList
+            })
+
         match msg with
+        | VocationMsgAtPosition(position,
+                                MundaneVocationMsg(MundaneVocationSkillsMsg(InsertSkill(skillName,
+                                                                                        _,
+                                                                                        Some weaponSkillDataMap)))) ->
+            let newVocationList =
+                VocationList.update
+                    (VocationMsgAtPosition(
+                        position,
+                        MundaneVocationMsg(
+                            MundaneVocationSkillsMsg(
+                                InsertSkill(skillName, Some dicePoolCalculationData, Some weaponSkillDataMap)
+                            )
+                        )
+                    ))
+                    model.vocationList
 
-        | VocationMsgAtPosition(position, msg) ->
-            match msg with
-            | MundaneVocationMsg(MundaneVocationSkillsMsg(InsertSkill(skillName, _, weaponSkillDataMapOption))) ->
+            {
+                model with
+                    vocationList = newVocationList
+                    combatRollList =
+                        CombatRollList.update
+                            (CombatRollList.RecalculateCombatRollList(
+                                model.equipmentList,
+                                vocationListToWeaponSkillList newVocationList,
+                                weaponSkillDataMap,
+                                dicePoolCalculationData
+                            ))
+                            model.combatRollList
+            }
 
-                MundaneVocationMsg(
-                    MundaneVocationSkillsMsg(
-                        InsertSkill(skillName, Some dicePoolCalculationData, weaponSkillDataMapOption)
-                    )
-                )
-            | _ -> msg
-            |> (fun msg -> VocationMsgAtPosition(position, msg))
 
         | InsertVocation(x, _, _, y) ->
-            (InsertVocation(x, Some(coreSkillToMap model.coreSkills), Some dicePoolCalculationData, y))
+            temp (InsertVocation(x, Some(coreSkillToMap model.coreSkills), Some dicePoolCalculationData, y))
 
-        | _ -> msg
+        | _ -> temp msg
 
-        |> (fun msg -> VocationList.update msg model.vocationList)
-        |> (fun newVocationList -> {
-            model with
-                vocationList = newVocationList
-        // combatRollList =
-        //     CombatRollList.update
-        //         (
-        //             CombatRollList.RecalculateCombatRollList(
-        //                 model.equipmentList,
-        //                 model.coreSkills,
 
-        //                 vocationListToWeaponSkillList newVocationList
-        //             )
-        //         )
-        //         model.combatRollList
-        })
 
-    | EquipmentMsg(msg, Some weaponSkillData) ->
+    | EquipmentMsg(msg, Some weaponSkillDataMap) ->
         let newEquipmentList = ItemStackList.update msg model.equipmentList
 
         {
@@ -145,7 +154,7 @@ let update msg (model: Character) =
                         (CombatRollList.RecalculateCombatRollList(
                             newEquipmentList,
                             vocationListToWeaponSkillList model.vocationList,
-                            weaponSkillData,
+                            weaponSkillDataMap,
                             dicePoolCalculationData
                         ))
                         model.combatRollList

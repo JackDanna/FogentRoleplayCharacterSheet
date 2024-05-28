@@ -31,10 +31,11 @@ let update msg model =
         model
         |> Set.map (fun skill ->
             MundaneVocationSkill.update (MundaneVocationSkill.CheckIfLevelCapExceeded msgData) skill)
-    | InsertSkill(skillName, Some dicePoolCalculationData, Some weaponSkillDataMap) ->
 
+    | InsertSkill(skillName, Some dicePoolCalculationData, Some weaponSkillDataMap) ->
         MundaneVocationSkill.init weaponSkillDataMap dicePoolCalculationData skillName
         |> (fun x -> Set.add x model)
+
     | _ -> model
 
 open Feliz

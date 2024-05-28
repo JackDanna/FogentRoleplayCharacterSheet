@@ -1708,7 +1708,7 @@ module CombatRoll =
     let createWeaponItemCombatRolls
         (equipmentList: ItemStack List)
         (weaponSkillList: Skill List)
-        (weaponSkillDataSet: WeaponSkillData Set)
+        (weaponSkillDataMap: Map<string, WeaponSkillData>)
         (dicePoolCalculationData: DicePoolCalculationData)
         : CombatRoll List =
 
@@ -1721,6 +1721,9 @@ module CombatRoll =
                     match effect with
                     | WeaponResource weaponResource -> [ weaponResource ]
                     | _ -> []))
+
+        let tryFindWeaponSkill weaponSkillName (skills: Skill List) =
+            skills |> List.tryFind (fun skill -> skill.name = weaponSkillName)
 
         equipmentList
         |> List.collect (fun itemStack ->
@@ -1746,21 +1749,8 @@ module CombatRoll =
 
         |> List.collect (fun (itemName, weapon, weaponResourceOption, itemTier) ->
 
-            let isWeaponNameInWeaponSkillData weaponName weaponSkillData =
-                weaponSkillData.governedWeapons |> Seq.contains weaponName
 
-            let weaponSkillDataOptionToWeaponSkillNameOption weaponSkillDataOption =
-                match weaponSkillDataOption with
-                | Some weaponSkillData -> Some weaponSkillData.name
-                | None -> None
-
-            let weaponNameToWeaponSkillDataOption (weaponSkillDataSet: WeaponSkillData Set) weaponName =
-                weaponSkillDataSet |> Seq.tryFind (isWeaponNameInWeaponSkillData weaponName)
-
-            let tryFindWeaponSkill weaponSkillName (skills: Skill List) =
-                skills |> List.tryFind (fun skill -> skill.name = weaponSkillName)
-
-            weaponNameToWeaponSkillDataOption weaponSkillDataSet weapon.name
+            weaponSkillDataMap.TryFind weapon.name
             |> function
                 | None -> Skill.init weapon.name Set.empty dicePoolCalculationData
                 | Some weaponSkillData ->

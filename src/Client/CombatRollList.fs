@@ -14,14 +14,15 @@ open FogentRoleplayLib.DicePoolCalculation
 
 
 
-type Msg = RecalculateCombatRollList of ItemStack List * Skill List * Set<WeaponSkillData> * DicePoolCalculationData
+type Msg =
+    | RecalculateCombatRollList of ItemStack List * Skill List * Map<string, WeaponSkillData> * DicePoolCalculationData
 
 let init () : CombatRoll list = []
 
 let update msg model : CombatRoll list =
     match msg with
-    | RecalculateCombatRollList(equipmentList, weaponSkillList, weaponSkillDataSet, dicePoolCalculationData) ->
-        createWeaponItemCombatRolls equipmentList weaponSkillList weaponSkillDataSet dicePoolCalculationData
+    | RecalculateCombatRollList(equipmentList, weaponSkillList, weaponSkillDataMap, dicePoolCalculationData) ->
+        createWeaponItemCombatRolls equipmentList weaponSkillList weaponSkillDataMap dicePoolCalculationData
 
 open Feliz
 open Feliz.Bulma
