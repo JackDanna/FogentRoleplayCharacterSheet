@@ -25,14 +25,12 @@ let view model dispatch preloadedCoreSkillView =
     model
     |> Set.toList
     |> List.mapi (fun position attribute ->
-        Bulma.column [
-            List.append
-                [
-                    Attribute.view attribute (fun msg -> ModifyAttribute(position, msg) |> dispatch)
-                ]
-                (preloadedCoreSkillView attribute.attributeName)
-            |> Bulma.box
-        ])
+        [
+            Attribute.view attribute (fun msg -> ModifyAttribute(position, msg) |> dispatch)
+        ]
+        @ (preloadedCoreSkillView attribute.attributeName)
+        |> Bulma.box
+        |> Bulma.column)
 
 open FogentRoleplayLib.AttributeName
 
