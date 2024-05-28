@@ -8,12 +8,16 @@ type Msg =
     | MundaneVocationSkillsMsg of MundaneVocationSkills.Msg
     | CalculateDicePools of DicePoolCalculationData
 
-let init name dicePoolCalculationData : MundaneVocation = {
-    vocationStat = VocationStat.init name dicePoolCalculationData
-    mundaneVocationSkills = MundaneVocationSkills.init ()
-}
+let init name dicePoolCalculationData : MundaneVocation =
+    let vocationStat = VocationStat.init name dicePoolCalculationData
+
+    {
+        vocationStat = vocationStat
+        mundaneVocationSkills = MundaneVocationSkills.init ()
+    }
 
 let update msg (model: MundaneVocation) =
+
     match msg with
     | VocationStatMsg msg ->
         let newVocationStat = VocationStat.update msg model.vocationStat
@@ -27,7 +31,7 @@ let update msg (model: MundaneVocation) =
                     vocationStat = newVocationStat
                     mundaneVocationSkills =
                         MundaneVocationSkills.update
-                            (MundaneVocationSkills.CheckIfLevelCapExceededForSkills(
+                            (MundaneVocationSkills.CheckIfLevelCapExceededForAll(
                                 newVocationStat.level,
                                 dicePoolCalculationData
                             ))
@@ -41,43 +45,19 @@ let update msg (model: MundaneVocation) =
     | MundaneVocationSkillsMsg msg ->
 
         match msg with
-        | MundaneVocationSkills.VocationalSkillListMsg(VocationalSkillList.CommonVocationalSkillMsgs(VocationalSkillList.ModifiedVocationalSkillAtPosition(pos,
-                                                                                                                                                           VocationalSkill.SkillMsg(Skill.ModifySkillLevel(msg,
-                                                                                                                                                                                                           _,
-                                                                                                                                                                                                           attributeOption,
-                                                                                                                                                                                                           dicePoolCalculationDataOption))))) ->
-            MundaneVocationSkills.VocationalSkillListMsg(
-                VocationalSkillList.CommonVocationalSkillMsgs(
-                    VocationalSkillList.ModifiedVocationalSkillAtPosition(
-                        pos,
-                        VocationalSkill.SkillMsg(
-                            Skill.ModifySkillLevel(
-                                msg,
-                                (Some model.vocationStat.level),
-                                attributeOption,
-                                dicePoolCalculationDataOption
-                            )
-                        )
-                    )
-                )
-            )
-        | MundaneVocationSkills.WeaponSkillListMsg(WeaponSkillList.CommonVocationalSkillMsgs(VocationalSkillList.ModifiedVocationalSkillAtPosition(pos,
-                                                                                                                                                   VocationalSkill.SkillMsg(Skill.ModifySkillLevel(msg,
-                                                                                                                                                                                                   _,
-                                                                                                                                                                                                   attributeOption,
-                                                                                                                                                                                                   dicePoolCalculationDataOption))))) ->
-            MundaneVocationSkills.WeaponSkillListMsg(
-                WeaponSkillList.CommonVocationalSkillMsgs(
-                    VocationalSkillList.ModifiedVocationalSkillAtPosition(
-                        pos,
-                        VocationalSkill.SkillMsg(
-                            Skill.ModifySkillLevel(
-                                msg,
-                                (Some model.vocationStat.level),
-                                attributeOption,
-                                dicePoolCalculationDataOption
-                            )
-                        )
+        | MundaneVocationSkills.ModifySkillAtPosition(pos1,
+                                                      MundaneVocationSkill.SkillMsg(Skill.ModifySkillLevel(msg,
+                                                                                                           _,
+                                                                                                           attributeOption,
+                                                                                                           dicePoolCalculationDataOption))) ->
+            MundaneVocationSkills.ModifySkillAtPosition(
+                pos1,
+                MundaneVocationSkill.SkillMsg(
+                    Skill.ModifySkillLevel(
+                        msg,
+                        (Some model.vocationStat.level),
+                        attributeOption,
+                        dicePoolCalculationDataOption
                     )
                 )
             )
@@ -86,11 +66,14 @@ let update msg (model: MundaneVocation) =
             model with
                 mundaneVocationSkills = MundaneVocationSkills.update msg model.mundaneVocationSkills
         })
-    | CalculateDicePools msg -> {
+    | CalculateDicePools dicePoolCalculationData -> {
         model with
-            vocationStat = VocationStat.update (VocationStat.CalculateDicePool msg) model.vocationStat
+            vocationStat =
+                VocationStat.update (VocationStat.CalculateDicePool dicePoolCalculationData) model.vocationStat
             mundaneVocationSkills =
-                MundaneVocationSkills.update (MundaneVocationSkills.CalculateDicePools msg) model.mundaneVocationSkills
+                MundaneVocationSkills.update
+                    (MundaneVocationSkills.CalculateDicePools dicePoolCalculationData)
+                    model.mundaneVocationSkills
       }
 
 open Feliz

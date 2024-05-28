@@ -66,7 +66,7 @@ let view attributeNameSet (model: VocationStat) dispatch =
             ]
         ]
         Bulma.column [
-            VocationalSkill.governingAttributesToggle
+            Skill.governingAttributesToggle
                 attributeNameSet
                 model.governingAttributeNameSet
                 (fun toggledAttributeName -> ToggleGoveringAttribute(toggledAttributeName, None) |> dispatch)

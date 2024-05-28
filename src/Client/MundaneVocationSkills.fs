@@ -1,93 +1,70 @@
 module MundaneVocationSkills
 
-open FogentRoleplayLib.MundaneVocationSkills
-open FogentRoleplayLib.ZeroToFive
 open FogentRoleplayLib.DicePoolCalculation
-open FogentRoleplayLib.VocationalSkill
 open FogentRoleplayLib.WeaponSkillData
 
 type Msg =
-    | VocationalSkillListMsg of VocationalSkillList.Msg
-    | WeaponSkillListMsg of WeaponSkillList.Msg
-    | InsertSkill of string * option<Map<string, WeaponSkillData>> * option<DicePoolCalculationData>
+    | ModifySkillAtPosition of int * MundaneVocationSkill.Msg
     | CalculateDicePools of DicePoolCalculationData
-    | CheckIfLevelCapExceededForSkills of ZeroToFive * DicePoolCalculationData
+    | CheckIfLevelCapExceededForAll of Skill.CheckIfLevelCapExceeded
+    | InsertSkill of string * option<Map<string, WeaponSkillData>> * option<DicePoolCalculationData>
 
-let init () : MundaneVocationSkills = {
-    vocationalSkills = []
-    weaponSkillList = []
-}
+let init () = Set.empty
 
-let update msg model : MundaneVocationSkills =
+let insertMundaneVocationSkill (weaponSkillDataMap: Map<string, WeaponSkillData>) dicePoolCalculationData skillName =
+    match weaponSkillDataMap.TryFind skillName with
+    | Some weaponSkillData ->
+        MundaneVocationSkill.initWeaponSkill
+            weaponSkillData.name
+            weaponSkillData.governingAttributes
+            dicePoolCalculationData
+    | None -> MundaneVocationSkill.initVocationalSkill skillName Set.empty dicePoolCalculationData
+
+
+let update msg model =
     match msg with
-    | VocationalSkillListMsg msg -> {
-        model with
-            vocationalSkills = VocationalSkillList.update msg model.vocationalSkills
-      }
-    | WeaponSkillListMsg msg -> {
-        model with
-            weaponSkillList = WeaponSkillList.update msg model.weaponSkillList
-      }
-    | InsertSkill(skillName, Some weaponSkillDataMap, dicePoolCalculationDataOption) ->
-
-        match weaponSkillDataMap.TryFind skillName with
-        | Some weaponSkillData -> {
-            model with
-                weaponSkillList =
-                    WeaponSkillList.update
-                        (WeaponSkillList.InsertWeaponSkill(skillName, weaponSkillData, dicePoolCalculationDataOption))
-                        model.weaponSkillList
-          }
-        | None -> {
-            model with
-                vocationalSkills =
-                    VocationalSkillList.update
-                        (VocationalSkillList.InsertVocationalSkill(skillName, dicePoolCalculationDataOption))
-                        model.vocationalSkills
-          }
+    | ModifySkillAtPosition(position, msg) ->
+        model
+        |> Set.toList
+        |> List.mapi (fun index coreSkill ->
+            if index = position then
+                MundaneVocationSkill.update msg coreSkill
+            else
+                coreSkill)
+        |> Set.ofList
     | CalculateDicePools dicePoolCalculationData ->
-        let temp vocationalSkills =
-            VocationalSkillList.commonVocationalSkillUpdate
-                (VocationalSkillList.CalculateVocationalSkillDicePoolList dicePoolCalculationData)
-                vocationalSkills
+        Set.map
+            (fun coreSkill ->
+                MundaneVocationSkill.update (MundaneVocationSkill.CalculateDicePool(dicePoolCalculationData)) coreSkill)
+            model
+    | CheckIfLevelCapExceededForAll msgData ->
+        model
+        |> Set.map (fun skill ->
+            MundaneVocationSkill.update (MundaneVocationSkill.CheckIfLevelCapExceeded msgData) skill)
+    | InsertSkill(skillName, Some weaponSkillDataMap, Some dicePoolCalculationData) ->
 
-        {
-            weaponSkillList = temp model.vocationalSkills
-            vocationalSkills = temp model.weaponSkillList
-        }
-    | CheckIfLevelCapExceededForSkills(levelCap, dicePoolCalculationData) ->
-        let temp vocationalSkills =
-            List.map
-                (fun (vocationalSkill: VocationalSkill) ->
-                    VocationalSkill.update
-                        (VocationalSkill.SkillMsg(
-                            Skill.CheckIfLevelCapExceeded(
-                                levelCap,
-                                vocationalSkill.governingAttributeNames,
-                                dicePoolCalculationData
-                            )
-                        ))
-                        vocationalSkill)
-                vocationalSkills
-
-        {
-            model with
-                vocationalSkills = temp model.vocationalSkills
-                weaponSkillList = temp model.weaponSkillList
-        }
+        insertMundaneVocationSkill weaponSkillDataMap dicePoolCalculationData skillName
+        |> (fun x -> Set.add x model)
     | _ -> model
 
-let view attributeNameSet (weaponSkillNameSet: string Set) model dispatch =
+open Feliz
+open Feliz.Bulma
 
-    [
+let view attributeNameSet weaponSkillNames model (dispatch: Msg -> unit) =
+    model
+    |> Set.toList
+    |> List.mapi (fun index mundaneVocationSkill ->
+        (MundaneVocationSkill.view attributeNameSet mundaneVocationSkill (fun msg ->
+            ModifySkillAtPosition(index, msg) |> dispatch))
+        |> Bulma.content)
+    |> (fun x ->
 
-        (VocationalSkillList.view attributeNameSet model.vocationalSkills (VocationalSkillListMsg >> dispatch))
-        (WeaponSkillList.view attributeNameSet model.weaponSkillList (WeaponSkillListMsg >> dispatch))
-        [
+        List.append x [
             ViewUtils.textInputWithDropdownSet
                 (fun input -> InsertSkill(input, None, None) |> dispatch)
-                weaponSkillNameSet
+                weaponSkillNames
                 "mundaneVocationSkills"
         ]
-    ]
-    |> List.collect id
+
+    )
+//|> Html.ul

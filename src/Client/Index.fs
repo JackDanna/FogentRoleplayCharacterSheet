@@ -29,7 +29,7 @@ let init () : Model * Cmd<Msg> =
         character = Character.init Set.empty
         fogentRoleplayData = {
             attributeNameSet = defaultAttributeSet
-            attributeAndCoreSkillDataSet = defaultCoreSkillList
+            coreSkillDataSet = defaultCoreSkillList
             itemStackMap = Map.empty
             weaponSpellSet = Set.empty
             magicSystemMap = Map.empty
@@ -91,7 +91,7 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
         {
             model with
                 fogentRoleplayData = newFogentRoleplayData
-                character = Character.init newFogentRoleplayData.attributeAndCoreSkillDataSet
+                character = Character.init newFogentRoleplayData.coreSkillDataSet
         },
         Cmd.none
 

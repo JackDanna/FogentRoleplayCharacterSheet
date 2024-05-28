@@ -1,13 +1,14 @@
 namespace Shared
 
 open FogentRoleplayLib.AttributeName
-open FogentRoleplayLib.AttributeAndCoreSkillsData
+open FogentRoleplayLib.SkillName
 open FogentRoleplayLib.ItemStack
 open FogentRoleplayLib.WeaponSpell
 open FogentRoleplayLib.MagicSystem
 open FogentRoleplayLib.WeaponSkillData
 open FogentRoleplayLib.Effect
 open FogentRoleplayLib.CombatSpeedCalculation
+open FogentRoleplayLib.CoreSkillData
 
 module Route =
     let builder typeName methodName =
@@ -15,7 +16,7 @@ module Route =
 
 type FogentRoleplayData = {
     attributeNameSet: AttributeName Set
-    attributeAndCoreSkillDataSet: AttributeAndCoreSkillsData Set
+    coreSkillDataSet: CoreSkillData Set
     itemStackMap: Map<string, ItemStack>
     weaponSpellSet: WeaponSpell Set
     magicSystemMap: Map<string, MagicSystem>
