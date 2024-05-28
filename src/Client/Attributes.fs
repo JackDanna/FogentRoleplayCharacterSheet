@@ -26,16 +26,18 @@ let view model dispatch preloadedCoreSkillView =
     |> Set.toList
     |> List.mapi (fun position attribute ->
         Bulma.column [
-            [
-                Attribute.view attribute (fun msg -> ModifyAttribute(position, msg) |> dispatch)
+            List.append
+                [
+                    Attribute.view attribute (fun msg -> ModifyAttribute(position, msg) |> dispatch)
+                ]
                 (preloadedCoreSkillView attribute.attributeName)
-            ]
+            |> Bulma.content
             |> Bulma.box
         ])
 
 open FogentRoleplayLib.AttributeName
 
-let attributesAndCoreSkillsListView model dispatch (preloadedCoreSkillView: AttributeName -> ReactElement) =
+let attributesAndCoreSkillsListView model dispatch (preloadedCoreSkillView: AttributeName -> ReactElement List) =
     Bulma.container [
         Bulma.label "Attributes and Core Skills:" |> Bulma.content
         Bulma.columns [
