@@ -6,7 +6,7 @@ open FogentRoleplayLib.Skill
 open FogentRoleplayLib.Attribute
 
 type Msg =
-    | RecalculateAllCombatSpeeds of option<Skill Set> * option<Attribute Set>
+    | RecalculateAllCombatSpeeds of Skill Set * Attribute Set
     | Insert of string * option<Skill Set> * option<Attribute Set> * option<Map<string, CombatSpeedCalculation>>
     | Remove of int
 
@@ -14,7 +14,7 @@ let init () : CombatSpeed List = []
 
 let update msg model =
     match msg with
-    | RecalculateAllCombatSpeeds(Some skills, Some attributes) ->
+    | RecalculateAllCombatSpeeds(skills, attributes) ->
         model
         |> List.map (fun combatSpeed ->
             CombatSpeed.update (CombatSpeed.RecalculateCombatSpeed(skills, attributes)) combatSpeed)

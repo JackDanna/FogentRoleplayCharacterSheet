@@ -62,12 +62,19 @@ let update msg (model: Character) =
                 attributes = newAttributes
         }
 
+        let newCoreSkills =
+            Skills.update (Skills.CalculateSkillDicePools newDicePoolCalculationData) model.coreSkills
+
         {
             model with
                 attributes = newAttributes
-                coreSkills = Skills.update (Skills.CalculateSkillDicePools newDicePoolCalculationData) model.coreSkills
+                coreSkills = newCoreSkills
                 vocationList =
                     VocationList.update (VocationList.CalculateDicePools newDicePoolCalculationData) model.vocationList
+                combatSpeeds =
+                    CombatSpeeds.update
+                        (CombatSpeeds.RecalculateAllCombatSpeeds(newCoreSkills, newAttributes))
+                        model.combatSpeeds
         }
 
     | CoreSkillsMsg msg -> {
