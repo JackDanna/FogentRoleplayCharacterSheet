@@ -48,6 +48,12 @@ open MundaneVocationSkills
 
 let update msg (model: Character) =
 
+    let temp =
+        (fun msg -> {
+            model with
+                vocationList = VocationList.update msg model.vocationList
+        })
+
     let coreSkillToMap (coreSkills: Skill Set) =
         coreSkills |> Set.map (fun x -> x.name, x) |> Map.ofSeq
 
@@ -97,12 +103,29 @@ let update msg (model: Character) =
                         model.combatSpeeds
         })
 
+    | VocationListMsg(VocationList.VocationMsgAtPosition(pos1,
+                                                         Vocation.MagicVocationMsg(MagicVocation.MagicVocationSkillsMsg(MagicVocationSkills.InsertSkill(skillName,
+                                                                                                                                                        vocationGoverningAttributesOption,
+                                                                                                                                                        _,
+                                                                                                                                                        weaponSkillDataOption,
+                                                                                                                                                        magicSkillDataOption))))) ->
+        VocationList.VocationMsgAtPosition(
+            pos1,
+            Vocation.MagicVocationMsg(
+                MagicVocation.MagicVocationSkillsMsg(
+                    MagicVocationSkills.InsertSkill(
+                        skillName,
+                        vocationGoverningAttributesOption,
+                        Some dicePoolCalculationData,
+                        weaponSkillDataOption,
+                        magicSkillDataOption
+                    )
+                )
+            )
+        )
+        |> temp
+
     | VocationListMsg(msg: VocationList.Msg) ->
-        let temp =
-            (fun msg -> {
-                model with
-                    vocationList = VocationList.update msg model.vocationList
-            })
 
         match msg with
         | VocationMsgAtPosition(position,

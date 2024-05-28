@@ -20,7 +20,7 @@ type FogentRoleplayData = {
     itemStackMap: Map<string, ItemStack>
     weaponSpellSet: WeaponSpell Set
     magicSystemMap: Map<string, MagicSystem>
-    weaponSkillData: WeaponSkillData Set
+    weaponSkillDataMap: Map<string, WeaponSkillData>
     effectMap: Map<string, Effect>
     //   carryWeightCalculationMap: Map<string, CarryWeightCalculation>
     //   weightClassList: WeightClass List

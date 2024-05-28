@@ -1510,7 +1510,7 @@ module MagicSystem =
         vocationGoverningAttributeSet: AttributeName Set
         resourceName: string
         governingCoreSkill: string
-        magicSkillDataSet: MagicSkillData Set
+        magicSkillDataMap: Map<string, MagicSkillData>
     }
 
 module MagicVocationSkill =

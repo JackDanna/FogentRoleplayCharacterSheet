@@ -199,10 +199,12 @@ module FogentRoleplayServerData =
             vocationGoverningAttributeSet = stringToAttributes row.["vocationGoverningAttributeSet"]
             resourceName = row.["resourceName"]
             governingCoreSkill = row.["governingCoreSkill"]
-            magicSkillDataSet =
+            magicSkillDataMap =
                 row.["magicSkillNameSet"]
                 |> commaSeperatedStringToSet
                 |> Set.map (fun key -> magicSkillDataMap.Item key)
+                |> Set.map (fun magicSkillData -> magicSkillData.name, magicSkillData)
+                |> Map.ofSeq
         })
         |> Set.map (fun magicSystem -> magicSystem.name, magicSystem)
         |> Map.ofSeq
@@ -222,12 +224,14 @@ module FogentRoleplayServerData =
             resourceNameOption = resourceOptionMap row.["resourceClass"]
         })
 
-    let weaponSkillDataSet =
+    let weaponSkillDataMap =
         makeFogentRoleplayDataSet "WeaponSkillData.csv" (fun row -> {
             name = string row.["skillName"]
             governingAttributes = stringToAttributes row.["governingAttributes"]
             governedWeapons = commaSeperatedStringToSet row.["weaponsGoverned"]
         })
+        |> Set.map (fun weaponSkillData -> weaponSkillData.name, weaponSkillData)
+        |> Map.ofSeq
 
     // WeaponSpell
     let weaponSpellSet: WeaponSpell Set =
@@ -435,7 +439,7 @@ let fallenDataApi: IFogentRoleplayDataApi = {
                 itemStackMap = FogentRoleplayServerData.itemStackMap
                 weaponSpellSet = FogentRoleplayServerData.weaponSpellSet
                 magicSystemMap = FogentRoleplayServerData.magicSystemData
-                weaponSkillData = FogentRoleplayServerData.weaponSkillDataSet
+                weaponSkillDataMap = FogentRoleplayServerData.weaponSkillDataMap
                 effectMap = FogentRoleplayServerData.effectDataMap
                 //   carryWeightCalculationMap = FallenServerData.carryWeightCalculationMap
                 //   weightClassList = FallenServerData.weightClassData

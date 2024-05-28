@@ -56,7 +56,7 @@ let update msg (model: MagicVocation) =
                     Some model.vocationStat.governingAttributeNameSet,
                     dicePoolCalculationDataOption,
                     weaponSkillDataOption,
-                    magicSkillDataMapOption
+                    Some model.magicSystem.magicSkillDataMap
                 )
             | _ -> msg
 

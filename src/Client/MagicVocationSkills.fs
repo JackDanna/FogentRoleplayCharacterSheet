@@ -39,7 +39,7 @@ let update msg (model: MagicVocationSkill Set) =
         model
         |> Set.map (fun skill -> MagicVocationSkill.update (MagicVocationSkill.CheckIfLevelCapExceeded msgData) skill)
     | InsertSkill(skillName,
-                  Some governingAttributeNames,
+                  Some vocationGoverningAttributeNames,
                   Some dicePoolCalculationData,
                   Some weaponSkillDataMap,
                   Some magicSkillDataMap) ->
@@ -47,7 +47,10 @@ let update msg (model: MagicVocationSkill Set) =
         match magicSkillDataMap.TryFind skillName with
         | Some magicSkillData ->
 
-            MagicVocationSkill.initMagicSkill magicSkillData.name governingAttributeNames dicePoolCalculationData
+            MagicVocationSkill.initMagicSkill
+                magicSkillData.name
+                vocationGoverningAttributeNames
+                dicePoolCalculationData
 
         | None ->
             MundaneVocationSkill.init weaponSkillDataMap dicePoolCalculationData skillName
