@@ -2,11 +2,10 @@ module Skills
 
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.CoreSkillData
-open FogentRoleplayLib.AttributeName
 
 type Msg =
     | ModifySkillAtPosition of int * Skill.Msg
-    | CalculateCoreSkillDicePools of DicePoolCalculationData
+    | CalculateSkillDicePools of DicePoolCalculationData
 
 let init skillNameSet governingAttributesNames dicePoolCalculations =
     skillNameSet
@@ -28,7 +27,7 @@ let update msg model =
             else
                 coreSkill)
         |> Set.ofList
-    | CalculateCoreSkillDicePools dicePoolCalculationData ->
+    | CalculateSkillDicePools dicePoolCalculationData ->
         Set.map (fun coreSkill -> Skill.update (Skill.CalculateDicePool(dicePoolCalculationData)) coreSkill) model
 
 open Feliz

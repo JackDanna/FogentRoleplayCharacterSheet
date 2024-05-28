@@ -55,10 +55,17 @@ let update msg (model: Character) =
     | SetName newName -> { model with name = newName }
 
     | AttributesMsg msg ->
+        let newAttributes = Attributes.update msg model.attributes
+
+        let newDicePoolCalculationData = {
+            dicePoolCalculationData with
+                attributes = newAttributes
+        }
 
         {
             model with
-                attributes = Attributes.update msg model.attributes
+                attributes = newAttributes
+                coreSkills = Skills.update (Skills.CalculateSkillDicePools newDicePoolCalculationData) model.coreSkills
         }
     // | ModifyAttributeAndCoreSkillsList(pos1, tempMsg) ->
     //     match tempMsg with
