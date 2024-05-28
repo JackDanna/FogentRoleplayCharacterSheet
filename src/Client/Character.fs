@@ -13,7 +13,7 @@ type Msg =
     | AttributesMsg of Attributes.Msg
     | CoreSkillsMsg of Skills.Msg
     | VocationListMsg of VocationList.Msg
-    | EquipmentMsg of ItemStackList.Msg * option<Set<WeaponSkillData>>
+    | EquipmentMsg of ItemStackList.Msg * option<WeaponSkillData Set>
     | CharacterInformationMsg of CharacterInformation.Msg
     | EffectListMsg of EffectList.Msg
     | CombatSpeedsMsg of CombatSpeeds.Msg
@@ -102,11 +102,11 @@ let update msg (model: Character) =
 
         | VocationMsgAtPosition(position, msg) ->
             match msg with
-            | MundaneVocationMsg(MundaneVocationSkillsMsg(InsertSkill(skillName, weaponSkillDataMapOption, _))) ->
+            | MundaneVocationMsg(MundaneVocationSkillsMsg(InsertSkill(skillName, _, weaponSkillDataMapOption))) ->
 
                 MundaneVocationMsg(
                     MundaneVocationSkillsMsg(
-                        InsertSkill(skillName, weaponSkillDataMapOption, Some dicePoolCalculationData)
+                        InsertSkill(skillName, Some dicePoolCalculationData, weaponSkillDataMapOption)
                     )
                 )
             | _ -> msg

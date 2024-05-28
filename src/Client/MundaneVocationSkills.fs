@@ -7,7 +7,7 @@ type Msg =
     | ModifyMundaneVocationSkillAtPosition of int * MundaneVocationSkill.Msg
     | CalculateDicePools of DicePoolCalculationData
     | CheckIfLevelCapExceededForAll of Skill.CheckIfLevelCapExceeded
-    | InsertSkill of string * option<Map<string, WeaponSkillData>> * option<DicePoolCalculationData>
+    | InsertSkill of string * option<DicePoolCalculationData> * option<Map<string, WeaponSkillData>>
 
 let init () = Set.empty
 
@@ -41,7 +41,7 @@ let update msg model =
         model
         |> Set.map (fun skill ->
             MundaneVocationSkill.update (MundaneVocationSkill.CheckIfLevelCapExceeded msgData) skill)
-    | InsertSkill(skillName, Some weaponSkillDataMap, Some dicePoolCalculationData) ->
+    | InsertSkill(skillName, Some dicePoolCalculationData, Some weaponSkillDataMap) ->
 
         insertMundaneVocationSkill weaponSkillDataMap dicePoolCalculationData skillName
         |> (fun x -> Set.add x model)
