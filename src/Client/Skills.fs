@@ -34,14 +34,14 @@ let update msg model =
 open Feliz
 open Feliz.Bulma
 
-let view attributeNameSet model (dispatch: Msg -> unit) =
-    model
-    |> Set.toList
-    |> List.mapi (fun index coreSkill ->
-        Skill.view attributeNameSet coreSkill (fun msg -> ModifySkillAtPosition(index, msg) |> dispatch) false true
-        |> Bulma.columns
-        |> Bulma.content)
-    |> Html.ul
+// let view attributeNameSet model (dispatch: Msg -> unit) =
+//     model
+//     |> Set.toList
+//     |> List.mapi (fun index coreSkill ->
+//         Skill.view attributeNameSet coreSkill (fun msg -> ModifySkillAtPosition(index, msg) |> dispatch) false true
+//         |> Bulma.columns
+//         |> Bulma.content)
+//     |> Html.ul
 
 let coreSkillsView model (dispatch: Msg -> unit) isThisAttributeNameContiainedOnSkill =
     model
