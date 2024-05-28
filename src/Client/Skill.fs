@@ -12,7 +12,7 @@ open FogentRoleplayLib.CoreSkillData
 type CheckIfLevelCapExceeded = ZeroToFive * DicePoolCalculationData
 
 type Msg =
-    | ModifySkillLevel of Neg1To5.Msg * option<ZeroToFive> * option<AttributeName Set> * option<DicePoolCalculationData>
+    | ModifySkillLevel of Neg1To5.Msg * option<ZeroToFive> * option<DicePoolCalculationData>
     | CalculateDicePool of DicePoolCalculationData
     | CheckIfLevelCapExceeded of CheckIfLevelCapExceeded
     | ToggleGoverningAttribute of AttributeName * option<DicePoolCalculationData>
@@ -28,20 +28,23 @@ let initCoreSkill coreSkillData dicePoolCalculationData =
 let update msg (model: Skill) =
 
     match msg with
-    | ModifySkillLevel(neg1To5Msg, levelCapOption, Some governingAttributeNameSet, Some dicePoolCalculationData) ->
-        let newLevel = Neg1To5.update neg1To5Msg model.level
+    | ModifySkillLevel(neg1To5Msg, levelCapOption, Some dicePoolCalculationData) ->
+        let msgLevel = Neg1To5.update neg1To5Msg model.level
+
+        let newLevel =
+            match levelCapOption with
+            | Some levelCap ->
+                if (zeroToFiveToInt levelCap) < (neg1To5ToInt msgLevel) then
+                    model.level
+                else
+                    msgLevel
+            | None -> msgLevel
 
         {
             model with
-                level =
-                    match levelCapOption with
-                    | Some levelCap ->
-                        if (zeroToFiveToInt levelCap) < (neg1To5ToInt newLevel) then
-                            model.level
-                        else
-                            newLevel
-                    | None -> newLevel
-                dicePool = calculateSkillDicePool model.name newLevel governingAttributeNameSet dicePoolCalculationData
+                level = newLevel
+                dicePool =
+                    calculateSkillDicePool model.name newLevel model.governingAttributeNames dicePoolCalculationData
         }
     | CalculateDicePool dicePoolCalculationData ->
 
@@ -129,10 +132,7 @@ let view attributeNameSet (model: Skill) dispatch disableChangeLevel governingSk
         else
             Html.none
         Bulma.column [
-            Neg1To5.view
-                model.level
-                ((fun msg -> ModifySkillLevel(msg, None, None, None)) >> dispatch)
-                disableChangeLevel
+            Neg1To5.view model.level ((fun msg -> ModifySkillLevel(msg, None, None)) >> dispatch) disableChangeLevel
         ]
         Bulma.column [ model.dicePool |> dicePoolToString |> prop.text ]
     ]

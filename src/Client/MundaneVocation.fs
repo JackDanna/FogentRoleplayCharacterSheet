@@ -45,20 +45,14 @@ let update msg (model: MundaneVocation) =
     | MundaneVocationSkillsMsg msg ->
 
         match msg with
-        | MundaneVocationSkills.ModifySkillAtPosition(pos1,
-                                                      MundaneVocationSkill.SkillMsg(Skill.ModifySkillLevel(msg,
-                                                                                                           _,
-                                                                                                           attributeOption,
-                                                                                                           dicePoolCalculationDataOption))) ->
-            MundaneVocationSkills.ModifySkillAtPosition(
+        | MundaneVocationSkills.ModifyMundaneVocationSkillAtPosition(pos1,
+                                                                     MundaneVocationSkill.SkillMsg(Skill.ModifySkillLevel(msg,
+                                                                                                                          _,
+                                                                                                                          dicePoolCalculationDataOption))) ->
+            MundaneVocationSkills.ModifyMundaneVocationSkillAtPosition(
                 pos1,
                 MundaneVocationSkill.SkillMsg(
-                    Skill.ModifySkillLevel(
-                        msg,
-                        (Some model.vocationStat.level),
-                        attributeOption,
-                        dicePoolCalculationDataOption
-                    )
+                    Skill.ModifySkillLevel(msg, (Some model.vocationStat.level), dicePoolCalculationDataOption)
                 )
             )
         | _ -> msg

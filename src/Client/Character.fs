@@ -39,6 +39,8 @@ let init (coreSkillDataSet: CoreSkillData Set) =
         combatSpeeds = CombatSpeeds.init ()
     }
 
+open Skills
+open Skill
 open VocationList
 open Vocation
 open MundaneVocation
@@ -77,10 +79,23 @@ let update msg (model: Character) =
                         model.combatSpeeds
         }
 
-    | CoreSkillsMsg msg -> {
-        model with
-            coreSkills = Skills.update msg model.coreSkills
-      }
+    | CoreSkillsMsg msg ->
+        match msg with
+        | ModifySkillAtPosition(pos, Skill.ModifySkillLevel(msg, levelCapOption, _)) ->
+            Skills.update
+                (ModifySkillAtPosition(pos, Skill.ModifySkillLevel(msg, levelCapOption, Some dicePoolCalculationData)))
+                model.coreSkills
+
+        | _ -> Skills.update msg model.coreSkills
+
+        |> (fun newCoreSkills -> {
+            model with
+                coreSkills = newCoreSkills
+                combatSpeeds =
+                    CombatSpeeds.update
+                        (CombatSpeeds.RecalculateAllCombatSpeeds(newCoreSkills, model.attributes))
+                        model.combatSpeeds
+        })
 
     | VocationListMsg(msg: VocationList.Msg) ->
         let temp msg =
