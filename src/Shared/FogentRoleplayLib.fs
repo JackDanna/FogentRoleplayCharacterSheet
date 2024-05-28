@@ -1749,7 +1749,6 @@ module CombatRoll =
 
         |> List.collect (fun (itemName, weapon, weaponResourceOption, itemTier) ->
 
-
             weaponSkillDataMap.TryFind weapon.name
             |> function
                 | None -> Skill.init weapon.name Set.empty dicePoolCalculationData
