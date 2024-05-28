@@ -50,7 +50,7 @@ let update msg (model: MagicVocationSkill Set) =
             MagicVocationSkill.initMagicSkill magicSkillData.name governingAttributeNames dicePoolCalculationData
 
         | None ->
-            MundaneVocationSkills.insertMundaneVocationSkill weaponSkillDataMap dicePoolCalculationData skillName
+            MundaneVocationSkill.init weaponSkillDataMap dicePoolCalculationData skillName
             |> MundaneVocationSkill
         |> (fun x -> Set.add x model)
 
@@ -76,4 +76,3 @@ let view attributeNameSet weaponSkillNames model (dispatch: Msg -> unit) =
         ]
 
     )
-//|> Html.ul

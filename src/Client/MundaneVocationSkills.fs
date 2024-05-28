@@ -11,16 +11,6 @@ type Msg =
 
 let init () = Set.empty
 
-let insertMundaneVocationSkill (weaponSkillDataMap: Map<string, WeaponSkillData>) dicePoolCalculationData skillName =
-    match weaponSkillDataMap.TryFind skillName with
-    | Some weaponSkillData ->
-        MundaneVocationSkill.initWeaponSkill
-            weaponSkillData.name
-            weaponSkillData.governingAttributes
-            dicePoolCalculationData
-    | None -> MundaneVocationSkill.initVocationalSkill skillName Set.empty dicePoolCalculationData
-
-
 let update msg model =
     match msg with
     | ModifyMundaneVocationSkillAtPosition(position, msg) ->
@@ -43,7 +33,7 @@ let update msg model =
             MundaneVocationSkill.update (MundaneVocationSkill.CheckIfLevelCapExceeded msgData) skill)
     | InsertSkill(skillName, Some dicePoolCalculationData, Some weaponSkillDataMap) ->
 
-        insertMundaneVocationSkill weaponSkillDataMap dicePoolCalculationData skillName
+        MundaneVocationSkill.init weaponSkillDataMap dicePoolCalculationData skillName
         |> (fun x -> Set.add x model)
     | _ -> model
 
@@ -67,4 +57,3 @@ let view attributeNameSet weaponSkillNames model (dispatch: Msg -> unit) =
         ]
 
     )
-//|> Html.ul

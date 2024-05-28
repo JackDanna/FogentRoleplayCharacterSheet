@@ -2,18 +2,19 @@ module MundaneVocationSkill
 
 open FogentRoleplayLib.MundaneVocationSkill
 open FogentRoleplayLib.DicePoolCalculation
+open FogentRoleplayLib.WeaponSkillData
 
 type Msg =
     | SkillMsg of Skill.Msg
     | CalculateDicePool of DicePoolCalculationData
     | CheckIfLevelCapExceeded of Skill.CheckIfLevelCapExceeded
 
-
-let initVocationalSkill name governingAttributes dicePoolCalculationData =
-    Skill.init name governingAttributes dicePoolCalculationData |> VocationalSkill
-
-let initWeaponSkill name governingAttributes dicePoolCalculationData =
-    Skill.init name governingAttributes dicePoolCalculationData |> WeaponSkill
+let init (weaponSkillDataMap: Map<string, WeaponSkillData>) dicePoolCalculationData skillName =
+    match weaponSkillDataMap.TryFind skillName with
+    | Some weaponSkillData ->
+        Skill.init weaponSkillData.name weaponSkillData.governingAttributes dicePoolCalculationData
+        |> VocationalSkill
+    | None -> Skill.init skillName Set.empty dicePoolCalculationData |> WeaponSkill
 
 let processMundaneVocationSkill model operation =
     match model with
