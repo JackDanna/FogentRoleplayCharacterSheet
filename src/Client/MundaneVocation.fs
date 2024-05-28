@@ -25,7 +25,6 @@ let update msg (model: MundaneVocation) =
         match msg with
         | VocationStat.ZeroToFiveMsg(_, Some dicePoolCalculationData) ->
 
-
             {
                 model with
                     vocationStat = newVocationStat
