@@ -66,6 +66,8 @@ let update msg (model: Character) =
             model with
                 attributes = newAttributes
                 coreSkills = Skills.update (Skills.CalculateSkillDicePools newDicePoolCalculationData) model.coreSkills
+                vocationList =
+                    VocationList.update (VocationList.CalculateDicePools newDicePoolCalculationData) model.vocationList
         }
     // | ModifyAttributeAndCoreSkillsList(pos1, tempMsg) ->
     //     match tempMsg with
