@@ -104,16 +104,16 @@ let update msg (model: Character) =
         })
 
     | VocationListMsg(VocationList.VocationMsgAtPosition(pos1,
-                                                         Vocation.MagicVocationMsg(MagicVocation.MagicVocationSkillsMsg(MagicVocationSkills.InsertSkill(skillName,
-                                                                                                                                                        vocationGoverningAttributesOption,
-                                                                                                                                                        _,
-                                                                                                                                                        weaponSkillDataOption,
-                                                                                                                                                        magicSkillDataOption))))) ->
+                                                         Vocation.MagicVocationMsg(MagicVocation.MagicVocationSkillsMsg(MagicVocationSkills.InsertMagicVocationSkill(skillName,
+                                                                                                                                                                     vocationGoverningAttributesOption,
+                                                                                                                                                                     _,
+                                                                                                                                                                     weaponSkillDataOption,
+                                                                                                                                                                     magicSkillDataOption))))) ->
         VocationList.VocationMsgAtPosition(
             pos1,
             Vocation.MagicVocationMsg(
                 MagicVocation.MagicVocationSkillsMsg(
-                    MagicVocationSkills.InsertSkill(
+                    MagicVocationSkills.InsertMagicVocationSkill(
                         skillName,
                         vocationGoverningAttributesOption,
                         Some dicePoolCalculationData,
@@ -129,16 +129,20 @@ let update msg (model: Character) =
 
         match msg with
         | VocationMsgAtPosition(position,
-                                MundaneVocationMsg(MundaneVocationSkillsMsg(InsertSkill(skillName,
-                                                                                        _,
-                                                                                        Some weaponSkillDataMap)))) ->
+                                MundaneVocationMsg(MundaneVocationSkillsMsg(InsertMundaneVocationSkill(skillName,
+                                                                                                       _,
+                                                                                                       Some weaponSkillDataMap)))) ->
             let newVocationList =
                 VocationList.update
                     (VocationMsgAtPosition(
                         position,
                         MundaneVocationMsg(
                             MundaneVocationSkillsMsg(
-                                InsertSkill(skillName, Some dicePoolCalculationData, Some weaponSkillDataMap)
+                                InsertMundaneVocationSkill(
+                                    skillName,
+                                    Some dicePoolCalculationData,
+                                    Some weaponSkillDataMap
+                                )
                             )
                         )
                     ))

@@ -62,18 +62,39 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
                 VocationList.InsertVocation(x, y, z, Some model.fogentRoleplayData.magicSystemMap)
             ))
             |> temp
+
         | Character.VocationListMsg(VocationList.VocationMsgAtPosition(pos1,
-                                                                       Vocation.MagicVocationMsg(MagicVocation.MagicVocationSkillsMsg(MagicVocationSkills.InsertSkill(skillName,
-                                                                                                                                                                      vocationGoverningAttributesOption,
-                                                                                                                                                                      dicePoolCalculationOption,
-                                                                                                                                                                      _,
-                                                                                                                                                                      magicSkillDataOption))))) ->
+                                                                       Vocation.MundaneVocationMsg(MundaneVocation.MundaneVocationSkillsMsg(MundaneVocationSkills.InsertMundaneVocationSkill(skillName,
+                                                                                                                                                                                             dicePoolCalculationDataOption,
+                                                                                                                                                                                             _))))) ->
+            Character.VocationListMsg(
+                VocationList.VocationMsgAtPosition(
+                    pos1,
+                    Vocation.MundaneVocationMsg(
+                        MundaneVocation.MundaneVocationSkillsMsg(
+                            MundaneVocationSkills.InsertMundaneVocationSkill(
+                                skillName,
+                                dicePoolCalculationDataOption,
+                                Some model.fogentRoleplayData.weaponSkillDataMap
+                            )
+                        )
+                    )
+                )
+            )
+            |> temp
+
+        | Character.VocationListMsg(VocationList.VocationMsgAtPosition(pos1,
+                                                                       Vocation.MagicVocationMsg(MagicVocation.MagicVocationSkillsMsg(MagicVocationSkills.InsertMagicVocationSkill(skillName,
+                                                                                                                                                                                   vocationGoverningAttributesOption,
+                                                                                                                                                                                   dicePoolCalculationOption,
+                                                                                                                                                                                   _,
+                                                                                                                                                                                   magicSkillDataOption))))) ->
             Character.VocationListMsg(
                 VocationList.VocationMsgAtPosition(
                     pos1,
                     Vocation.MagicVocationMsg(
                         MagicVocation.MagicVocationSkillsMsg(
-                            MagicVocationSkills.InsertSkill(
+                            MagicVocationSkills.InsertMagicVocationSkill(
                                 skillName,
                                 vocationGoverningAttributesOption,
                                 dicePoolCalculationOption,
@@ -85,6 +106,7 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
                 )
             )
             |> temp
+
         | Character.EffectListMsg(EffectList.Insert(effectName, _)) ->
 
             {

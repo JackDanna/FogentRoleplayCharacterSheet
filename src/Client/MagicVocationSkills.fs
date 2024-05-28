@@ -10,7 +10,7 @@ type Msg =
     | ModifySkillAtPosition of int * MagicVocationSkill.Msg
     | CalculateDicePools of DicePoolCalculationData
     | CheckIfLevelCapExceededForAll of Skill.CheckIfLevelCapExceeded
-    | InsertSkill of
+    | InsertMagicVocationSkill of
         string *
         option<AttributeName Set> *
         option<DicePoolCalculationData> *
@@ -38,11 +38,11 @@ let update msg (model: MagicVocationSkill Set) =
     | CheckIfLevelCapExceededForAll msgData ->
         model
         |> Set.map (fun skill -> MagicVocationSkill.update (MagicVocationSkill.CheckIfLevelCapExceeded msgData) skill)
-    | InsertSkill(skillName,
-                  Some vocationGoverningAttributeNames,
-                  Some dicePoolCalculationData,
-                  Some weaponSkillDataMap,
-                  Some magicSkillDataMap) ->
+    | InsertMagicVocationSkill(skillName,
+                               Some vocationGoverningAttributeNames,
+                               Some dicePoolCalculationData,
+                               Some weaponSkillDataMap,
+                               Some magicSkillDataMap) ->
 
         match magicSkillDataMap.TryFind skillName with
         | Some magicSkillData ->
@@ -73,7 +73,7 @@ let view attributeNameSet weaponSkillNames model (dispatch: Msg -> unit) =
 
         List.append x [
             ViewUtils.textInputWithDropdownSet
-                (fun input -> InsertSkill(input, None, None, None, None) |> dispatch)
+                (fun input -> InsertMagicVocationSkill(input, None, None, None, None) |> dispatch)
                 weaponSkillNames
                 "mundaneVocationSkills"
         ]

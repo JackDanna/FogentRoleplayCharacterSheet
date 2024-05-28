@@ -46,12 +46,12 @@ let update msg (model: MagicVocation) =
     | MagicVocationSkillsMsg msg ->
         let temp msg =
             match msg with
-            | MagicVocationSkills.InsertSkill(name,
-                                              _,
-                                              dicePoolCalculationDataOption,
-                                              weaponSkillDataOption,
-                                              magicSkillDataMapOption) ->
-                MagicVocationSkills.InsertSkill(
+            | MagicVocationSkills.InsertMagicVocationSkill(name,
+                                                           _,
+                                                           dicePoolCalculationDataOption,
+                                                           weaponSkillDataOption,
+                                                           magicSkillDataMapOption) ->
+                MagicVocationSkills.InsertMagicVocationSkill(
                     name,
                     Some model.vocationStat.governingAttributeNameSet,
                     dicePoolCalculationDataOption,
