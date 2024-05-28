@@ -69,47 +69,6 @@ let update msg (model: Character) =
                 vocationList =
                     VocationList.update (VocationList.CalculateDicePools newDicePoolCalculationData) model.vocationList
         }
-    // | ModifyAttributeAndCoreSkillsList(pos1, tempMsg) ->
-    //     match tempMsg with
-    //     | CoreSkillListMsg(ModifiedCoreSkillAtPosition(pos2, SkillMsg(ModifySkillLevel(x, y, z, _)))) -> {
-    //         model with
-    //             attributeAndCoreSkillsList =
-    //                 AttributeAndCoreSkillsList.update
-    //                     (ModifyAttributeAndCoreSkillsList(
-    //                         pos1,
-    //                         CoreSkillListMsg(
-    //                             ModifiedCoreSkillAtPosition(
-    //                                 pos2,
-    //                                 SkillMsg(ModifySkillLevel(x, y, z, Some dicePoolCalculationData))
-    //                             )
-    //                         )
-    //                     ))
-    //                     model.attributeAndCoreSkillsList
-    //       }
-
-    //     | AttributeMsg(msg, _) ->
-    //         let newAttributeAndCoreSkillsList =
-    //             AttributeAndCoreSkillsList.update
-    //                 (ModifyAttributeAndCoreSkillsList(pos1, AttributeMsg(msg, Some dicePoolCalculationData.effects)))
-    //                 model.attributeAndCoreSkillsList
-
-    //         {
-    //             model with
-    //                 attributeAndCoreSkillsList = newAttributeAndCoreSkillsList
-    //                 vocationList =
-    //                     VocationList.update
-    //                         (VocationList.CalculateDicePools {
-    //                             dicePoolCalculationData with
-    //                                 attributes = attributeAndCoreSkillsSetToAttributes newAttributeAndCoreSkillsList
-    //                         })
-    //                         model.vocationList
-    //         }
-    //     | _ -> model
-
-    // | _ -> {
-    //     model with
-    //         attributeAndCoreSkillsList = AttributeAndCoreSkillsList.update msg model.attributeAndCoreSkillsList
-    //   }
 
     | CoreSkillsMsg msg -> {
         model with
