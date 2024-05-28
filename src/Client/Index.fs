@@ -41,9 +41,6 @@ let init () : Model * Cmd<Msg> =
 
     Cmd.OfAsync.perform fogentRoleplayDataApi.getInitData () GotInitData
 
-// open Character
-// open VocationList
-
 let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
     match msg with
     | CharacterMsg characterMsg ->
