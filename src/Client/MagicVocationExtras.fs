@@ -138,7 +138,7 @@ let view attributeNameSet (weaponSkillNames) (model: MagicVocationExtras) dispat
     @ [
         Bulma.columns [
             Bulma.column [ prop.text model.magicSystem.resourceName ]
-            Bulma.column [ prop.text model.magicSystem.governingCoreSkill ]
+            // Bulma.column [ prop.text model.magicSystem.governingCoreSkill ]
             Bulma.column [
                 Bulma.input.number [
                     prop.min 0
@@ -147,10 +147,10 @@ let view attributeNameSet (weaponSkillNames) (model: MagicVocationExtras) dispat
                     prop.onChange (fun (num: int) -> dispatch (SetCurrentMagicResource(uint num)))
                 ]
             ]
-            Bulma.column [
-                sprintf "CoreSkillResourcePool: %d" (model.coreSkillResourcePool) |> prop.text
-            ]
-            Bulma.column [ sprintf "VocationResourcePool: %d" (model.vocationResourcePool) |> prop.text ]
+            // Bulma.column [
+            //     sprintf "CoreSkillResourcePool: %d" (model.coreSkillResourcePool) |> prop.text
+            // ]
+            // Bulma.column [ sprintf "VocationResourcePool: %d" (model.vocationResourcePool) |> prop.text ]
             Bulma.column [
                 sprintf "Max: %d" (model.vocationResourcePool + model.coreSkillResourcePool)
                 |> prop.text
