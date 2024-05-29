@@ -2,15 +2,20 @@ module Vocation
 
 open FogentRoleplayLib.Vocation
 open FogentRoleplayLib.DicePoolCalculation
+open FogentRoleplayLib.MagicSystem
 
 type Msg =
     | VocationStatMsg of VocationStat.Msg
     | MundaneOrMagicVocationExtrasMsg of MundaneOrMagicVocationExtras.Msg
     | CalculateDicePools of DicePoolCalculationData
 
-let init vocationName coreSkillMap dicePoolCalculationData magicSystemMap : Vocation =
+let init vocationName coreSkillMap dicePoolCalculationData (magicSystemMap: Map<string, MagicSystem>) : Vocation =
+    let vocationStat =
+        match magicSystemMap.TryFind vocationName with
+        | Some magicSystem ->
+            VocationStat.init vocationName magicSystem.vocationGoverningAttributeSet dicePoolCalculationData
 
-    let vocationStat = VocationStat.init vocationName Set.empty dicePoolCalculationData
+        | None -> VocationStat.init vocationName Set.empty dicePoolCalculationData
 
     {
         vocationStat = vocationStat
