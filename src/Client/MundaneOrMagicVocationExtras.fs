@@ -9,6 +9,7 @@ type Msg =
     | MundaneVocationSkillsMsg of MundaneVocationSkills.Msg
     | MagicVocationExtrasMsg of MagicVocationExtras.Msg
     | CalculateDicePools of DicePoolCalculationData
+    | RecalculateVocationResourcePool of MagicVocationExtras.RecalculateVocationResourcePoolMsg
 
 let init vocationStat coreSkillMap (magicSystemMap: Map<string, MagicSystem>) =
 
@@ -24,20 +25,23 @@ let update msg (model: MundaneOrMagicVocationExtras) =
     match msg, model with
     | MundaneVocationSkillsMsg msg, MundaneVocationExtras mundaneVocation ->
         MundaneVocationSkills.update msg mundaneVocation |> MundaneVocationExtras
+
     | MagicVocationExtrasMsg msg, MagicVocationExtras magicVocation ->
         MagicVocationExtras.update msg magicVocation |> MagicVocationExtras
-    | CalculateDicePools dicePoolCalculationData, mundaneOrMagicVocationExtras ->
-        match mundaneOrMagicVocationExtras with
-        | MundaneVocationExtras mundaneVocation ->
-            MundaneVocationSkills.update
-                (MundaneVocationSkills.CalculateDicePools dicePoolCalculationData)
-                mundaneVocation
-            |> MundaneVocationExtras
-        | MagicVocationExtras magicVocation ->
-            MagicVocationExtras.update
-                (MagicVocationExtras.CalculateMagicVocationSkillDicePools dicePoolCalculationData)
-                magicVocation
-            |> MagicVocationExtras
+
+    | CalculateDicePools dicePoolCalculationData, MundaneVocationExtras mundaneVocation ->
+        MundaneVocationSkills.update (MundaneVocationSkills.CalculateDicePools dicePoolCalculationData) mundaneVocation
+        |> MundaneVocationExtras
+
+    | CalculateDicePools dicePoolCalculationData, MagicVocationExtras magicVocation ->
+        MagicVocationExtras.update
+            (MagicVocationExtras.CalculateMagicVocationSkillDicePools dicePoolCalculationData)
+            magicVocation
+        |> MagicVocationExtras
+
+    | RecalculateVocationResourcePool msg, MagicVocationExtras magicVocation ->
+        MagicVocationExtras.update (MagicVocationExtras.RecalculateVocationResourcePool msg) magicVocation
+        |> MagicVocationExtras
 
     | _, _ -> model
 

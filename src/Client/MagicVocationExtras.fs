@@ -9,11 +9,13 @@ open FogentRoleplayLib.DicePool
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.ZeroToFive
 
+type RecalculateVocationResourcePoolMsg = ZeroToFive * DicePool
+
 type Msg =
     | MagicVocationSkillsMsg of MagicVocationSkills.Msg
     | SetCurrentMagicResource of uint
     | CalculateMagicVocationSkillDicePools of DicePoolCalculationData
-    | RecalculateVocationResourcePool of ZeroToFive * DicePool
+    | RecalculateVocationResourcePool of RecalculateVocationResourcePoolMsg
 
 let init
     (coreSkillMap: Map<string, Skill>)

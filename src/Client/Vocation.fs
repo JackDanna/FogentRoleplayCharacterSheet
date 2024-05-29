@@ -37,17 +37,12 @@ let update (msg: Msg) (model: Vocation) =
             model with
                 vocationStat = vocationStat
                 mundaneOrMagicVocationExtras =
-                    match model.mundaneOrMagicVocationExtras with
-                    | MagicVocationExtras _ ->
-                        MundaneOrMagicVocationExtras.update
-                            (MundaneOrMagicVocationExtras.MagicVocationExtrasMsg(
-                                MagicVocationExtras.RecalculateVocationResourcePool(
-                                    vocationStat.level,
-                                    vocationStat.dicePool
-                                )
-                            ))
-                            model.mundaneOrMagicVocationExtras
-                    | MundaneVocationExtras _ -> model.mundaneOrMagicVocationExtras
+                    MundaneOrMagicVocationExtras.update
+                        (MundaneOrMagicVocationExtras.RecalculateVocationResourcePool(
+                            vocationStat.level,
+                            vocationStat.dicePool
+                        ))
+                        model.mundaneOrMagicVocationExtras
         }
     | VocationStatMsg msg -> {
         model with
