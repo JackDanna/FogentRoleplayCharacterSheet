@@ -142,6 +142,7 @@ let view attributeNameSet (weaponSkillNames) (model: MagicVocationExtras) dispat
             Bulma.column [
                 Bulma.input.number [
                     prop.min 0
+                    prop.max (int (model.coreSkillResourcePool + model.vocationResourcePool))
                     prop.value (int model.currentMagicResource)
                     prop.onChange (fun (num: int) -> dispatch (SetCurrentMagicResource(uint num)))
                 ]
