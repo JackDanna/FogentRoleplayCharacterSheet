@@ -73,9 +73,16 @@ let update (msg: Msg) (model: Vocation) =
         {
             vocationStat = newVocationStat
             mundaneOrMagicVocationExtras =
-                MundaneOrMagicVocationExtras.update
-                    (MundaneOrMagicVocationExtras.CalculateDicePools dicePoolCalculationData)
-                    model.mundaneOrMagicVocationExtras
+                model.mundaneOrMagicVocationExtras
+                |> MundaneOrMagicVocationExtras.update (
+                    MundaneOrMagicVocationExtras.CalculateDicePools dicePoolCalculationData
+                )
+                |> MundaneOrMagicVocationExtras.update (
+                    MundaneOrMagicVocationExtras.RecalculateVocationResourcePool(
+                        newVocationStat.level,
+                        newVocationStat.dicePool
+                    )
+                )
         }
 
 open Feliz
