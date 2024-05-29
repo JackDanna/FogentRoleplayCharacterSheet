@@ -42,7 +42,6 @@ let init (coreSkillDataSet: CoreSkillData Set) =
 open Skills
 open VocationList
 open Vocation
-open MundaneVocationSkills
 
 let update msg (model: Character) =
 
