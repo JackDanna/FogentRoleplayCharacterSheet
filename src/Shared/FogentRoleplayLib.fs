@@ -1471,7 +1471,7 @@ module MagicResourcePool =
 
     let determineGoverningCoreSkillLevelFloatForCalc governingCoreSkillLevel =
         match governingCoreSkillLevel with
-        | NegOne -> 0.0
+        | Neg1To5.NegOne -> 0.0
         | Neg1To5.Zero -> 0.5
         | positiveLevel -> neg1To5ToFloat positiveLevel
 

@@ -75,7 +75,17 @@ let update msg (model: Character) =
                 attributes = newAttributes
                 coreSkills = newCoreSkills
                 vocationList =
-                    VocationList.update (VocationList.CalculateDicePools newDicePoolCalculationData) model.vocationList
+                    model.vocationList
+                    |> VocationList.update (VocationList.CalculateDicePools newDicePoolCalculationData)
+                    |> VocationList.update (
+                        VocationMsgForAll(
+                            MundaneOrMagicVocationExtrasMsg(
+                                MundaneOrMagicVocationExtras.RecalculateCoreSkillResourcePool(
+                                    coreSkillToMap newCoreSkills
+                                )
+                            )
+                        )
+                    )
                 combatSpeeds =
                     CombatSpeeds.update
                         (CombatSpeeds.RecalculateAllCombatSpeeds(newCoreSkills, newAttributes))
