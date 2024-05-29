@@ -47,6 +47,6 @@ let coreSkillsView model (dispatch: Msg -> unit) isThisAttributeNameContiainedOn
     |> Set.toList
     |> List.mapi (fun index (coreSkill: FogentRoleplayLib.Skill.Skill) ->
         if coreSkill.governingAttributeNames.Contains isThisAttributeNameContiainedOnSkill then
-            Skill.view Set.empty coreSkill (fun msg -> ModifySkillAtPosition(index, msg) |> dispatch) false true
+            Skill.view Set.empty coreSkill (fun msg -> ModifySkillAtPosition(index, msg) |> dispatch) false false
         else
             Html.none)
