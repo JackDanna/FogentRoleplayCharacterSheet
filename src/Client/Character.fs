@@ -154,6 +154,18 @@ let update msg (model: Character) =
                     model.vocationList
       }
 
+    // Checking for ToggleGoverningAttribute
+    | VocationListMsg(VocationMsgAtPosition(pos1, VocationStatMsg(VocationStat.ToggleGoveringAttribute(msg, _)))) -> {
+        model with
+            vocationList =
+                VocationList.update
+                    (VocationMsgAtPosition(
+                        pos1,
+                        VocationStatMsg(VocationStat.ToggleGoveringAttribute(msg, Some dicePoolCalculationData))
+                    ))
+                    model.vocationList
+      }
+
     // Checking for InsertMundaneVocationSkill
     | VocationListMsg(VocationMsgAtPosition(position,
                                             Vocation.MundaneOrMagicVocationExtrasMsg(MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg(MundaneVocationSkills.InsertMundaneVocationSkill(name,
