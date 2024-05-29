@@ -1479,7 +1479,7 @@ module MagicResourcePool =
         governingCoreSkillDicePoolSize
         |> float
         |> (*) (determineGoverningCoreSkillLevelFloatForCalc governingCoreSkillLevel)
-        |> (/) 2.0
+        |> (*) 0.5
         |> Math.Floor
         |> uint
 
