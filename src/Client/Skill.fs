@@ -137,3 +137,6 @@ let view attributeNameSet (model: Skill) dispatch disableChangeLevel governingSk
         Bulma.column [ model.dicePool |> dicePoolToString |> prop.text ]
     ]
     |> Bulma.columns
+
+let coreSkillView model dispatch =
+    view Set.empty model dispatch false false
