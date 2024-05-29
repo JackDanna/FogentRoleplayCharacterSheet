@@ -27,11 +27,19 @@ let update msg (model: VocationStat) =
 
     match msg with
     | SetName newName -> { model with name = newName }
-    | ZeroToFiveMsg(msg, Some dicePoolCalculationData) -> {
-        model with
-            level = ZeroToFive.update msg model.level
-            dicePool = temp dicePoolCalculationData
-      }
+    | ZeroToFiveMsg(msg, Some dicePoolCalculationData) ->
+        let newLevel = ZeroToFive.update msg model.level
+
+        {
+            model with
+                level = newLevel
+                dicePool =
+                    calculateVocationStatDicePool
+                        model.name
+                        newLevel
+                        model.governingAttributeNameSet
+                        dicePoolCalculationData
+        }
     | ToggleGoveringAttribute(newAttributeName, Some dicePoolCalculationData) ->
         let newGoverningAttributeNameSet =
             toggleAttributeNameSet model.governingAttributeNameSet newAttributeName
