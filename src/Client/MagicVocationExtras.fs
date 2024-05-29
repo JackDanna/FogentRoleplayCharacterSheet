@@ -78,14 +78,17 @@ let update msg (model: MagicVocationExtras) =
                 magicVocationSkills = MagicVocationSkills.update (temp msg) model.magicVocationSkills
         }
 
-    | SetCurrentMagicResource newCurrentMagicResource -> {
-        model with
-            currentMagicResource =
-                if newCurrentMagicResource > model.coreSkillResourcePool then
-                    model.coreSkillResourcePool
-                else
-                    newCurrentMagicResource
-      }
+    | SetCurrentMagicResource newCurrentMagicResource ->
+        let magicResourcePool = model.coreSkillResourcePool + model.vocationResourcePool
+
+        {
+            model with
+                currentMagicResource =
+                    if newCurrentMagicResource > magicResourcePool then
+                        magicResourcePool
+                    else
+                        newCurrentMagicResource
+        }
     | CalculateMagicVocationSkillDicePools dicePoolCalculationData -> {
         model with
             magicVocationSkills =
