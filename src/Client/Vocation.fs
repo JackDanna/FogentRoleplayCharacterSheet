@@ -57,13 +57,17 @@ let update (msg: Msg) (model: Vocation) =
         model with
             mundaneOrMagicVocationExtras = MundaneOrMagicVocationExtras.update msg model.mundaneOrMagicVocationExtras
       }
-    | CalculateDicePools dicePoolCalculationData -> {
-        vocationStat = VocationStat.update (VocationStat.CalculateDicePool dicePoolCalculationData) model.vocationStat
-        mundaneOrMagicVocationExtras =
-            MundaneOrMagicVocationExtras.update
-                (MundaneOrMagicVocationExtras.CalculateDicePools dicePoolCalculationData)
-                model.mundaneOrMagicVocationExtras
-      }
+    | CalculateDicePools dicePoolCalculationData ->
+        let newVocationStat =
+            VocationStat.update (VocationStat.CalculateDicePool dicePoolCalculationData) model.vocationStat
+
+        {
+            vocationStat = newVocationStat
+            mundaneOrMagicVocationExtras =
+                MundaneOrMagicVocationExtras.update
+                    (MundaneOrMagicVocationExtras.CalculateDicePools dicePoolCalculationData)
+                    model.mundaneOrMagicVocationExtras
+        }
 
 open Feliz
 open Feliz.Bulma
