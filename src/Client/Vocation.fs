@@ -44,6 +44,20 @@ let update (msg: Msg) (model: Vocation) =
                         ))
                         model.mundaneOrMagicVocationExtras
         }
+    | VocationStatMsg(VocationStat.Msg.ZeroToFiveMsg(msg, dicePoolCalculationData)) ->
+        let newVocationStat =
+            VocationStat.update (VocationStat.Msg.ZeroToFiveMsg(msg, dicePoolCalculationData)) model.vocationStat
+
+        {
+            vocationStat = newVocationStat
+            mundaneOrMagicVocationExtras =
+                MundaneOrMagicVocationExtras.update
+                    (MundaneOrMagicVocationExtras.RecalculateVocationResourcePool(
+                        newVocationStat.level,
+                        newVocationStat.dicePool
+                    ))
+                    model.mundaneOrMagicVocationExtras
+        }
     | VocationStatMsg msg -> {
         model with
             vocationStat = VocationStat.update msg model.vocationStat
