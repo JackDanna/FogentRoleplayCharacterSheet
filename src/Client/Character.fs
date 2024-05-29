@@ -98,6 +98,16 @@ let update msg (model: Character) =
                     CombatSpeeds.update
                         (CombatSpeeds.RecalculateAllCombatSpeeds(newCoreSkills, model.attributes))
                         model.combatSpeeds
+                vocationList =
+                    VocationList.update
+                        (VocationMsgForAll(
+                            MundaneOrMagicVocationExtrasMsg(
+                                MundaneOrMagicVocationExtras.RecalculateCoreSkillResourcePool(
+                                    coreSkillToMap newCoreSkills
+                                )
+                            )
+                        ))
+                        model.vocationList
         })
 
     // Checking for InsertMagicVocationSkill

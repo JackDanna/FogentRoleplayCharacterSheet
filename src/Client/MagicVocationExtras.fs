@@ -10,12 +10,25 @@ open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.ZeroToFive
 
 type RecalculateVocationResourcePoolMsg = ZeroToFive * DicePool
+type RecalculateCoreSkillResourcePoolMsg = Map<string, Skill>
 
 type Msg =
     | MagicVocationSkillsMsg of MagicVocationSkills.Msg
     | SetCurrentMagicResource of uint
     | CalculateMagicVocationSkillDicePools of DicePoolCalculationData
     | RecalculateVocationResourcePool of RecalculateVocationResourcePoolMsg
+    | RecalculateCoreSkillResourePool of Map<string, Skill>
+
+let tryFindCoreSkillInMapWithDefault (coreSkillMap: Map<string, Skill>) governingCoreSkillName =
+    match coreSkillMap.TryFind governingCoreSkillName with
+    | None -> (Neg1To5.Zero, emptyDicePool)
+    | Some coreSkill -> (coreSkill.level, coreSkill.dicePool)
+
+let checkForResourcePoolOverflow resourcePool currentMagicResource =
+    if resourcePool < currentMagicResource then
+        resourcePool
+    else
+        currentMagicResource
 
 let init
     (coreSkillMap: Map<string, Skill>)
@@ -25,9 +38,7 @@ let init
     : MagicVocationExtras =
 
     let governingCoreSkillLevel, governingCoreSkillDicePool =
-        match coreSkillMap.TryFind magicSystem.governingCoreSkill with
-        | None -> (Neg1To5.Zero, emptyDicePool)
-        | Some coreSkill -> (coreSkill.level, coreSkill.dicePool)
+        tryFindCoreSkillInMapWithDefault coreSkillMap magicSystem.governingCoreSkill
 
     let vocationResourcePool =
         calculateVocationMagicResource vocationStatLevel (dicePoolToNumDice vocationStatDicePool)
@@ -86,15 +97,28 @@ let update msg (model: MagicVocationExtras) =
         let newVocationResourcePool =
             calculateVocationMagicResource vocationLevel (dicePoolToNumDice vocationDicePool)
 
-        let newResourcePool = (newVocationResourcePool + model.coreSkillResourcePool)
-
         {
             model with
                 vocationResourcePool = newVocationResourcePool
                 currentMagicResource =
-                    if newResourcePool < model.currentMagicResource then
-                        newResourcePool
-                    else
+                    checkForResourcePoolOverflow
+                        (newVocationResourcePool + model.coreSkillResourcePool)
+                        model.currentMagicResource
+        }
+
+    | RecalculateCoreSkillResourePool coreSkillMap ->
+        let governingCoreSkillLevel, governingCoreSkillDicePool =
+            tryFindCoreSkillInMapWithDefault coreSkillMap model.magicSystem.governingCoreSkill
+
+        let newCoreSkillResourcePool =
+            calcGoverningSkillMagicResource governingCoreSkillLevel (dicePoolToNumDice governingCoreSkillDicePool)
+
+        {
+            model with
+                coreSkillResourcePool = newCoreSkillResourcePool
+                currentMagicResource =
+                    checkForResourcePoolOverflow
+                        (model.vocationResourcePool + newCoreSkillResourcePool)
                         model.currentMagicResource
         }
 

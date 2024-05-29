@@ -10,6 +10,7 @@ type Msg =
     | MagicVocationExtrasMsg of MagicVocationExtras.Msg
     | CalculateDicePools of DicePoolCalculationData
     | RecalculateVocationResourcePool of MagicVocationExtras.RecalculateVocationResourcePoolMsg
+    | RecalculateCoreSkillResourcePool of MagicVocationExtras.RecalculateCoreSkillResourcePoolMsg
 
 let init vocationStat coreSkillMap (magicSystemMap: Map<string, MagicSystem>) =
 
@@ -41,6 +42,10 @@ let update msg (model: MundaneOrMagicVocationExtras) =
 
     | RecalculateVocationResourcePool msg, MagicVocationExtras magicVocation ->
         MagicVocationExtras.update (MagicVocationExtras.RecalculateVocationResourcePool msg) magicVocation
+        |> MagicVocationExtras
+
+    | RecalculateCoreSkillResourcePool msg, MagicVocationExtras magicVocation ->
+        MagicVocationExtras.update (MagicVocationExtras.RecalculateCoreSkillResourePool msg) magicVocation
         |> MagicVocationExtras
 
     | _, _ -> model
