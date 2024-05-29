@@ -1,6 +1,6 @@
-module MagicVocation
+module MagicVocationExtras
 
-open FogentRoleplayLib.MagicVocation
+open FogentRoleplayLib.MagicVocationExtras
 open FogentRoleplayLib.MagicResourcePool
 open FogentRoleplayLib.Skill
 open FogentRoleplayLib.Neg1To5
@@ -9,13 +9,16 @@ open FogentRoleplayLib.DicePool
 open FogentRoleplayLib.DicePoolCalculation
 
 type Msg =
-    | MundaneVocationMsg of MundaneVocation.Msg
-    | MagicVocationSkillListMsg of MagicSkillList.Msg
+    | MagicVocationSkillsMsg of MagicVocationSkills.Msg
     | SetCurrentMagicResource of uint
     | CalculateMagicVocationSkillDicePools of DicePoolCalculationData
 
-let init name (coreSkillMap: Map<string, Skill>) (magicSystem: MagicSystem) dicePoolCalculationData : MagicVocation =
-    let mundaneVocation = MundaneVocation.init name dicePoolCalculationData
+let init
+    (coreSkillMap: Map<string, Skill>)
+    (magicSystem: MagicSystem)
+    vocationStatLevel
+    vocationStatDicePool
+    : MagicVocationExtras =
 
     let governingCoreSkillLevel, governingCoreSkillDicePoolSize =
         match coreSkillMap.TryFind magicSystem.governingCoreSkill with
@@ -24,40 +27,40 @@ let init name (coreSkillMap: Map<string, Skill>) (magicSystem: MagicSystem) dice
 
     let magicResourceCap =
         calculateMagicResourcePool
-            mundaneVocation.vocationStat.level
-            (dicePoolToNumDice mundaneVocation.vocationStat.dicePool)
+            vocationStatLevel
+            (dicePoolToNumDice vocationStatDicePool)
             governingCoreSkillLevel
             governingCoreSkillDicePoolSize
 
     {
+        magicVocationSkills = MagicVocationSkills.init ()
         currentMagicResource = magicResourceCap
         magicResourceCap = magicResourceCap
         magicSystem = magicSystem
-        mundaneVocation = mundaneVocation
-        magicVocationSkillSet = Set.empty
     }
 
-let update msg (model: MagicVocation) =
+let update msg (model: MagicVocationExtras) =
     match msg with
-    | MundaneVocationMsg msg -> {
-        model with
-            mundaneVocation = MundaneVocation.update msg model.mundaneVocation
-      }
-    | MagicVocationSkillListMsg msg ->
+    | MagicVocationSkillsMsg msg ->
         let temp msg =
             match msg with
-            | MagicSkillList.InsertMagicSkill(name, _, dicePoolCalculationDataOption, magicSkillDataMapOption) ->
-                MagicSkillList.InsertMagicSkill(
+            | MagicVocationSkills.InsertMagicVocationSkill(name,
+                                                           _,
+                                                           dicePoolCalculationDataOption,
+                                                           weaponSkillDataOption,
+                                                           _) ->
+                MagicVocationSkills.InsertMagicVocationSkill(
                     name,
-                    Some model.mundaneVocation.vocationStat.governingAttributeNameSet,
+                    Some model.magicSystem.vocationGoverningAttributeSet,
                     dicePoolCalculationDataOption,
-                    magicSkillDataMapOption
+                    weaponSkillDataOption,
+                    Some model.magicSystem.magicSkillDataMap
                 )
             | _ -> msg
 
         {
             model with
-                magicVocationSkillSet = MagicSkillList.update (temp msg) model.magicVocationSkillSet
+                magicVocationSkills = MagicVocationSkills.update (temp msg) model.magicVocationSkills
         }
 
     | SetCurrentMagicResource newCurrentMagicResource -> {
@@ -70,21 +73,23 @@ let update msg (model: MagicVocation) =
       }
     | CalculateMagicVocationSkillDicePools dicePoolCalculationData -> {
         model with
-            mundaneVocation =
-                MundaneVocation.update
-                    (MundaneVocation.CalculateDicePools(dicePoolCalculationData))
-                    model.mundaneVocation
-            magicVocationSkillSet =
-                MagicSkillList.update
-                    (MagicSkillList.CalculateMagicSkillDicePool(dicePoolCalculationData))
-                    model.magicVocationSkillSet
+            magicVocationSkills =
+                MagicVocationSkills.update
+                    (MagicVocationSkills.CalculateDicePools(dicePoolCalculationData))
+                    model.magicVocationSkills
       }
 
 open Feliz
 open Feliz.Bulma
 
-let view attributeNameSet (weaponSkillNames) (model: MagicVocation) dispatch =
-    [
+let view attributeNameSet (weaponSkillNames) (model: MagicVocationExtras) dispatch =
+
+    MagicVocationSkills.view
+        attributeNameSet
+        weaponSkillNames
+        model.magicVocationSkills
+        (MagicVocationSkillsMsg >> dispatch)
+    @ [
         Bulma.columns [
             Bulma.column [ prop.text model.magicSystem.resourceName ]
             Bulma.column [
@@ -97,6 +102,3 @@ let view attributeNameSet (weaponSkillNames) (model: MagicVocation) dispatch =
             Bulma.column [ sprintf "Max: %d" model.magicResourceCap |> prop.text ]
         ]
     ]
-    |> List.append (
-        MundaneVocation.view attributeNameSet weaponSkillNames model.mundaneVocation (MundaneVocationMsg >> dispatch)
-    )

@@ -6,39 +6,54 @@ open FogentRoleplayLib.ZeroToFive
 open FogentRoleplayLib.Neg1To5
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.AttributeName
+open FogentRoleplayLib.StringUtils
+open FogentRoleplayLib.CoreSkillData
+
+type CheckIfLevelCapExceeded = ZeroToFive * DicePoolCalculationData
 
 type Msg =
-    | ModifySkillLevel of Neg1To5.Msg * option<ZeroToFive> * option<AttributeName Set> * option<DicePoolCalculationData>
-    | CalculateDicePool of AttributeName Set * DicePoolCalculationData
-    | CheckIfLevelCapExceeded of ZeroToFive * AttributeName Set * DicePoolCalculationData
+    | ModifySkillLevel of Neg1To5.Msg * option<ZeroToFive> * option<DicePoolCalculationData>
+    | CalculateDicePool of DicePoolCalculationData
+    | CheckIfLevelCapExceeded of CheckIfLevelCapExceeded
+    | ToggleGoverningAttribute of AttributeName * option<DicePoolCalculationData>
 
 let init = FogentRoleplayLib.Skill.init
+
+let initCoreSkill coreSkillData dicePoolCalculationData =
+    FogentRoleplayLib.Skill.init
+        coreSkillData.skillName
+        (Set.ofList [ coreSkillData.attributeName ])
+        dicePoolCalculationData
 
 let update msg (model: Skill) =
 
     match msg with
-    | ModifySkillLevel(neg1To5Msg, levelCapOption, Some governingAttributeNameSet, Some dicePoolCalculationData) ->
-        let newLevel = Neg1To5.update neg1To5Msg model.level
+    | ModifySkillLevel(neg1To5Msg, levelCapOption, Some dicePoolCalculationData) ->
+        let msgLevel = Neg1To5.update neg1To5Msg model.level
+
+        let newLevel =
+            match levelCapOption with
+            | Some levelCap ->
+                if (zeroToFiveToInt levelCap) < (neg1To5ToInt msgLevel) then
+                    model.level
+                else
+                    msgLevel
+            | None -> msgLevel
 
         {
             model with
-                level =
-                    match levelCapOption with
-                    | Some levelCap ->
-                        if (zeroToFiveToInt levelCap) < (neg1To5ToInt newLevel) then
-                            model.level
-                        else
-                            newLevel
-                    | None -> newLevel
-                dicePool = calculateSkillDicePool model.name newLevel governingAttributeNameSet dicePoolCalculationData
+                level = newLevel
+                dicePool =
+                    calculateSkillDicePool model.name newLevel model.governingAttributeNames dicePoolCalculationData
         }
-    | CalculateDicePool(governingAttributeSet, dicePoolCalculationData) ->
+    | CalculateDicePool dicePoolCalculationData ->
 
         {
             model with
-                dicePool = calculateSkillDicePool model.name model.level governingAttributeSet dicePoolCalculationData
+                dicePool =
+                    calculateSkillDicePool model.name model.level model.governingAttributeNames dicePoolCalculationData
         }
-    | CheckIfLevelCapExceeded(levelCap, governingAttributeSet, dicePoolCalculationData) ->
+    | CheckIfLevelCapExceeded(levelCap, dicePoolCalculationData) ->
         if (zeroToFiveToInt levelCap) < (neg1To5ToInt model.level) then
 
             let convertedLevelCap = levelCap |> zeroToFiveToNeg1To5
@@ -50,11 +65,22 @@ let update msg (model: Skill) =
                         calculateSkillDicePool
                             model.name
                             convertedLevelCap
-                            governingAttributeSet
+                            model.governingAttributeNames
                             dicePoolCalculationData
             }
         else
             model
+
+    | ToggleGoverningAttribute(newAttributeName, Some dicePoolCalculationData) ->
+        let newGoverningAttribteNameSet =
+            toggleAttributeNameSet model.governingAttributeNames newAttributeName
+
+        {
+            model with
+                governingAttributeNames = newGoverningAttribteNameSet
+                dicePool =
+                    calculateSkillDicePool model.name model.level newGoverningAttribteNameSet dicePoolCalculationData
+        }
 
     | _ -> model
 
@@ -63,17 +89,51 @@ let update msg (model: Skill) =
 open Feliz
 open Feliz.Bulma
 
-let view (model: Skill) dispatch disableChangeLevel governingSkillColumn =
-    [ Bulma.column [ prop.text model.name ] ]
-    @ match governingSkillColumn with
-      | Some column -> column |> List.singleton
-      | None -> List.Empty
-    @ [
+let governingAttributesToggle
+    (attributeNameSet: AttributeName Set)
+    (model: AttributeName Set)
+    dispatchToggleGoverningAttribute
+    =
+    Bulma.dropdown [
+        dropdown.isHoverable
+        prop.children [
+            Bulma.dropdownTrigger [ Bulma.button.button [ Html.span (stringSetToStringSeperatedByCommas model) ] ]
+            Bulma.dropdownMenu [
+
+                List.map
+                    (fun attributeName ->
+                        Bulma.dropdownItem.a [
+                            prop.onClick (fun _ -> dispatchToggleGoverningAttribute attributeName)
+                            prop.children [
+                                Bulma.columns [
+                                    Bulma.column [
+                                        Bulma.input.checkbox [
+                                            prop.isChecked (List.contains attributeName (List.ofSeq model))
+                                        ]
+                                    ]
+                                    Bulma.column [ prop.text attributeName ]
+                                ]
+                            ]
+                        ])
+                    (attributeNameSet |> List.ofSeq)
+                |> Bulma.dropdownContent
+            ]
+        ]
+    ]
+
+let view attributeNameSet (model: Skill) dispatch disableChangeLevel governingSkillColumn =
+    [
+        Bulma.column [ prop.text model.name ]
+        if governingSkillColumn then
+            Bulma.column [
+                governingAttributesToggle attributeNameSet model.governingAttributeNames (fun toggledAttributeName ->
+                    ToggleGoverningAttribute(toggledAttributeName, None) |> dispatch)
+            ]
+        else
+            Html.none
         Bulma.column [
-            Neg1To5.view
-                model.level
-                ((fun msg -> ModifySkillLevel(msg, None, None, None)) >> dispatch)
-                disableChangeLevel
+            Neg1To5.view model.level ((fun msg -> ModifySkillLevel(msg, None, None)) >> dispatch) disableChangeLevel
         ]
         Bulma.column [ model.dicePool |> dicePoolToString |> prop.text ]
     ]
+    |> Bulma.columns

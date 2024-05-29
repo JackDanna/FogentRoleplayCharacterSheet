@@ -29,11 +29,11 @@ let init () : Model * Cmd<Msg> =
         character = Character.init Set.empty
         fogentRoleplayData = {
             attributeNameSet = defaultAttributeSet
-            attributeAndCoreSkillDataSet = defaultCoreSkillList
+            coreSkillDataSet = defaultCoreSkillList
             itemStackMap = Map.empty
             weaponSpellSet = Set.empty
             magicSystemMap = Map.empty
-            weaponSkillData = Set.empty
+            weaponSkillDataMap = Map.empty
             effectMap = Map.empty
             combatSpeedCalculationMap = Map.empty
         }
@@ -44,19 +44,72 @@ let init () : Model * Cmd<Msg> =
 let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
     match msg with
     | CharacterMsg characterMsg ->
-        match characterMsg with
-        | Character.VocationListMsg(VocationList.InsertVocation(x, y, z, _)) ->
+
+        let temp msg =
             {
                 model with
-                    character =
-                        Character.update
-                            (Character.VocationListMsg(
-                                VocationList.InsertVocation(x, y, z, Some model.fogentRoleplayData.magicSystemMap)
-                            ))
-                            model.character
+                    character = Character.update msg model.character
             },
             Cmd.none
+
+        match characterMsg with
+        | Character.VocationListMsg(VocationList.InsertVocation(x, y, z, _)) ->
+
+            (Character.VocationListMsg(
+                VocationList.InsertVocation(x, y, z, Some model.fogentRoleplayData.magicSystemMap)
+            ))
+            |> temp
+
+        // Check for InsertMundaneVocationSkill
+        | Character.VocationListMsg(VocationList.VocationMsgAtPosition(pos1,
+                                                                       Vocation.MundaneOrMagicVocationExtrasMsg(MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg(MundaneVocationSkills.InsertMundaneVocationSkill(x,
+                                                                                                                                                                                                                       y,
+                                                                                                                                                                                                                       _))))) ->
+            Character.VocationListMsg(
+                VocationList.VocationMsgAtPosition(
+                    pos1,
+                    Vocation.MundaneOrMagicVocationExtrasMsg(
+                        MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg(
+                            MundaneVocationSkills.InsertMundaneVocationSkill(
+                                x,
+                                y,
+                                Some model.fogentRoleplayData.weaponSkillDataMap
+                            )
+                        )
+                    )
+                )
+            )
+            |> temp
+
+        // Check for InsertMagicVocationSkill
+        | Character.VocationListMsg(VocationList.VocationMsgAtPosition(pos1,
+                                                                       Vocation.MundaneOrMagicVocationExtrasMsg(MundaneOrMagicVocationExtras.MagicVocationExtrasMsg(MagicVocationExtras.MagicVocationSkillsMsg(MagicVocationSkills.InsertMagicVocationSkill(x,
+                                                                                                                                                                                                                                                            y,
+                                                                                                                                                                                                                                                            z,
+                                                                                                                                                                                                                                                            _,
+                                                                                                                                                                                                                                                            t)))))) ->
+            Character.VocationListMsg(
+                VocationList.VocationMsgAtPosition(
+                    pos1,
+                    Vocation.MundaneOrMagicVocationExtrasMsg(
+                        MundaneOrMagicVocationExtras.MagicVocationExtrasMsg(
+                            MagicVocationExtras.MagicVocationSkillsMsg(
+                                MagicVocationSkills.InsertMagicVocationSkill(
+                                    x,
+                                    y,
+                                    z,
+                                    Some model.fogentRoleplayData.weaponSkillDataMap,
+                                    t
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+            |> temp
+
         | Character.EffectListMsg(EffectList.Insert(effectName, _)) ->
+
             {
                 model with
                     character =
@@ -91,7 +144,7 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
         {
             model with
                 fogentRoleplayData = newFogentRoleplayData
-                character = Character.init newFogentRoleplayData.attributeAndCoreSkillDataSet
+                character = Character.init newFogentRoleplayData.coreSkillDataSet
         },
         Cmd.none
 
@@ -128,7 +181,7 @@ let view (model: Model) (dispatch: Msg -> unit) =
                     model.fogentRoleplayData.attributeNameSet
                     (model.fogentRoleplayData.itemStackMap.Keys |> Set.ofSeq)
                     (model.fogentRoleplayData.magicSystemMap.Keys |> Set.ofSeq)
-                    (model.fogentRoleplayData.weaponSkillData |> Set.map (_.name))
+                    (model.fogentRoleplayData.weaponSkillDataMap.Keys)
                     (model.fogentRoleplayData.effectMap.Keys |> Set.ofSeq)
                     (model.fogentRoleplayData.combatSpeedCalculationMap.Keys |> Set.ofSeq)
                     model.character

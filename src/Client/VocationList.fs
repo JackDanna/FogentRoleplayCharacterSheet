@@ -2,7 +2,6 @@ module VocationList
 
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.MagicSystem
-open FogentRoleplayLib.Vocation
 open FogentRoleplayLib.Skill
 
 type Msg =
@@ -27,18 +26,10 @@ let update msg model =
             else
                 vocation)
     | InsertVocation(vocationName, Some coreSkillMap, Some dicePoolCalculationData, Some magicSystemMap) ->
-        match magicSystemMap.TryFind vocationName with
-        | Some magicSystem ->
-            MagicVocation.init vocationName coreSkillMap magicSystem dicePoolCalculationData
-            |> MagicVocation
-            |> List.singleton
-            |> List.append model
+        Vocation.init vocationName coreSkillMap dicePoolCalculationData magicSystemMap
+        |> List.singleton
+        |> List.append model
 
-        | None ->
-            MundaneVocation.init vocationName dicePoolCalculationData
-            |> MundaneVocation
-            |> List.singleton
-            |> List.append model
     | Remove position -> List.removeAt position model
     | CalculateDicePools msg ->
         List.map (fun vocation -> Vocation.update (Vocation.CalculateDicePools(msg)) vocation) model

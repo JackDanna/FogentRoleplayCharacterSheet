@@ -837,6 +837,15 @@ module Attribute =
 module SkillName =
     type SkillName = string
 
+module CoreSkillData =
+    open AttributeName
+    open SkillName
+
+    type CoreSkillData = {
+        skillName: SkillName
+        attributeName: AttributeName
+    }
+
 module SpeedCalculation =
     open MathUtils
 
@@ -1364,79 +1373,24 @@ module Skill =
     open DicePool
     open SkillName
     open DicePoolCalculation
+    open AttributeName
 
     type Skill = {
         name: SkillName
         level: Neg1To5
+        governingAttributeNames: AttributeName Set
         dicePool: DicePool
     //effectDicePoolModList: DicePoolMod List
     }
 
-    let init name governingAttributeSet effects =
+    let init name governingAttributes dicePoolCalculationData =
         let level = Neg1To5.init ()
 
         {
             name = name
             level = level
-            dicePool = calculateSkillDicePool name level governingAttributeSet effects
-        }
-
-module CoreSkill =
-    open AttributeName
-    open Skill
-
-    type CoreSkill = {
-        skill: Skill
-        governingAttributeName: AttributeName
-    }
-
-module AttributeAndCoreSkillsData =
-    open AttributeName
-    open SkillName
-
-    type AttributeAndCoreSkillsData = {
-        coreSkillNameSet: SkillName Set
-        governingAttributeName: AttributeName
-    }
-
-module AttributeAndCoreSkills =
-    open Attribute
-    open CoreSkill
-
-    type AttributeAndCoreSkills = {
-        attributeStat: Attribute
-        coreSkills: CoreSkill Set
-    }
-
-    let attributeAndCoreSkillsSetToAttributes attributeAndCoreSkills =
-        attributeAndCoreSkills |> Set.map (_.attributeStat)
-
-    let attributeAndCoreSkillsSetToSkills attributeAndCoreSkillsSet =
-        attributeAndCoreSkillsSet
-        |> Set.map (_.coreSkills)
-        |> Set.unionMany
-        |> Set.map (_.skill)
-
-    let attributeAndCoreSkillsSetToSkillMap (attributeAndCoreSkillsSet: AttributeAndCoreSkills Set) =
-        attributeAndCoreSkillsSet
-        |> attributeAndCoreSkillsSetToSkills
-        |> Set.map (fun skill -> (skill.name, skill))
-        |> Map.ofSeq
-
-module VocationalSkill =
-    open Skill
-    open AttributeName
-
-    type VocationalSkill = {
-        skill: Skill
-        governingAttributeNames: AttributeName Set
-    }
-
-    let init governingAttributeSet dicePoolCalculationData skillName =
-
-        {
-            skill = Skill.init skillName governingAttributeSet dicePoolCalculationData
-            governingAttributeNames = governingAttributeSet
+            governingAttributeNames = governingAttributes
+            dicePool = calculateSkillDicePool name level governingAttributes dicePoolCalculationData
         }
 
 module WeaponSkillData =
@@ -1470,21 +1424,28 @@ module VocationStat =
         dicePool: DicePool
     }
 
-module MundaneVocationSkills =
-    open VocationalSkill
+module MundaneVocationSkill =
+    open Skill
 
-    type MundaneVocationSkills = {
-        vocationalSkills: VocationalSkill List
-        weaponSkillList: VocationalSkill List
-    }
+    type MundaneVocationSkill =
+        | VocationalSkill of Skill
+        | WeaponSkill of Skill
+
+    let mundaneVocationSkillToSkill mundaneVocationSkill =
+        match mundaneVocationSkill with
+        | VocationalSkill skill -> skill
+        | WeaponSkill skill -> skill
+
+    let mundaneVocationSkillsToSkills mundaneVocationSkills =
+        Set.map mundaneVocationSkillToSkill mundaneVocationSkills
 
 module MundaneVocation =
     open VocationStat
-    open MundaneVocationSkills
+    open MundaneVocationSkill
 
     type MundaneVocation = {
         vocationStat: VocationStat
-        mundaneVocationSkills: MundaneVocationSkills
+        mundaneVocationSkills: MundaneVocationSkill Set
     }
 
 // Magic
@@ -1529,8 +1490,7 @@ module MagicResourcePool =
         |> Math.Floor
         |> uint
 
-module MagicSkill =
-    open VocationalSkill
+module MagicSkillData =
     open DamageType
 
     type MagicSkillData = {
@@ -1540,14 +1500,9 @@ module MagicSkill =
         isRangeCapable: bool
     }
 
-    type MagicSkill = {
-        vocationalSkill: VocationalSkill
-        magicSkillData: MagicSkillData
-    }
-
 module MagicSystem =
     open AttributeName
-    open MagicSkill
+    open MagicSkillData
 
     type MagicSystem = {
         name: string
@@ -1555,37 +1510,51 @@ module MagicSystem =
         vocationGoverningAttributeSet: AttributeName Set
         resourceName: string
         governingCoreSkill: string
-        magicSkillDataSet: MagicSkillData Set
+        magicSkillDataMap: Map<string, MagicSkillData>
     }
 
-module MagicVocation =
-    open MundaneVocation
-    open MagicSystem
-    open MagicSkill
+module MagicVocationSkill =
+    open MundaneVocationSkill
+    open Skill
 
-    type MagicVocation = {
-        mundaneVocation: MundaneVocation
-        magicVocationSkillSet: MagicSkill Set
+    type MagicVocationSkill =
+        | MagicSkill of Skill
+        | MundaneVocationSkill of MundaneVocationSkill
+
+    let magicVocationSkillToSkill magicVocationSkill =
+        match magicVocationSkill with
+        | MagicSkill skill -> skill
+        | MundaneVocationSkill mundaneVocationSkill -> mundaneVocationSkillToSkill mundaneVocationSkill
+
+    let magicVocationSkillsToSkills magicVocationSkills =
+        Set.map magicVocationSkillToSkill magicVocationSkills
+
+module MagicVocationExtras =
+    open MagicSystem
+    open MagicVocationSkill
+
+    type MagicVocationExtras = {
+        magicVocationSkills: MagicVocationSkill Set
         magicSystem: MagicSystem
         magicResourceCap: uint
         currentMagicResource: uint
     }
 
+module MundaneOrMagicVocationExtras =
+    open MundaneVocationSkill
+    open MagicVocationExtras
+
+    type MundaneOrMagicVocationExtras =
+        | MundaneVocationExtras of MundaneVocationSkill Set
+        | MagicVocationExtras of MagicVocationExtras
+
 module Vocation =
-    open MundaneVocation
-    open MagicVocation
+    open VocationStat
+    open MundaneOrMagicVocationExtras
 
-    type Vocation =
-        | MundaneVocation of MundaneVocation
-        | MagicVocation of MagicVocation
-
-module Vocations =
-    open MundaneVocation
-    open MagicVocation
-
-    type Vocations = {
-        mundaneVocations: MundaneVocation List
-        magicVocations: MagicVocation List
+    type Vocation = {
+        vocationStat: VocationStat
+        mundaneOrMagicVocationExtras: MundaneOrMagicVocationExtras
     }
 
 module WeightClass =
@@ -1619,6 +1588,7 @@ module CombatRoll =
     open EngageableOpponents
     open Effect
     open DicePoolCalculation
+    open Skill
 
     type CombatRoll = {
         name: string
@@ -1632,7 +1602,6 @@ module CombatRoll =
         eoName: string option
     }
 
-    open VocationalSkill
     open ItemStack
 
     open WeaponResource
@@ -1736,8 +1705,8 @@ module CombatRoll =
 
     let createWeaponItemCombatRolls
         (equipmentList: ItemStack List)
-        (weaponSkillList: VocationalSkill List)
-        (weaponSkillDataSet: WeaponSkillData Set)
+        (weaponSkillList: Skill List)
+        (weaponSkillDataMap: Map<string, WeaponSkillData>)
         (dicePoolCalculationData: DicePoolCalculationData)
         : CombatRoll List =
 
@@ -1750,6 +1719,9 @@ module CombatRoll =
                     match effect with
                     | WeaponResource weaponResource -> [ weaponResource ]
                     | _ -> []))
+
+        let tryFindWeaponSkill weaponSkillName (skills: Skill List) =
+            skills |> List.tryFind (fun skill -> skill.name = weaponSkillName)
 
         equipmentList
         |> List.collect (fun itemStack ->
@@ -1775,39 +1747,18 @@ module CombatRoll =
 
         |> List.collect (fun (itemName, weapon, weaponResourceOption, itemTier) ->
 
-            let isWeaponNameInWeaponSkillData weaponName weaponSkillData =
-                weaponSkillData.governedWeapons |> Seq.contains weaponName
-
-            let weaponSkillDataOptionToWeaponSkillNameOption weaponSkillDataOption =
-                match weaponSkillDataOption with
-                | Some weaponSkillData -> Some weaponSkillData.name
-                | None -> None
-
-            let weaponNameToWeaponSkillDataOption (weaponSkillDataSet: WeaponSkillData Set) weaponName =
-                weaponSkillDataSet |> Seq.tryFind (isWeaponNameInWeaponSkillData weaponName)
-
-            let tryFindWeaponSkill weaponSkillName (weaponSkills: VocationalSkill List) =
-                weaponSkills
-                |> List.tryFind (fun weaponSkill -> weaponSkill.skill.name = weaponSkillName)
-
-            weaponNameToWeaponSkillDataOption weaponSkillDataSet weapon.name
+            weaponSkillDataMap.TryFind weapon.name
             |> function
-                | None -> VocationalSkill.init Set.empty dicePoolCalculationData weapon.name
+                | None -> Skill.init weapon.name Set.empty dicePoolCalculationData
                 | Some weaponSkillData ->
                     tryFindWeaponSkill weaponSkillData.name weaponSkillList
                     |> function
                         | Some vocationalSkill -> vocationalSkill
                         | None ->
-                            VocationalSkill.init
-                                weaponSkillData.governingAttributes
-                                dicePoolCalculationData
-                                weaponSkillData.name
-            |> (fun vocationalSkill ->
-                createSkillDicePool
-                    vocationalSkill.skill.name
-                    vocationalSkill.skill.level
-                    vocationalSkill.governingAttributeNames
-                    dicePoolCalculationData)
+                            Skill.init weaponSkillData.name weaponSkillData.governingAttributes dicePoolCalculationData
+
+            |> (fun skill ->
+                createSkillDicePool skill.name skill.level skill.governingAttributeNames dicePoolCalculationData)
             |> (fun skillDicePoolModList ->
                 createCombatRoll weapon itemTier.baseDice skillDicePoolModList weaponResourceOption))
 
@@ -1822,19 +1773,22 @@ module CharacterInformation =
     }
 
 module Character =
-    open AttributeAndCoreSkills
+    open Attribute
+    open Skill
     open Vocation
     open DicePoolCalculation
-    open DicePoolMod
     open ItemStack
     open CombatRoll
     open CharacterInformation
     open Effect
     open CombatSpeed
+    open MagicVocationSkill
+    open MundaneVocationSkill
 
     type Character = {
         name: string
-        attributeAndCoreSkillsList: AttributeAndCoreSkills Set
+        attributes: Attribute Set
+        coreSkills: Skill Set
         vocationList: Vocation list
         equipmentList: ItemStack list
         combatRollList: CombatRoll List
@@ -1845,12 +1799,17 @@ module Character =
 
     let characterToDicePoolCalculationData character = {
         effects = character.characterEffects
-        attributes = attributeAndCoreSkillsSetToAttributes character.attributeAndCoreSkillsList
+        attributes = character.attributes
     }
+
+    open MundaneOrMagicVocationExtras
 
     let vocationListToWeaponSkillList (vocationList: Vocation List) =
         vocationList
         |> List.collect (fun vocation ->
-            match vocation with
-            | MagicVocation magicVocation -> magicVocation.mundaneVocation.mundaneVocationSkills.weaponSkillList
-            | MundaneVocation mundaneVocation -> mundaneVocation.mundaneVocationSkills.weaponSkillList)
+            match vocation.mundaneOrMagicVocationExtras with
+            | MagicVocationExtras magicVocationExtras ->
+                magicVocationSkillsToSkills magicVocationExtras.magicVocationSkills
+                |> List.ofSeq
+            | MundaneVocationExtras mundaneVocationSkills ->
+                mundaneVocationSkillsToSkills mundaneVocationSkills |> List.ofSeq)

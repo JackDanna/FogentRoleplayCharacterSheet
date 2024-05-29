@@ -6,7 +6,7 @@ open FogentRoleplayLib.DicePool
 open FogentRoleplayLib.Range
 open FogentRoleplayLib.SetAreaOfEffect
 open FogentRoleplayLib.ItemStack
-open FogentRoleplayLib.VocationalSkill
+open FogentRoleplayLib.Skill
 
 open FogentRoleplayLib.StringUtils
 open FogentRoleplayLib.WeaponSkillData
@@ -15,18 +15,14 @@ open FogentRoleplayLib.DicePoolCalculation
 
 
 type Msg =
-    | RecalculateCombatRollList of
-        ItemStack List *
-        VocationalSkill List *
-        Set<WeaponSkillData> *
-        DicePoolCalculationData
+    | RecalculateCombatRollList of ItemStack List * Skill List * Map<string, WeaponSkillData> * DicePoolCalculationData
 
 let init () : CombatRoll list = []
 
 let update msg model : CombatRoll list =
     match msg with
-    | RecalculateCombatRollList(equipmentList, weaponSkillList, weaponSkillDataSet, dicePoolCalculationData) ->
-        createWeaponItemCombatRolls equipmentList weaponSkillList weaponSkillDataSet dicePoolCalculationData
+    | RecalculateCombatRollList(equipmentList, weaponSkillList, weaponSkillDataMap, dicePoolCalculationData) ->
+        createWeaponItemCombatRolls equipmentList weaponSkillList weaponSkillDataMap dicePoolCalculationData
 
 open Feliz
 open Feliz.Bulma

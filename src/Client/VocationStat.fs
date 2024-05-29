@@ -11,9 +11,8 @@ type Msg =
     | ToggleGoveringAttribute of AttributeName * option<DicePoolCalculationData>
     | CalculateDicePool of DicePoolCalculationData
 
-let init name dicePoolCalculationData : VocationStat =
+let init name governingAttributeNameSet dicePoolCalculationData : VocationStat =
     let level = ZeroToFive.init ()
-    let governingAttributeNameSet = Set.empty
 
     {
         name = name
@@ -66,7 +65,7 @@ let view attributeNameSet (model: VocationStat) dispatch =
             ]
         ]
         Bulma.column [
-            VocationalSkill.governingAttributesToggle
+            Skill.governingAttributesToggle
                 attributeNameSet
                 model.governingAttributeNameSet
                 (fun toggledAttributeName -> ToggleGoveringAttribute(toggledAttributeName, None) |> dispatch)
