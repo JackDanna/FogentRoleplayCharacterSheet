@@ -17,10 +17,10 @@
     <Compile Include="VocationStat.fs" />
     <Compile Include="MundaneVocationSkill.fs" />
     <Compile Include="MundaneVocationSkills.fs" />
-    <Compile Include="MundaneVocation.fs" />
     <Compile Include="MagicVocationSkill.fs" />
     <Compile Include="MagicVocationSkills.fs" />
-    <Compile Include="MagicVocation.fs" />
+    <Compile Include="MagicVocationExtras.fs" />
+    <Compile Include="MundaneOrMagicVocationExtras.fs" />
     <Compile Include="Vocation.fs" />
     <Compile Include="VocationList.fs" />
     <Compile Include="Item.fs" />

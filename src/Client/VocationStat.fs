@@ -11,9 +11,8 @@ type Msg =
     | ToggleGoveringAttribute of AttributeName * option<DicePoolCalculationData>
     | CalculateDicePool of DicePoolCalculationData
 
-let init name dicePoolCalculationData : VocationStat =
+let init name governingAttributeNameSet dicePoolCalculationData : VocationStat =
     let level = ZeroToFive.init ()
-    let governingAttributeNameSet = Set.empty
 
     {
         name = name

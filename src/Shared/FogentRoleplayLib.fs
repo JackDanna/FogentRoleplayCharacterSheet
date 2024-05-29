@@ -1529,34 +1529,32 @@ module MagicVocationSkill =
     let magicVocationSkillsToSkills magicVocationSkills =
         Set.map magicVocationSkillToSkill magicVocationSkills
 
-module MagicVocation =
-    open VocationStat
+module MagicVocationExtras =
     open MagicSystem
     open MagicVocationSkill
 
-    type MagicVocation = {
-        vocationStat: VocationStat
+    type MagicVocationExtras = {
         magicVocationSkills: MagicVocationSkill Set
         magicSystem: MagicSystem
         magicResourceCap: uint
         currentMagicResource: uint
     }
 
+module MundaneOrMagicVocationExtras =
+    open MundaneVocationSkill
+    open MagicVocationExtras
+
+    type MundaneOrMagicVocationExtras =
+        | MundaneVocationExtras of MundaneVocationSkill Set
+        | MagicVocationExtras of MagicVocationExtras
+
 module Vocation =
-    open MundaneVocation
-    open MagicVocation
+    open VocationStat
+    open MundaneOrMagicVocationExtras
 
-    type Vocation =
-        | MundaneVocation of MundaneVocation
-        | MagicVocation of MagicVocation
-
-module Vocations =
-    open MundaneVocation
-    open MagicVocation
-
-    type Vocations = {
-        mundaneVocations: MundaneVocation List
-        magicVocations: MagicVocation List
+    type Vocation = {
+        vocationStat: VocationStat
+        mundaneOrMagicVocationExtras: MundaneOrMagicVocationExtras
     }
 
 module WeightClass =
@@ -1804,12 +1802,14 @@ module Character =
         attributes = character.attributes
     }
 
+    open MundaneOrMagicVocationExtras
+
     let vocationListToWeaponSkillList (vocationList: Vocation List) =
         vocationList
         |> List.collect (fun vocation ->
-            match vocation with
-            | MagicVocation magicVocation ->
-                magicVocationSkillsToSkills magicVocation.magicVocationSkills |> List.ofSeq
-            | MundaneVocation mundaneVocation ->
-                mundaneVocationSkillsToSkills mundaneVocation.mundaneVocationSkills
-                |> List.ofSeq)
+            match vocation.mundaneOrMagicVocationExtras with
+            | MagicVocationExtras magicVocationExtras ->
+                magicVocationSkillsToSkills magicVocationExtras.magicVocationSkills
+                |> List.ofSeq
+            | MundaneVocationExtras mundaneVocationSkills ->
+                mundaneVocationSkillsToSkills mundaneVocationSkills |> List.ofSeq)

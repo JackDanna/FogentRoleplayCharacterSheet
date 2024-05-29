@@ -4,40 +4,50 @@ open FogentRoleplayLib.Vocation
 open FogentRoleplayLib.DicePoolCalculation
 
 type Msg =
-    | MundaneVocationMsg of MundaneVocation.Msg
-    | MagicVocationMsg of MagicVocation.Msg
+    | VocationStatMsg of VocationStat.Msg
+    | MundaneOrMagicVocationExtrasMsg of MundaneOrMagicVocationExtras.Msg
     | CalculateDicePools of DicePoolCalculationData
 
-let init name dicePoolCalculationData : Vocation =
-    MundaneVocation.init name dicePoolCalculationData |> MundaneVocation
+let init vocationName coreSkillMap dicePoolCalculationData magicSystemMap : Vocation =
 
-let update msg (model: Vocation) =
+    let vocationStat = VocationStat.init vocationName Set.empty dicePoolCalculationData
 
-    match msg, model with
-    | MundaneVocationMsg msg, MundaneVocation mundaneVocation ->
-        MundaneVocation.update msg mundaneVocation |> MundaneVocation
-    | MagicVocationMsg msg, MagicVocation magicVocation -> MagicVocation.update msg magicVocation |> MagicVocation
-    | CalculateDicePools dicePoolCalculationData, vocation ->
-        match vocation with
-        | MundaneVocation mundaneVocation ->
-            MundaneVocation.update (MundaneVocation.CalculateDicePools dicePoolCalculationData) mundaneVocation
-            |> MundaneVocation
-        | MagicVocation magicVocation ->
-            MagicVocation.update
-                (MagicVocation.CalculateMagicVocationSkillDicePools dicePoolCalculationData)
-                magicVocation
-            |> MagicVocation
+    {
+        vocationStat = vocationStat
+        mundaneOrMagicVocationExtras = MundaneOrMagicVocationExtras.init vocationStat coreSkillMap magicSystemMap
+    }
 
-    | _, _ -> model
+let update (msg: Msg) (model: Vocation) =
 
+    match msg with
+    | VocationStatMsg msg -> {
+        model with
+            vocationStat = VocationStat.update msg model.vocationStat
+      }
+    | MundaneOrMagicVocationExtrasMsg msg -> {
+        model with
+            mundaneOrMagicVocationExtras = MundaneOrMagicVocationExtras.update msg model.mundaneOrMagicVocationExtras
+      }
+    | CalculateDicePools dicePoolCalculationData -> {
+        vocationStat = VocationStat.update (VocationStat.CalculateDicePool dicePoolCalculationData) model.vocationStat
+        mundaneOrMagicVocationExtras =
+            MundaneOrMagicVocationExtras.update
+                (MundaneOrMagicVocationExtras.CalculateDicePools dicePoolCalculationData)
+                model.mundaneOrMagicVocationExtras
+      }
 
 open Feliz
 open Feliz.Bulma
 
 let view attributeNameSet (weaponSkillNameSet) (model: Vocation) dispatch =
-    match model with
-    | MundaneVocation mundaneVocation ->
-        MundaneVocation.view attributeNameSet weaponSkillNameSet mundaneVocation (MundaneVocationMsg >> dispatch)
-    | MagicVocation magicVocation ->
-        MagicVocation.view attributeNameSet weaponSkillNameSet magicVocation (MagicVocationMsg >> dispatch)
+
+    [
+        VocationStat.view attributeNameSet model.vocationStat (VocationStatMsg >> dispatch)
+
+    ]
+    @ MundaneOrMagicVocationExtras.view
+        attributeNameSet
+        weaponSkillNameSet
+        model.mundaneOrMagicVocationExtras
+        (MundaneOrMagicVocationExtrasMsg >> dispatch)
     |> Bulma.box
