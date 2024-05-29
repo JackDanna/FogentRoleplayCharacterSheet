@@ -3,6 +3,7 @@ module Vocation
 open FogentRoleplayLib.Vocation
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.MagicSystem
+open FogentRoleplayLib.MundaneOrMagicVocationExtras
 
 type Msg =
     | VocationStatMsg of VocationStat.Msg
@@ -25,6 +26,29 @@ let init vocationName coreSkillMap dicePoolCalculationData (magicSystemMap: Map<
 let update (msg: Msg) (model: Vocation) =
 
     match msg with
+    // Checks for ToggleGoverningAttribute
+    | VocationStatMsg(VocationStat.ToggleGoveringAttribute(attributeName, dicePoolCalculationDataOption)) ->
+        let vocationStat =
+            VocationStat.update
+                (VocationStat.ToggleGoveringAttribute(attributeName, dicePoolCalculationDataOption))
+                model.vocationStat
+
+        {
+            model with
+                vocationStat = vocationStat
+                mundaneOrMagicVocationExtras =
+                    match model.mundaneOrMagicVocationExtras with
+                    | MagicVocationExtras _ ->
+                        MundaneOrMagicVocationExtras.update
+                            (MundaneOrMagicVocationExtras.MagicVocationExtrasMsg(
+                                MagicVocationExtras.RecalculateVocationResourcePool(
+                                    vocationStat.level,
+                                    vocationStat.dicePool
+                                )
+                            ))
+                            model.mundaneOrMagicVocationExtras
+                    | MundaneVocationExtras _ -> model.mundaneOrMagicVocationExtras
+        }
     | VocationStatMsg msg -> {
         model with
             vocationStat = VocationStat.update msg model.vocationStat

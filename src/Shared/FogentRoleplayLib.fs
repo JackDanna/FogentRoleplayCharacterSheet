@@ -1466,6 +1466,8 @@ module MagicResourcePool =
         vocationDicePoolSize
         |> float
         |> (*) (determineVocationLevelFloatForCalc vocationLevel)
+        |> Math.Floor
+        |> uint
 
     let determineGoverningCoreSkillLevelFloatForCalc governingCoreSkillLevel =
         match governingCoreSkillLevel with
@@ -1478,15 +1480,6 @@ module MagicResourcePool =
         |> float
         |> (*) (determineGoverningCoreSkillLevelFloatForCalc governingCoreSkillLevel)
         |> (/) 2.0
-
-    let calculateMagicResourcePool
-        vocationLevel
-        vocationDicePoolSize
-        governingCoreSkillLevel
-        governingCoreSkillDicePoolSize
-        =
-        calculateVocationMagicResource vocationLevel vocationDicePoolSize
-        |> (+) (calcGoverningSkillMagicResource governingCoreSkillLevel governingCoreSkillDicePoolSize)
         |> Math.Floor
         |> uint
 
@@ -1536,7 +1529,8 @@ module MagicVocationExtras =
     type MagicVocationExtras = {
         magicVocationSkills: MagicVocationSkill Set
         magicSystem: MagicSystem
-        magicResourceCap: uint
+        vocationResourcePool: uint
+        coreSkillResourcePool: uint
         currentMagicResource: uint
     }
 

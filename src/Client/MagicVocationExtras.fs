@@ -7,11 +7,13 @@ open FogentRoleplayLib.Neg1To5
 open FogentRoleplayLib.MagicSystem
 open FogentRoleplayLib.DicePool
 open FogentRoleplayLib.DicePoolCalculation
+open FogentRoleplayLib.ZeroToFive
 
 type Msg =
     | MagicVocationSkillsMsg of MagicVocationSkills.Msg
     | SetCurrentMagicResource of uint
     | CalculateMagicVocationSkillDicePools of DicePoolCalculationData
+    | RecalculateVocationResourcePool of ZeroToFive * DicePool
 
 let init
     (coreSkillMap: Map<string, Skill>)
@@ -20,22 +22,22 @@ let init
     vocationStatDicePool
     : MagicVocationExtras =
 
-    let governingCoreSkillLevel, governingCoreSkillDicePoolSize =
+    let governingCoreSkillLevel, governingCoreSkillDicePool =
         match coreSkillMap.TryFind magicSystem.governingCoreSkill with
-        | None -> (Zero, 0u)
-        | Some coreSkill -> (coreSkill.level, dicePoolToNumDice coreSkill.dicePool)
+        | None -> (Neg1To5.Zero, emptyDicePool)
+        | Some coreSkill -> (coreSkill.level, coreSkill.dicePool)
 
-    let magicResourceCap =
-        calculateMagicResourcePool
-            vocationStatLevel
-            (dicePoolToNumDice vocationStatDicePool)
-            governingCoreSkillLevel
-            governingCoreSkillDicePoolSize
+    let vocationResourcePool =
+        calculateVocationMagicResource vocationStatLevel (dicePoolToNumDice vocationStatDicePool)
+
+    let governingCoreSkillResourcePool =
+        calcGoverningSkillMagicResource governingCoreSkillLevel (dicePoolToNumDice governingCoreSkillDicePool)
 
     {
         magicVocationSkills = MagicVocationSkills.init ()
-        currentMagicResource = magicResourceCap
-        magicResourceCap = magicResourceCap
+        currentMagicResource = vocationResourcePool + governingCoreSkillResourcePool
+        vocationResourcePool = vocationResourcePool
+        coreSkillResourcePool = governingCoreSkillResourcePool
         magicSystem = magicSystem
     }
 
@@ -66,8 +68,8 @@ let update msg (model: MagicVocationExtras) =
     | SetCurrentMagicResource newCurrentMagicResource -> {
         model with
             currentMagicResource =
-                if newCurrentMagicResource > model.magicResourceCap then
-                    model.magicResourceCap
+                if newCurrentMagicResource > model.coreSkillResourcePool then
+                    model.coreSkillResourcePool
                 else
                     newCurrentMagicResource
       }
@@ -78,6 +80,21 @@ let update msg (model: MagicVocationExtras) =
                     (MagicVocationSkills.CalculateDicePools(dicePoolCalculationData))
                     model.magicVocationSkills
       }
+    | RecalculateVocationResourcePool(vocationLevel, vocationDicePool) ->
+        let newVocationResourcePool =
+            calculateVocationMagicResource vocationLevel (dicePoolToNumDice vocationDicePool)
+
+        let newResourcePool = (newVocationResourcePool + model.coreSkillResourcePool)
+
+        {
+            model with
+                vocationResourcePool = newVocationResourcePool
+                currentMagicResource =
+                    if newResourcePool < model.currentMagicResource then
+                        newResourcePool
+                    else
+                        model.currentMagicResource
+        }
 
 open Feliz
 open Feliz.Bulma
@@ -99,6 +116,9 @@ let view attributeNameSet (weaponSkillNames) (model: MagicVocationExtras) dispat
                     prop.onChange (fun (num: int) -> dispatch (SetCurrentMagicResource(uint num)))
                 ]
             ]
-            Bulma.column [ sprintf "Max: %d" model.magicResourceCap |> prop.text ]
+            Bulma.column [
+                sprintf "Max: %d" (model.vocationResourcePool + model.coreSkillResourcePool)
+                |> prop.text
+            ]
         ]
     ]
