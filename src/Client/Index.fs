@@ -108,18 +108,18 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
             )
             |> temp
 
-        | Character.EffectListMsg(EffectList.Insert(effectName, _)) ->
-
-            {
-                model with
-                    character =
-                        Character.update
-                            (Character.EffectListMsg(
-                                EffectList.Insert(effectName, Some model.fogentRoleplayData.effectMap)
-                            ))
-                            model.character
-            },
-            Cmd.none
+        | Character.EffectListMsg(msg, _) ->
+            match msg with
+            | EffectList.Insert(effectName, _) ->
+                (EffectList.Insert(effectName, Some model.fogentRoleplayData.effectMap))
+            | _ -> msg
+            |> (fun msg -> Character.EffectListMsg(msg, Some model.fogentRoleplayData.weaponSkillDataMap))
+            |> (fun msg ->
+                {
+                    model with
+                        character = Character.update msg model.character
+                },
+                Cmd.none)
 
         | Character.CombatSpeedsMsg(CombatSpeeds.Insert(name, x, y, _)) ->
             {

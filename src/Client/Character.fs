@@ -15,7 +15,7 @@ type Msg =
     | VocationListMsg of VocationList.Msg
     | EquipmentMsg of ItemStackList.Msg * option<Map<string, WeaponSkillData>>
     | CharacterInformationMsg of CharacterInformation.Msg
-    | EffectListMsg of EffectList.Msg
+    | EffectListMsg of EffectList.Msg * option<Map<string, WeaponSkillData>>
     | CombatSpeedsMsg of CombatSpeeds.Msg
 
 let init (coreSkillDataSet: CoreSkillData Set) =
@@ -246,7 +246,7 @@ let update msg (model: Character) =
         model with
             characterInformation = CharacterInformation.update msg model.characterInformation
       }
-    | EffectListMsg msg ->
+    | EffectListMsg(msg, Some weaponSkillDataMap) ->
         let newEffectList: FogentRoleplayLib.Effect.Effect list =
             EffectList.update msg model.characterEffects
 
@@ -278,6 +278,15 @@ let update msg (model: Character) =
                     CombatSpeeds.update
                         (CombatSpeeds.RecalculateAllCombatSpeeds(newCoreSkills, model.attributes))
                         model.combatSpeeds
+                combatRollList =
+                    CombatRollList.update
+                        (CombatRollList.RecalculateCombatRollList(
+                            model.equipmentList,
+                            vocationListToWeaponSkillList model.vocationList,
+                            weaponSkillDataMap,
+                            dicePoolCalculationData
+                        ))
+                        model.combatRollList
         }
     | CombatSpeedsMsg msg ->
         match msg with
@@ -339,7 +348,7 @@ let view
 
         // DestinyPoints.view model.destinyPoints (DestinyPointsMsg >> dispatch)
 
-        EffectList.view effectNameSet model.characterEffects (EffectListMsg >> dispatch)
+        EffectList.view effectNameSet model.characterEffects (fun msg -> (EffectListMsg(msg, None) |> dispatch))
 
         // CarryWeightStatOption.view
         //     carryWeightCalculationNameList
