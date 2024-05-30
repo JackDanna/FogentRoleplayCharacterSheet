@@ -92,7 +92,6 @@ let view attributeNameSet (weaponSkillNameSet) (model: Vocation) dispatch =
 
     [
         VocationStat.view attributeNameSet model.vocationStat (VocationStatMsg >> dispatch)
-
     ]
     @ MundaneOrMagicVocationExtras.view
         attributeNameSet
