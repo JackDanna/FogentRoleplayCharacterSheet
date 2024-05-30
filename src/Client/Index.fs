@@ -133,6 +133,17 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
             },
             Cmd.none
 
+        | Character.EquipmentMsg(msg, _) ->
+            match msg with
+            | ItemStackList.Insert(msg, _) -> ItemStackList.Insert(msg, Some model.fogentRoleplayData.itemStackMap)
+            | _ -> msg
+            |> (fun msg -> Character.EquipmentMsg(msg, Some model.fogentRoleplayData.weaponSkillDataMap))
+            |> (fun msg -> {
+                model with
+                    character = Character.update msg model.character
+            }),
+            Cmd.none
+
         | _ ->
             {
                 model with
