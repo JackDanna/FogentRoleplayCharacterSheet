@@ -36,10 +36,10 @@ open Feliz
 open Feliz.Bulma
 
 let vocationalSkillView attributeNameSet model dispatch =
-    Skill.view attributeNameSet model dispatch false true
+    Skill.viewAsList attributeNameSet model dispatch false true
 
 let weaponSkillView attributeNameSet model dispatch =
-    Skill.view attributeNameSet model dispatch true true
+    Skill.viewAsList attributeNameSet model dispatch true true
 
 let view attributeNameSet model dispatch =
     match model with

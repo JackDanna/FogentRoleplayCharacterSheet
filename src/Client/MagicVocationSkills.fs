@@ -8,6 +8,7 @@ open FogentRoleplayLib.AttributeName
 
 type Msg =
     | ModifySkillAtPosition of int * MagicVocationSkill.Msg
+    | RemoveAtPosition of int
     | CalculateDicePools of DicePoolCalculationData
     | CheckIfLevelCapExceededForAll of Skill.CheckIfLevelCapExceeded
     | InsertMagicVocationSkill of
@@ -30,6 +31,7 @@ let update msg (model: MagicVocationSkill Set) =
             else
                 coreSkill)
         |> Set.ofList
+    | RemoveAtPosition position -> model |> Set.toList |> List.removeAt position |> Set.ofList
     | CalculateDicePools dicePoolCalculationData ->
         Set.map
             (fun coreSkill ->
@@ -68,6 +70,8 @@ let view attributeNameSet weaponSkillNames model (dispatch: Msg -> unit) =
     |> List.mapi (fun index mundaneVocationSkill ->
         (MagicVocationSkill.view attributeNameSet mundaneVocationSkill (fun msg ->
             ModifySkillAtPosition(index, msg) |> dispatch))
+        @ ViewUtils.deleteEquipmentRowButton (fun _ -> dispatch (RemoveAtPosition(index)))
+        |> Bulma.columns
         |> Bulma.content)
     |> (fun x ->
 

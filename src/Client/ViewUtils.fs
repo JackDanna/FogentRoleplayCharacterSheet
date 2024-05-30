@@ -21,3 +21,7 @@ let textInputWithDropdownSet (onTextChange: string -> unit) dropdownSet dataList
             prop.children (Seq.map (fun (elementName: string) -> Html.option [ prop.value elementName ]) dropdownSet)
         ]
     ]
+
+let deleteEquipmentRowButton onClick =
+    Html.td [ Html.button [ prop.onClick onClick; prop.text "-" ] ]
+    |> List.singleton

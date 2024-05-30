@@ -39,6 +39,6 @@ open Feliz.Bulma
 
 let view attributeNameSet model dispatch =
     match model with
-    | MagicSkill skill -> Skill.view attributeNameSet skill (MagicSkillMsg >> dispatch) true true
+    | MagicSkill skill -> Skill.viewAsList attributeNameSet skill (MagicSkillMsg >> dispatch) true true
     | MundaneVocationSkill skill ->
         MundaneVocationSkill.view attributeNameSet skill (MundaneVocationSkillMsg >> dispatch)
