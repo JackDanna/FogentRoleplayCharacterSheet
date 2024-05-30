@@ -250,9 +250,34 @@ let update msg (model: Character) =
         let newEffectList: FogentRoleplayLib.Effect.Effect list =
             EffectList.update msg model.characterEffects
 
+        let newDicePoolCalculationData = {
+            dicePoolCalculationData with
+                effects = newEffectList
+        }
+
+        let newCoreSkills =
+            Skills.update (Skills.CalculateSkillDicePools newDicePoolCalculationData) model.coreSkills
+
         {
             model with
+                coreSkills = newCoreSkills
                 characterEffects = newEffectList
+                vocationList =
+                    model.vocationList
+                    |> VocationList.update (VocationList.CalculateDicePools newDicePoolCalculationData)
+                    |> VocationList.update (
+                        VocationMsgForAll(
+                            MundaneOrMagicVocationExtrasMsg(
+                                MundaneOrMagicVocationExtras.RecalculateCoreSkillResourcePool(
+                                    coreSkillToMap newCoreSkills
+                                )
+                            )
+                        )
+                    )
+                combatSpeeds =
+                    CombatSpeeds.update
+                        (CombatSpeeds.RecalculateAllCombatSpeeds(newCoreSkills, model.attributes))
+                        model.combatSpeeds
         }
     | CombatSpeedsMsg msg ->
         match msg with
