@@ -35,7 +35,13 @@ let update msg model =
 open Feliz
 open Feliz.Bulma
 
+let vocationalSkillView attributeNameSet model dispatch =
+    Skill.view attributeNameSet model dispatch false true
+
+let weaponSkillView attributeNameSet model dispatch =
+    Skill.view attributeNameSet model dispatch true true
+
 let view attributeNameSet model dispatch =
     match model with
-    | VocationalSkill skill -> Skill.view attributeNameSet skill (SkillMsg >> dispatch) true true
-    | WeaponSkill skill -> Skill.view attributeNameSet skill (SkillMsg >> dispatch) false true
+    | VocationalSkill skill -> vocationalSkillView attributeNameSet skill (SkillMsg >> dispatch)
+    | WeaponSkill skill -> weaponSkillView attributeNameSet skill (SkillMsg >> dispatch)

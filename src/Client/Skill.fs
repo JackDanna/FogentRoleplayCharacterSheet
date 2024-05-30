@@ -121,10 +121,10 @@ let governingAttributesToggle
         ]
     ]
 
-let view attributeNameSet (model: Skill) dispatch disableChangeLevel governingSkillColumn =
+let view attributeNameSet (model: Skill) dispatch disableChangeLevel showGoverningSkillColumn =
     [
         Bulma.column [ prop.text model.name ]
-        if governingSkillColumn then
+        if showGoverningSkillColumn then
             Bulma.column [
                 governingAttributesToggle attributeNameSet model.governingAttributeNames (fun toggledAttributeName ->
                     ToggleGoverningAttribute(toggledAttributeName, None) |> dispatch)

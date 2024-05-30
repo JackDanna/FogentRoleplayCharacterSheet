@@ -173,7 +173,7 @@ let update msg (model: Character) =
                     model.vocationList
       }
 
-    // Checking for ToggleGoverningAttribute
+    // Checking for ToggleGoverningAttribute for VocationStat
     | VocationListMsg(VocationMsgAtPosition(pos1, VocationStatMsg(VocationStat.ToggleGoveringAttribute(msg, _)))) -> {
         model with
             vocationList =
