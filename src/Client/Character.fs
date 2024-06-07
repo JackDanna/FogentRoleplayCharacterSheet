@@ -162,42 +162,12 @@ let update msg (model: Character) =
                         model.vocationList
         }
 
-    // Check for InsertMagicVocationSkill
-    | VocationListMsg(VocationList.VocationMsgAtPosition(pos1,
-                                                         Vocation.MundaneOrMagicVocationExtrasMsg(MundaneOrMagicVocationExtras.MagicVocationExtrasMsg(MagicVocationExtras.MagicVocationSkillsMsg(MagicVocationSkills.InsertMagicVocationSkill(x,
-                                                                                                                                                                                                                                              y,
-                                                                                                                                                                                                                                              z,
-                                                                                                                                                                                                                                              _,
-                                                                                                                                                                                                                                              t)))))) ->
-
-        {
-            model with
-                vocationList =
-                    VocationList.update
-                        (VocationList.VocationMsgAtPosition(
-                            pos1,
-                            Vocation.MundaneOrMagicVocationExtrasMsg(
-                                MundaneOrMagicVocationExtras.MagicVocationExtrasMsg(
-                                    MagicVocationExtras.MagicVocationSkillsMsg(
-                                        MagicVocationSkills.InsertMagicVocationSkill(
-                                            x,
-                                            y,
-                                            z,
-                                            Some model.settingData.weaponSkillDataMap,
-                                            t
-                                        )
-                                    )
-                                )
-                            )
-                        ))
-                        model.vocationList
-        }
     // Checking for InsertMagicVocationSkill
     | VocationListMsg(VocationMsgAtPosition(pos1,
                                             Vocation.MundaneOrMagicVocationExtrasMsg(MundaneOrMagicVocationExtras.MagicVocationExtrasMsg(MagicVocationExtras.MagicVocationSkillsMsg(MagicVocationSkills.InsertMagicVocationSkill(name,
-                                                                                                                                                                                                                                 governingAttributesOption,
                                                                                                                                                                                                                                  _,
-                                                                                                                                                                                                                                 Some weaponSkillDataMap,
+                                                                                                                                                                                                                                 _,
+                                                                                                                                                                                                                                 _,
                                                                                                                                                                                                                                  magicSkillDataMapOption)))))) ->
         let newVocationList =
             VocationList.update
@@ -208,9 +178,9 @@ let update msg (model: Character) =
                             MagicVocationExtras.MagicVocationSkillsMsg(
                                 MagicVocationSkills.InsertMagicVocationSkill(
                                     name,
-                                    governingAttributesOption,
+                                    Some model.settingData.attributeNameSet,
                                     Some dicePoolCalculationData,
-                                    Some weaponSkillDataMap,
+                                    Some model.settingData.weaponSkillDataMap,
                                     magicSkillDataMapOption
                                 )
                             )
@@ -227,7 +197,12 @@ let update msg (model: Character) =
                         (CombatRollList.RecalculateCombatRollList(
                             model.equipmentList,
                             vocationListToWeaponSkillList newVocationList,
-                            weaponSkillDataMap,
+                            model.settingData.weaponSkillDataMap,
+                            dicePoolCalculationData
+                        ))
+                        model.combatRollList
+        }
+
                             dicePoolCalculationData
                         ))
                         model.combatRollList
