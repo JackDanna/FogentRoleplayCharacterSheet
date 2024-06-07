@@ -135,16 +135,15 @@ let update msg (model: Character) =
                     model.vocationList
       }
 
-    // Check for InsertMundaneVocationSkill
-    | VocationListMsg(VocationList.VocationMsgAtPosition(pos1,
-                                                         Vocation.MundaneOrMagicVocationExtrasMsg(MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg(MundaneVocationSkills.InsertMundaneVocationSkill(name,
-                                                                                                                                                                                                         _,
-                                                                                                                                                                                                         _))))) ->
-
+    // Checking for InsertMundaneVocationSkill
+    | VocationListMsg(VocationMsgAtPosition(position,
+                                            Vocation.MundaneOrMagicVocationExtrasMsg(MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg(MundaneVocationSkills.InsertMundaneVocationSkill(name,
+                                                                                                                                                                                            _,
+                                                                                                                                                                                            Some weaponSkillDataMap))))) ->
         let newVocationList =
             VocationList.update
-                (VocationList.VocationMsgAtPosition(
-                    pos1,
+                (VocationMsgAtPosition(
+                    position,
                     Vocation.MundaneOrMagicVocationExtrasMsg(
                         MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg(
                             MundaneVocationSkills.InsertMundaneVocationSkill(
@@ -272,41 +271,6 @@ let update msg (model: Character) =
                     ))
                     model.vocationList
       }
-
-    // Checking for InsertMundaneVocationSkill
-    | VocationListMsg(VocationMsgAtPosition(position,
-                                            Vocation.MundaneOrMagicVocationExtrasMsg(MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg(MundaneVocationSkills.InsertMundaneVocationSkill(name,
-                                                                                                                                                                                            _,
-                                                                                                                                                                                            Some weaponSkillDataMap))))) ->
-        let newVocationList =
-            VocationList.update
-                (VocationMsgAtPosition(
-                    position,
-                    Vocation.MundaneOrMagicVocationExtrasMsg(
-                        MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg(
-                            MundaneVocationSkills.InsertMundaneVocationSkill(
-                                name,
-                                Some dicePoolCalculationData,
-                                Some weaponSkillDataMap
-                            )
-                        )
-                    )
-                ))
-                model.vocationList
-
-        {
-            model with
-                vocationList = newVocationList
-                combatRollList =
-                    CombatRollList.update
-                        (CombatRollList.RecalculateCombatRollList(
-                            model.equipmentList,
-                            vocationListToWeaponSkillList newVocationList,
-                            weaponSkillDataMap,
-                            dicePoolCalculationData
-                        ))
-                        model.combatRollList
-        }
 
     | VocationListMsg(msg: VocationList.Msg) -> {
         model with
