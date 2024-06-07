@@ -158,47 +158,6 @@ let update msg (model: Character) =
                     )
         }
 
-    // Checking for InsertMagicVocationSkill
-    | VocationListMsg(VocationMsgAtPosition(pos1,
-                                            Vocation.MundaneOrMagicVocationExtrasMsg(MundaneOrMagicVocationExtras.MagicVocationExtrasMsg(MagicVocationExtras.MagicVocationSkillsMsg(MagicVocationSkills.InsertMagicVocationSkill(name,
-                                                                                                                                                                                                                                 _,
-                                                                                                                                                                                                                                 _,
-                                                                                                                                                                                                                                 _,
-                                                                                                                                                                                                                                 magicSkillDataMapOption)))))) ->
-        let newVocationList =
-            VocationList.update
-                (VocationMsgAtPosition(
-                    pos1,
-                    Vocation.MundaneOrMagicVocationExtrasMsg(
-                        MundaneOrMagicVocationExtras.MagicVocationExtrasMsg(
-                            MagicVocationExtras.MagicVocationSkillsMsg(
-                                MagicVocationSkills.InsertMagicVocationSkill(
-                                    name,
-                                    Some model.settingData.attributeNameSet,
-                                    Some dicePoolCalculationData,
-                                    Some model.settingData.weaponSkillDataMap,
-                                    magicSkillDataMapOption
-                                )
-                            )
-                        )
-                    )
-                ))
-                model.vocationList
-
-        {
-            model with
-                vocationList = newVocationList
-                combatRollList =
-                    CombatRollList.update (
-                        CombatRollList.RecalculateCombatRollList(
-                            model.equipmentList,
-                            vocationListToWeaponSkillList newVocationList,
-                            model.settingData.weaponSkillDataMap,
-                            dicePoolCalculationData
-                        )
-                    )
-        }
-
     | VocationListMsg(msg: VocationList.Msg) ->
 
         let noParentInterceptionUpdate () = {
