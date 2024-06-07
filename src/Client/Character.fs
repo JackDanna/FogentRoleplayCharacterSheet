@@ -236,21 +236,9 @@ let update msg (model: Character) =
                     )
         }
 
-    // Checking for ZeroToFiveMsg
-    | VocationListMsg(VocationMsgAtPosition(pos1, VocationStatMsg(VocationStat.ZeroToFiveMsg(msg, _)))) -> {
-        model with
-            vocationList =
-                VocationList.update
-                    (VocationMsgAtPosition(
-                        pos1,
-                        VocationStatMsg(VocationStat.ZeroToFiveMsg(msg, Some dicePoolCalculationData))
-                    ))
-                    model.vocationList
-      }
-
     | VocationListMsg(msg: VocationList.Msg) ->
 
-        let temp () = {
+        let noParentInterceptionUpdate () = {
             model with
                 vocationList = VocationList.update msg model.vocationList
         }
@@ -280,8 +268,19 @@ let update msg (model: Character) =
                             ))
                             model.vocationList
               }
-            | _ -> temp ()
-        | _ -> temp ()
+            | VocationStat.ZeroToFiveMsg(msg, _) -> {
+                model with
+                    vocationList =
+                        VocationList.update
+                            (VocationMsgAtPosition(
+                                pos1,
+                                VocationStatMsg(VocationStat.ZeroToFiveMsg(msg, Some dicePoolCalculationData))
+                            ))
+                            model.vocationList
+              }
+
+            | _ -> noParentInterceptionUpdate ()
+        | _ -> noParentInterceptionUpdate ()
 
     | EquipmentMsg(msg) ->
         let newEquipmentList = ItemStackList.update msg model.equipmentList
