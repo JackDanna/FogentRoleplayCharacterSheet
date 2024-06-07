@@ -24,7 +24,7 @@ let init () : Model * Cmd<Msg> =
     let defaultCoreSkillList = Set.empty
 
     {
-        character = Character.init Set.empty (FogentRoleplayLib.SettingData.init ())
+        character = Character.init (FogentRoleplayLib.SettingData.init ())
     },
 
     Cmd.OfAsync.perform fogentRoleplayDataApi.getInitData () GotInitSettingData
@@ -42,7 +42,7 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
 
         {
             model with
-                character = Character.update (Character.SetSettingData(newSettingData)) model.character
+                character = Character.init newSettingData
         },
         Cmd.none
 

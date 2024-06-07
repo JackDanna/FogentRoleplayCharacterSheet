@@ -20,8 +20,10 @@ type Msg =
     | EffectListMsg of EffectList.Msg
     | CombatSpeedsMsg of CombatSpeeds.Msg
 
-let init (coreSkillDataSet: CoreSkillData Set) (settingData: SettingData) =
-    let attributes = Set.map (fun x -> Attribute.init x.attributeName) coreSkillDataSet
+let init (settingData: SettingData) =
+    let attributes =
+        Set.map (fun x -> Attribute.init x.attributeName) settingData.coreSkillDataSet
+
     let effects = EffectList.init ()
 
     let dicePoolCalculationData: DicePoolCalculationData = {
@@ -32,14 +34,14 @@ let init (coreSkillDataSet: CoreSkillData Set) (settingData: SettingData) =
     {
         name = ""
         attributes = attributes
-        coreSkills = Skills.initCoreSkills coreSkillDataSet dicePoolCalculationData
+        coreSkills = Skills.initCoreSkills settingData.coreSkillDataSet dicePoolCalculationData
         vocationList = VocationList.init ()
         equipmentList = ItemStackList.init ()
         combatRollList = CombatRollList.init ()
         characterInformation = CharacterInformation.init ()
         characterEffects = effects
         combatSpeeds = CombatSpeeds.init ()
-        settingData = FogentRoleplayLib.SettingData.init ()
+        settingData = settingData
     }
 
 let coreSkillToMap (coreSkills: Skill Set) =
