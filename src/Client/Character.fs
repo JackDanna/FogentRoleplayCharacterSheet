@@ -342,7 +342,7 @@ let view (model: Character) dispatch =
         VocationList.view
             model.settingData.attributeNameSet
             (model.settingData.magicSystemMap.Keys |> Set.ofSeq)
-            (model.settingData.weaponSkillDataMap.Keys)
+            (model.settingData.weaponSkillDataMap.Keys |> Set.ofSeq)
             model.vocationList
             (VocationListMsg >> dispatch)
 

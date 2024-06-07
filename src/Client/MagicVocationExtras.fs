@@ -132,6 +132,7 @@ let view attributeNameSet (weaponSkillNames) (model: MagicVocationExtras) dispat
 
     MagicVocationSkills.view
         attributeNameSet
+        (model.magicSystem.magicSkillDataMap.Keys |> Set.ofSeq)
         weaponSkillNames
         model.magicVocationSkills
         (MagicVocationSkillsMsg >> dispatch)
