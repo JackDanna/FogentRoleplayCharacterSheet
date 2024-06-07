@@ -19,7 +19,7 @@ type Msg =
 
 let init () : CombatRoll list = []
 
-let update msg model : CombatRoll list =
+let update msg : CombatRoll list =
     match msg with
     | RecalculateCombatRollList(equipmentList, weaponSkillList, weaponSkillDataMap, dicePoolCalculationData) ->
         createWeaponItemCombatRolls equipmentList weaponSkillList weaponSkillDataMap dicePoolCalculationData

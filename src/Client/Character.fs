@@ -160,14 +160,14 @@ let update msg (model: Character) =
             model with
                 vocationList = newVocationList
                 combatRollList =
-                    CombatRollList.update
-                        (CombatRollList.RecalculateCombatRollList(
+                    CombatRollList.update (
+                        CombatRollList.RecalculateCombatRollList(
                             model.equipmentList,
                             vocationListToWeaponSkillList newVocationList,
                             model.settingData.weaponSkillDataMap,
                             dicePoolCalculationData
-                        ))
-                        model.combatRollList
+                        )
+                    )
         }
 
     // Checking for InsertMagicVocationSkill
@@ -201,14 +201,14 @@ let update msg (model: Character) =
             model with
                 vocationList = newVocationList
                 combatRollList =
-                    CombatRollList.update
-                        (CombatRollList.RecalculateCombatRollList(
+                    CombatRollList.update (
+                        CombatRollList.RecalculateCombatRollList(
                             model.equipmentList,
                             vocationListToWeaponSkillList newVocationList,
                             model.settingData.weaponSkillDataMap,
                             dicePoolCalculationData
-                        ))
-                        model.combatRollList
+                        )
+                    )
         }
 
     // Checking for ModifySkillLevel in MundaneVocationSkill
@@ -238,14 +238,14 @@ let update msg (model: Character) =
             model with
                 vocationList = newVocationList
                 combatRollList =
-                    CombatRollList.update
-                        (CombatRollList.RecalculateCombatRollList(
+                    CombatRollList.update (
+                        CombatRollList.RecalculateCombatRollList(
                             model.equipmentList,
                             vocationListToWeaponSkillList newVocationList,
                             model.settingData.weaponSkillDataMap,
                             dicePoolCalculationData
-                        ))
-                        model.combatRollList
+                        )
+                    )
         }
 
     // Checking for ZeroToFiveMsg
@@ -284,14 +284,14 @@ let update msg (model: Character) =
             model with
                 equipmentList = newEquipmentList
                 combatRollList =
-                    CombatRollList.update
-                        (CombatRollList.RecalculateCombatRollList(
+                    CombatRollList.update (
+                        CombatRollList.RecalculateCombatRollList(
                             newEquipmentList,
                             vocationListToWeaponSkillList model.vocationList,
                             weaponSkillDataMap,
                             dicePoolCalculationData
-                        ))
-                        model.combatRollList
+                        )
+                    )
         }
     | CharacterInformationMsg msg -> {
         model with
@@ -330,14 +330,14 @@ let update msg (model: Character) =
                         (CombatSpeeds.RecalculateAllCombatSpeeds(newCoreSkills, model.attributes))
                         model.combatSpeeds
                 combatRollList =
-                    CombatRollList.update
-                        (CombatRollList.RecalculateCombatRollList(
+                    CombatRollList.update (
+                        CombatRollList.RecalculateCombatRollList(
                             model.equipmentList,
                             vocationListToWeaponSkillList model.vocationList,
                             weaponSkillDataMap,
                             dicePoolCalculationData
-                        ))
-                        model.combatRollList
+                        )
+                    )
         }
     | CombatSpeedsMsg msg ->
         match msg with
