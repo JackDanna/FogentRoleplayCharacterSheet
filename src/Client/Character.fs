@@ -249,6 +249,12 @@ let update msg (model: Character) =
       }
 
     | VocationListMsg(msg: VocationList.Msg) ->
+
+        let temp () = {
+            model with
+                vocationList = VocationList.update msg model.vocationList
+        }
+
         match msg with
         | InsertVocation(vocationName, _, _, _) -> {
             model with
@@ -262,20 +268,20 @@ let update msg (model: Character) =
                         ))
                         model.vocationList
           }
-        | VocationMsgAtPosition(pos1, VocationStatMsg(VocationStat.ToggleGoveringAttribute(msg, _))) -> {
-            model with
-                vocationList =
-                    VocationList.update
-                        (VocationMsgAtPosition(
-                            pos1,
-                            VocationStatMsg(VocationStat.ToggleGoveringAttribute(msg, Some dicePoolCalculationData))
-                        ))
-                        model.vocationList
-          }
-        | _ -> {
-            model with
-                vocationList = VocationList.update msg model.vocationList
-          }
+        | VocationMsgAtPosition(pos1, VocationStatMsg(msg)) ->
+            match msg with
+            | VocationStat.ToggleGoveringAttribute(msg, _) -> {
+                model with
+                    vocationList =
+                        VocationList.update
+                            (VocationMsgAtPosition(
+                                pos1,
+                                VocationStatMsg(VocationStat.ToggleGoveringAttribute(msg, Some dicePoolCalculationData))
+                            ))
+                            model.vocationList
+              }
+            | _ -> temp ()
+        | _ -> temp ()
 
     | EquipmentMsg(msg) ->
         let newEquipmentList = ItemStackList.update msg model.equipmentList
