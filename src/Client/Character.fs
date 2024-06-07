@@ -256,29 +256,33 @@ let update msg (model: Character) =
                         ))
                         model.vocationList
           }
-        | VocationMsgAtPosition(pos1, VocationStatMsg(msg)) ->
+        | VocationMsgAtPosition(pos1, msg) ->
             match msg with
-            | VocationStat.ToggleGoveringAttribute(msg, _) -> {
-                model with
-                    vocationList =
-                        VocationList.update
-                            (VocationMsgAtPosition(
-                                pos1,
-                                VocationStatMsg(VocationStat.ToggleGoveringAttribute(msg, Some dicePoolCalculationData))
-                            ))
-                            model.vocationList
-              }
-            | VocationStat.ZeroToFiveMsg(msg, _) -> {
-                model with
-                    vocationList =
-                        VocationList.update
-                            (VocationMsgAtPosition(
-                                pos1,
-                                VocationStatMsg(VocationStat.ZeroToFiveMsg(msg, Some dicePoolCalculationData))
-                            ))
-                            model.vocationList
-              }
-
+            | VocationStatMsg msg ->
+                match msg with
+                | VocationStat.ToggleGoveringAttribute(msg, _) -> {
+                    model with
+                        vocationList =
+                            VocationList.update
+                                (VocationMsgAtPosition(
+                                    pos1,
+                                    VocationStatMsg(
+                                        VocationStat.ToggleGoveringAttribute(msg, Some dicePoolCalculationData)
+                                    )
+                                ))
+                                model.vocationList
+                  }
+                | VocationStat.ZeroToFiveMsg(msg, _) -> {
+                    model with
+                        vocationList =
+                            VocationList.update
+                                (VocationMsgAtPosition(
+                                    pos1,
+                                    VocationStatMsg(VocationStat.ZeroToFiveMsg(msg, Some dicePoolCalculationData))
+                                ))
+                                model.vocationList
+                  }
+                | _ -> noParentInterceptionUpdate ()
             | _ -> noParentInterceptionUpdate ()
         | _ -> noParentInterceptionUpdate ()
 
