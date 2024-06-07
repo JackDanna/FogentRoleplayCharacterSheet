@@ -248,18 +248,6 @@ let update msg (model: Character) =
                     model.vocationList
       }
 
-    // Checking for ToggleGoverningAttribute for VocationStat
-    | VocationListMsg(VocationMsgAtPosition(pos1, VocationStatMsg(VocationStat.ToggleGoveringAttribute(msg, _)))) -> {
-        model with
-            vocationList =
-                VocationList.update
-                    (VocationMsgAtPosition(
-                        pos1,
-                        VocationStatMsg(VocationStat.ToggleGoveringAttribute(msg, Some dicePoolCalculationData))
-                    ))
-                    model.vocationList
-      }
-
     | VocationListMsg(msg: VocationList.Msg) ->
         match msg with
         | InsertVocation(vocationName, _, _, _) -> {
@@ -271,6 +259,16 @@ let update msg (model: Character) =
                             Some(coreSkillToMap model.coreSkills),
                             Some dicePoolCalculationData,
                             Some model.settingData.magicSystemMap
+                        ))
+                        model.vocationList
+          }
+        | VocationMsgAtPosition(pos1, VocationStatMsg(VocationStat.ToggleGoveringAttribute(msg, _))) -> {
+            model with
+                vocationList =
+                    VocationList.update
+                        (VocationMsgAtPosition(
+                            pos1,
+                            VocationStatMsg(VocationStat.ToggleGoveringAttribute(msg, Some dicePoolCalculationData))
                         ))
                         model.vocationList
           }
