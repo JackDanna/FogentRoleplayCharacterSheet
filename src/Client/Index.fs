@@ -42,7 +42,7 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
 
         {
             model with
-                character = Character.init newSettingData.coreSkillDataSet
+                character = Character.update (Character.SetSettingData(newSettingData)) model.character
         },
         Cmd.none
 
