@@ -358,8 +358,6 @@ let update msg (model: Character) =
                 combatSpeeds = CombatSpeeds.update msg model.combatSpeeds
         })
 
-    | _ -> model
-
 open Feliz
 open Feliz.Bulma
 
