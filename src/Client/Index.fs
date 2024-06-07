@@ -35,30 +35,17 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
 
 
         match characterMsg with
-        | Character.CombatSpeedsMsg(CombatSpeeds.Insert(name, x, y, _)) ->
-            {
-                model with
-                    character =
-                        Character.update
-                            (Character.CombatSpeedsMsg(
-                                CombatSpeeds.Insert(name, x, y, Some model.fogentRoleplayData.combatSpeedCalculationMap)
-                            ))
-                            model.character
-            },
-            Cmd.none
-
         | _ ->
             {
                 model with
                     character = Character.update characterMsg model.character
             },
             Cmd.none
-    | GotInitSettingData newFogentRoleplayData ->
+    | GotInitSettingData newSettingData ->
 
         {
             model with
-                fogentRoleplayData = newFogentRoleplayData
-                character = Character.init newFogentRoleplayData.coreSkillDataSet
+                character = Character.init newSettingData.coreSkillDataSet
         },
         Cmd.none
 

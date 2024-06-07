@@ -343,8 +343,13 @@ let update msg (model: Character) =
         }
     | CombatSpeedsMsg msg ->
         match msg with
-        | CombatSpeeds.Insert(name, _, _, combatSpeedMapOption) ->
-            CombatSpeeds.Insert(name, Some(model.coreSkills), Some(model.attributes), combatSpeedMapOption)
+        | CombatSpeeds.Insert(name, _, _, _) ->
+            CombatSpeeds.Insert(
+                name,
+                Some model.coreSkills,
+                Some model.attributes,
+                Some model.settingData.combatSpeedCalculationMap
+            )
         | _ -> msg
         |> (fun msg -> {
             model with
