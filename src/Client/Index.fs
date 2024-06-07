@@ -33,14 +33,11 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
     match msg with
     | CharacterMsg characterMsg ->
 
-
-        match characterMsg with
-        | _ ->
-            {
-                model with
-                    character = Character.update characterMsg model.character
-            },
-            Cmd.none
+        {
+            model with
+                character = Character.update characterMsg model.character
+        },
+        Cmd.none
     | GotInitSettingData newSettingData ->
 
         {
