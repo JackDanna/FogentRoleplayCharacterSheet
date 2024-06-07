@@ -42,14 +42,14 @@ let init (coreSkillDataSet: CoreSkillData Set) (settingData: SettingData) =
         settingData = FogentRoleplayLib.SettingData.init ()
     }
 
+let coreSkillToMap (coreSkills: Skill Set) =
+    coreSkills |> Set.map (fun x -> x.name, x) |> Map.ofSeq
+
 open Skills
 open VocationList
 open Vocation
 
 let update msg (model: Character) =
-
-    let coreSkillToMap (coreSkills: Skill Set) =
-        coreSkills |> Set.map (fun x -> x.name, x) |> Map.ofSeq
 
     let dicePoolCalculationData = characterToDicePoolCalculationData model
 
@@ -121,15 +121,19 @@ let update msg (model: Character) =
                         model.vocationList
         })
 
-    | VocationListMsg(VocationList.InsertVocation(x, y, z, _)) ->
-
-        {
-            model with
-                vocationList =
-                    VocationList.update
-                        (VocationList.InsertVocation(x, y, z, Some model.settingData.magicSystemMap))
-                        model.vocationList
-        }
+    // Checking for InsertVocation
+    | VocationListMsg(InsertVocation(vocationName, _, _, _)) -> {
+        model with
+            vocationList =
+                VocationList.update
+                    (InsertVocation(
+                        vocationName,
+                        Some(coreSkillToMap model.coreSkills),
+                        Some dicePoolCalculationData,
+                        Some model.settingData.magicSystemMap
+                    ))
+                    model.vocationList
+      }
 
     // Check for InsertMundaneVocationSkill
     | VocationListMsg(VocationList.VocationMsgAtPosition(pos1,
@@ -292,15 +296,6 @@ let update msg (model: Character) =
                         ))
                         model.combatRollList
         }
-
-    // Checking for InsertVocation
-    | VocationListMsg(InsertVocation(x, _, _, y)) -> {
-        model with
-            vocationList =
-                VocationList.update
-                    (InsertVocation(x, Some(coreSkillToMap model.coreSkills), Some dicePoolCalculationData, y))
-                    model.vocationList
-      }
 
     | VocationListMsg(msg: VocationList.Msg) -> {
         model with
