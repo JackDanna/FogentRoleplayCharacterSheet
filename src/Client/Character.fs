@@ -401,7 +401,7 @@ let view (model: Character) dispatch =
         // DestinyPoints.view model.destinyPoints (DestinyPointsMsg >> dispatch)
 
         EffectList.view (model.settingData.effectMap.Keys |> Set.ofSeq) model.characterEffects (fun msg ->
-            (EffectListMsg(msg, None) |> dispatch))
+            (EffectListMsg msg |> dispatch))
 
         // CarryWeightStatOption.view
         //     carryWeightCalculationNameList
@@ -411,7 +411,7 @@ let view (model: Character) dispatch =
         ItemStackList.view
             (model.settingData.itemStackMap.Keys |> Set.ofSeq)
             model.equipmentList
-            ((fun msg -> EquipmentMsg(msg, None)) >> dispatch)
+            ((fun msg -> EquipmentMsg msg) >> dispatch)
 
         CombatRollList.view model.combatRollList
 
