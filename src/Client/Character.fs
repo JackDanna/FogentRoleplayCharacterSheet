@@ -123,20 +123,6 @@ let update msg (model: Character) =
                         model.vocationList
         })
 
-    // Checking for InsertVocation
-    | VocationListMsg(InsertVocation(vocationName, _, _, _)) -> {
-        model with
-            vocationList =
-                VocationList.update
-                    (InsertVocation(
-                        vocationName,
-                        Some(coreSkillToMap model.coreSkills),
-                        Some dicePoolCalculationData,
-                        Some model.settingData.magicSystemMap
-                    ))
-                    model.vocationList
-      }
-
     // Checking for InsertMundaneVocationSkill
     | VocationListMsg(VocationMsgAtPosition(position,
                                             Vocation.MundaneOrMagicVocationExtrasMsg(MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg(MundaneVocationSkills.InsertMundaneVocationSkill(name,
@@ -274,10 +260,24 @@ let update msg (model: Character) =
                     model.vocationList
       }
 
-    | VocationListMsg(msg: VocationList.Msg) -> {
-        model with
-            vocationList = VocationList.update msg model.vocationList
-      }
+    | VocationListMsg(msg: VocationList.Msg) ->
+        match msg with
+        | InsertVocation(vocationName, _, _, _) -> {
+            model with
+                vocationList =
+                    VocationList.update
+                        (InsertVocation(
+                            vocationName,
+                            Some(coreSkillToMap model.coreSkills),
+                            Some dicePoolCalculationData,
+                            Some model.settingData.magicSystemMap
+                        ))
+                        model.vocationList
+          }
+        | _ -> {
+            model with
+                vocationList = VocationList.update msg model.vocationList
+          }
 
     | EquipmentMsg(msg) ->
         let newEquipmentList = ItemStackList.update msg model.equipmentList
