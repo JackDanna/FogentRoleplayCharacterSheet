@@ -48,12 +48,6 @@ open Vocation
 
 let update msg (model: Character) =
 
-    let temp =
-        (fun msg -> {
-            model with
-                vocationList = VocationList.update msg model.vocationList
-        })
-
     let coreSkillToMap (coreSkills: Skill Set) =
         coreSkills |> Set.map (fun x -> x.name, x) |> Map.ofSeq
 
@@ -300,10 +294,18 @@ let update msg (model: Character) =
         }
 
     // Checking for InsertVocation
-    | VocationListMsg(InsertVocation(x, _, _, y)) ->
-        temp (InsertVocation(x, Some(coreSkillToMap model.coreSkills), Some dicePoolCalculationData, y))
+    | VocationListMsg(InsertVocation(x, _, _, y)) -> {
+        model with
+            vocationList =
+                VocationList.update
+                    (InsertVocation(x, Some(coreSkillToMap model.coreSkills), Some dicePoolCalculationData, y))
+                    model.vocationList
+      }
 
-    | VocationListMsg(msg: VocationList.Msg) -> temp msg
+    | VocationListMsg(msg: VocationList.Msg) -> {
+        model with
+            vocationList = VocationList.update msg model.vocationList
+      }
 
     | EquipmentMsg(msg, Some weaponSkillDataMap) ->
         let newEquipmentList = ItemStackList.update msg model.equipmentList
