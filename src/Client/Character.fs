@@ -164,7 +164,7 @@ let update msg (model: Character) =
                 match msg with
                 | MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg(MundaneVocationSkills.InsertMundaneVocationSkill(name,
                                                                                                                          _,
-                                                                                                                         Some weaponSkillDataMap)) ->
+                                                                                                                         _)) ->
 
                     VocationList.update
                         (VocationMsgAtPosition(
