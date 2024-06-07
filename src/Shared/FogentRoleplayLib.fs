@@ -1790,6 +1790,19 @@ module SettingData =
         combatSpeedCalculationMap: Map<string, CombatSpeedCalculation>
     }
 
+    let init () = {
+        attributeNameSet = Set.empty
+        coreSkillDataSet = Set.empty
+        itemStackMap = Map.empty
+        weaponSpellSet = Set.empty
+        magicSystemMap = Map.empty
+        weaponSkillDataMap = Map.empty
+        effectMap = Map.empty
+        combatSpeedCalculationMap = Map.empty
+    }
+
+
+
 module Character =
     open Attribute
     open Skill
@@ -1802,6 +1815,7 @@ module Character =
     open CombatSpeed
     open MagicVocationSkill
     open MundaneVocationSkill
+    open SettingData
 
     type Character = {
         name: string
@@ -1813,6 +1827,7 @@ module Character =
         characterInformation: CharacterInformation
         characterEffects: Effect List
         combatSpeeds: CombatSpeed List
+        settingData: SettingData
     }
 
     let characterToDicePoolCalculationData character = {
