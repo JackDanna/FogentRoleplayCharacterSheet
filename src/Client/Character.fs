@@ -17,7 +17,7 @@ type Msg =
     | VocationListMsg of VocationList.Msg
     | EquipmentMsg of ItemStackList.Msg
     | CharacterInformationMsg of CharacterInformation.Msg
-    | EffectListMsg of EffectList.Msg * option<Map<string, WeaponSkillData>>
+    | EffectListMsg of EffectList.Msg
     | CombatSpeedsMsg of CombatSpeeds.Msg
 
 let init (coreSkillDataSet: CoreSkillData Set) (settingData: SettingData) =
@@ -299,7 +299,7 @@ let update msg (model: Character) =
             characterInformation = CharacterInformation.update msg model.characterInformation
       }
 
-    | EffectListMsg(msg, Some weaponSkillDataMap) ->
+    | EffectListMsg(msg) ->
         let newEffectList: FogentRoleplayLib.Effect.Effect list =
             EffectList.update msg model.characterEffects
 
@@ -336,7 +336,7 @@ let update msg (model: Character) =
                         CombatRollList.RecalculateCombatRollList(
                             model.equipmentList,
                             vocationListToWeaponSkillList model.vocationList,
-                            weaponSkillDataMap,
+                            model.settingData.weaponSkillDataMap,
                             dicePoolCalculationData
                         )
                     )
