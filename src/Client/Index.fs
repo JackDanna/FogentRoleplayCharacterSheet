@@ -33,68 +33,8 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
     match msg with
     | CharacterMsg characterMsg ->
 
-        let temp msg =
-            {
-                model with
-                    character = Character.update msg model.character
-            },
-            Cmd.none
 
         match characterMsg with
-        | Character.VocationListMsg(VocationList.InsertVocation(x, y, z, _)) ->
-
-            (Character.VocationListMsg(
-                VocationList.InsertVocation(x, y, z, Some model.fogentRoleplayData.magicSystemMap)
-            ))
-            |> temp
-
-        // Check for InsertMundaneVocationSkill
-        | Character.VocationListMsg(VocationList.VocationMsgAtPosition(pos1,
-                                                                       Vocation.MundaneOrMagicVocationExtrasMsg(MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg(MundaneVocationSkills.InsertMundaneVocationSkill(x,
-                                                                                                                                                                                                                       y,
-                                                                                                                                                                                                                       _))))) ->
-            Character.VocationListMsg(
-                VocationList.VocationMsgAtPosition(
-                    pos1,
-                    Vocation.MundaneOrMagicVocationExtrasMsg(
-                        MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg(
-                            MundaneVocationSkills.InsertMundaneVocationSkill(
-                                x,
-                                y,
-                                Some model.fogentRoleplayData.weaponSkillDataMap
-                            )
-                        )
-                    )
-                )
-            )
-            |> temp
-
-        // Check for InsertMagicVocationSkill
-        | Character.VocationListMsg(VocationList.VocationMsgAtPosition(pos1,
-                                                                       Vocation.MundaneOrMagicVocationExtrasMsg(MundaneOrMagicVocationExtras.MagicVocationExtrasMsg(MagicVocationExtras.MagicVocationSkillsMsg(MagicVocationSkills.InsertMagicVocationSkill(x,
-                                                                                                                                                                                                                                                            y,
-                                                                                                                                                                                                                                                            z,
-                                                                                                                                                                                                                                                            _,
-                                                                                                                                                                                                                                                            t)))))) ->
-            Character.VocationListMsg(
-                VocationList.VocationMsgAtPosition(
-                    pos1,
-                    Vocation.MundaneOrMagicVocationExtrasMsg(
-                        MundaneOrMagicVocationExtras.MagicVocationExtrasMsg(
-                            MagicVocationExtras.MagicVocationSkillsMsg(
-                                MagicVocationSkills.InsertMagicVocationSkill(
-                                    x,
-                                    y,
-                                    z,
-                                    Some model.fogentRoleplayData.weaponSkillDataMap,
-                                    t
-                                )
-                            )
-                        )
-                    )
-                )
-            )
-            |> temp
 
         | Character.EffectListMsg(msg, _) ->
             match msg with
