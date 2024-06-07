@@ -206,30 +206,33 @@ let update msg (model: Character) =
 
                     | _ -> noParentInterceptionVocationListUpdate ()
 
-                | MundaneOrMagicVocationExtras.MagicVocationExtrasMsg(MagicVocationExtras.MagicVocationSkillsMsg(MagicVocationSkills.InsertMagicVocationSkill(name,
-                                                                                                                                                              _,
-                                                                                                                                                              _,
-                                                                                                                                                              _,
-                                                                                                                                                              magicSkillDataMapOption))) ->
+                | MundaneOrMagicVocationExtras.MagicVocationExtrasMsg(msg) ->
+                    match msg with
+                    | MagicVocationExtras.MagicVocationSkillsMsg(MagicVocationSkills.InsertMagicVocationSkill(name,
+                                                                                                              _,
+                                                                                                              _,
+                                                                                                              _,
+                                                                                                              magicSkillDataMapOption)) ->
 
-                    VocationList.update
-                        (VocationMsgAtPosition(
-                            pos1,
-                            Vocation.MundaneOrMagicVocationExtrasMsg(
-                                MundaneOrMagicVocationExtras.MagicVocationExtrasMsg(
-                                    MagicVocationExtras.MagicVocationSkillsMsg(
-                                        MagicVocationSkills.InsertMagicVocationSkill(
-                                            name,
-                                            Some model.settingData.attributeNameSet,
-                                            Some dicePoolCalculationData,
-                                            Some model.settingData.weaponSkillDataMap,
-                                            magicSkillDataMapOption
+                        VocationList.update
+                            (VocationMsgAtPosition(
+                                pos1,
+                                Vocation.MundaneOrMagicVocationExtrasMsg(
+                                    MundaneOrMagicVocationExtras.MagicVocationExtrasMsg(
+                                        MagicVocationExtras.MagicVocationSkillsMsg(
+                                            MagicVocationSkills.InsertMagicVocationSkill(
+                                                name,
+                                                Some model.settingData.attributeNameSet,
+                                                Some dicePoolCalculationData,
+                                                Some model.settingData.weaponSkillDataMap,
+                                                magicSkillDataMapOption
+                                            )
                                         )
                                     )
                                 )
-                            )
-                        ))
-                        model.vocationList
+                            ))
+                            model.vocationList
+                    | _ -> noParentInterceptionVocationListUpdate ()
 
                 | _ -> noParentInterceptionVocationListUpdate ()
             | _ -> noParentInterceptionVocationListUpdate ()
