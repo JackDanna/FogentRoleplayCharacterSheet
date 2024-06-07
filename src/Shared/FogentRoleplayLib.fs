@@ -1766,6 +1766,30 @@ module CharacterInformation =
         backstory: string
     }
 
+module SettingData =
+
+    open AttributeName
+    open CoreSkillData
+    open ItemStack
+    open WeaponSpell
+    open MagicSystem
+    open WeaponSkillData
+    open Effect
+    open CombatSpeedCalculation
+
+    type SettingData = {
+        attributeNameSet: AttributeName Set
+        coreSkillDataSet: CoreSkillData Set
+        itemStackMap: Map<string, ItemStack>
+        weaponSpellSet: WeaponSpell Set
+        magicSystemMap: Map<string, MagicSystem>
+        weaponSkillDataMap: Map<string, WeaponSkillData>
+        effectMap: Map<string, Effect>
+        //   carryWeightCalculationMap: Map<string, CarryWeightCalculation>
+        //   weightClassList: WeightClass List
+        combatSpeedCalculationMap: Map<string, CombatSpeedCalculation>
+    }
+
 module Character =
     open Attribute
     open Skill
