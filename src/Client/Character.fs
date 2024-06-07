@@ -7,8 +7,10 @@ open FogentRoleplayLib.AttributeName
 open FogentRoleplayLib.CoreSkillData
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.Skill
+open FogentRoleplayLib.SettingData
 
 type Msg =
+    | SetSettingData of SettingData
     | SetName of string
     | AttributesMsg of Attributes.Msg
     | CoreSkillsMsg of Skills.Msg
@@ -18,7 +20,7 @@ type Msg =
     | EffectListMsg of EffectList.Msg * option<Map<string, WeaponSkillData>>
     | CombatSpeedsMsg of CombatSpeeds.Msg
 
-let init (coreSkillDataSet: CoreSkillData Set) =
+let init (coreSkillDataSet: CoreSkillData Set) (settingData: SettingData) =
     let attributes = Set.map (fun x -> Attribute.init x.attributeName) coreSkillDataSet
     let effects = EffectList.init ()
 
@@ -37,6 +39,7 @@ let init (coreSkillDataSet: CoreSkillData Set) =
         characterInformation = CharacterInformation.init ()
         characterEffects = effects
         combatSpeeds = CombatSpeeds.init ()
+        settingData = FogentRoleplayLib.SettingData.init ()
     }
 
 open Skills
@@ -57,6 +60,10 @@ let update msg (model: Character) =
     let dicePoolCalculationData = characterToDicePoolCalculationData model
 
     match msg with
+    | SetSettingData newSettingData -> {
+        model with
+            settingData = newSettingData
+      }
     | SetName newName -> { model with name = newName }
 
     | AttributesMsg msg ->
@@ -303,16 +310,7 @@ let update msg (model: Character) =
 open Feliz
 open Feliz.Bulma
 
-let view
-    attributeNameSet
-    (allItemStackNameSet: string Set)
-    (magicSystemNameSet: string Set)
-    (weaponSkillNameSet)
-    (effectNameSet: string Set)
-    combatSpeedsCalculationNames
-    (model: Character)
-    dispatch
-    =
+let view (model: Character) dispatch =
 
     Bulma.container [
 
@@ -338,24 +336,31 @@ let view
         |> Attributes.attributesAndCoreSkillsListView model.attributes (AttributesMsg >> dispatch)
 
         VocationList.view
-            attributeNameSet
-            magicSystemNameSet
-            weaponSkillNameSet
+            model.settingData.attributeNameSet
+            (model.settingData.magicSystemMap.Keys |> Set.ofSeq)
+            (model.settingData.weaponSkillDataMap.Keys)
             model.vocationList
             (VocationListMsg >> dispatch)
 
-        CombatSpeeds.view combatSpeedsCalculationNames model.combatSpeeds (CombatSpeedsMsg >> dispatch)
+        CombatSpeeds.view
+            (model.settingData.combatSpeedCalculationMap.Keys |> Set.ofSeq)
+            model.combatSpeeds
+            (CombatSpeedsMsg >> dispatch)
 
         // DestinyPoints.view model.destinyPoints (DestinyPointsMsg >> dispatch)
 
-        EffectList.view effectNameSet model.characterEffects (fun msg -> (EffectListMsg(msg, None) |> dispatch))
+        EffectList.view (model.settingData.effectMap.Keys |> Set.ofSeq) model.characterEffects (fun msg ->
+            (EffectListMsg(msg, None) |> dispatch))
 
         // CarryWeightStatOption.view
         //     carryWeightCalculationNameList
         //     model.carryWeightStatOption
         //     (CarryWeightStatOptionMsg >> dispatch)
 
-        ItemStackList.view allItemStackNameSet model.equipmentList ((fun msg -> EquipmentMsg(msg, None)) >> dispatch)
+        ItemStackList.view
+            (model.settingData.itemStackMap.Keys |> Set.ofSeq)
+            model.equipmentList
+            ((fun msg -> EquipmentMsg(msg, None)) >> dispatch)
 
         CombatRollList.view model.combatRollList
 

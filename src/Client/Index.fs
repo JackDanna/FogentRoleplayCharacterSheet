@@ -6,15 +6,13 @@ open Fable.Remoting.Client
 open Shared
 
 open FogentRoleplayLib.Character
+open FogentRoleplayLib.SettingData
 
-type Model = {
-    fogentRoleplayData: FogentRoleplayData
-    character: Character
-}
+type Model = { character: Character }
 
 type Msg =
     | CharacterMsg of Character.Msg
-    | GotInitData of FogentRoleplayData
+    | GotInitSettingData of SettingData
 
 let fogentRoleplayDataApi =
     Remoting.createApi ()
@@ -26,20 +24,10 @@ let init () : Model * Cmd<Msg> =
     let defaultCoreSkillList = Set.empty
 
     {
-        character = Character.init Set.empty
-        fogentRoleplayData = {
-            attributeNameSet = defaultAttributeSet
-            coreSkillDataSet = defaultCoreSkillList
-            itemStackMap = Map.empty
-            weaponSpellSet = Set.empty
-            magicSystemMap = Map.empty
-            weaponSkillDataMap = Map.empty
-            effectMap = Map.empty
-            combatSpeedCalculationMap = Map.empty
-        }
+        character = Character.init Set.empty (FogentRoleplayLib.SettingData.init ())
     },
 
-    Cmd.OfAsync.perform fogentRoleplayDataApi.getInitData () GotInitData
+    Cmd.OfAsync.perform fogentRoleplayDataApi.getInitData () GotInitSettingData
 
 let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
     match msg with
@@ -150,7 +138,7 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
                     character = Character.update characterMsg model.character
             },
             Cmd.none
-    | GotInitData newFogentRoleplayData ->
+    | GotInitSettingData newFogentRoleplayData ->
 
         {
             model with
@@ -187,16 +175,6 @@ let view (model: Model) (dispatch: Msg -> unit) =
                 ]
             ]
 
-            Bulma.heroBody [
-                Character.view
-                    model.fogentRoleplayData.attributeNameSet
-                    (model.fogentRoleplayData.itemStackMap.Keys |> Set.ofSeq)
-                    (model.fogentRoleplayData.magicSystemMap.Keys |> Set.ofSeq)
-                    (model.fogentRoleplayData.weaponSkillDataMap.Keys)
-                    (model.fogentRoleplayData.effectMap.Keys |> Set.ofSeq)
-                    (model.fogentRoleplayData.combatSpeedCalculationMap.Keys |> Set.ofSeq)
-                    model.character
-                    (CharacterMsg >> dispatch)
-            ]
+            Bulma.heroBody [ Character.view model.character (CharacterMsg >> dispatch) ]
         ]
     ]
