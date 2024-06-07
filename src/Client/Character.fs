@@ -203,6 +203,38 @@ let update msg (model: Character) =
                         model.combatRollList
         }
 
+    // Checking for ModifySkillLevel in MundaneVocationSkill
+    | VocationListMsg(VocationMsgAtPosition(pos1,
+                                            Vocation.MundaneOrMagicVocationExtrasMsg(MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg(MundaneVocationSkills.ModifyMundaneVocationSkillAtPosition(pos2,
+                                                                                                                                                                                                      MundaneVocationSkill.Msg.SkillMsg(Skill.Msg.ModifySkillLevel(msg,
+                                                                                                                                                                                                                                                                   zeroToFiveOption,
+                                                                                                                                                                                                                                                                   _))))))) ->
+        let newVocationList =
+            VocationList.update
+                (VocationMsgAtPosition(
+                    pos1,
+                    Vocation.MundaneOrMagicVocationExtrasMsg(
+                        MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg(
+                            MundaneVocationSkills.ModifyMundaneVocationSkillAtPosition(
+                                pos2,
+                                MundaneVocationSkill.Msg.SkillMsg(
+                                    Skill.Msg.ModifySkillLevel(msg, zeroToFiveOption, Some dicePoolCalculationData)
+                                )
+                            )
+                        )
+                    )
+                ))
+                model.vocationList
+
+        {
+            model with
+                vocationList = newVocationList
+                combatRollList =
+                    CombatRollList.update
+                        (CombatRollList.RecalculateCombatRollList(
+                            model.equipmentList,
+                            vocationListToWeaponSkillList newVocationList,
+                            model.settingData.weaponSkillDataMap,
                             dicePoolCalculationData
                         ))
                         model.combatRollList
