@@ -206,13 +206,9 @@ let update msg (model: Character) =
 
                     | _ -> noParentInterceptionVocationListUpdate ()
 
-                | MundaneOrMagicVocationExtras.MagicVocationExtrasMsg(msg) ->
+                | MundaneOrMagicVocationExtras.MagicVocationExtrasMsg(MagicVocationExtras.MagicVocationSkillsMsg msg) ->
                     match msg with
-                    | MagicVocationExtras.MagicVocationSkillsMsg(MagicVocationSkills.InsertMagicVocationSkill(name,
-                                                                                                              _,
-                                                                                                              _,
-                                                                                                              _,
-                                                                                                              magicSkillDataMapOption)) ->
+                    | MagicVocationSkills.InsertMagicVocationSkill(name, _, _, _, magicSkillDataMapOption) ->
 
                         VocationList.update
                             (VocationMsgAtPosition(
@@ -232,6 +228,32 @@ let update msg (model: Character) =
                                 )
                             ))
                             model.vocationList
+                    | MagicVocationSkills.ModifySkillAtPosition(pos2,
+                                                                MagicVocationSkill.SkillMsg(Skill.ModifySkillLevel(msg,
+                                                                                                                   zeroToFiveOption,
+                                                                                                                   _))) ->
+                        VocationList.update
+                            (VocationMsgAtPosition(
+                                pos1,
+                                Vocation.MundaneOrMagicVocationExtrasMsg(
+                                    MundaneOrMagicVocationExtras.MagicVocationExtrasMsg(
+                                        MagicVocationExtras.MagicVocationSkillsMsg(
+                                            MagicVocationSkills.ModifySkillAtPosition(
+                                                pos2,
+                                                MagicVocationSkill.SkillMsg(
+                                                    Skill.ModifySkillLevel(
+                                                        msg,
+                                                        zeroToFiveOption,
+                                                        Some dicePoolCalculationData
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            ))
+                            model.vocationList
+
                     | _ -> noParentInterceptionVocationListUpdate ()
 
                 | _ -> noParentInterceptionVocationListUpdate ()

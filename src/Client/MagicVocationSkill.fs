@@ -4,7 +4,7 @@ open FogentRoleplayLib.MagicVocationSkill
 open FogentRoleplayLib.DicePoolCalculation
 
 type Msg =
-    | MagicSkillMsg of Skill.Msg
+    | SkillMsg of Skill.Msg
     | MundaneVocationSkillMsg of MundaneVocationSkill.Msg
     | CalculateDicePool of DicePoolCalculationData
     | CheckIfLevelCapExceeded of Skill.CheckIfLevelCapExceeded
@@ -22,7 +22,7 @@ let processMagicVocationSkill model operation =
 let update msg model =
 
     match msg with
-    | MagicSkillMsg msg -> processMagicVocationSkill model (fun skill -> Skill.update msg skill)
+    | SkillMsg msg -> processMagicVocationSkill model (fun skill -> Skill.update msg skill)
     | MundaneVocationSkillMsg(MundaneVocationSkill.SkillMsg msg) ->
         processMagicVocationSkill model (fun skill -> Skill.update msg skill)
     | CalculateDicePool dicePoolCalculationData ->
@@ -39,6 +39,6 @@ open Feliz.Bulma
 
 let view attributeNameSet model dispatch =
     match model with
-    | MagicSkill skill -> Skill.viewAsList attributeNameSet skill (MagicSkillMsg >> dispatch) true true
+    | MagicSkill skill -> Skill.viewAsList attributeNameSet skill (SkillMsg >> dispatch) true true
     | MundaneVocationSkill skill ->
         MundaneVocationSkill.view attributeNameSet skill (MundaneVocationSkillMsg >> dispatch)
