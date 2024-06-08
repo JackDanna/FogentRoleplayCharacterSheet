@@ -17,11 +17,11 @@ let update msg model =
     | ModifyMundaneVocationSkillAtPosition(position, msg) ->
         model
         |> Set.toList
-        |> List.mapi (fun index coreSkill ->
+        |> List.mapi (fun index mundaneVocationSkill ->
             if index = position then
-                MundaneVocationSkill.update msg coreSkill
+                MundaneVocationSkill.update msg mundaneVocationSkill
             else
-                coreSkill)
+                mundaneVocationSkill)
         |> Set.ofList
     | RemoveAtPosition position -> model |> List.ofSeq |> List.removeAt position |> Set.ofList
     | CalculateDicePools dicePoolCalculationData ->

@@ -25,11 +25,10 @@ let processMundaneVocationSkill model operation =
 let update msg model =
 
     match msg with
-    | SkillMsg msg -> (fun skill -> Skill.update msg skill)
-    | CalculateDicePool dicePoolCalculationData ->
-        (fun skill -> Skill.update (Skill.CalculateDicePool dicePoolCalculationData) skill)
-    | CheckIfLevelCapExceeded checkIfLevelCapExceededData ->
-        (fun skill -> Skill.update (Skill.CheckIfLevelCapExceeded checkIfLevelCapExceededData) skill)
+    | SkillMsg msg -> msg
+    | CalculateDicePool dicePoolCalculationData -> (Skill.CalculateDicePool dicePoolCalculationData)
+    | CheckIfLevelCapExceeded checkIfLevelCapExceededData -> (Skill.CheckIfLevelCapExceeded checkIfLevelCapExceededData)
+    |> (fun msg skill -> Skill.update msg skill)
     |> processMundaneVocationSkill model
 
 open Feliz
