@@ -84,16 +84,27 @@ let update (msg: Msg) (model: Vocation) =
             |> MagicVocationSkills.Msg.ModifySkillAtPosition
             |> MagicVocationExtras.Msg.MagicVocationSkillsMsg
             |> MundaneOrMagicVocationExtras.Msg.MagicVocationExtrasMsg
-            |> (fun msg -> {
-                model with
-                    mundaneOrMagicVocationExtras =
-                        MundaneOrMagicVocationExtras.update msg model.mundaneOrMagicVocationExtras
-            })
-        | _ -> {
+
+        | MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg(MundaneVocationSkills.ModifyMundaneVocationSkillAtPosition(pos,
+                                                                                                                           msg)) ->
+            match msg with
+            | MundaneVocationSkill.SkillMsg(Skill.ModifySkillLevel(msg, _, dicePoolCalculationOption)) ->
+                MundaneVocationSkill.SkillMsg(
+                    Skill.ModifySkillLevel(msg, Some model.vocationStat.level, dicePoolCalculationOption)
+                )
+            | _ -> msg
+            |> (fun msg -> pos, msg)
+            |> MundaneVocationSkills.ModifyMundaneVocationSkillAtPosition
+            |> MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg
+
+        | _ -> msg
+
+        |> (fun msg -> {
             model with
                 mundaneOrMagicVocationExtras =
                     MundaneOrMagicVocationExtras.update msg model.mundaneOrMagicVocationExtras
-          }
+        })
+
     | CalculateDicePools dicePoolCalculationData ->
         let newVocationStat =
             VocationStat.update (VocationStat.CalculateDicePool dicePoolCalculationData) model.vocationStat
