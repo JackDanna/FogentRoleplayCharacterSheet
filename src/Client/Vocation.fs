@@ -62,10 +62,38 @@ let update (msg: Msg) (model: Vocation) =
         model with
             vocationStat = VocationStat.update msg model.vocationStat
       }
-    | MundaneOrMagicVocationExtrasMsg msg -> {
-        model with
-            mundaneOrMagicVocationExtras = MundaneOrMagicVocationExtras.update msg model.mundaneOrMagicVocationExtras
-      }
+    | MundaneOrMagicVocationExtrasMsg msg ->
+        match msg with
+        | MundaneOrMagicVocationExtras.Msg.MagicVocationExtrasMsg(MagicVocationExtras.Msg.MagicVocationSkillsMsg(MagicVocationSkills.Msg.ModifySkillAtPosition(pos,
+                                                                                                                                                               msg))) ->
+            match msg with
+            | MagicVocationSkill.SkillMsg(Skill.Msg.ModifySkillLevel(msg, _, dicePoolCalculationOption)) ->
+                MagicVocationSkill.SkillMsg(
+                    Skill.Msg.ModifySkillLevel(msg, Some model.vocationStat.level, dicePoolCalculationOption)
+                )
+            | MagicVocationSkill.MundaneVocationSkillMsg(MundaneVocationSkill.SkillMsg(Skill.Msg.ModifySkillLevel(msg,
+                                                                                                                  _,
+                                                                                                                  dicePoolCalculationOption))) ->
+                MagicVocationSkill.MundaneVocationSkillMsg(
+                    MundaneVocationSkill.SkillMsg(
+                        Skill.Msg.ModifySkillLevel(msg, Some model.vocationStat.level, dicePoolCalculationOption)
+                    )
+                )
+            | _ -> msg
+            |> (fun msg -> pos, msg)
+            |> MagicVocationSkills.Msg.ModifySkillAtPosition
+            |> MagicVocationExtras.Msg.MagicVocationSkillsMsg
+            |> MundaneOrMagicVocationExtras.Msg.MagicVocationExtrasMsg
+            |> (fun msg -> {
+                model with
+                    mundaneOrMagicVocationExtras =
+                        MundaneOrMagicVocationExtras.update msg model.mundaneOrMagicVocationExtras
+            })
+        | _ -> {
+            model with
+                mundaneOrMagicVocationExtras =
+                    MundaneOrMagicVocationExtras.update msg model.mundaneOrMagicVocationExtras
+          }
     | CalculateDicePools dicePoolCalculationData ->
         let newVocationStat =
             VocationStat.update (VocationStat.CalculateDicePool dicePoolCalculationData) model.vocationStat
