@@ -196,17 +196,23 @@ let update msg (model: Character) =
                             magicSkillDataMapOption
                         )
 
-                    | MagicVocationSkills.ModifySkillAtPosition(pos2,
-                                                                MagicVocationSkill.MagicSkillMsg(Skill.ModifySkillLevel(msg,
-                                                                                                                        zeroToFiveOption,
-                                                                                                                        _))) ->
+                    | MagicVocationSkills.ModifySkillAtPosition(pos2, msg) ->
 
-                        MagicVocationSkills.ModifySkillAtPosition(
-                            pos2,
+                        match msg with
+                        | MagicVocationSkill.MagicSkillMsg(Skill.ModifySkillLevel(msg, zeroToFiveOption, _)) ->
                             MagicVocationSkill.MagicSkillMsg(
                                 Skill.ModifySkillLevel(msg, zeroToFiveOption, Some dicePoolCalculationData)
                             )
-                        )
+                        | MagicVocationSkill.MundaneVocationSkillMsg(MundaneVocationSkill.SkillMsg(Skill.ModifySkillLevel(msg,
+                                                                                                                          zeroToFiveOption,
+                                                                                                                          _))) ->
+                            MagicVocationSkill.MundaneVocationSkillMsg(
+                                MundaneVocationSkill.SkillMsg(
+                                    Skill.ModifySkillLevel(msg, zeroToFiveOption, Some dicePoolCalculationData)
+                                )
+                            )
+                        | _ -> msg
+                        |> (fun msg -> MagicVocationSkills.ModifySkillAtPosition(pos2, msg))
 
                     | _ -> msg
                     |> MagicVocationExtras.MagicVocationSkillsMsg
