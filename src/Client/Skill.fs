@@ -9,13 +9,15 @@ open FogentRoleplayLib.AttributeName
 open FogentRoleplayLib.StringUtils
 open FogentRoleplayLib.CoreSkillData
 
-type CheckIfLevelCapExceeded = ZeroToFive * DicePoolCalculationData
+type ZeroToFiveAndDicePoolCalculationData = ZeroToFive * DicePoolCalculationData
 
 type Msg =
     | ModifySkillLevel of Neg1To5.Msg * option<ZeroToFive> * option<DicePoolCalculationData>
     | CalculateDicePool of DicePoolCalculationData
-    | CheckIfLevelCapExceeded of CheckIfLevelCapExceeded
+    | CheckIfLevelCapExceeded of ZeroToFiveAndDicePoolCalculationData
     | ToggleGoverningAttribute of AttributeName * option<DicePoolCalculationData>
+    | ModifySkillLevelWithVocationStatLevel of ZeroToFiveAndDicePoolCalculationData
+    | NoOp
 
 let init = FogentRoleplayLib.Skill.init
 
@@ -81,7 +83,17 @@ let update msg (model: Skill) =
                 dicePool =
                     calculateSkillDicePool model.name model.level newGoverningAttribteNameSet dicePoolCalculationData
         }
+    | ModifySkillLevelWithVocationStatLevel(vocationStatLevel, dicePoolCalculationData) ->
+        let newLevel = zeroToFiveToNeg1To5 vocationStatLevel
 
+        {
+            model with
+                level = newLevel
+                dicePool =
+                    calculateSkillDicePool model.name newLevel model.governingAttributeNames dicePoolCalculationData
+        }
+
+    | NoOp
     | _ -> model
 
 

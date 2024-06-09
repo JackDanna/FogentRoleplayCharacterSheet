@@ -3,7 +3,6 @@ module Vocation
 open FogentRoleplayLib.Vocation
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.MagicSystem
-open FogentRoleplayLib.MundaneOrMagicVocationExtras
 
 type Msg =
     | VocationStatMsg of VocationStat.Msg
@@ -25,18 +24,8 @@ let init vocationName coreSkillMap dicePoolCalculationData (magicSystemMap: Map<
 
 let update (msg: Msg) (model: Vocation) =
 
-    match msg with
-    // Checks for ToggleGoverningAttribute
-    | VocationStatMsg(msg) ->
-        match msg with
-        | VocationStat.ToggleGoveringAttribute(attributeName, dicePoolCalculationDataOption) ->
-            (VocationStat.ToggleGoveringAttribute(attributeName, dicePoolCalculationDataOption))
-
-        | VocationStat.Msg.ZeroToFiveMsg(msg, dicePoolCalculationData) ->
-            (VocationStat.Msg.ZeroToFiveMsg(msg, dicePoolCalculationData))
-
-        | _ -> msg
-        |> (fun msg ->
+    let temp =
+        (fun msg ->
             let newVocationStat = VocationStat.update msg model.vocationStat
 
             {
@@ -50,13 +39,37 @@ let update (msg: Msg) (model: Vocation) =
                         model.mundaneOrMagicVocationExtras
             })
 
+    match msg with
+    // Checks for ToggleGoverningAttribute
+    | VocationStatMsg(msg) ->
+        match msg with
+        | VocationStat.ToggleGoveringAttribute(attributeName, dicePoolCalculationDataOption) ->
+            (VocationStat.ToggleGoveringAttribute(attributeName, dicePoolCalculationDataOption))
+            |> temp
+
+        | VocationStat.Msg.ZeroToFiveMsg(msg, Some dicePoolCalculationData) ->
+            (VocationStat.Msg.ZeroToFiveMsg(msg, Some dicePoolCalculationData))
+            |> temp
+            |> (fun vocation -> {
+                vocation with
+                    mundaneOrMagicVocationExtras =
+                        MundaneOrMagicVocationExtras.update
+                            (MundaneOrMagicVocationExtras.Msg.SetLevelForVocationalSkills(
+                                vocation.vocationStat.level,
+                                dicePoolCalculationData
+                            ))
+                            vocation.mundaneOrMagicVocationExtras
+            })
+
+        | _ -> temp msg
+
     | MundaneOrMagicVocationExtrasMsg msg ->
         match msg with
         | MundaneOrMagicVocationExtras.Msg.MagicVocationExtrasMsg(MagicVocationExtras.Msg.MagicVocationSkillsMsg(MagicVocationSkills.Msg.ModifySkillAtPosition(pos,
                                                                                                                                                                msg))) ->
             match msg with
-            | MagicVocationSkill.SkillMsg(Skill.Msg.ModifySkillLevel(msg, _, dicePoolCalculationOption)) ->
-                MagicVocationSkill.SkillMsg(
+            | MagicVocationSkill.MagicSkillMsg(Skill.Msg.ModifySkillLevel(msg, _, dicePoolCalculationOption)) ->
+                MagicVocationSkill.MagicSkillMsg(
                     Skill.Msg.ModifySkillLevel(msg, Some model.vocationStat.level, dicePoolCalculationOption)
                 )
             | MagicVocationSkill.MundaneVocationSkillMsg(MundaneVocationSkill.SkillMsg(Skill.Msg.ModifySkillLevel(msg,

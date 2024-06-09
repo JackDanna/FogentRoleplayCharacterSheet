@@ -18,6 +18,7 @@ type Msg =
     | CalculateMagicVocationSkillDicePools of DicePoolCalculationData
     | RecalculateVocationResourcePool of RecalculateVocationResourcePoolMsg
     | RecalculateCoreSkillResourePool of Map<string, Skill>
+    | SetLevelForVocationalSkill of Skill.ZeroToFiveAndDicePoolCalculationData
 
 let tryFindCoreSkillInMapWithDefault (coreSkillMap: Map<string, Skill>) governingCoreSkillName =
     match coreSkillMap.TryFind governingCoreSkillName with
@@ -124,6 +125,13 @@ let update msg (model: MagicVocationExtras) =
                         (model.vocationResourcePool + newCoreSkillResourcePool)
                         model.currentMagicResource
         }
+    | SetLevelForVocationalSkill data -> {
+        model with
+            magicVocationSkills =
+                MagicVocationSkills.update
+                    (MagicVocationSkills.Msg.SetLevelForVocationalSkills(data))
+                    model.magicVocationSkills
+      }
 
 open Feliz
 open Feliz.Bulma

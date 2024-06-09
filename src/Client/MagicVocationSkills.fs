@@ -10,13 +10,14 @@ type Msg =
     | ModifySkillAtPosition of int * MagicVocationSkill.Msg
     | RemoveAtPosition of int
     | CalculateDicePools of DicePoolCalculationData
-    | CheckIfLevelCapExceededForAll of Skill.CheckIfLevelCapExceeded
+    | CheckIfLevelCapExceededForAll of Skill.ZeroToFiveAndDicePoolCalculationData
     | InsertMagicVocationSkill of
         string *
         option<AttributeName Set> *
         option<DicePoolCalculationData> *
         option<Map<string, WeaponSkillData>> *
         option<Map<string, MagicSkillData>>
+    | SetLevelForVocationalSkills of Skill.ZeroToFiveAndDicePoolCalculationData
 
 let init () = Set.empty
 
@@ -58,6 +59,14 @@ let update msg (model: MagicVocationSkill Set) =
             MundaneVocationSkill.init weaponSkillDataMap dicePoolCalculationData skillName
             |> MundaneVocationSkill
         |> (fun x -> Set.add x model)
+    | SetLevelForVocationalSkills data ->
+        model
+        |> Set.map (fun magicVocationSkill ->
+            MagicVocationSkill.update
+                (MagicVocationSkill.Msg.MundaneVocationSkillMsg(
+                    MundaneVocationSkill.Msg.SetLevelForVocationalSkill(data)
+                ))
+                magicVocationSkill)
 
     | _ -> model
 

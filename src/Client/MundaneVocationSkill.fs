@@ -7,29 +7,40 @@ open FogentRoleplayLib.WeaponSkillData
 type Msg =
     | SkillMsg of Skill.Msg
     | CalculateDicePool of DicePoolCalculationData
-    | CheckIfLevelCapExceeded of Skill.CheckIfLevelCapExceeded
+    | CheckIfLevelCapExceeded of Skill.ZeroToFiveAndDicePoolCalculationData
+    | SetLevelForVocationalSkill of Skill.ZeroToFiveAndDicePoolCalculationData
+    | NoOp
 
 let init (weaponSkillDataMap: Map<string, WeaponSkillData>) dicePoolCalculationData skillName =
     match weaponSkillDataMap.TryFind skillName with
     | Some weaponSkillData ->
         Skill.init weaponSkillData.name weaponSkillData.governingAttributes dicePoolCalculationData
-        |> VocationalSkill
-    | None -> Skill.init skillName Set.empty dicePoolCalculationData |> WeaponSkill
-
-let processMundaneVocationSkill model operation =
-    match model with
-    | WeaponSkill skill -> skill |> operation |> WeaponSkill
-    | VocationalSkill skill -> skill |> operation |> VocationalSkill
-
+        |> WeaponSkill
+    | None -> Skill.init skillName Set.empty dicePoolCalculationData |> VocationalSkill
 
 let update msg model =
-
-    match msg with
-    | SkillMsg msg -> msg
-    | CalculateDicePool dicePoolCalculationData -> (Skill.CalculateDicePool dicePoolCalculationData)
-    | CheckIfLevelCapExceeded checkIfLevelCapExceededData -> (Skill.CheckIfLevelCapExceeded checkIfLevelCapExceededData)
-    |> (fun msg skill -> Skill.update msg skill)
-    |> processMundaneVocationSkill model
+    match model with
+    | WeaponSkill skill ->
+        match msg with
+        | SkillMsg msg -> msg
+        | CalculateDicePool dicePoolCalculationData -> (Skill.CalculateDicePool dicePoolCalculationData)
+        | CheckIfLevelCapExceeded checkIfLevelCapExceededData ->
+            (Skill.CheckIfLevelCapExceeded checkIfLevelCapExceededData)
+        | SetLevelForVocationalSkill _
+        | NoOp -> (Skill.NoOp)
+        |> (fun msg -> Skill.update msg skill)
+        |> WeaponSkill
+    | VocationalSkill skill ->
+        match msg with
+        | SkillMsg msg -> msg
+        | CalculateDicePool dicePoolCalculationData -> (Skill.CalculateDicePool dicePoolCalculationData)
+        | CheckIfLevelCapExceeded checkIfLevelCapExceededData ->
+            (Skill.CheckIfLevelCapExceeded checkIfLevelCapExceededData)
+        | SetLevelForVocationalSkill vocaitonStatLevelAndDicePoolCalculationData ->
+            (Skill.Msg.ModifySkillLevelWithVocationStatLevel vocaitonStatLevelAndDicePoolCalculationData)
+        | NoOp -> (Skill.NoOp)
+        |> (fun msg -> Skill.update msg skill)
+        |> VocationalSkill
 
 open Feliz
 open Feliz.Bulma

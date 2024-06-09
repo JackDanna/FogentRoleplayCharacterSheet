@@ -190,13 +190,13 @@ let update msg (model: Character) =
                         )
 
                     | MagicVocationSkills.ModifySkillAtPosition(pos2,
-                                                                MagicVocationSkill.SkillMsg(Skill.ModifySkillLevel(msg,
-                                                                                                                   zeroToFiveOption,
-                                                                                                                   _))) ->
+                                                                MagicVocationSkill.MagicSkillMsg(Skill.ModifySkillLevel(msg,
+                                                                                                                        zeroToFiveOption,
+                                                                                                                        _))) ->
 
                         MagicVocationSkills.ModifySkillAtPosition(
                             pos2,
-                            MagicVocationSkill.SkillMsg(
+                            MagicVocationSkill.MagicSkillMsg(
                                 Skill.ModifySkillLevel(msg, zeroToFiveOption, Some dicePoolCalculationData)
                             )
                         )
