@@ -133,7 +133,7 @@ let governingAttributesToggle
         ]
     ]
 
-let viewAsList attributeNameSet (model: Skill) dispatch disableChangeLevel showGoverningSkillColumn = [
+let viewAsList attributeNameSet (model: Skill) dispatch userInputDisabled showGoverningSkillColumn = [
     Bulma.column [ prop.text model.name ]
     if showGoverningSkillColumn then
         Bulma.column [
@@ -143,7 +143,7 @@ let viewAsList attributeNameSet (model: Skill) dispatch disableChangeLevel showG
     else
         Html.none
     Bulma.column [
-        Neg1To5.view model.level ((fun msg -> ModifySkillLevel(msg, None, None)) >> dispatch) disableChangeLevel
+        Neg1To5.view model.level ((fun msg -> ModifySkillLevel(msg, None, None)) >> dispatch) userInputDisabled
     ]
     Bulma.column [ model.dicePool |> dicePoolToString |> prop.text ]
 ]
