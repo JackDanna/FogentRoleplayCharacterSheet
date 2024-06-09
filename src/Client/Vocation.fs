@@ -30,26 +30,14 @@ let update (msg: Msg) (model: Vocation) =
     | VocationStatMsg(msg) ->
         match msg with
         | VocationStat.ToggleGoveringAttribute(attributeName, dicePoolCalculationDataOption) ->
+            (VocationStat.ToggleGoveringAttribute(attributeName, dicePoolCalculationDataOption))
 
-            let vocationStat =
-                VocationStat.update
-                    (VocationStat.ToggleGoveringAttribute(attributeName, dicePoolCalculationDataOption))
-                    model.vocationStat
-
-            {
-                model with
-                    vocationStat = vocationStat
-                    mundaneOrMagicVocationExtras =
-                        MundaneOrMagicVocationExtras.update
-                            (MundaneOrMagicVocationExtras.RecalculateVocationResourcePool(
-                                vocationStat.level,
-                                vocationStat.dicePool
-                            ))
-                            model.mundaneOrMagicVocationExtras
-            }
         | VocationStat.Msg.ZeroToFiveMsg(msg, dicePoolCalculationData) ->
-            let newVocationStat =
-                VocationStat.update (VocationStat.Msg.ZeroToFiveMsg(msg, dicePoolCalculationData)) model.vocationStat
+            (VocationStat.Msg.ZeroToFiveMsg(msg, dicePoolCalculationData))
+
+        | _ -> msg
+        |> (fun msg ->
+            let newVocationStat = VocationStat.update msg model.vocationStat
 
             {
                 vocationStat = newVocationStat
@@ -60,11 +48,7 @@ let update (msg: Msg) (model: Vocation) =
                             newVocationStat.dicePool
                         ))
                         model.mundaneOrMagicVocationExtras
-            }
-        | _ -> {
-            model with
-                vocationStat = VocationStat.update msg model.vocationStat
-          }
+            })
 
     | MundaneOrMagicVocationExtrasMsg msg ->
         match msg with
