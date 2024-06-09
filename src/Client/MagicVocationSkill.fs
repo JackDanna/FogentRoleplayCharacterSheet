@@ -2,6 +2,7 @@ module MagicVocationSkill
 
 open FogentRoleplayLib.MagicVocationSkill
 open FogentRoleplayLib.DicePoolCalculation
+open FogentRoleplayLib.Neg1To5
 
 type Msg =
     | MagicSkillMsg of Skill.Msg
@@ -10,7 +11,8 @@ type Msg =
     | CheckIfLevelCapExceeded of Skill.ZeroToFiveAndDicePoolCalculationData
 
 let initMagicSkill name governingAttributes dicePoolCalculationData =
-    Skill.init name governingAttributes dicePoolCalculationData |> MagicSkill
+    Skill.init name Neg1To5.Zero governingAttributes dicePoolCalculationData
+    |> MagicSkill
 
 let update msg model =
 

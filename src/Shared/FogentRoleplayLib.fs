@@ -1383,8 +1383,7 @@ module Skill =
     //effectDicePoolModList: DicePoolMod List
     }
 
-    let init name governingAttributes dicePoolCalculationData =
-        let level = Neg1To5.init ()
+    let init name level governingAttributes dicePoolCalculationData =
 
         {
             name = name
@@ -1743,13 +1742,17 @@ module CombatRoll =
 
             weaponSkillDataMap.TryFind weapon.name
             |> function
-                | None -> Skill.init weapon.name Set.empty dicePoolCalculationData
+                | None -> Skill.init weapon.name Neg1To5.Zero Set.empty dicePoolCalculationData
                 | Some weaponSkillData ->
                     tryFindWeaponSkill weaponSkillData.name weaponSkillList
                     |> function
                         | Some vocationalSkill -> vocationalSkill
                         | None ->
-                            Skill.init weaponSkillData.name weaponSkillData.governingAttributes dicePoolCalculationData
+                            Skill.init
+                                weaponSkillData.name
+                                Neg1To5.Zero
+                                weaponSkillData.governingAttributes
+                                dicePoolCalculationData
 
             |> (fun skill ->
                 createSkillDicePool skill.name skill.level skill.governingAttributeNames dicePoolCalculationData)

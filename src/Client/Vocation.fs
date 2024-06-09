@@ -40,7 +40,6 @@ let update (msg: Msg) (model: Vocation) =
             })
 
     match msg with
-    // Checks for ToggleGoverningAttribute
     | VocationStatMsg(msg) ->
         match msg with
         | VocationStat.ToggleGoveringAttribute(attributeName, dicePoolCalculationDataOption) ->
@@ -65,37 +64,53 @@ let update (msg: Msg) (model: Vocation) =
 
     | MundaneOrMagicVocationExtrasMsg msg ->
         match msg with
-        | MundaneOrMagicVocationExtras.Msg.MagicVocationExtrasMsg(MagicVocationExtras.Msg.MagicVocationSkillsMsg(MagicVocationSkills.Msg.ModifySkillAtPosition(pos,
-                                                                                                                                                               msg))) ->
+        | MundaneOrMagicVocationExtras.MagicVocationExtrasMsg(MagicVocationExtras.MagicVocationSkillsMsg(msg)) ->
             match msg with
-            | MagicVocationSkill.MagicSkillMsg(Skill.Msg.ModifySkillLevel(msg, _, dicePoolCalculationOption)) ->
-                MagicVocationSkill.MagicSkillMsg(
-                    Skill.Msg.ModifySkillLevel(msg, Some model.vocationStat.level, dicePoolCalculationOption)
-                )
-            | MagicVocationSkill.MundaneVocationSkillMsg(MundaneVocationSkill.SkillMsg(Skill.Msg.ModifySkillLevel(msg,
+            | MagicVocationSkills.ModifySkillAtPosition(pos, msg) ->
+                match msg with
+                | MagicVocationSkill.MagicSkillMsg(Skill.ModifySkillLevel(msg, _, dicePoolCalculationOption)) ->
+                    MagicVocationSkill.MagicSkillMsg(
+                        Skill.ModifySkillLevel(msg, Some model.vocationStat.level, dicePoolCalculationOption)
+                    )
+                | MagicVocationSkill.MundaneVocationSkillMsg(MundaneVocationSkill.SkillMsg(Skill.ModifySkillLevel(msg,
                                                                                                                   _,
                                                                                                                   dicePoolCalculationOption))) ->
-                MagicVocationSkill.MundaneVocationSkillMsg(
+                    MagicVocationSkill.MundaneVocationSkillMsg(
+                        MundaneVocationSkill.SkillMsg(
+                            Skill.ModifySkillLevel(msg, Some model.vocationStat.level, dicePoolCalculationOption)
+                        )
+                    )
+                | _ -> msg
+                |> (fun msg -> pos, msg)
+                |> MagicVocationSkills.ModifySkillAtPosition
+
+            | MagicVocationSkills.InsertMagicVocationSkill(a, _, b, c, d, e) ->
+                MagicVocationSkills.InsertMagicVocationSkill(a, Some model.vocationStat.level, b, c, d, e)
+
+            | _ -> msg
+
+            |> MagicVocationExtras.MagicVocationSkillsMsg
+            |> MundaneOrMagicVocationExtras.MagicVocationExtrasMsg
+
+        | MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg(msg) ->
+            match msg with
+            | MundaneVocationSkills.ModifyMundaneVocationSkillAtPosition(pos,
+                                                                         MundaneVocationSkill.SkillMsg(Skill.ModifySkillLevel(msg,
+                                                                                                                              _,
+                                                                                                                              dicePoolCalculationOption))) ->
+
+                MundaneVocationSkills.ModifyMundaneVocationSkillAtPosition(
+                    pos,
                     MundaneVocationSkill.SkillMsg(
-                        Skill.Msg.ModifySkillLevel(msg, Some model.vocationStat.level, dicePoolCalculationOption)
+                        Skill.ModifySkillLevel(msg, Some model.vocationStat.level, dicePoolCalculationOption)
                     )
                 )
-            | _ -> msg
-            |> (fun msg -> pos, msg)
-            |> MagicVocationSkills.Msg.ModifySkillAtPosition
-            |> MagicVocationExtras.Msg.MagicVocationSkillsMsg
-            |> MundaneOrMagicVocationExtras.Msg.MagicVocationExtrasMsg
 
-        | MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg(MundaneVocationSkills.ModifyMundaneVocationSkillAtPosition(pos,
-                                                                                                                           msg)) ->
-            match msg with
-            | MundaneVocationSkill.SkillMsg(Skill.ModifySkillLevel(msg, _, dicePoolCalculationOption)) ->
-                MundaneVocationSkill.SkillMsg(
-                    Skill.ModifySkillLevel(msg, Some model.vocationStat.level, dicePoolCalculationOption)
-                )
+            | MundaneVocationSkills.InsertMundaneVocationSkill(a, _, b, c) ->
+                MundaneVocationSkills.InsertMundaneVocationSkill(a, Some model.vocationStat.level, b, c)
+
             | _ -> msg
-            |> (fun msg -> pos, msg)
-            |> MundaneVocationSkills.ModifyMundaneVocationSkillAtPosition
+
             |> MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg
 
         | _ -> msg

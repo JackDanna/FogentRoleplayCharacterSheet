@@ -5,6 +5,7 @@ open FogentRoleplayLib.WeaponSkillData
 open FogentRoleplayLib.MagicSkillData
 open FogentRoleplayLib.MagicVocationSkill
 open FogentRoleplayLib.AttributeName
+open FogentRoleplayLib.ZeroToFive
 
 type Msg =
     | ModifySkillAtPosition of int * MagicVocationSkill.Msg
@@ -13,6 +14,7 @@ type Msg =
     | CheckIfLevelCapExceededForAll of Skill.ZeroToFiveAndDicePoolCalculationData
     | InsertMagicVocationSkill of
         string *
+        option<ZeroToFive> *
         option<AttributeName Set> *
         option<DicePoolCalculationData> *
         option<Map<string, WeaponSkillData>> *
@@ -42,6 +44,7 @@ let update msg (model: MagicVocationSkill Set) =
         model
         |> Set.map (fun skill -> MagicVocationSkill.update (MagicVocationSkill.CheckIfLevelCapExceeded msgData) skill)
     | InsertMagicVocationSkill(skillName,
+                               Some vocationStatLevel,
                                Some vocationGoverningAttributeNames,
                                Some dicePoolCalculationData,
                                Some weaponSkillDataMap,
@@ -56,7 +59,7 @@ let update msg (model: MagicVocationSkill Set) =
                 dicePoolCalculationData
 
         | None ->
-            MundaneVocationSkill.init weaponSkillDataMap dicePoolCalculationData skillName
+            MundaneVocationSkill.init weaponSkillDataMap dicePoolCalculationData skillName vocationStatLevel
             |> MundaneVocationSkill
         |> (fun x -> Set.add x model)
     | SetLevelForVocationalSkills data ->
@@ -86,7 +89,7 @@ let view attributeNameSet magicSkillNames weaponSkillNames model (dispatch: Msg 
 
         List.append x [
             ViewUtils.textInputWithDropdownSet
-                (fun input -> InsertMagicVocationSkill(input, None, None, None, None) |> dispatch)
+                (fun input -> InsertMagicVocationSkill(input, None, None, None, None, None) |> dispatch)
                 (Set.union magicSkillNames weaponSkillNames)
                 "mundaneVocationSkills"
         ]

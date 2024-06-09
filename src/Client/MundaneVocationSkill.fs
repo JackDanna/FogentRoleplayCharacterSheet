@@ -3,6 +3,8 @@ module MundaneVocationSkill
 open FogentRoleplayLib.MundaneVocationSkill
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.WeaponSkillData
+open FogentRoleplayLib.Neg1To5
+open FogentRoleplayLib.ZeroToFive
 
 type Msg =
     | SkillMsg of Skill.Msg
@@ -11,12 +13,20 @@ type Msg =
     | SetLevelForVocationalSkill of Skill.ZeroToFiveAndDicePoolCalculationData
     | NoOp
 
-let init (weaponSkillDataMap: Map<string, WeaponSkillData>) dicePoolCalculationData skillName =
+let init
+    (weaponSkillDataMap: Map<string, WeaponSkillData>)
+    dicePoolCalculationData
+    skillName
+    (vocationStatLevel: ZeroToFive)
+    =
     match weaponSkillDataMap.TryFind skillName with
     | Some weaponSkillData ->
-        Skill.init weaponSkillData.name weaponSkillData.governingAttributes dicePoolCalculationData
+        Skill.init weaponSkillData.name Neg1To5.Zero weaponSkillData.governingAttributes dicePoolCalculationData
         |> WeaponSkill
-    | None -> Skill.init skillName Set.empty dicePoolCalculationData |> VocationalSkill
+    | None ->
+
+        Skill.init skillName (zeroToFiveToNeg1To5 vocationStatLevel) Set.empty dicePoolCalculationData
+        |> VocationalSkill
 
 let update msg model =
     match model with

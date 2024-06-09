@@ -61,12 +61,14 @@ let update msg (model: MagicVocationExtras) =
         let temp msg =
             match msg with
             | MagicVocationSkills.InsertMagicVocationSkill(name,
+                                                           vocationStatLevelOption,
                                                            _,
                                                            dicePoolCalculationDataOption,
                                                            weaponSkillDataOption,
                                                            _) ->
                 MagicVocationSkills.InsertMagicVocationSkill(
                     name,
+                    vocationStatLevelOption,
                     Some model.magicSystem.vocationGoverningAttributeSet,
                     dicePoolCalculationDataOption,
                     weaponSkillDataOption,

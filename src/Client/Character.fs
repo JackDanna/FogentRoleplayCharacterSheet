@@ -155,22 +155,23 @@ let update msg (model: Character) =
                 match msg with
                 | MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg(msg) ->
                     match msg with
-                    | MundaneVocationSkills.InsertMundaneVocationSkill(name, _, _) ->
+                    | MundaneVocationSkills.InsertMundaneVocationSkill(name, vocationStatLevelOption, _, _) ->
                         MundaneVocationSkills.InsertMundaneVocationSkill(
                             name,
+                            vocationStatLevelOption,
                             Some dicePoolCalculationData,
                             Some model.settingData.weaponSkillDataMap
                         )
 
                     | MundaneVocationSkills.ModifyMundaneVocationSkillAtPosition(pos2,
-                                                                                 MundaneVocationSkill.Msg.SkillMsg(Skill.Msg.ModifySkillLevel(msg,
-                                                                                                                                              zeroToFiveOption,
-                                                                                                                                              _))) ->
+                                                                                 MundaneVocationSkill.SkillMsg(Skill.ModifySkillLevel(msg,
+                                                                                                                                      zeroToFiveOption,
+                                                                                                                                      _))) ->
 
                         MundaneVocationSkills.ModifyMundaneVocationSkillAtPosition(
                             pos2,
-                            MundaneVocationSkill.Msg.SkillMsg(
-                                Skill.Msg.ModifySkillLevel(msg, zeroToFiveOption, Some dicePoolCalculationData)
+                            MundaneVocationSkill.SkillMsg(
+                                Skill.ModifySkillLevel(msg, zeroToFiveOption, Some dicePoolCalculationData)
                             )
                         )
 
@@ -179,10 +180,16 @@ let update msg (model: Character) =
 
                 | MundaneOrMagicVocationExtras.MagicVocationExtrasMsg(MagicVocationExtras.MagicVocationSkillsMsg msg) ->
                     match msg with
-                    | MagicVocationSkills.InsertMagicVocationSkill(name, _, _, _, magicSkillDataMapOption) ->
+                    | MagicVocationSkills.InsertMagicVocationSkill(name,
+                                                                   vocationStatLevelOption,
+                                                                   _,
+                                                                   _,
+                                                                   _,
+                                                                   magicSkillDataMapOption) ->
 
                         MagicVocationSkills.InsertMagicVocationSkill(
                             name,
+                            vocationStatLevelOption,
                             Some model.settingData.attributeNameSet,
                             Some dicePoolCalculationData,
                             Some model.settingData.weaponSkillDataMap,

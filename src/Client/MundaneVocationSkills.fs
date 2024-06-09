@@ -2,13 +2,18 @@ module MundaneVocationSkills
 
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.WeaponSkillData
+open FogentRoleplayLib.ZeroToFive
 
 type Msg =
     | ModifyMundaneVocationSkillAtPosition of int * MundaneVocationSkill.Msg
     | RemoveAtPosition of int
     | CalculateDicePools of DicePoolCalculationData
     | CheckIfLevelCapExceededForAll of Skill.ZeroToFiveAndDicePoolCalculationData
-    | InsertMundaneVocationSkill of string * option<DicePoolCalculationData> * option<Map<string, WeaponSkillData>>
+    | InsertMundaneVocationSkill of
+        string *
+        option<ZeroToFive> *
+        option<DicePoolCalculationData> *
+        option<Map<string, WeaponSkillData>>
     | SetLevelForVocationalSkills of Skill.ZeroToFiveAndDicePoolCalculationData
 
 let init () = Set.empty
@@ -35,8 +40,11 @@ let update msg model =
         |> Set.map (fun skill ->
             MundaneVocationSkill.update (MundaneVocationSkill.CheckIfLevelCapExceeded msgData) skill)
 
-    | InsertMundaneVocationSkill(skillName, Some dicePoolCalculationData, Some weaponSkillDataMap) ->
-        MundaneVocationSkill.init weaponSkillDataMap dicePoolCalculationData skillName
+    | InsertMundaneVocationSkill(skillName,
+                                 Some vocationStatLevel,
+                                 Some dicePoolCalculationData,
+                                 Some weaponSkillDataMap) ->
+        MundaneVocationSkill.init weaponSkillDataMap dicePoolCalculationData skillName vocationStatLevel
         |> (fun x -> Set.add x model)
 
     | SetLevelForVocationalSkills data ->
@@ -62,7 +70,7 @@ let view attributeNameSet weaponSkillNames model (dispatch: Msg -> unit) =
 
         List.append x [
             ViewUtils.textInputWithDropdownSet
-                (fun input -> InsertMundaneVocationSkill(input, None, None) |> dispatch)
+                (fun input -> InsertMundaneVocationSkill(input, None, None, None) |> dispatch)
                 weaponSkillNames
                 "mundaneVocationSkills"
         ])

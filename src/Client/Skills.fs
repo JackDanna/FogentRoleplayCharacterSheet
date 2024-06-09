@@ -7,10 +7,6 @@ type Msg =
     | ModifySkillAtPosition of int * Skill.Msg
     | CalculateSkillDicePools of DicePoolCalculationData
 
-let init skillNameSet governingAttributesNames dicePoolCalculations =
-    skillNameSet
-    |> Set.map (fun coreSkillName -> Skill.init coreSkillName governingAttributesNames dicePoolCalculations)
-
 let initCoreSkills coreSkillDataSet dicePoolCalculationData =
     Set.map
         (fun (coreSkillData: CoreSkillData) -> Skill.initCoreSkill coreSkillData dicePoolCalculationData)
