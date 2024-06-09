@@ -18,6 +18,7 @@ type Msg =
     | CalculateMagicVocationSkillDicePools of DicePoolCalculationData
     | RecalculateVocationResourcePool of RecalculateVocationResourcePoolMsg
     | RecalculateCoreSkillResourePool of Map<string, Skill>
+    | CheckIfLevelCapExceededForSkills of Skill.ZeroToFiveAndDicePoolCalculationData
     | SetLevelForVocationalSkill of Skill.ZeroToFiveAndDicePoolCalculationData
 
 let tryFindCoreSkillInMapWithDefault (coreSkillMap: Map<string, Skill>) governingCoreSkillName =
@@ -127,6 +128,13 @@ let update msg (model: MagicVocationExtras) =
                         (model.vocationResourcePool + newCoreSkillResourcePool)
                         model.currentMagicResource
         }
+    | CheckIfLevelCapExceededForSkills data -> {
+        model with
+            magicVocationSkills =
+                MagicVocationSkills.update
+                    (MagicVocationSkills.CheckIfLevelCapExceededForSkills(data))
+                    model.magicVocationSkills
+      }
     | SetLevelForVocationalSkill data -> {
         model with
             magicVocationSkills =

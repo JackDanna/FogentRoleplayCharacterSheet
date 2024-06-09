@@ -11,7 +11,7 @@ type Msg =
     | ModifySkillAtPosition of int * MagicVocationSkill.Msg
     | RemoveAtPosition of int
     | CalculateDicePools of DicePoolCalculationData
-    | CheckIfLevelCapExceededForAll of Skill.ZeroToFiveAndDicePoolCalculationData
+    | CheckIfLevelCapExceededForSkills of Skill.ZeroToFiveAndDicePoolCalculationData
     | InsertMagicVocationSkill of
         string *
         option<ZeroToFive> *
@@ -40,7 +40,7 @@ let update msg (model: MagicVocationSkill Set) =
             (fun coreSkill ->
                 MagicVocationSkill.update (MagicVocationSkill.CalculateDicePool(dicePoolCalculationData)) coreSkill)
             model
-    | CheckIfLevelCapExceededForAll msgData ->
+    | CheckIfLevelCapExceededForSkills msgData ->
         model
         |> Set.map (fun skill -> MagicVocationSkill.update (MagicVocationSkill.CheckIfLevelCapExceeded msgData) skill)
     | InsertMagicVocationSkill(skillName,

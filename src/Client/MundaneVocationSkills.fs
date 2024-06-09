@@ -8,7 +8,7 @@ type Msg =
     | ModifyMundaneVocationSkillAtPosition of int * MundaneVocationSkill.Msg
     | RemoveAtPosition of int
     | CalculateDicePools of DicePoolCalculationData
-    | CheckIfLevelCapExceededForAll of Skill.ZeroToFiveAndDicePoolCalculationData
+    | CheckIfLevelCapExceededForSkills of Skill.ZeroToFiveAndDicePoolCalculationData
     | InsertMundaneVocationSkill of
         string *
         option<ZeroToFive> *
@@ -35,7 +35,7 @@ let update msg model =
             (fun coreSkill ->
                 MundaneVocationSkill.update (MundaneVocationSkill.CalculateDicePool(dicePoolCalculationData)) coreSkill)
             model
-    | CheckIfLevelCapExceededForAll msgData ->
+    | CheckIfLevelCapExceededForSkills msgData ->
         model
         |> Set.map (fun skill ->
             MundaneVocationSkill.update (MundaneVocationSkill.CheckIfLevelCapExceeded msgData) skill)

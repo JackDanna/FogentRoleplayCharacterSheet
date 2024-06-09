@@ -46,18 +46,25 @@ let update (msg: Msg) (model: Vocation) =
             (VocationStat.ToggleGoveringAttribute(attributeName, dicePoolCalculationDataOption))
             |> temp
 
-        | VocationStat.Msg.ZeroToFiveMsg(msg, Some dicePoolCalculationData) ->
-            (VocationStat.Msg.ZeroToFiveMsg(msg, Some dicePoolCalculationData))
+        | VocationStat.ZeroToFiveMsg(msg, Some dicePoolCalculationData) ->
+            (VocationStat.ZeroToFiveMsg(msg, Some dicePoolCalculationData))
             |> temp
             |> (fun vocation -> {
                 vocation with
                     mundaneOrMagicVocationExtras =
-                        MundaneOrMagicVocationExtras.update
-                            (MundaneOrMagicVocationExtras.Msg.SetLevelForVocationalSkills(
+                        vocation.mundaneOrMagicVocationExtras
+                        |> MundaneOrMagicVocationExtras.update (
+                            MundaneOrMagicVocationExtras.Msg.SetLevelForVocationalSkills(
                                 vocation.vocationStat.level,
                                 dicePoolCalculationData
-                            ))
-                            vocation.mundaneOrMagicVocationExtras
+                            )
+                        )
+                        |> MundaneOrMagicVocationExtras.update (
+                            MundaneOrMagicVocationExtras.Msg.CheckIfLevelCapExceededForSkills(
+                                vocation.vocationStat.level,
+                                dicePoolCalculationData
+                            )
+                        )
             })
 
         | _ -> temp msg
