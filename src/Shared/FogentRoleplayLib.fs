@@ -749,8 +749,6 @@ module Container =
         volumeFtCubed: float
     }
 
-    let containerToName container = container.name
-
 module ItemTier =
     open DicePool
 
