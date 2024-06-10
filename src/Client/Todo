@@ -1,7 +1,5 @@
 Refactor Skill lists to be a tupe of (skillName * skillLevel)
 
-Can't increase level of vocation skill
-
 Combat Rolls dual wielded doesn't show dual-wielded +1d6
 
 Equipment effect aren't being factored increase
