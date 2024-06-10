@@ -251,21 +251,27 @@ let update msg (model: Character) =
           }
 
     | EquipmentMsg(msg) ->
-        let newEquipmentList = ItemStackList.update msg model.equipmentList
 
-        {
-            model with
-                equipmentList = newEquipmentList
-                combatRollList =
-                    CombatRollList.update (
-                        CombatRollList.RecalculateCombatRollList(
-                            newEquipmentList,
-                            vocationListToWeaponSkillList model.vocationList,
-                            model.settingData.weaponSkillDataMap,
-                            dicePoolCalculationData
+        match msg with
+        | ItemStackList.Insert(name, _) -> ItemStackList.Insert(name, Some model.settingData.itemStackMap)
+        | _ -> msg
+        |> (fun msg ->
+
+            let newEquipmentList = ItemStackList.update msg model.equipmentList
+
+            {
+                model with
+                    equipmentList = newEquipmentList
+                    combatRollList =
+                        CombatRollList.update (
+                            CombatRollList.RecalculateCombatRollList(
+                                newEquipmentList,
+                                vocationListToWeaponSkillList model.vocationList,
+                                model.settingData.weaponSkillDataMap,
+                                dicePoolCalculationData
+                            )
                         )
-                    )
-        }
+            })
 
     | CharacterInformationMsg msg -> {
         model with
