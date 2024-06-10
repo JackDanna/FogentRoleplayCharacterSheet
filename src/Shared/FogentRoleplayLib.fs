@@ -1180,9 +1180,6 @@ module Effect =
 
 module Item =
     open ItemTier
-    open Weapon
-    open WeaponResource
-    open StringUtils
     open Effect
 
     type Item = {
