@@ -162,16 +162,16 @@ let update msg (model: Character) =
                         )
 
                     | MundaneVocationSkills.ModifyMundaneVocationSkillAtPosition(pos2,
-                                                                                 MundaneVocationSkill.SkillMsg(Skill.ModifySkillLevel(msg,
-                                                                                                                                      zeroToFiveOption,
-                                                                                                                                      _))) ->
+                                                                                 MundaneVocationSkill.SkillMsg(msg)) ->
 
-                        MundaneVocationSkills.ModifyMundaneVocationSkillAtPosition(
-                            pos2,
-                            MundaneVocationSkill.SkillMsg(
-                                Skill.ModifySkillLevel(msg, zeroToFiveOption, Some dicePoolCalculationData)
-                            )
-                        )
+                        match msg with
+                        | Skill.ModifySkillLevel(msg, zeroToFiveOption, _) ->
+                            Skill.ModifySkillLevel(msg, zeroToFiveOption, Some dicePoolCalculationData)
+                        | Skill.ToggleGoverningAttribute(attributeName, _) ->
+                            Skill.ToggleGoverningAttribute(attributeName, Some dicePoolCalculationData)
+                        | _ -> msg
+                        |> MundaneVocationSkill.SkillMsg
+                        |> (fun msg -> MundaneVocationSkills.ModifyMundaneVocationSkillAtPosition(pos2, msg))
 
                     | _ -> msg
                     |> MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg
@@ -197,18 +197,25 @@ let update msg (model: Character) =
                     | MagicVocationSkills.ModifySkillAtPosition(pos2, msg) ->
 
                         match msg with
-                        | MagicVocationSkill.MagicSkillMsg(Skill.ModifySkillLevel(msg, zeroToFiveOption, _)) ->
-                            MagicVocationSkill.MagicSkillMsg(
+                        | MagicVocationSkill.MagicSkillMsg(msg) ->
+
+                            match msg with
+                            | Skill.ModifySkillLevel(msg, zeroToFiveOption, _) ->
                                 Skill.ModifySkillLevel(msg, zeroToFiveOption, Some dicePoolCalculationData)
-                            )
-                        | MagicVocationSkill.MundaneVocationSkillMsg(MundaneVocationSkill.SkillMsg(Skill.ModifySkillLevel(msg,
-                                                                                                                          zeroToFiveOption,
-                                                                                                                          _))) ->
-                            MagicVocationSkill.MundaneVocationSkillMsg(
-                                MundaneVocationSkill.SkillMsg(
-                                    Skill.ModifySkillLevel(msg, zeroToFiveOption, Some dicePoolCalculationData)
-                                )
-                            )
+                            | Skill.ToggleGoverningAttribute(attributeName, _) ->
+                                Skill.ToggleGoverningAttribute(attributeName, Some dicePoolCalculationData)
+                            | _ -> msg
+                            |> MagicVocationSkill.MagicSkillMsg
+
+                        | MagicVocationSkill.MundaneVocationSkillMsg(MundaneVocationSkill.SkillMsg(msg)) ->
+                            match msg with
+                            | Skill.ModifySkillLevel(msg, zeroToFiveOption, _) ->
+                                Skill.ModifySkillLevel(msg, zeroToFiveOption, Some dicePoolCalculationData)
+                            | Skill.ToggleGoverningAttribute(attributeName, _) ->
+                                Skill.ToggleGoverningAttribute(attributeName, Some dicePoolCalculationData)
+                            | _ -> msg
+                            |> MundaneVocationSkill.SkillMsg
+                            |> MagicVocationSkill.MundaneVocationSkillMsg
                         | _ -> msg
                         |> (fun msg -> MagicVocationSkills.ModifySkillAtPosition(pos2, msg))
 
