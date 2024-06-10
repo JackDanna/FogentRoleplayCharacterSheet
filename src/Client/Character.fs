@@ -55,42 +55,41 @@ let update msg (model: Character) =
 
     let dicePoolCalculationData = characterToDicePoolCalculationData model
 
-    let newEffectsForCharacter =
-        (fun character ->
-            let newDicePoolCalculationData = characterToDicePoolCalculationData character
+    let newEffectsForCharacter character =
+        let newDicePoolCalculationData = characterToDicePoolCalculationData character
 
-            let newCoreSkills =
-                Skills.update (Skills.CalculateSkillDicePools newDicePoolCalculationData) model.coreSkills
+        let newCoreSkills =
+            Skills.update (Skills.CalculateSkillDicePools newDicePoolCalculationData) character.coreSkills
 
-            {
-                character with
-                    coreSkills = newCoreSkills
-                    vocationList =
-                        model.vocationList
-                        |> VocationList.update (VocationList.CalculateDicePools newDicePoolCalculationData)
-                        |> VocationList.update (
-                            VocationMsgForAll(
-                                MundaneOrMagicVocationExtrasMsg(
-                                    MundaneOrMagicVocationExtras.RecalculateCoreSkillResourcePool(
-                                        coreSkillToMap newCoreSkills
-                                    )
+        {
+            character with
+                coreSkills = newCoreSkills
+                vocationList =
+                    character.vocationList
+                    |> VocationList.update (VocationList.CalculateDicePools newDicePoolCalculationData)
+                    |> VocationList.update (
+                        VocationMsgForAll(
+                            MundaneOrMagicVocationExtrasMsg(
+                                MundaneOrMagicVocationExtras.RecalculateCoreSkillResourcePool(
+                                    coreSkillToMap newCoreSkills
                                 )
                             )
                         )
-                    combatSpeeds =
-                        CombatSpeeds.update
-                            (CombatSpeeds.RecalculateAllCombatSpeeds(newCoreSkills, model.attributes))
-                            model.combatSpeeds
-                    combatRollList =
-                        CombatRollList.update (
-                            CombatRollList.RecalculateCombatRollList(
-                                model.equipmentList,
-                                vocationListToWeaponSkillList model.vocationList,
-                                model.settingData.weaponSkillDataMap,
-                                dicePoolCalculationData
-                            )
+                    )
+                combatSpeeds =
+                    CombatSpeeds.update
+                        (CombatSpeeds.RecalculateAllCombatSpeeds(newCoreSkills, character.attributes))
+                        character.combatSpeeds
+                combatRollList =
+                    CombatRollList.update (
+                        CombatRollList.RecalculateCombatRollList(
+                            character.equipmentList,
+                            vocationListToWeaponSkillList character.vocationList,
+                            character.settingData.weaponSkillDataMap,
+                            dicePoolCalculationData
                         )
-            })
+                    )
+        }
 
     match msg with
     | SetSettingData newSettingData -> {
