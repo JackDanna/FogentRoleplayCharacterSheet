@@ -421,7 +421,10 @@ module FogentRoleplayServerData =
             quantity = uint row.["quantity"]
             item = {
                 name = string row.["desc"]
-                itemEffectSet = stringToEffectSet effectDataMap row.["itemClasses"]
+                itemEffectSet =
+                    Set.union
+                        (stringToEffectSet effectDataMap row.["itemClasses"])
+                        (stringToEffectSet effectDataMap row.["itemEffects"])
                 itemTier = itemTierMap.Item row.["itemTier"]
                 value = string row.["value"]
                 weight = float row.["weight"]
