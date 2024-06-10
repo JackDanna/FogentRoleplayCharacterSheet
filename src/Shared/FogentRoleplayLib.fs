@@ -1278,6 +1278,12 @@ module ItemStack =
         |> List.map (fun itemStack -> itemStack.item.weight * (float itemStack.quantity))
         |> List.sum
 
+    let itemStackToEffectList (itemStack: ItemStack) =
+        itemStack.item.itemEffectSet |> List.ofSeq
+
+    let itemStackListToEffectList itemStackList =
+        itemStackList |> List.collect itemStackToEffectList
+
 // module Container =
 
 //     open Container
@@ -1834,7 +1840,7 @@ module Character =
     }
 
     let characterToDicePoolCalculationData character = {
-        effects = character.characterEffects
+        effects = character.characterEffects @ itemStackListToEffectList character.equipmentList
         attributes = character.attributes
     }
 
