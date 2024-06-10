@@ -45,10 +45,6 @@ let view attributeNameSet (magicSystemNameSet) (weaponSkillNameSet) model dispat
     Bulma.container [
         Bulma.label [ prop.text "Vocations and Vocational Skills:" ] |> Bulma.content
         //Bulma.button.button [ prop.onClick (fun _ -> dispatch Insert); prop.text "+" ]
-        ViewUtils.textInputWithDropdownSet
-            (fun input -> InsertVocation(input, None, None, None) |> dispatch)
-            (magicSystemNameSet)
-            "vocationList"
         Bulma.columns [
             columns.isCentered
             prop.children [
@@ -64,4 +60,8 @@ let view attributeNameSet (magicSystemNameSet) (weaponSkillNameSet) model dispat
                 |> Bulma.columns
             ]
         ]
+        ViewUtils.textInputWithDropdownSet
+            (fun input -> InsertVocation(input, None, None, None) |> dispatch)
+            (magicSystemNameSet)
+            "vocationList"
     ]
