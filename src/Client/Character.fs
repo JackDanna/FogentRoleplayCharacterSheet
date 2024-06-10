@@ -125,8 +125,6 @@ let update msg (model: Character) =
 
     | VocationListMsg(msg: VocationList.Msg) ->
 
-        let noParentInterceptionVocationListUpdate () = msg
-
         match msg with
         | InsertVocation(vocationName, _, _, _) -> {
             model with
