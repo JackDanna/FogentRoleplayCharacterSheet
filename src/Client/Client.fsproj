@@ -26,6 +26,9 @@
     <Compile Include="Item.fs" />
     <Compile Include="ItemStack.fs" />
     <Compile Include="ItemStackList.fs" />
+    <Compile Include="ContainerInstance.fs" />
+    <Compile Include="ContainerInstanceList.fs" />
+    <Compile Include="Equipment.fs" />
     <Compile Include="CombatRollList.fs" />
     <Compile Include="CharacterInformation.fs" />
     <Compile Include="DurationAndSource.fs" />

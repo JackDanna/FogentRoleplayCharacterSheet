@@ -1,9 +1,6 @@
 module Character
 
 open FogentRoleplayLib.Character
-open FogentRoleplayLib.WeaponSkillData
-open FogentRoleplayLib.SkillName
-open FogentRoleplayLib.AttributeName
 open FogentRoleplayLib.CoreSkillData
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.Skill
@@ -15,7 +12,7 @@ type Msg =
     | AttributesMsg of Attributes.Msg
     | CoreSkillsMsg of Skills.Msg
     | VocationListMsg of VocationList.Msg
-    | EquipmentMsg of ItemStackList.Msg
+    | EquipmentMsg of Equipment.Msg
     | CharacterInformationMsg of CharacterInformation.Msg
     | EffectListMsg of EffectList.Msg
     | CombatSpeedsMsg of CombatSpeeds.Msg
@@ -36,7 +33,7 @@ let init (settingData: SettingData) =
         attributes = attributes
         coreSkills = Skills.initCoreSkills settingData.coreSkillDataSet dicePoolCalculationData
         vocationList = VocationList.init ()
-        equipmentList = ItemStackList.init ()
+        equipment = Equipment.init ()
         combatRollList = CombatRollList.init ()
         characterInformation = CharacterInformation.init ()
         characterEffects = effects
@@ -83,7 +80,7 @@ let update msg (model: Character) =
                 combatRollList =
                     CombatRollList.update (
                         CombatRollList.RecalculateCombatRollList(
-                            character.equipmentList,
+                            character.equipment.itemStackList,
                             vocationListToWeaponSkillList character.vocationList,
                             character.settingData.weaponSkillDataMap,
                             dicePoolCalculationData
@@ -274,7 +271,7 @@ let update msg (model: Character) =
                         combatRollList =
                             CombatRollList.update (
                                 CombatRollList.RecalculateCombatRollList(
-                                    model.equipmentList,
+                                    model.equipment.itemStackList,
                                     vocationListToWeaponSkillList newVocationList,
                                     model.settingData.weaponSkillDataMap,
                                     dicePoolCalculationData
@@ -289,11 +286,12 @@ let update msg (model: Character) =
     | EquipmentMsg(msg) ->
 
         match msg with
-        | ItemStackList.Insert(name, _) -> ItemStackList.Insert(name, Some model.settingData.itemStackMap)
+        | Equipment.ItemStackListMsg(ItemStackList.Insert(name, _)) ->
+            Equipment.ItemStackListMsg(ItemStackList.Insert(name, Some model.settingData.itemStackMap))
         | _ -> msg
         |> (fun msg -> {
             model with
-                equipmentList = ItemStackList.update msg model.equipmentList
+                equipment = Equipment.update msg model.equipment
         })
         |> newEffectsForCharacter
 
@@ -377,10 +375,7 @@ let view (model: Character) dispatch =
         //     model.carryWeightStatOption
         //     (CarryWeightStatOptionMsg >> dispatch)
 
-        ItemStackList.view
-            (model.settingData.itemStackMap.Keys |> Set.ofSeq)
-            model.equipmentList
-            ((fun msg -> EquipmentMsg msg) >> dispatch)
+        Equipment.view (model.settingData.itemStackMap.Keys |> Set.ofSeq) model.equipment (EquipmentMsg >> dispatch)
 
         CombatRollList.view model.combatRollList
 

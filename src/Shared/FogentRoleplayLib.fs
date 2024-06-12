@@ -1174,6 +1174,14 @@ module Effect =
             durationAndSource = durationAndSource
         })
 
+    let effectToContainerOption effect =
+        match effect with
+        | Container container -> Some container
+        | _ -> None
+
+    let effectListToContainerList effects =
+        List.choose effectToContainerOption effects
+
 // Item
 
 module Item =
@@ -1196,6 +1204,7 @@ module Item =
 
 module ItemStack =
     open Item
+    open Effect
 
     type ItemStack = { item: Item; quantity: uint }
 
@@ -1210,33 +1219,12 @@ module ItemStack =
     let itemStackToEffectList (itemStack: ItemStack) =
         itemStack.item.itemEffectSet |> List.ofSeq
 
+
+    let itemStackToContinerList itemStack =
+        itemStack |> itemStackToEffectList |> List.choose effectToContainerOption
+
     let itemStackListToEffectList itemStackList =
         itemStackList |> List.collect itemStackToEffectList
-
-// module Container =
-
-//     open Container
-//     open ItemStack
-
-//     type Container = {
-//         name: string
-//         containerClass: ContainerClass
-//         isEquipped: bool
-//         itemStackList: ItemStack list
-//     }
-
-//     let itemNameAndContainerClassToContainer (itemName, containerClass: ContainerClass) = {
-//         name = itemName
-//         containerClass = containerClass
-//         isEquipped = false
-//         itemStackList = []
-//     }
-
-//     let sumContainerListWeight (containerList: Container list) =
-//         containerList
-//         |> List.map (fun container -> sumItemStackListWeight container.itemStackList)
-//         |> List.sum
-
 
 // ItemStat
 
@@ -1505,6 +1493,42 @@ module WeightClass =
                 && (percentOfMaxCarryWeight >= weightClass.bottomPercent))
             weightClassList
 
+module ContainerInstance =
+
+    open Container
+    open ItemStack
+
+    type ContainerInstance = {
+        itemName: string
+        containerClass: Container
+        itemStackList: ItemStack list
+    }
+
+    let initContainerInstance (itemName, container: Container) = {
+        itemName = itemName
+        containerClass = container
+        itemStackList = []
+    }
+
+    let sumContainerInstanceWeight (containerInstance: ContainerInstance) =
+        sumItemStackListWeight containerInstance.itemStackList
+
+    let sumContainerInstanceListWeight (containerInstances: ContainerInstance list) =
+        containerInstances |> List.map sumContainerInstanceWeight |> List.sum
+
+module Equipment =
+    open ContainerInstance
+    open ItemStack
+
+    type Equipment = {
+        itemStackList: ItemStack List
+        onPersonContainerInstanceList: ContainerInstance List
+        offPersonContinaerInstacneList: ContainerInstance List
+    }
+
+    let equipmentToEffectList equipment =
+        itemStackListToEffectList equipment.itemStackList
+
 module CombatRoll =
 
     open DicePool
@@ -1746,7 +1770,7 @@ module Character =
     open Skill
     open Vocation
     open DicePoolCalculation
-    open ItemStack
+    open Equipment
     open CombatRoll
     open CharacterInformation
     open Effect
@@ -1760,7 +1784,7 @@ module Character =
         attributes: Attribute Set
         coreSkills: Skill Set
         vocationList: Vocation list
-        equipmentList: ItemStack list
+        equipment: Equipment
         combatRollList: CombatRoll List
         characterInformation: CharacterInformation
         characterEffects: Effect List
@@ -1769,7 +1793,7 @@ module Character =
     }
 
     let characterToDicePoolCalculationData character = {
-        effects = character.characterEffects @ itemStackListToEffectList character.equipmentList
+        effects = character.characterEffects @ equipmentToEffectList character.equipment
         attributes = character.attributes
     }
 

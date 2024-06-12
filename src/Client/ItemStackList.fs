@@ -29,9 +29,8 @@ let update (msg: Msg) (model: ItemStack list) : ItemStack list =
 open Feliz
 open Feliz.Bulma
 
-let view (allItemStackSet: string Set) (model: ItemStack list) (dispatch: Msg -> unit) =
+let view (allItemStackNameSet: string Set) (model: ItemStack list) (dispatch: Msg -> unit) =
     Bulma.container [
-        Bulma.label "Equipment List:"
         Bulma.table [
             table.isBordered
             prop.children [
@@ -64,7 +63,7 @@ let view (allItemStackSet: string Set) (model: ItemStack list) (dispatch: Msg ->
                 Html.tfoot [
                     ViewUtils.textInputWithDropdownSet
                         (fun input -> dispatch (Insert(input, None)))
-                        allItemStackSet
+                        allItemStackNameSet
                         "ItemStackList"
                 ]
             ]
