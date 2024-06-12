@@ -1151,6 +1151,8 @@ module Effect =
         | Container container -> Some container
         | _ -> None
 
+    let effectsToContainerList = List.choose effectToContainerOption
+
     open DicePoolMod
 
     let skillDiceModToTextEffect (sdm: SkillDiceMod) =
@@ -1218,7 +1220,7 @@ module ItemStack =
 
 
     let itemStackToContinerList itemStack =
-        itemStack |> itemStackToEffectList |> List.choose effectToContainerOption
+        itemStack |> itemStackToEffectList |> effectsToContainerList
 
     let itemStackListToEffectList itemStackList =
         itemStackList |> List.collect itemStackToEffectList
