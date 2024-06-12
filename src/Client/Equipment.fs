@@ -4,7 +4,8 @@ open FogentRoleplayLib.Equipment
 open FogentRoleplayLib.ItemStack
 
 type Msg =
-    | ContainerInstanceListMsg of ContainerInstanceList.Msg
+    | OnPersonContainerInstanceListMsg of ContainerInstanceList.Msg
+    | OffPersonContinaerInstacneList of ContainerInstanceList.Msg
     | ItemStackListMsg of ItemStackList.Msg
 
 let init () = {
@@ -15,9 +16,13 @@ let init () = {
 
 let update msg (model: Equipment) =
     match msg with
-    | ContainerInstanceListMsg msg -> {
+    | OnPersonContainerInstanceListMsg msg -> {
         model with
             onPersonContainerInstanceList = ContainerInstanceList.update msg model.onPersonContainerInstanceList
+      }
+    | OffPersonContinaerInstacneList msg -> {
+        model with
+            offPersonContinaerInstacneList = ContainerInstanceList.update msg model.offPersonContinaerInstacneList
       }
     | ItemStackListMsg msg ->
         match msg with
@@ -64,5 +69,5 @@ let view allItemStackNames (model: Equipment) dispatch =
         ContainerInstanceList.view
             allItemStackNames
             model.onPersonContainerInstanceList
-            (ContainerInstanceListMsg >> dispatch)
+            (OnPersonContainerInstanceListMsg >> dispatch)
     ]

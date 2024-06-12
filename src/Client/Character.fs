@@ -288,6 +288,28 @@ let update msg (model: Character) =
         match msg with
         | Equipment.ItemStackListMsg(ItemStackList.Insert(name, _)) ->
             Equipment.ItemStackListMsg(ItemStackList.Insert(name, Some model.settingData.itemStackMap))
+        | Equipment.OnPersonContainerInstanceListMsg(ContainerInstanceList.ModifyContainerInstance(pos1,
+                                                                                                   ContainerInstance.ItemStackListMsg(ItemStackList.Insert(itemName,
+                                                                                                                                                           _)))) ->
+            Equipment.OnPersonContainerInstanceListMsg(
+                ContainerInstanceList.ModifyContainerInstance(
+                    pos1,
+                    ContainerInstance.ItemStackListMsg(
+                        ItemStackList.Insert(itemName, Some model.settingData.itemStackMap)
+                    )
+                )
+            )
+        | Equipment.OffPersonContinaerInstacneList(ContainerInstanceList.ModifyContainerInstance(pos1,
+                                                                                                 ContainerInstance.ItemStackListMsg(ItemStackList.Insert(itemName,
+                                                                                                                                                         _)))) ->
+            Equipment.OffPersonContinaerInstacneList(
+                ContainerInstanceList.ModifyContainerInstance(
+                    pos1,
+                    ContainerInstance.ItemStackListMsg(
+                        ItemStackList.Insert(itemName, Some model.settingData.itemStackMap)
+                    )
+                )
+            )
         | _ -> msg
         |> (fun msg -> {
             model with
