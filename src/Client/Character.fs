@@ -101,37 +101,11 @@ let update msg (model: Character) =
     | SetName newName -> { model with name = newName }
 
     | AttributesMsg msg ->
-        let newAttributes = Attributes.update msg model.attributes
-
-        let newDicePoolCalculationData = {
-            dicePoolCalculationData with
-                attributes = newAttributes
-        }
-
-        let newCoreSkills =
-            Skills.update (Skills.CalculateSkillDicePools newDicePoolCalculationData) model.coreSkills
-
         {
             model with
-                attributes = newAttributes
-                coreSkills = newCoreSkills
-                vocationList =
-                    model.vocationList
-                    |> VocationList.update (VocationList.CalculateDicePools newDicePoolCalculationData)
-                    |> VocationList.update (
-                        VocationMsgForAll(
-                            MundaneOrMagicVocationExtrasMsg(
-                                MundaneOrMagicVocationExtras.RecalculateCoreSkillResourcePool(
-                                    coreSkillToMap newCoreSkills
-                                )
-                            )
-                        )
-                    )
-                combatSpeeds =
-                    CombatSpeeds.update
-                        (CombatSpeeds.RecalculateAllCombatSpeeds(newCoreSkills, newAttributes))
-                        model.combatSpeeds
+                attributes = Attributes.update msg model.attributes
         }
+        |> newEffectsForCharacter
 
     | CoreSkillsMsg msg ->
         match msg with
