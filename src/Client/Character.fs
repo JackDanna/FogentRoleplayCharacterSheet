@@ -5,6 +5,7 @@ open FogentRoleplayLib.CoreSkillData
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.Skill
 open FogentRoleplayLib.SettingData
+open FogentRoleplayLib.ItemStack
 
 type Msg =
     | SetSettingData of SettingData
@@ -12,7 +13,9 @@ type Msg =
     | AttributesMsg of Attributes.Msg
     | CoreSkillsMsg of Skills.Msg
     | VocationListMsg of VocationList.Msg
-    | EquipmentMsg of Equipment.Msg
+    | EquipmentMsg of ItemStackList.Msg
+    | EquipedContainerInstanceListMsg of ContainerInstanceList.Msg
+    | OffPersonContainerInstanceListMsg of ContainerInstanceList.Msg
     | CharacterInformationMsg of CharacterInformation.Msg
     | EffectListMsg of EffectList.Msg
     | CombatSpeedsMsg of CombatSpeeds.Msg
@@ -33,7 +36,9 @@ let init (settingData: SettingData) =
         attributes = attributes
         coreSkills = Skills.initCoreSkills settingData.coreSkillDataSet dicePoolCalculationData
         vocationList = VocationList.init ()
-        equipment = Equipment.init ()
+        equipment = ItemStackList.init ()
+        equipedContainerInstanceList = ContainerInstanceList.init ()
+        offPersonContinaerInstacneList = ContainerInstanceList.init ()
         combatRollList = CombatRollList.init ()
         characterInformation = CharacterInformation.init ()
         characterEffects = effects
@@ -80,7 +85,7 @@ let update msg (model: Character) =
                 combatRollList =
                     CombatRollList.update (
                         CombatRollList.RecalculateCombatRollList(
-                            character.equipment.itemStackList,
+                            character.equipment,
                             vocationListToWeaponSkillList character.vocationList,
                             character.settingData.weaponSkillDataMap,
                             dicePoolCalculationData
@@ -271,7 +276,7 @@ let update msg (model: Character) =
                         combatRollList =
                             CombatRollList.update (
                                 CombatRollList.RecalculateCombatRollList(
-                                    model.equipment.itemStackList,
+                                    model.equipment,
                                     vocationListToWeaponSkillList newVocationList,
                                     model.settingData.weaponSkillDataMap,
                                     dicePoolCalculationData
@@ -282,40 +287,73 @@ let update msg (model: Character) =
             model with
                 vocationList = VocationList.update msg model.vocationList
           }
-
-    | EquipmentMsg(msg) ->
-
+    | EquipmentMsg msg ->
         match msg with
-        | Equipment.ItemStackListMsg(ItemStackList.Insert(name, _)) ->
-            Equipment.ItemStackListMsg(ItemStackList.Insert(name, Some model.settingData.itemStackMap))
-        | Equipment.OnPersonContainerInstanceListMsg(ContainerInstanceList.ModifyContainerInstance(pos1,
-                                                                                                   ContainerInstance.ItemStackListMsg(ItemStackList.Insert(itemName,
-                                                                                                                                                           _)))) ->
-            Equipment.OnPersonContainerInstanceListMsg(
-                ContainerInstanceList.ModifyContainerInstance(
-                    pos1,
-                    ContainerInstance.ItemStackListMsg(
-                        ItemStackList.Insert(itemName, Some model.settingData.itemStackMap)
-                    )
-                )
-            )
-        | Equipment.OffPersonContinaerInstacneList(ContainerInstanceList.ModifyContainerInstance(pos1,
-                                                                                                 ContainerInstance.ItemStackListMsg(ItemStackList.Insert(itemName,
-                                                                                                                                                         _)))) ->
-            Equipment.OffPersonContinaerInstacneList(
-                ContainerInstanceList.ModifyContainerInstance(
-                    pos1,
-                    ContainerInstance.ItemStackListMsg(
-                        ItemStackList.Insert(itemName, Some model.settingData.itemStackMap)
-                    )
-                )
+        | ItemStackList.Insert(itemName, _) ->
+
+            let msgWithParentData =
+                ItemStackList.Insert(itemName, Some model.settingData.itemStackMap)
+
+            match model.settingData.itemStackMap.TryFind itemName with
+            | Some itemStack -> {
+                model with
+                    equipment = ItemStackList.update msgWithParentData model.equipment
+                    equipedContainerInstanceList =
+                        itemStack
+                        |> itemStackToContinerList
+                        |> List.fold
+                            (fun acc container ->
+                                ContainerInstanceList.update
+                                    (ContainerInstanceList.Insert(itemStack.item.name, container))
+                                    acc)
+                            model.equipedContainerInstanceList
+              }
+            | None -> {
+                model with
+                    equipment = ItemStackList.update msgWithParentData model.equipment
+              }
+
+        | ItemStackList.Remove(pos) -> {
+            model with
+                equipment = ItemStackList.update (ItemStackList.Remove(pos)) model.equipment
+                equipedContainerInstanceList = List.removeAt pos model.equipedContainerInstanceList
+          }
+        | _ -> {
+            model with
+                equipment = ItemStackList.update msg model.equipment
+          }
+        |> newEffectsForCharacter
+
+    | EquipedContainerInstanceListMsg msg ->
+        match msg with
+        | ContainerInstanceList.ModifyContainerInstance(pos1,
+                                                        ContainerInstance.ItemStackListMsg(ItemStackList.Insert(itemName,
+                                                                                                                _))) ->
+            ContainerInstanceList.ModifyContainerInstance(
+                pos1,
+                ContainerInstance.ItemStackListMsg(ItemStackList.Insert(itemName, Some model.settingData.itemStackMap))
             )
         | _ -> msg
         |> (fun msg -> {
             model with
-                equipment = Equipment.update msg model.equipment
+                equipedContainerInstanceList = ContainerInstanceList.update msg model.equipedContainerInstanceList
         })
         |> newEffectsForCharacter
+
+    | OffPersonContainerInstanceListMsg msg ->
+        match msg with
+        | ContainerInstanceList.ModifyContainerInstance(pos1,
+                                                        ContainerInstance.ItemStackListMsg(ItemStackList.Insert(itemName,
+                                                                                                                _))) ->
+            ContainerInstanceList.ModifyContainerInstance(
+                pos1,
+                ContainerInstance.ItemStackListMsg(ItemStackList.Insert(itemName, Some model.settingData.itemStackMap))
+            )
+        | _ -> msg
+        |> (fun msg -> {
+            model with
+                offPersonContinaerInstacneList = ContainerInstanceList.update msg model.offPersonContinaerInstacneList
+        })
 
     | CharacterInformationMsg msg -> {
         model with
@@ -349,6 +387,17 @@ let update msg (model: Character) =
 
 open Feliz
 open Feliz.Bulma
+
+let oldEquipmentView allItemStackNames (model) dispatch =
+    Bulma.container [
+        Bulma.label ("Equiped Items: " + (string (sumItemStackListWeight model.equipment)))
+        ItemStackList.view allItemStackNames model.equipment (EquipmentMsg >> dispatch)
+        Bulma.label "Containers:"
+        ContainerInstanceList.view
+            allItemStackNames
+            model.equipedContainerInstanceList
+            (EquipedContainerInstanceListMsg >> dispatch)
+    ]
 
 let view (model: Character) dispatch =
 
@@ -397,7 +446,7 @@ let view (model: Character) dispatch =
         //     model.carryWeightStatOption
         //     (CarryWeightStatOptionMsg >> dispatch)
 
-        Equipment.view (model.settingData.itemStackMap.Keys |> Set.ofSeq) model.equipment (EquipmentMsg >> dispatch)
+        oldEquipmentView (model.settingData.itemStackMap.Keys |> Set.ofSeq) model dispatch
 
         CombatRollList.view model.combatRollList
 

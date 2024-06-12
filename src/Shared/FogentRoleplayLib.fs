@@ -1515,19 +1515,6 @@ module ContainerInstance =
     let sumContainerInstanceListWeight (containerInstances: ContainerInstance list) =
         containerInstances |> List.map sumContainerInstanceWeight |> List.sum
 
-module Equipment =
-    open ContainerInstance
-    open ItemStack
-
-    type Equipment = {
-        itemStackList: ItemStack List
-        onPersonContainerInstanceList: ContainerInstance List
-        offPersonContinaerInstacneList: ContainerInstance List
-    }
-
-    let equipmentToEffectList equipment =
-        itemStackListToEffectList equipment.itemStackList
-
 module CombatRoll =
 
     open DicePool
@@ -1769,7 +1756,8 @@ module Character =
     open Skill
     open Vocation
     open DicePoolCalculation
-    open Equipment
+    open ItemStack
+    open ContainerInstance
     open CombatRoll
     open CharacterInformation
     open Effect
@@ -1783,7 +1771,9 @@ module Character =
         attributes: Attribute Set
         coreSkills: Skill Set
         vocationList: Vocation list
-        equipment: Equipment
+        equipment: ItemStack List
+        equipedContainerInstanceList: ContainerInstance List
+        offPersonContinaerInstacneList: ContainerInstance List
         combatRollList: CombatRoll List
         characterInformation: CharacterInformation
         characterEffects: Effect List
@@ -1792,7 +1782,7 @@ module Character =
     }
 
     let characterToDicePoolCalculationData character = {
-        effects = character.characterEffects @ equipmentToEffectList character.equipment
+        effects = character.characterEffects @ itemStackListToEffectList character.equipment
         attributes = character.attributes
     }
 
