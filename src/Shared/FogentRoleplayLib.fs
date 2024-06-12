@@ -1126,25 +1126,30 @@ module Effect =
 
     let effectToSkillDiceModEffectList (effect: Effect) =
         match effect with
-        | SkillDiceMod skillAdjustment -> [ skillAdjustment ]
-        | _ -> []
+        | SkillDiceMod skillAdjustment -> Some skillAdjustment
+        | _ -> None
 
-    let effectsToSkillDiceModEffectList = List.collect effectToSkillDiceModEffectList
+    let effectsToSkillDiceModEffectList = List.choose effectToSkillDiceModEffectList
 
     let effectToAttributeDeterminedDiceModEffectList (effect: Effect) =
         match effect with
-        | AttributeDeterminedDiceMod addme -> [ addme ]
-        | _ -> []
+        | AttributeDeterminedDiceMod addme -> Some addme
+        | _ -> None
 
     let effectsToAttributeDeterminedDiceModEffectList =
-        List.collect effectToAttributeDeterminedDiceModEffectList
+        List.choose effectToAttributeDeterminedDiceModEffectList
 
     let effectToBaseDiceMod effect =
         match effect with
-        | BaseDiceMod bdm -> [ bdm ]
-        | _ -> []
+        | BaseDiceMod bdm -> Some bdm
+        | _ -> None
 
-    let effectsToBaseDiceModList = List.collect effectToBaseDiceMod
+    let effectsToBaseDiceModList = List.choose effectToBaseDiceMod
+
+    let effectToContainerOption effect =
+        match effect with
+        | Container container -> Some container
+        | _ -> None
 
     open DicePoolMod
 
@@ -1173,14 +1178,6 @@ module Effect =
             effect = effectString
             durationAndSource = durationAndSource
         })
-
-    let effectToContainerOption effect =
-        match effect with
-        | Container container -> Some container
-        | _ -> None
-
-    let effectListToContainerList effects =
-        List.choose effectToContainerOption effects
 
 // Item
 
