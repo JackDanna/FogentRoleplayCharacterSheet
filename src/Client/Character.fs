@@ -431,6 +431,8 @@ let view (model: Character) dispatch =
             model.vocationList
             (VocationListMsg >> dispatch)
 
+        CombatRollList.view model.combatRollList
+
         CombatSpeeds.view
             (model.settingData.combatSpeedCalculationMap.Keys |> Set.ofSeq)
             model.combatSpeeds
@@ -448,7 +450,6 @@ let view (model: Character) dispatch =
 
         oldEquipmentView (model.settingData.itemStackMap.Keys |> Set.ofSeq) model dispatch
 
-        CombatRollList.view model.combatRollList
 
         // ContainerList.view
         //     (List.collect itemToContainerClassNames (itemStackListToItemList allItemStackList))
