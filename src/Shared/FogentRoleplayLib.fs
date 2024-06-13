@@ -707,9 +707,9 @@ module WeaponResource =
 
     let weaponResourceToName weaponResource = weaponResource.name
 
-    let weaponResourceClassOptionToWeaponResourceClass (resource: WeaponResource option) =
+    let weaponResourceClassOptionToWeaponResourceClass (resource: option<string * WeaponResource>) =
         match resource with
-        | Some resource ->
+        | Some(weaponResourceItemName, resource) ->
             (" (" + resource.name + ")",
              resource.dicePoolMod,
              resource.penetration,
@@ -1153,6 +1153,21 @@ module Effect =
 
     let effectsToContainerList = List.choose effectToContainerOption
 
+    let effectToWeaponResourceOption effect =
+        match effect with
+        | WeaponResource weaponResource -> Some weaponResource
+        | _ -> None
+
+    let effectsToWeaponResourceList = List.choose effectToWeaponResourceOption
+
+    let effectToWeaponOption effect =
+        match effect with
+        | Weapon weapon -> Some weapon
+        | _ -> None
+
+    let effectsToWeaponList = List.choose effectToWeaponOption
+
+
     open DicePoolMod
 
     let skillDiceModToTextEffect (sdm: SkillDiceMod) =
@@ -1207,9 +1222,6 @@ module ItemStack =
 
     type ItemStack = { item: Item; quantity: uint }
 
-    let itemStackListToItemList itemStackList =
-        List.map (fun itemStack -> itemStack.item) itemStackList
-
     let sumItemStackListWeight (itemStackList: ItemStack list) =
         itemStackList
         |> List.map (fun itemStack -> itemStack.item.weight * (float itemStack.quantity))
@@ -1218,12 +1230,26 @@ module ItemStack =
     let itemStackToEffectList (itemStack: ItemStack) =
         itemStack.item.itemEffectSet |> List.ofSeq
 
+    let itemStackToNameAndEffectList itemStack =
+        (itemStack.item.name, itemStackToEffectList itemStack)
 
-    let itemStackToContinerList itemStack =
-        itemStack |> itemStackToEffectList |> effectsToContainerList
+    let itemStackListToNameAndEffectListList = List.map itemStackToNameAndEffectList
 
-    let itemStackListToEffectList itemStackList =
-        itemStackList |> List.collect itemStackToEffectList
+    let itemStackToContinerList = itemStackToEffectList >> effectsToContainerList
+
+    let itemStackToWeaponList = itemStackToEffectList >> effectsToWeaponList
+
+
+    // List stuff
+
+    let itemStackListToEffectList = List.collect itemStackToEffectList
+
+    let itemStackListToTupledWeaponResourceList itemStackList =
+        itemStackList
+        |> itemStackListToNameAndEffectListList
+        |> List.map (fun (name, effectList) -> (name, effectsToWeaponResourceList effectList))
+        |> List.collect (fun (name, weaponResourceList) ->
+            List.map (fun weaponResource -> (name, weaponResource)) weaponResourceList)
 
 // ItemStat
 
@@ -1554,7 +1580,7 @@ module CombatRoll =
         (weaponAOEOption: AreaOfEffect option)
         (baseDice: DicePool)
         (skillDicePoolModList: DicePoolMod List)
-        (resource: WeaponResource option)
+        (resource: option<string * WeaponResource>)
         (weaponHandedSuffixString: string)
         (weaponDiceMod: DicePoolMod)
         (offHandWeaponDiceMod: DicePoolMod)
@@ -1613,7 +1639,7 @@ module CombatRoll =
         (weapon: Weapon)
         (baseDice: DicePool)
         (skillDicePoolModList: DicePoolMod List)
-        (weaponResource: WeaponResource option)
+        tupledWeaponResourceOption
         : CombatRoll list =
 
         let preloadedCreateWeaponCombatRoll =
@@ -1626,7 +1652,7 @@ module CombatRoll =
                 weapon.areaOfEffectOption
                 baseDice
                 skillDicePoolModList
-                weaponResource
+                tupledWeaponResourceOption
 
         [
             (temp preloadedCreateWeaponCombatRoll " (one-handed)" weapon.oneHandedWeaponDice)
@@ -1648,44 +1674,35 @@ module CombatRoll =
         (dicePoolCalculationData: DicePoolCalculationData)
         : CombatRoll List =
 
-        let weaponResourceList =
-            equipmentList
-            |> List.collect (fun itemStack ->
-                itemStack.item.itemEffectSet
-                |> Set.toList
-                |> List.collect (fun effect ->
-                    match effect with
-                    | WeaponResource weaponResource -> [ weaponResource ]
-                    | _ -> []))
+        let tupledWeaponResourceList = itemStackListToTupledWeaponResourceList equipmentList
 
         let tryFindWeaponSkill weaponSkillName (skills: Skill List) =
             skills |> List.tryFind (fun skill -> skill.name = weaponSkillName)
 
+        //let tryFindWeaponResources weapon
         equipmentList
+        // Step 1: filter down to a tuple of item name, tier, and weapon
         |> List.collect (fun itemStack ->
-
-            itemStack.item.itemEffectSet
-            |> Set.toList
-            |> List.collect (fun effect ->
-                match effect with
-                | Weapon weapon -> (itemStack.item.name, weapon, itemStack.item.itemTier) |> List.singleton
-                | _ -> List.empty))
-
-        |> List.collect (fun (itemName, weapon, itemTier) ->
-
+            itemStack
+            |> itemStackToWeaponList
+            |> List.map (fun weapon -> (itemStack.item.name, weapon, itemStack.item.itemTier)))
+        // Step 2: Find weapons that have weapon Resources. If weapon has a weapon resource, but no weapon resource is in equipment then none, else save tuple with weapon resource tuple. If weapon has no weapon resource, than just return tuple with none for the weaponResource tuple.
+        |> List.collect (fun (weaponItemName, weapon, itemTier) ->
             match weapon.resourceNameOption with
             | Some resourceClass ->
-                weaponResourceList
-                |> List.collect (fun weaponResource ->
+                tupledWeaponResourceList
+                |> List.choose (fun (weaponResourceItemName, weaponResource) ->
                     if weaponResource.resourceName = resourceClass then
-                        (itemName, weapon, Some weaponResource, itemTier) |> List.singleton
+                        Some(weaponItemName, weapon, itemTier, Some(weaponResourceItemName, weaponResource))
                     else
-                        List.empty)
-            | None -> List.singleton (itemName, weapon, None, itemTier))
-
-        |> List.collect (fun (itemName, weapon, weaponResourceOption, itemTier) ->
-
-            weaponSkillDataMap.TryFind weapon.name
+                        None)
+            | None -> List.singleton (weaponItemName, weapon, itemTier, None))
+        // Step 3: Try to find the weaponSkill that governs the specific weapon. If none exists, init a "fake" skill at level 0.
+        // If some weaponSkillData exists, check if they have a weapon skill for it already.
+        //If so, return the skill, else make a "default" skill using weaponSkillData.
+        |> List.collect (fun (itemName, weapon, itemTier, weaponResourceOption) ->
+            weapon.name
+            |> weaponSkillDataMap.TryFind
             |> function
                 | None -> Skill.init weapon.name Neg1To5.Zero Set.empty dicePoolCalculationData
                 | Some weaponSkillData ->
