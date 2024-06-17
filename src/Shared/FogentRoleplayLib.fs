@@ -1810,7 +1810,6 @@ module Character =
         coreSkills: Skill Set
         vocationList: Vocation list
         equipment: ItemElement List
-        offPersonContinaerItemList: ContainerItem List
         combatRollList: CombatRoll List
         characterInformation: CharacterInformation
         characterEffects: Effect List

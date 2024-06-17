@@ -13,7 +13,6 @@ type Msg =
     | CoreSkillsMsg of Skills.Msg
     | VocationListMsg of VocationList.Msg
     | EquipmentMsg of ItemElement.ItemElementListMsgType
-    | OffPersonContainerInstanceListMsg of ItemElement.ContainerItemMsgType
     | CharacterInformationMsg of CharacterInformation.Msg
     | EffectListMsg of EffectList.Msg
     | CombatSpeedsMsg of CombatSpeeds.Msg
@@ -35,7 +34,6 @@ let init (settingData: SettingData) =
         coreSkills = Skills.initCoreSkills settingData.coreSkillDataSet dicePoolCalculationData
         vocationList = VocationList.init ()
         equipment = ItemElement.itemElementListInit ()
-        offPersonContinaerItemList = []
         combatRollList = CombatRollList.init ()
         characterInformation = CharacterInformation.init ()
         characterEffects = effects
@@ -386,13 +384,6 @@ let view (model: Character) dispatch =
             (model.settingData.itemElementMap.Keys |> Set.ofSeq)
             model.equipment
             (EquipmentMsg >> dispatch)
-
-
-        // ContainerList.view
-        //     (List.collect itemToContainerClassNames (itemStackListToItemList allItemStackList))
-        //     allItemStackNameList
-        //     model.containerList
-        //     (ContainerListMsg >> dispatch)
 
         CharacterInformation.view model.characterInformation (CharacterInformationMsg >> dispatch)
     ]
