@@ -5,7 +5,7 @@ open FogentRoleplayLib.CombatRoll
 open FogentRoleplayLib.DicePool
 open FogentRoleplayLib.Range
 open FogentRoleplayLib.SetAreaOfEffect
-open FogentRoleplayLib.ItemStack
+open FogentRoleplayLib.ItemElement
 open FogentRoleplayLib.Skill
 
 open FogentRoleplayLib.StringUtils
@@ -15,7 +15,11 @@ open FogentRoleplayLib.DicePoolCalculation
 
 
 type Msg =
-    | RecalculateCombatRollList of ItemStack List * Skill List * Map<string, WeaponSkillData> * DicePoolCalculationData
+    | RecalculateCombatRollList of
+        ItemElement List *
+        Skill List *
+        Map<string, WeaponSkillData> *
+        DicePoolCalculationData
 
 let init () : CombatRoll list = []
 

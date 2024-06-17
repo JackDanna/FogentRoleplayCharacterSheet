@@ -1,21 +1,21 @@
-module ItemStackList
+module ItemElementList
 
-open FogentRoleplayLib.ItemStack
+open FogentRoleplayLib.ItemElement
 
 type Msg =
-    | ModifyItemStack of int * ItemStack.Msg
-    | Insert of string * option<Map<string, ItemStack>>
+    | ModifyItemStack of int * ItemElement.Msg
+    | Insert of string * option<Map<string, ItemElement>>
     | Remove of int
 
-let init () : ItemStack list = []
+let init () : ItemElement list = []
 
-let update (msg: Msg) (model: ItemStack list) : ItemStack list =
+let update (msg: Msg) (model: ItemElement list) : ItemElement list =
     match msg with
     | ModifyItemStack(position, msg) ->
         List.mapi
             (fun index equipment ->
                 if position = index then
-                    ItemStack.update msg equipment
+                    ItemElement.update msg equipment
                 else
                     equipment)
             model
@@ -29,7 +29,7 @@ let update (msg: Msg) (model: ItemStack list) : ItemStack list =
 open Feliz
 open Feliz.Bulma
 
-let view (allItemStackNameSet: string Set) (model: ItemStack list) (dispatch: Msg -> unit) =
+let view (allItemStackNameSet: string Set) (model: ItemElement list) (dispatch: Msg -> unit) =
     Bulma.container [
         Bulma.table [
             table.isBordered
@@ -47,9 +47,9 @@ let view (allItemStackNameSet: string Set) (model: ItemStack list) (dispatch: Ms
                 ]
                 Html.tableBody (
                     List.mapi
-                        (fun position itemStack ->
+                        (fun position itemElement ->
                             let itemStackView =
-                                ItemStack.view itemStack (fun msg -> dispatch (ModifyItemStack(position, msg)))
+                                ItemElement.view itemElement (fun msg -> dispatch (ModifyItemStack(position, msg)))
 
                             let deleteEquipmentRowButton =
                                 Html.td [

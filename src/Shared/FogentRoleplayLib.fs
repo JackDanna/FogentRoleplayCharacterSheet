@@ -1091,14 +1091,12 @@ module Effect =
     open AttributeDeterminedDiceMod
     open Weapon
     open WeaponResource
-    open Container
     open BaseDiceMod
     open TextEffect
 
     type Effect =
         | Weapon of Weapon
         | WeaponResource of WeaponResource
-        | Container of Container
         | SkillDiceMod of SkillDiceMod
         | AttributeStatAdjustment of AttributeStatAdjustment
         | PhysicalDefense of PhysicalDefense
@@ -1110,7 +1108,6 @@ module Effect =
         match effect with
         | Weapon weapon -> weapon.name
         | WeaponResource weaponResource -> weaponResource.name
-        | Container container -> container.name
         | SkillDiceMod skillDiceModEffect -> skillDiceModEffect.name
         | AttributeStatAdjustment attributeStatAdjustment -> attributeStatAdjustment.name
         | PhysicalDefense defenseClass -> defenseClass.name
@@ -1145,13 +1142,6 @@ module Effect =
         | _ -> None
 
     let effectsToBaseDiceModList = List.choose effectToBaseDiceMod
-
-    let effectToContainerOption effect =
-        match effect with
-        | Container container -> Some container
-        | _ -> None
-
-    let effectsToContainerList = List.choose effectToContainerOption
 
     let effectToWeaponResourceOption effect =
         match effect with
@@ -1216,42 +1206,98 @@ module Item =
         else
             List.sumBy (fun item -> item.weight) itemList
 
+    let itemToEffectList item = item.itemEffectSet |> List.ofSeq
+
 module ItemStack =
     open Item
     open Effect
 
     type ItemStack = { item: Item; quantity: uint }
 
+    let sumItemStackWeight itemStack =
+        itemStack.item.weight * (float itemStack.quantity)
+
     let sumItemStackListWeight (itemStackList: ItemStack list) =
-        itemStackList
-        |> List.map (fun itemStack -> itemStack.item.weight * (float itemStack.quantity))
-        |> List.sum
+        itemStackList |> List.map sumItemStackWeight |> List.sum
 
-    let itemStackToEffectList (itemStack: ItemStack) =
-        itemStack.item.itemEffectSet |> List.ofSeq
+    let itemStackToEffectList (itemStack: ItemStack) = itemToEffectList itemStack.item
 
-    let itemStackToNameAndEffectList itemStack =
-        (itemStack.item.name, itemStackToEffectList itemStack)
+// ItemStat
 
-    let itemStackListToNameAndEffectListList = List.map itemStackToNameAndEffectList
+module ItemElement =
 
-    let itemStackToContinerList = itemStackToEffectList >> effectsToContainerList
+    open Item
+    open ItemStack
+    open Container
+    open Effect
 
-    let itemStackToWeaponList = itemStackToEffectList >> effectsToWeaponList
+    type ContainerItem = {
+        item: Item
+        containerTypeData: Container
+        containedElements: ItemElement list
+    }
 
+    and ItemElement =
+        | Item of Item
+        | ContainerItem of ContainerItem
+        | ItemStack of ItemStack
+
+    let containerItemToEffects (containerItem: ContainerItem) =
+        containerItem.item.itemEffectSet |> Set.toList
+
+    let itemElementToItem itemElement =
+        match itemElement with
+        | Item item -> item
+        | ContainerItem containerItem -> containerItem.item
+        | ItemStack itemStack -> itemStack.item
+
+    let itemElementToName itemElement =
+        let temp = itemElementToItem itemElement
+        temp.name
+
+    let getItemElementTier itemElement =
+        let temp = itemElementToItem itemElement
+        temp.itemTier
+
+    let rec getItemElementWeight itemElement =
+        match itemElement with
+        | Item item -> item.weight
+        | ContainerItem containerItem ->
+            containerItem.item.weight
+            + (containerItem.containedElements |> List.map getItemElementWeight |> List.sum)
+        | ItemStack itemStack -> sumItemStackWeight itemStack
+
+    let sumItemElementListWeight itemElementList =
+        itemElementList |> List.map getItemElementWeight |> List.sum
+
+    let itemElementToNonContainedEffects itemElement =
+        match itemElement with
+        | Item item -> itemToEffectList item
+        | ContainerItem containerItem -> containerItemToEffects containerItem
+        | ItemStack itemStack -> itemStackToEffectList itemStack
+
+    let itemElementListToNonContainedEffects itemElementList =
+        List.collect itemElementToNonContainedEffects itemElementList
+
+    let itemElementToWeaponList =
+        itemElementToNonContainedEffects >> effectsToWeaponList
+
+    let itemElementToNameAndEffectList itemElement =
+        (itemElementToName itemElement, itemElementToNonContainedEffects itemElement)
+
+    let itemElementListToNameAndEffectListList = List.map itemElementToNameAndEffectList
 
     // List stuff
 
-    let itemStackListToEffectList = List.collect itemStackToEffectList
+    let itemElementListToEffectList = List.collect itemElementToNonContainedEffects
 
-    let itemStackListToTupledWeaponResourceList itemStackList =
+    let itemElementListToTupledWeaponResourceList itemStackList =
         itemStackList
-        |> itemStackListToNameAndEffectListList
+        |> itemElementListToNameAndEffectListList
         |> List.map (fun (name, effectList) -> (name, effectsToWeaponResourceList effectList))
         |> List.collect (fun (name, weaponResourceList) ->
             List.map (fun weaponResource -> (name, weaponResource)) weaponResourceList)
 
-// ItemStat
 
 module DicePoolCalculation =
     open Attribute
@@ -1518,29 +1564,6 @@ module WeightClass =
                 && (percentOfMaxCarryWeight >= weightClass.bottomPercent))
             weightClassList
 
-module ContainerInstance =
-
-    open Container
-    open ItemStack
-
-    type ContainerInstance = {
-        itemName: string
-        containerClass: Container
-        itemStackList: ItemStack list
-    }
-
-    let initContainerInstance (itemName, container: Container) = {
-        itemName = itemName
-        containerClass = container
-        itemStackList = []
-    }
-
-    let sumContainerInstanceWeight (containerInstance: ContainerInstance) =
-        sumItemStackListWeight containerInstance.itemStackList
-
-    let sumContainerInstanceListWeight (containerInstances: ContainerInstance list) =
-        containerInstances |> List.map sumContainerInstanceWeight |> List.sum
-
 module CombatRoll =
 
     open DicePool
@@ -1566,7 +1589,7 @@ module CombatRoll =
         eoName: string option
     }
 
-    open ItemStack
+    open ItemElement
 
     open WeaponResource
     open AreaOfEffect
@@ -1668,13 +1691,14 @@ module CombatRoll =
     open WeaponSkillData
 
     let createWeaponItemCombatRolls
-        (equipmentList: ItemStack List)
+        (equipmentList: ItemElement List)
         (weaponSkillList: Skill List)
         (weaponSkillDataMap: Map<string, WeaponSkillData>)
         (dicePoolCalculationData: DicePoolCalculationData)
         : CombatRoll List =
 
-        let tupledWeaponResourceList = itemStackListToTupledWeaponResourceList equipmentList
+        let tupledWeaponResourceList =
+            itemElementListToTupledWeaponResourceList equipmentList
 
         let tryFindWeaponSkill weaponSkillName (skills: Skill List) =
             skills |> List.tryFind (fun skill -> skill.name = weaponSkillName)
@@ -1682,10 +1706,10 @@ module CombatRoll =
         //let tryFindWeaponResources weapon
         equipmentList
         // Step 1: filter down to a tuple of item name, tier, and weapon
-        |> List.collect (fun itemStack ->
-            itemStack
-            |> itemStackToWeaponList
-            |> List.map (fun weapon -> (itemStack.item.name, weapon, itemStack.item.itemTier)))
+        |> List.collect (fun itemElement ->
+            itemElement
+            |> itemElementToWeaponList
+            |> List.map (fun weapon -> (itemElementToName itemElement, weapon, getItemElementTier itemElement)))
         // Step 2: Find weapons that have weapon Resources. If weapon has a weapon resource, but no weapon resource is in equipment then none, else save tuple with weapon resource tuple. If weapon has no weapon resource, than just return tuple with none for the weaponResource tuple.
         |> List.collect (fun (weaponItemName, weapon, itemTier) ->
             match weapon.resourceNameOption with
@@ -1735,7 +1759,7 @@ module SettingData =
 
     open AttributeName
     open CoreSkillData
-    open ItemStack
+    open ItemElement
     open WeaponSpell
     open MagicSystem
     open WeaponSkillData
@@ -1745,7 +1769,7 @@ module SettingData =
     type SettingData = {
         attributeNameSet: AttributeName Set
         coreSkillDataSet: CoreSkillData Set
-        itemStackMap: Map<string, ItemStack>
+        itemElementMap: Map<string, ItemElement>
         weaponSpellSet: WeaponSpell Set
         magicSystemMap: Map<string, MagicSystem>
         weaponSkillDataMap: Map<string, WeaponSkillData>
@@ -1758,7 +1782,7 @@ module SettingData =
     let init () = {
         attributeNameSet = Set.empty
         coreSkillDataSet = Set.empty
-        itemStackMap = Map.empty
+        itemElementMap = Map.empty
         weaponSpellSet = Set.empty
         magicSystemMap = Map.empty
         weaponSkillDataMap = Map.empty
@@ -1766,15 +1790,12 @@ module SettingData =
         combatSpeedCalculationMap = Map.empty
     }
 
-
-
 module Character =
     open Attribute
     open Skill
     open Vocation
     open DicePoolCalculation
-    open ItemStack
-    open ContainerInstance
+    open ItemElement
     open CombatRoll
     open CharacterInformation
     open Effect
@@ -1788,9 +1809,8 @@ module Character =
         attributes: Attribute Set
         coreSkills: Skill Set
         vocationList: Vocation list
-        equipment: ItemStack List
-        equipedContainerInstanceList: ContainerInstance List
-        offPersonContinaerInstacneList: ContainerInstance List
+        equipment: ItemElement List
+        offPersonContinaerItemList: ContainerItem List
         combatRollList: CombatRoll List
         characterInformation: CharacterInformation
         characterEffects: Effect List
@@ -1799,7 +1819,9 @@ module Character =
     }
 
     let characterToDicePoolCalculationData character = {
-        effects = character.characterEffects @ itemStackListToEffectList character.equipment
+        effects =
+            character.characterEffects
+            @ itemElementListToNonContainedEffects character.equipment
         attributes = character.attributes
     }
 

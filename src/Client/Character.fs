@@ -5,7 +5,6 @@ open FogentRoleplayLib.CoreSkillData
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.Skill
 open FogentRoleplayLib.SettingData
-open FogentRoleplayLib.ItemStack
 
 type Msg =
     | SetSettingData of SettingData
@@ -13,9 +12,8 @@ type Msg =
     | AttributesMsg of Attributes.Msg
     | CoreSkillsMsg of Skills.Msg
     | VocationListMsg of VocationList.Msg
-    | EquipmentMsg of ItemStackList.Msg
-    | EquipedContainerInstanceListMsg of ContainerInstanceList.Msg
-    | OffPersonContainerInstanceListMsg of ContainerInstanceList.Msg
+    | EquipmentMsg of ItemElement.ItemElementListMsgType
+    | OffPersonContainerInstanceListMsg of ItemElement.ContainerItemMsgType
     | CharacterInformationMsg of CharacterInformation.Msg
     | EffectListMsg of EffectList.Msg
     | CombatSpeedsMsg of CombatSpeeds.Msg
@@ -36,9 +34,8 @@ let init (settingData: SettingData) =
         attributes = attributes
         coreSkills = Skills.initCoreSkills settingData.coreSkillDataSet dicePoolCalculationData
         vocationList = VocationList.init ()
-        equipment = ItemStackList.init ()
-        equipedContainerInstanceList = ContainerInstanceList.init ()
-        offPersonContinaerInstacneList = ContainerInstanceList.init ()
+        equipment = ItemElement.itemElementListInit ()
+        offPersonContinaerItemList = []
         combatRollList = CombatRollList.init ()
         characterInformation = CharacterInformation.init ()
         characterEffects = effects
@@ -263,71 +260,45 @@ let update msg (model: Character) =
           }
     | EquipmentMsg msg ->
         match msg with
-        | ItemStackList.Insert(itemName, _) ->
+        | ItemElement.ItemElementListMsgType.Insert(itemName, _) ->
+            (ItemElement.ItemElementListMsgType.Insert(itemName, Some model.settingData.itemElementMap))
 
-            let msgWithParentData =
-                ItemStackList.Insert(itemName, Some model.settingData.itemStackMap)
-
-            match model.settingData.itemStackMap.TryFind itemName with
-            | Some itemStack -> {
-                model with
-                    equipment = ItemStackList.update msgWithParentData model.equipment
-                    equipedContainerInstanceList =
-                        itemStack
-                        |> itemStackToContinerList
-                        |> List.fold
-                            (fun acc container ->
-                                ContainerInstanceList.update
-                                    (ContainerInstanceList.Insert(itemStack.item.name, container))
-                                    acc)
-                            model.equipedContainerInstanceList
-              }
-            | None -> {
-                model with
-                    equipment = ItemStackList.update msgWithParentData model.equipment
-              }
-
-        | ItemStackList.Remove(pos) -> {
-            model with
-                equipment = ItemStackList.update (ItemStackList.Remove(pos)) model.equipment
-                equipedContainerInstanceList = List.removeAt pos model.equipedContainerInstanceList
-          }
-        | _ -> {
-            model with
-                equipment = ItemStackList.update msg model.equipment
-          }
-        |> newEffectsForCharacter
-
-    | EquipedContainerInstanceListMsg msg ->
-        match msg with
-        | ContainerInstanceList.ModifyContainerInstance(pos1,
-                                                        ContainerInstance.ItemStackListMsg(ItemStackList.Insert(itemName,
-                                                                                                                _))) ->
-            ContainerInstanceList.ModifyContainerInstance(
+        | ItemElement.ItemElementListMsgType.ModifyItemElement(pos1,
+                                                               ItemElement.ItemElementMsgType.ContainerItemMsg(ItemElement.ContainerItemMsgType.ItemElementListMsg(ItemElement.ItemElementListMsgType.Insert(itemName,
+                                                                                                                                                                                                             _)))) ->
+            (ItemElement.ItemElementListMsgType.ModifyItemElement(
                 pos1,
-                ContainerInstance.ItemStackListMsg(ItemStackList.Insert(itemName, Some model.settingData.itemStackMap))
-            )
+                ItemElement.ItemElementMsgType.ContainerItemMsg(
+                    ItemElement.ContainerItemMsgType.ItemElementListMsg(
+                        ItemElement.ItemElementListMsgType.Insert(itemName, Some model.settingData.itemElementMap)
+                    )
+                )
+            ))
+
         | _ -> msg
+
         |> (fun msg -> {
             model with
-                equipedContainerInstanceList = ContainerInstanceList.update msg model.equipedContainerInstanceList
+                equipment = ItemElement.itemElementListUpdate msg model.equipment
         })
         |> newEffectsForCharacter
 
-    | OffPersonContainerInstanceListMsg msg ->
-        match msg with
-        | ContainerInstanceList.ModifyContainerInstance(pos1,
-                                                        ContainerInstance.ItemStackListMsg(ItemStackList.Insert(itemName,
-                                                                                                                _))) ->
-            ContainerInstanceList.ModifyContainerInstance(
-                pos1,
-                ContainerInstance.ItemStackListMsg(ItemStackList.Insert(itemName, Some model.settingData.itemStackMap))
-            )
-        | _ -> msg
-        |> (fun msg -> {
-            model with
-                offPersonContinaerInstacneList = ContainerInstanceList.update msg model.offPersonContinaerInstacneList
-        })
+    // | OffPersonContainerInstanceListMsg msg ->
+    //     match msg with
+    //     | ContainerInstanceList.ModifyContainerInstance(pos1,
+    //                                                     ContainerInstance.ItemStackListMsg(ItemStackList.Insert(itemName,
+    //                                                                                                             _))) ->
+    //         ContainerInstanceList.ModifyContainerInstance(
+    //             pos1,
+    //             ContainerInstance.ItemStackListMsg(
+    //                 ItemStackList.Insert(itemName, Some model.settingData.itemElementMap)
+    //             )
+    //         )
+    //     | _ -> msg
+    //     |> (fun msg -> {
+    //         model with
+    //             offPersonContinaerItemList = ContainerInstanceList.update msg model.offPersonContinaerInstacneList
+    //     })
 
     | CharacterInformationMsg msg -> {
         model with
@@ -335,7 +306,6 @@ let update msg (model: Character) =
       }
 
     | EffectListMsg(msg) ->
-
         match msg with
         | EffectList.Insert(effectName, _) -> EffectList.Insert(effectName, Some model.settingData.effectMap)
         | _ -> msg
@@ -344,6 +314,7 @@ let update msg (model: Character) =
                 characterEffects = EffectList.update msg model.characterEffects
         })
         |> newEffectsForCharacter
+
     | CombatSpeedsMsg msg ->
         match msg with
         | CombatSpeeds.Insert(name, _, _, _) ->
@@ -361,17 +332,6 @@ let update msg (model: Character) =
 
 open Feliz
 open Feliz.Bulma
-
-let oldEquipmentView allItemStackNames (model) dispatch =
-    Bulma.container [
-        Bulma.label ("Equiped Items: " + (string (sumItemStackListWeight model.equipment)))
-        ItemStackList.view allItemStackNames model.equipment (EquipmentMsg >> dispatch)
-        Bulma.label "Containers:"
-        ContainerInstanceList.view
-            allItemStackNames
-            model.equipedContainerInstanceList
-            (EquipedContainerInstanceListMsg >> dispatch)
-    ]
 
 let view (model: Character) dispatch =
 
@@ -422,7 +382,10 @@ let view (model: Character) dispatch =
         //     model.carryWeightStatOption
         //     (CarryWeightStatOptionMsg >> dispatch)
 
-        oldEquipmentView (model.settingData.itemStackMap.Keys |> Set.ofSeq) model dispatch
+        ItemElement.equipmentView
+            (model.settingData.itemElementMap.Keys |> Set.ofSeq)
+            model.equipment
+            (EquipmentMsg >> dispatch)
 
 
         // ContainerList.view

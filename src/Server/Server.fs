@@ -248,13 +248,14 @@ module FogentRoleplayServerData =
         })
 
     // Container
-    let containerSet =
-        makeFogentRoleplayDataList "ContainerClassData.csv" (fun row -> {
+    let containerMap =
+        makeFogentRoleplayDataSet "ContainerClassData.csv" (fun row -> {
             name = string row.["Name"]
             weightCapacity = float row.["Weight Capacity"]
             volumeFtCubed = float row.["Volume"]
         })
-        |> Set.ofList
+        |> Set.map (fun containerMap -> containerMap.name, containerMap)
+        |> Map.ofSeq
 
 
     //WeaponResource
@@ -398,7 +399,6 @@ module FogentRoleplayServerData =
         [
             Set.map Weapon weaponSet
             Set.map WeaponResource weaponResourceSet
-            Set.map Container containerSet
             Set.map SkillDiceMod skillDiceModEffectSet
             Set.map AttributeStatAdjustment attributeStatAdjustmentEffectData
             Set.map PhysicalDefense physicalDefenseSet
@@ -416,21 +416,45 @@ module FogentRoleplayServerData =
         |> Set.filter (fun effectName -> effectMap.Keys.Contains effectName)
         |> Set.map (fun effectName -> effectMap.Item effectName)
 
+    open FogentRoleplayLib.ItemElement
+    open FogentRoleplayLib.Item
+    open System
+
+    let createItemFromRow (row1: CsvRow) = {
+        name = string row1.["desc"]
+        itemEffectSet =
+            Set.union
+                (stringToEffectSet effectDataMap row1.["itemClasses"])
+                (stringToEffectSet effectDataMap row1.["itemEffects"])
+        itemTier = itemTierMap.Item row1.["itemTier"]
+        value = string row1.["value"]
+        weight = float row1.["weight"]
+    }
+
     let itemStackMap =
-        makeFogentRoleplayDataSet "ItemData.csv" (fun row -> {
-            quantity = uint row.["quantity"]
-            item = {
-                name = string row.["desc"]
-                itemEffectSet =
-                    Set.union
-                        (stringToEffectSet effectDataMap row.["itemClasses"])
-                        (stringToEffectSet effectDataMap row.["itemEffects"])
-                itemTier = itemTierMap.Item row.["itemTier"]
-                value = string row.["value"]
-                weight = float row.["weight"]
-            }
-        })
-        |> Set.map (fun itemStack -> (itemStack.item.name, itemStack))
+        makeFogentRoleplayDataSet "ItemData.csv" (fun row ->
+
+            match row.["quantity"] with
+            | quantity when isNumeric quantity ->
+                {
+                    quantity = uint row.["quantity"]
+                    item = createItemFromRow row
+                }
+                |> ItemStack
+                |> Some
+            | quantity when String.IsNullOrEmpty quantity -> createItemFromRow row |> Item |> Some
+            | quantity when containerMap.ContainsKey quantity ->
+                {
+                    containerTypeData = containerMap.Item quantity
+                    containedElements = []
+                    item = createItemFromRow row
+                }
+                |> ContainerItem
+                |> Some
+            | _ -> None)
+        |> Set.toList
+        |> List.choose id
+        |> List.map (fun itemElement -> (itemElementToName itemElement, itemElement))
         |> Map.ofSeq
 
 let fallenDataApi: IFogentRoleplayDataApi = {
@@ -439,7 +463,7 @@ let fallenDataApi: IFogentRoleplayDataApi = {
             return {
                 attributeNameSet = FogentRoleplayServerData.attributeNameSet
                 coreSkillDataSet = FogentRoleplayServerData.coreSkillDataSet
-                itemStackMap = FogentRoleplayServerData.itemStackMap
+                itemElementMap = FogentRoleplayServerData.itemStackMap
                 weaponSpellSet = FogentRoleplayServerData.weaponSpellSet
                 magicSystemMap = FogentRoleplayServerData.magicSystemData
                 weaponSkillDataMap = FogentRoleplayServerData.weaponSkillDataMap

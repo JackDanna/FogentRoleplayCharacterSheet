@@ -11,6 +11,7 @@
     <Compile Include="Attribute.fs" />
     <Compile Include="Attributes.fs" />
     <Compile Include="Neg1To5.fs" />
+    <Compile Include="Item.fs" />
     <Compile Include="Skill.fs" />
     <Compile Include="Skills.fs" />
     <Compile Include="ZeroToFive.fs" />
@@ -23,11 +24,8 @@
     <Compile Include="MundaneOrMagicVocationExtras.fs" />
     <Compile Include="Vocation.fs" />
     <Compile Include="VocationList.fs" />
-    <Compile Include="Item.fs" />
     <Compile Include="ItemStack.fs" />
-    <Compile Include="ItemStackList.fs" />
-    <Compile Include="ContainerInstance.fs" />
-    <Compile Include="ContainerInstanceList.fs" />
+    <Compile Include="ItemElement.fs" />
     <Compile Include="CombatRollList.fs" />
     <Compile Include="CharacterInformation.fs" />
     <Compile Include="DurationAndSource.fs" />
