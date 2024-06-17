@@ -11,6 +11,7 @@ type Msg =
     | SetName of string
     | AttributesMsg of Attributes.Msg
     | CoreSkillsMsg of Skills.Msg
+    | DestinyPointMsg of DestinyPoints.Msg
     | VocationListMsg of VocationList.Msg
     | EquipmentMsg of ItemElement.ItemElementListMsgType
     | CharacterInformationMsg of CharacterInformation.Msg
@@ -32,6 +33,7 @@ let init (settingData: SettingData) =
         name = ""
         attributes = attributes
         coreSkills = Skills.initCoreSkills settingData.coreSkillDataSet dicePoolCalculationData
+        destinyPoints = DestinyPoints.init ()
         vocationList = VocationList.init ()
         equipment = ItemElement.itemElementListInit ()
         combatRollList = CombatRollList.init ()
@@ -129,6 +131,11 @@ let update msg (model: Character) =
                         ))
                         model.vocationList
         })
+
+    | DestinyPointMsg msg -> {
+        model with
+            destinyPoints = DestinyPoints.update msg model.destinyPoints
+      }
 
     | VocationListMsg(msg: VocationList.Msg) ->
 
@@ -356,6 +363,8 @@ let view (model: Character) dispatch =
         Skills.coreSkillsView model.coreSkills (CoreSkillsMsg >> dispatch)
         |> Attributes.attributesAndCoreSkillsListView model.attributes (AttributesMsg >> dispatch)
 
+        DestinyPoints.view model.destinyPoints (DestinyPointMsg >> dispatch)
+
         VocationList.view
             model.settingData.attributeNameSet
             (model.settingData.magicSystemMap.Keys |> Set.ofSeq)
@@ -369,8 +378,6 @@ let view (model: Character) dispatch =
             (model.settingData.combatSpeedCalculationMap.Keys |> Set.ofSeq)
             model.combatSpeeds
             (CombatSpeedsMsg >> dispatch)
-
-        // DestinyPoints.view model.destinyPoints (DestinyPointsMsg >> dispatch)
 
         EffectList.view (model.settingData.effectMap.Keys |> Set.ofSeq) model.characterEffects (fun msg ->
             (EffectListMsg msg |> dispatch))

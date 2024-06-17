@@ -1790,9 +1790,24 @@ module SettingData =
         combatSpeedCalculationMap = Map.empty
     }
 
+module ZeroToThree =
+    type ZeroToThree =
+        | Zero
+        | One
+        | Two
+        | Three
+
+    let zeroToThreeToUint zeroToThree =
+        match zeroToThree with
+        | Zero -> 0u
+        | One -> 1u
+        | Two -> 2u
+        | Three -> 3u
+
 module Character =
     open Attribute
     open Skill
+    open ZeroToThree
     open Vocation
     open DicePoolCalculation
     open ItemElement
@@ -1808,6 +1823,7 @@ module Character =
         name: string
         attributes: Attribute Set
         coreSkills: Skill Set
+        destinyPoints: ZeroToThree
         vocationList: Vocation list
         equipment: ItemElement List
         combatRollList: CombatRoll List
