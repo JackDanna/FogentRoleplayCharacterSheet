@@ -6,6 +6,10 @@ open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.Skill
 open FogentRoleplayLib.SettingData
 
+open FogentRoleplayLib.CarryWeightCalculation
+open FogentRoleplayLib.WeightClass
+open FogentRoleplayLib.ItemElement
+
 type Msg =
     | SetSettingData of SettingData
     | SetName of string
@@ -29,18 +33,28 @@ let init (settingData: SettingData) =
         attributes = attributes
     }
 
+    let equipment = ItemElement.itemElementListInit ()
+
+    let coreSkills =
+        Skills.initCoreSkills settingData.coreSkillDataSet dicePoolCalculationData
+
     {
         name = ""
         attributes = attributes
-        coreSkills = Skills.initCoreSkills settingData.coreSkillDataSet dicePoolCalculationData
+        coreSkills = coreSkills
         destinyPoints = DestinyPoints.init ()
         vocationList = VocationList.init ()
-        equipment = ItemElement.itemElementListInit ()
+        equipment = equipment
         combatRollList = CombatRollList.init ()
         characterInformation = CharacterInformation.init ()
         characterEffects = effects
         combatSpeeds = CombatSpeeds.init ()
         settingData = settingData
+        weightClassOption =
+            determineWeightClass
+                (calculateCarryWeight (settingData.carryWeightCalculationMap.Item "Carry Weight") attributes coreSkills)
+                (sumItemElementListWeight equipment)
+                (settingData.weightClassSet)
     }
 
 let coreSkillToMap (coreSkills: Skill Set) =
@@ -386,6 +400,12 @@ let view (model: Character) dispatch =
         //     carryWeightCalculationNameList
         //     model.carryWeightStatOption
         //     (CarryWeightStatOptionMsg >> dispatch)
+
+        Html.text (
+            match model.weightClassOption with
+            | Some weightClass -> weightClass.name
+            | None -> "Nada"
+        )
 
         ItemElement.equipmentView
             (model.settingData.itemElementMap.Keys |> Set.ofSeq)

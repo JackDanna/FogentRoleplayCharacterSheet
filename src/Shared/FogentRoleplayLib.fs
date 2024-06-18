@@ -1742,17 +1742,14 @@ module CarryWeightCalculation =
         weightIncreasePerSkill: uint
     }
 
-    let calculateCarryWeight
-        (carryWeightCalculation: CarryWeightCalculation)
-        attributeList
-        (coreSkillList: Skill list)
-        =
+    let calculateCarryWeight (carryWeightCalculation: CarryWeightCalculation) attributes coreSkills =
 
         let attributeLevel =
-            sumAttributesLevels (Set.ofList [ carryWeightCalculation.governingAttribute ]) attributeList
+            sumAttributesLevels (Set.ofList [ carryWeightCalculation.governingAttribute ]) attributes
 
         let skillLevel =
-            coreSkillList
+            coreSkills
+            |> Set.toList
             |> List.tryFind (fun (skill: Skill) -> skill.name = carryWeightCalculation.governingSkill)
             |> function
                 | Some skill -> skill.level
@@ -1775,7 +1772,7 @@ module WeightClass =
         attributeDeterminedDiceModEffect: AttributeDeterminedDiceMod
     }
 
-    let determineWeightClass (maxCarryWeight: float) (inventoryWeight: float) (weightClassList: WeightClass list) =
+    let determineWeightClass (maxCarryWeight: float) (inventoryWeight: float) (weightClassSet: WeightClass Set) =
 
         let percentOfMaxCarryWeight = inventoryWeight / maxCarryWeight
 
@@ -1783,22 +1780,22 @@ module WeightClass =
 
         let checkBottomPercent bottomPercent = bottomPercent < percentOfMaxCarryWeight
 
-        List.find
-            (fun weightClass ->
-                match weightClass.bottomPercent, weightClass.topPercent with
-                | None, Some topPercent ->
-                    // Generally used for setting the bottom of a weightClass range (e.i. Light)
-                    checkTopPercent topPercent
-                | Some bottomPercent, Some topPercent ->
-                    // Generally used for setting the inbetween elements of a weightClass range (e.i. Medium, Heavy)
-                    (checkTopPercent topPercent) && (checkBottomPercent bottomPercent)
-                | Some bottomPercent, None ->
-                    // Generally used for setting the upper bound of a weightClass range (e.i. Overencumbered)
-                    checkBottomPercent bottomPercent
-                | None, None ->
-                    // Only if impossible case is defined that can never be used
-                    false)
-            weightClassList
+        weightClassSet
+        |> List.ofSeq
+        |> List.tryFind (fun weightClass ->
+            match weightClass.bottomPercent, weightClass.topPercent with
+            | None, Some topPercent ->
+                // Generally used for setting the bottom of a weightClass range (e.i. Light)
+                checkTopPercent topPercent
+            | Some bottomPercent, Some topPercent ->
+                // Generally used for setting the inbetween elements of a weightClass range (e.i. Medium, Heavy)
+                (checkTopPercent topPercent) && (checkBottomPercent bottomPercent)
+            | Some bottomPercent, None ->
+                // Generally used for setting the upper bound of a weightClass range (e.i. Overencumbered)
+                checkBottomPercent bottomPercent
+            | None, None ->
+                // Only if impossible case is defined that can never be used
+                false)
 
 module SettingData =
 
@@ -1810,6 +1807,8 @@ module SettingData =
     open WeaponSkillData
     open Effect
     open CombatSpeedCalculation
+    open CarryWeightCalculation
+    open WeightClass
 
     type SettingData = {
         attributeNameSet: AttributeName Set
@@ -1819,9 +1818,9 @@ module SettingData =
         magicSystemMap: Map<string, MagicSystem>
         weaponSkillDataMap: Map<string, WeaponSkillData>
         effectMap: Map<string, Effect>
-        //   carryWeightCalculationMap: Map<string, CarryWeightCalculation>
-        //   weightClassList: WeightClass List
         combatSpeedCalculationMap: Map<string, CombatSpeedCalculation>
+        carryWeightCalculationMap: Map<string, CarryWeightCalculation>
+        weightClassSet: WeightClass Set
     }
 
     let init () = {
@@ -1833,6 +1832,8 @@ module SettingData =
         weaponSkillDataMap = Map.empty
         effectMap = Map.empty
         combatSpeedCalculationMap = Map.empty
+        carryWeightCalculationMap = Map.empty
+        weightClassSet = Set.empty
     }
 
 module ZeroToThree =
@@ -1863,6 +1864,7 @@ module Character =
     open MagicVocationSkill
     open MundaneVocationSkill
     open SettingData
+    open WeightClass
 
     type Character = {
         name: string
@@ -1876,6 +1878,7 @@ module Character =
         characterEffects: Effect List
         combatSpeeds: CombatSpeed List
         settingData: SettingData
+        weightClassOption: WeightClass option
     }
 
     let characterToDicePoolCalculationData character = {

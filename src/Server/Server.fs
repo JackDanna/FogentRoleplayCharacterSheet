@@ -336,7 +336,7 @@ module FogentRoleplayServerData =
 
 
     // WeightClass
-    let weightClassData: WeightClass Set =
+    let weightClassSet: WeightClass Set =
         makeFogentRoleplayDataSet "WeightClassData.csv" (fun row -> {
             name = row.["name"]
             bottomPercent =
@@ -345,7 +345,7 @@ module FogentRoleplayServerData =
                 else
                     None
             topPercent =
-                if isNumeric row.["bottomPercent"] then
+                if isNumeric row.["topPercent"] then
                     Some(float row.["topPercent"])
                 else
                     None
@@ -379,7 +379,7 @@ module FogentRoleplayServerData =
     // CarryWeightCalculation
     open FogentRoleplayLib.CarryWeightCalculation
 
-    let carryWeightCalculationData =
+    let carryWeightCalculationMap =
         makeFogentRoleplayDataSet "CarryWeightCalculationData.csv" (fun row -> {
             name = string row.["name"]
             baseWeight = uint row.["baseWeight"]
@@ -388,9 +388,6 @@ module FogentRoleplayServerData =
             governingSkill = string row.["governingSkill"]
             weightIncreasePerSkill = uint row.["weightIncreasePerSkill"]
         })
-
-    let carryWeightCalculationMap =
-        carryWeightCalculationData
         |> Set.map (fun carryWeightCalculation -> carryWeightCalculation.name, carryWeightCalculation)
         |> Map.ofSeq
 
@@ -479,9 +476,9 @@ let fallenDataApi: IFogentRoleplayDataApi = {
                 magicSystemMap = FogentRoleplayServerData.magicSystemData
                 weaponSkillDataMap = FogentRoleplayServerData.weaponSkillDataMap
                 effectMap = FogentRoleplayServerData.effectDataMap
-                //   carryWeightCalculationMap = FallenServerData.carryWeightCalculationMap
-                //   weightClassList = FallenServerData.weightClassData
                 combatSpeedCalculationMap = FogentRoleplayServerData.combatSpeedCalculationMap
+                carryWeightCalculationMap = FogentRoleplayServerData.carryWeightCalculationMap
+                weightClassSet = FogentRoleplayServerData.weightClassSet
             }
         }
 }
