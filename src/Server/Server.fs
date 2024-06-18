@@ -368,20 +368,23 @@ module FogentRoleplayServerData =
         |> Set.map (fun combatSpeed -> combatSpeed.name, combatSpeed)
         |> Map.ofSeq
 
-    // // CarryWeightCalculationu
-    // let carryWeightCalculationData =
-    //     makeFogentRoleplayData "CarryWeightCalculationData.csv" (fun row ->
-    //         { name = string row.["name"]
-    //           baseWeight = uint row.["baseWeight"]
-    //           governingAttribute = AttributeName row.["governingAttribute"]
-    //           weightIncreasePerAttribute = uint row.["weightIncreasePerAttribute"]
-    //           governingSkill = string row.["governingSkill"]
-    //           weightIncreasePerSkill = uint row.["weightIncreasePerSkill"] })
+    // CarryWeightCalculation
+    open FogentRoleplayLib.CarryWeightCalculation
 
-    // let carryWeightCalculationMap =
-    //     carryWeightCalculationData
-    //     |> List.map (fun carryWeightCalculation -> carryWeightCalculation.name, carryWeightCalculation)
-    //     |> Map.ofList
+    let carryWeightCalculationData =
+        makeFogentRoleplayDataSet "CarryWeightCalculationData.csv" (fun row -> {
+            name = string row.["name"]
+            baseWeight = uint row.["baseWeight"]
+            governingAttribute = AttributeName row.["governingAttribute"]
+            weightIncreasePerAttribute = uint row.["weightIncreasePerAttribute"]
+            governingSkill = string row.["governingSkill"]
+            weightIncreasePerSkill = uint row.["weightIncreasePerSkill"]
+        })
+
+    let carryWeightCalculationMap =
+        carryWeightCalculationData
+        |> Set.map (fun carryWeightCalculation -> carryWeightCalculation.name, carryWeightCalculation)
+        |> Map.ofSeq
 
     // TextEffectForDisplay
     let textEffect: TextEffect Set =
