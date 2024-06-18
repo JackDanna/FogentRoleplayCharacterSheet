@@ -91,6 +91,12 @@
                 version = "0.8.2";
                 sha256 = "sha256-DbAGQnizAzvpITtPwG4BHflUwBUrmOWCO7hRDOr/YWQ=";
               }
+              {
+                name = "vscode-dotnet-runtime";
+                publisher = "ms-dotnettools";
+                version = "2.0.5";
+                sha256 = "sha256-acP3NULTNNyPw5052ZX1L+ymqn9+t4ydoCns29Ta1MU=";
+              }
             ];
           })
 
