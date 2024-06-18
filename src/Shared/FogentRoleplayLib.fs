@@ -1727,55 +1727,6 @@ module CharacterInformation =
         backstory: string
     }
 
-module SettingData =
-
-    open AttributeName
-    open CoreSkillData
-    open ItemElement
-    open WeaponSpell
-    open MagicSystem
-    open WeaponSkillData
-    open Effect
-    open CombatSpeedCalculation
-
-    type SettingData = {
-        attributeNameSet: AttributeName Set
-        coreSkillDataSet: CoreSkillData Set
-        itemElementMap: Map<string, ItemElement>
-        weaponSpellSet: WeaponSpell Set
-        magicSystemMap: Map<string, MagicSystem>
-        weaponSkillDataMap: Map<string, WeaponSkillData>
-        effectMap: Map<string, Effect>
-        //   carryWeightCalculationMap: Map<string, CarryWeightCalculation>
-        //   weightClassList: WeightClass List
-        combatSpeedCalculationMap: Map<string, CombatSpeedCalculation>
-    }
-
-    let init () = {
-        attributeNameSet = Set.empty
-        coreSkillDataSet = Set.empty
-        itemElementMap = Map.empty
-        weaponSpellSet = Set.empty
-        magicSystemMap = Map.empty
-        weaponSkillDataMap = Map.empty
-        effectMap = Map.empty
-        combatSpeedCalculationMap = Map.empty
-    }
-
-module ZeroToThree =
-    type ZeroToThree =
-        | Zero
-        | One
-        | Two
-        | Three
-
-    let zeroToThreeToUint zeroToThree =
-        match zeroToThree with
-        | Zero -> 0u
-        | One -> 1u
-        | Two -> 2u
-        | Three -> 3u
-
 module CarryWeightCalculation =
     open Attribute
     open Neg1To5
@@ -1848,6 +1799,55 @@ module WeightClass =
                     // Only if impossible case is defined that can never be used
                     false)
             weightClassList
+
+module SettingData =
+
+    open AttributeName
+    open CoreSkillData
+    open ItemElement
+    open WeaponSpell
+    open MagicSystem
+    open WeaponSkillData
+    open Effect
+    open CombatSpeedCalculation
+
+    type SettingData = {
+        attributeNameSet: AttributeName Set
+        coreSkillDataSet: CoreSkillData Set
+        itemElementMap: Map<string, ItemElement>
+        weaponSpellSet: WeaponSpell Set
+        magicSystemMap: Map<string, MagicSystem>
+        weaponSkillDataMap: Map<string, WeaponSkillData>
+        effectMap: Map<string, Effect>
+        //   carryWeightCalculationMap: Map<string, CarryWeightCalculation>
+        //   weightClassList: WeightClass List
+        combatSpeedCalculationMap: Map<string, CombatSpeedCalculation>
+    }
+
+    let init () = {
+        attributeNameSet = Set.empty
+        coreSkillDataSet = Set.empty
+        itemElementMap = Map.empty
+        weaponSpellSet = Set.empty
+        magicSystemMap = Map.empty
+        weaponSkillDataMap = Map.empty
+        effectMap = Map.empty
+        combatSpeedCalculationMap = Map.empty
+    }
+
+module ZeroToThree =
+    type ZeroToThree =
+        | Zero
+        | One
+        | Two
+        | Three
+
+    let zeroToThreeToUint zeroToThree =
+        match zeroToThree with
+        | Zero -> 0u
+        | One -> 1u
+        | Two -> 2u
+        | Three -> 3u
 
 module Character =
     open Attribute
