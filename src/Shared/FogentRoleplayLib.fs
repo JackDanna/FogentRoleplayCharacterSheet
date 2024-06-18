@@ -1819,8 +1819,8 @@ module WeightClass =
 
     type WeightClass = {
         name: string
-        bottomPercent: float
-        topPercent: float
+        bottomPercent: float option
+        topPercent: float option
         attributeDeterminedDiceModEffect: AttributeDeterminedDiceMod
     }
 
@@ -1828,10 +1828,25 @@ module WeightClass =
 
         let percentOfMaxCarryWeight = inventoryWeight / maxCarryWeight
 
+        let checkTopPercent topPercent = percentOfMaxCarryWeight <= topPercent
+
+        let checkBottomPercent bottomPercent = bottomPercent < percentOfMaxCarryWeight
+
         List.find
             (fun weightClass ->
-                (weightClass.topPercent >= percentOfMaxCarryWeight)
-                && (percentOfMaxCarryWeight >= weightClass.bottomPercent))
+                match weightClass.bottomPercent, weightClass.topPercent with
+                | None, Some topPercent ->
+                    // Generally used for setting the bottom of a weightClass range (e.i. Light)
+                    checkTopPercent topPercent
+                | Some bottomPercent, Some topPercent ->
+                    // Generally used for setting the inbetween elements of a weightClass range (e.i. Medium, Heavy)
+                    (checkTopPercent topPercent) && (checkBottomPercent bottomPercent)
+                | Some bottomPercent, None ->
+                    // Generally used for setting the upper bound of a weightClass range (e.i. Overencumbered)
+                    checkBottomPercent bottomPercent
+                | None, None ->
+                    // Only if impossible case is defined that can never be used
+                    false)
             weightClassList
 
 module Character =
