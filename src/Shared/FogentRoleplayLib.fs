@@ -802,7 +802,8 @@ module Attribute =
         level: Neg2To5
     }
 
-    let attributesToAttributeNames attributes = Seq.map (_.attributeName) attributes
+    let attributesToAttributeNames attributes =
+        Seq.map (fun attriubte -> attriubte.attributeName) attributes
 
     let findAttributeWithAttributeName (set: Attribute Set) name =
         set |> Seq.find (fun attribute -> attribute.attributeName = name)
