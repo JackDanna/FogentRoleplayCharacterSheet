@@ -1395,14 +1395,6 @@ module WeaponSkillData =
         governedWeapons: string Set
     }
 
-// module WeaponSkill =
-//     open VocationalSkill
-
-//     type WeaponSkill = {
-//         vocationalSkill: VocationalSkill
-//         governedWeapons: string Set
-//     }
-
 // Larger Character Building Blocks
 
 module VocationStat =
@@ -1543,26 +1535,6 @@ module Vocation =
         vocationStat: VocationStat
         mundaneOrMagicVocationExtras: MundaneOrMagicVocationExtras
     }
-
-module WeightClass =
-    open AttributeDeterminedDiceMod
-
-    type WeightClass = {
-        name: string
-        bottomPercent: float
-        topPercent: float
-        attributeDeterminedDiceModEffect: AttributeDeterminedDiceMod
-    }
-
-    let determineWeightClass (maxCarryWeight: float) (inventoryWeight: float) (weightClassList: WeightClass list) =
-
-        let percentOfMaxCarryWeight = inventoryWeight / maxCarryWeight
-
-        List.find
-            (fun weightClass ->
-                (weightClass.topPercent >= percentOfMaxCarryWeight)
-                && (percentOfMaxCarryWeight >= weightClass.bottomPercent))
-            weightClassList
 
 module CombatRoll =
 
@@ -1803,6 +1775,64 @@ module ZeroToThree =
         | One -> 1u
         | Two -> 2u
         | Three -> 3u
+
+module CarryWeightCalculation =
+    open Attribute
+    open Neg1To5
+    open Skill
+    open AttributeName
+
+    type CarryWeightCalculation = {
+        name: string
+        baseWeight: uint
+        governingAttribute: AttributeName
+        weightIncreasePerAttribute: uint
+        governingSkill: string
+        weightIncreasePerSkill: uint
+    }
+
+    let calculateCarryWeight
+        (carryWeightCalculation: CarryWeightCalculation)
+        attributeList
+        (coreSkillList: Skill list)
+        =
+
+        let attributeLevel =
+            sumAttributesLevels (Set.ofList [ carryWeightCalculation.governingAttribute ]) attributeList
+
+        let skillLevel =
+            coreSkillList
+            |> List.tryFind (fun (skill: Skill) -> skill.name = carryWeightCalculation.governingSkill)
+            |> function
+                | Some skill -> skill.level
+                | None -> Zero
+            |> neg1To5ToInt
+
+
+        int carryWeightCalculation.baseWeight
+        + (attributeLevel * int carryWeightCalculation.weightIncreasePerAttribute)
+        + (skillLevel * int carryWeightCalculation.weightIncreasePerSkill)
+        |> float
+
+module WeightClass =
+    open AttributeDeterminedDiceMod
+
+    type WeightClass = {
+        name: string
+        bottomPercent: float
+        topPercent: float
+        attributeDeterminedDiceModEffect: AttributeDeterminedDiceMod
+    }
+
+    let determineWeightClass (maxCarryWeight: float) (inventoryWeight: float) (weightClassList: WeightClass list) =
+
+        let percentOfMaxCarryWeight = inventoryWeight / maxCarryWeight
+
+        List.find
+            (fun weightClass ->
+                (weightClass.topPercent >= percentOfMaxCarryWeight)
+                && (percentOfMaxCarryWeight >= weightClass.bottomPercent))
+            weightClassList
 
 module Character =
     open Attribute
