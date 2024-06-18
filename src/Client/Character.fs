@@ -51,10 +51,14 @@ let init (settingData: SettingData) =
         combatSpeeds = CombatSpeeds.init ()
         settingData = settingData
         weightClassOption =
-            determineWeightClass
-                (calculateCarryWeight (settingData.carryWeightCalculationMap.Item "Carry Weight") attributes coreSkills)
-                (sumItemElementListWeight equipment)
-                (settingData.weightClassSet)
+            match settingData.carryWeightCalculationMap.TryFind "Carry Weight" with
+            | Some carryWeightCalculation ->
+                determineWeightClass
+                    (calculateCarryWeight (carryWeightCalculation) attributes coreSkills)
+                    (sumItemElementListWeight equipment)
+                    (settingData.weightClassSet)
+            | None -> None
+
     }
 
 let coreSkillToMap (coreSkills: Skill Set) =
