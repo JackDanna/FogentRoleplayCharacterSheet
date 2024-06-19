@@ -6,10 +6,6 @@ open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.Skill
 open FogentRoleplayLib.SettingData
 
-open FogentRoleplayLib.CarryWeightCalculation
-open FogentRoleplayLib.WeightClass
-open FogentRoleplayLib.ItemElement
-
 type Msg =
     | SetSettingData of SettingData
     | SetName of string
@@ -21,6 +17,7 @@ type Msg =
     | CharacterInformationMsg of CharacterInformation.Msg
     | EffectListMsg of EffectList.Msg
     | CombatSpeedsMsg of CombatSpeeds.Msg
+// | WeightClassOptionMsg of WeightClassOption.Msg
 
 let init (settingData: SettingData) =
     let attributes =
@@ -51,14 +48,12 @@ let init (settingData: SettingData) =
         combatSpeeds = CombatSpeeds.init ()
         settingData = settingData
         weightClassOption =
-            match settingData.carryWeightCalculationMap.TryFind "Carry Weight" with
-            | Some carryWeightCalculation ->
-                determineWeightClass
-                    (calculateCarryWeight (carryWeightCalculation) attributes coreSkills)
-                    (sumItemElementListWeight equipment)
-                    (settingData.weightClassSet)
-            | None -> None
-
+            WeightClassOption.init
+                settingData.carryWeightCalculationMap
+                settingData.weightClassSet
+                attributes
+                coreSkills
+                equipment
     }
 
 let coreSkillToMap (coreSkills: Skill Set) =
@@ -353,6 +348,11 @@ let update msg (model: Character) =
                 combatSpeeds = CombatSpeeds.update msg model.combatSpeeds
         })
 
+// | WeightClassOptionMsg msg -> {
+//     model with
+//         weightClassOption = WeightClassOption.update (msg) model.weightClassOption
+//   }
+
 open Feliz
 open Feliz.Bulma
 
@@ -400,16 +400,7 @@ let view (model: Character) dispatch =
         EffectList.view (model.settingData.effectMap.Keys |> Set.ofSeq) model.characterEffects (fun msg ->
             (EffectListMsg msg |> dispatch))
 
-        // CarryWeightStatOption.view
-        //     carryWeightCalculationNameList
-        //     model.carryWeightStatOption
-        //     (CarryWeightStatOptionMsg >> dispatch)
-
-        Html.text (
-            match model.weightClassOption with
-            | Some weightClass -> weightClass.name
-            | None -> "Nada"
-        )
+        WeightClassOption.view model.weightClassOption //(CarryWeightStatOptionMsg >> dispatch)
 
         ItemElement.equipmentView
             (model.settingData.itemElementMap.Keys |> Set.ofSeq)

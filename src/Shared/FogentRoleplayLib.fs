@@ -905,17 +905,6 @@ module AttributeDeterminedDiceMod =
         durationAndSource: DurationAndSource
     }
 
-    let attributeDeterminedDiceModToName attributeDeterminedDiceMod = attributeDeterminedDiceMod.name
-
-    let attributeDeterminedDiceModEffectToEffectString attributeDeterminedDiceModEffect =
-        let attributesString =
-            String.concat "," attributeDeterminedDiceModEffect.attributesToEffect
-
-        let dicePoolModString =
-            dicePoolModToString attributeDeterminedDiceModEffect.dicePoolMod
-
-        $"{dicePoolModString} {attributesString} ({attributeDeterminedDiceModEffect.name})"
-
     let attributeDeterminedDiceModsToDicePoolMods
         (governingAttributesOfSkill: AttributeName Set)
         attributeDeterminedDiceMods
@@ -936,10 +925,6 @@ module PhysicalDefense =
         durationAndSource: DurationAndSource
     }
 
-    let physicalDefenseToName physicalDefense = physicalDefense.name
-
-    let physicalDefenseEffectToEffectString defenseClass =
-        $"{defenseClass.physicalDefense} Physical Defense"
 
 module SkillDiceMod =
     open DurationAndSource
@@ -951,11 +936,6 @@ module SkillDiceMod =
         diceMod: DicePoolMod
         durationAndSource: DurationAndSource
     }
-
-    let skillDiceModToName skillDiceMod = skillDiceMod.name
-
-    let skillDiceModEffectToEffectString skillDiceModEffect =
-        $"{dicePoolModToString skillDiceModEffect.diceMod} {skillDiceModEffect.skillToEffect}"
 
     let skillNameToSkillDiceMods skillName skillAdjustmentList =
         skillAdjustmentList
@@ -1076,12 +1056,51 @@ module BaseDiceMod =
             | None -> base3d6DicePool)
 
 module TextEffect =
+    open StringUtils
     open DurationAndSource
+    open DicePoolMod
+
+    open AttributeDeterminedDiceMod
+    open PhysicalDefense
+    open SkillDiceMod
 
     type TextEffect = {
         name: string
         effect: string
         durationAndSource: DurationAndSource
+    }
+
+    // AttributeDeterminedDiceMod
+    let attributeDeterminedDiceModToEffectString (addm: AttributeDeterminedDiceMod) =
+        sprintf
+            "%s to %s"
+            (dicePoolModToString addm.dicePoolMod)
+            (stringSeqToStringSeperatedByCommaAndSpace addm.attributesToEffect)
+
+    let attributeDeterminedDiceModToTextEffect (addm: AttributeDeterminedDiceMod) = {
+        name = addm.name
+        effect = attributeDeterminedDiceModToEffectString addm
+        durationAndSource = addm.durationAndSource
+    }
+
+    // PhysicalDefense
+    let physicalDefenseToEffectString pd =
+        sprintf "+%.2f to Physical Defense" pd.physicalDefense
+
+    let physicalDefenseToNameAndEffect (pd: PhysicalDefense) = {
+        name = pd.name
+        effect = physicalDefenseToEffectString pd
+        durationAndSource = pd.durationAndSource
+    }
+
+    // SkillDiceMod
+    let skillDiceModToEffectString sdm =
+        sprintf "%s to %s" (dicePoolModToString sdm.diceMod) sdm.skillToEffect
+
+    let skillDiceModToTextEffect (sdm: SkillDiceMod) = {
+        name = sdm.name
+        effect = skillDiceModToEffectString sdm
+        durationAndSource = sdm.durationAndSource
     }
 
 module Effect =
@@ -1158,34 +1177,12 @@ module Effect =
 
     let effectsToWeaponList = List.choose effectToWeaponOption
 
-
-    open DicePoolMod
-
-    let skillDiceModToTextEffect (sdm: SkillDiceMod) =
-        (sdm.name, sprintf "%s to %s" (dicePoolModToString sdm.diceMod) sdm.skillToEffect, sdm.durationAndSource)
-
-    let attributeDeterminedDiceModToNameAndEffect (addm: AttributeDeterminedDiceMod) =
-        (addm.name,
-         sprintf
-             "%s to %s"
-             (dicePoolModToString addm.dicePoolMod)
-             (stringSeqToStringSeperatedByCommaAndSpace addm.attributesToEffect),
-         addm.durationAndSource)
-
-    let physicalDefenseToNameAndEffect (pd: PhysicalDefense) =
-        (pd.name, sprintf "+%.2f to Physical Defense" pd.physicalDefense, pd.durationAndSource)
-
     let effectToTextEffect effect =
         match effect with
-        | TextEffect te -> (te.name, te.effect, te.durationAndSource)
+        | TextEffect te -> te
         | SkillDiceMod sdm -> skillDiceModToTextEffect sdm
-        | AttributeDeterminedDiceMod addm -> attributeDeterminedDiceModToNameAndEffect addm
+        | AttributeDeterminedDiceMod addm -> attributeDeterminedDiceModToTextEffect addm
         | PhysicalDefense pd -> physicalDefenseToNameAndEffect pd
-        |> (fun (nameString, effectString, durationAndSource) -> {
-            name = nameString
-            effect = effectString
-            durationAndSource = durationAndSource
-        })
 
 // Item
 
@@ -1375,7 +1372,6 @@ module Skill =
         level: Neg1To5
         governingAttributeNames: AttributeName Set
         dicePool: DicePool
-    //effectDicePoolModList: DicePoolMod List
     }
 
     let init name level governingAttributes dicePoolCalculationData =
