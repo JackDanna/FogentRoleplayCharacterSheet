@@ -340,15 +340,15 @@ module FogentRoleplayServerData =
         makeFogentRoleplayDataSet "WeightClassData.csv" (fun row -> {
             name = row.["name"]
             bottomPercent =
-                if isNumeric row.["bottomPercent"] then
+                if "" = row.["bottomPercent"] then
+                    None
+                else
                     Some(float row.["bottomPercent"])
-                else
-                    None
             topPercent =
-                if isNumeric row.["topPercent"] then
-                    Some(float row.["topPercent"])
-                else
+                if "" = row.["topPercent"] then
                     None
+                else
+                    Some(float row.["topPercent"])
             attributeDeterminedDiceModEffect =
                 attributeDeterminedDiceModMap.Item row.["attributeDeterminedDiceModEffect"]
         })
