@@ -309,7 +309,7 @@ let update msg (model: Character) =
                                 model.attributes,
                                 (Skills.update // We recalculate the core skills without the weightClassOption AttributeDeterminedDiceMod since that should only be factored into skill dice pool and not the num dice for determining carry weight
                                     (Skills.CalculateSkillDicePools(
-                                        characterToDicePoolCalculationDataWithoutWeightClassOptionEffect character
+                                        characterToDicePoolCalculationDataWithoutWeightClassOptionEffect model
                                     ))
                                     model.coreSkills),
                                 model.equipment
