@@ -42,7 +42,7 @@ let view (model: CharacterInformation) (dispatch: Msg -> unit) =
 
     let characterInformationTextArea (labelName: string) dispatchMsg =
         Bulma.container [
-            Html.label [ prop.text labelName ]
+            Bulma.label labelName
             Bulma.textarea [
                 prop.placeholder $"Enter {labelName}..."
                 prop.onTextChange (fun text -> dispatch (dispatchMsg text))
