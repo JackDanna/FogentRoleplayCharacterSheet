@@ -42,7 +42,7 @@ let view (model: CharacterInformation) (dispatch: Msg -> unit) =
 
     let characterInformationTextArea (labelName: string) dispatchMsg =
         Bulma.container [
-            Bulma.label labelName
+            Bulma.label (labelName + ":")
             Bulma.textarea [
                 prop.placeholder $"Enter {labelName}..."
                 prop.onTextChange (fun text -> dispatch (dispatchMsg text))
@@ -50,9 +50,9 @@ let view (model: CharacterInformation) (dispatch: Msg -> unit) =
         ]
 
     Bulma.container [
-        characterInformationTextArea "Backstory:" SetBackstory
-        characterInformationTextArea "Notes:" SetNotes
-        characterInformationTextArea "Beliefs/Morality:" SetBeliefsAndMorality
-        characterInformationTextArea "Goals/Aspirations:" SetGoalsAndAspirations
-        characterInformationTextArea "Disposition:" SetDisposition
+        characterInformationTextArea "Backstory" SetBackstory
+        characterInformationTextArea "Notes" SetNotes
+        characterInformationTextArea "Beliefs/Morality" SetBeliefsAndMorality
+        characterInformationTextArea "Goals/Aspirations" SetGoalsAndAspirations
+        characterInformationTextArea "Disposition" SetDisposition
     ]
