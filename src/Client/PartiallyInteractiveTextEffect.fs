@@ -14,5 +14,5 @@ let update (msg: Msg) (model: TextEffect) : TextEffect =
 open Feliz
 
 let view (model: TextEffect) (dispatch: Msg -> unit) =
-    [ Html.td [ prop.text model.name ]; Html.td [ prop.text model.effect ] ]
+    [ Html.text model.name; Html.text model.effect ]
     @ DurationAndSource.interactiveView model.durationAndSource (DurationAndSourceMsg >> dispatch)
