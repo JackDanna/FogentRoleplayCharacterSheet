@@ -28,7 +28,12 @@ let update msg (model: Effect list) =
 open Feliz
 open Feliz.Bulma
 
-let view (characterEffectNameList: string Set) (model: Effect list) (dispatch: Msg -> unit) =
+let view
+    (characterEffectNameList: string Set)
+    (model: Effect list)
+    (dispatch: Msg -> unit)
+    (weightClassOptionADDME: list<Fable.React.ReactElement>)
+    =
     Bulma.container [
         Bulma.label "Effects:"
         Bulma.table [
@@ -47,6 +52,7 @@ let view (characterEffectNameList: string Set) (model: Effect list) (dispatch: M
                                |> List.singleton)
                             |> Html.tr)
                         model
+                    |> List.append [ weightClassOptionADDME @ [ Html.none |> Html.td ] |> Html.tr ]
                 )
                 Html.tfoot [
                     ViewUtils.textInputWithDropdownSet

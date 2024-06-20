@@ -339,12 +339,12 @@ module FogentRoleplayServerData =
     let weightClassSet: WeightClass Set =
         makeFogentRoleplayDataSet "WeightClassData.csv" (fun row -> {
             name = row.["name"]
-            bottomPercent =
+            bottomPercentOption =
                 if "" = row.["bottomPercent"] then
                     None
                 else
                     Some(float row.["bottomPercent"])
-            topPercent =
+            topPercentOption =
                 if "" = row.["topPercent"] then
                     None
                 else

@@ -1768,10 +1768,38 @@ module WeightClass =
 
     type WeightClass = {
         name: string
-        bottomPercent: float option
-        topPercent: float option
+        bottomPercentOption: float option
+        topPercentOption: float option
         attributeDeterminedDiceModEffect: AttributeDeterminedDiceMod
     }
+
+    let floatPercentToUintPercent percentFloat = percentFloat * 100.0 |> uint
+
+    let weightClassSourceString weightClass currentWeight maxWeight =
+
+        let topPercent =
+            match weightClass.topPercentOption with
+            | Some topPercent ->
+                topPercent
+                |> floatPercentToUintPercent
+                |> (fun topPercent -> $"""<= {topPercent}{"%"}""")
+            | None -> ""
+
+        let bottomPercent =
+            match weightClass.bottomPercentOption with
+            | Some bottomPercent ->
+                bottomPercent
+                |> floatPercentToUintPercent
+                |> (fun bottomPercent -> $"""{bottomPercent}{"%"} <=""")
+            | None -> ""
+
+
+        $"""{currentWeight}/{maxWeight} ({bottomPercent} {"%"} of carry weight {topPercent})"""
+
+    let weightClassOptionSourceString weightClassOption currentWeight maxWeight =
+        match weightClassOption with
+        | Some weightClass -> weightClassSourceString weightClass currentWeight maxWeight
+        | None -> ""
 
     let determineWeightClass (maxCarryWeight: float) (inventoryWeight: float) (weightClassSet: WeightClass Set) =
 
@@ -1784,7 +1812,7 @@ module WeightClass =
         weightClassSet
         |> List.ofSeq
         |> List.tryFind (fun weightClass ->
-            match weightClass.bottomPercent, weightClass.topPercent with
+            match weightClass.bottomPercentOption, weightClass.topPercentOption with
             | None, Some topPercent ->
                 // Generally used for setting the bottom of a weightClass range (e.i. Light)
                 checkTopPercent topPercent
@@ -1866,6 +1894,7 @@ module Character =
     open MundaneVocationSkill
     open SettingData
     open WeightClass
+    open CarryWeightCalculation
 
     type Character = {
         name: string
@@ -1880,6 +1909,7 @@ module Character =
         combatSpeeds: CombatSpeed List
         settingData: SettingData
         weightClassOption: WeightClass option
+        carryWeightCalculationOption: CarryWeightCalculation option
     }
 
     let characterToDicePoolCalculationDataWithoutWeightClassOptionEffect character = {

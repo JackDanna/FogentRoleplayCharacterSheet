@@ -19,10 +19,7 @@ let update (msg: Msg) (model: DurationAndSource) : DurationAndSource =
 
 open Feliz
 
-let nonInteractiveView (model: DurationAndSource) = [
-    Html.td [ prop.text model.duration ]
-    Html.td [ prop.text model.source ]
-]
+let nonInteractiveView (model: DurationAndSource) = [ Html.text model.duration; Html.text model.source ]
 
 let interactiveView (model: DurationAndSource) (dispatch: Msg -> unit) = [
     StringInput.view model.duration (DurationMsg >> dispatch)

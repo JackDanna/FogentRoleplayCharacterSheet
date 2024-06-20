@@ -5,6 +5,8 @@ open FogentRoleplayLib.CoreSkillData
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.Skill
 open FogentRoleplayLib.SettingData
+open FogentRoleplayLib.ItemElement
+open FogentRoleplayLib.CarryWeightCalculation
 
 type Msg =
     | SetSettingData of SettingData
@@ -35,6 +37,11 @@ let init (settingData: SettingData) =
     let coreSkills =
         Skills.initCoreSkills settingData.coreSkillDataSet dicePoolCalculationData
 
+    let carryWeightCalculationOption =
+        match settingData.carryWeightCalculationMap.TryFind "Carry Weight" with
+        | Some carryWeightCalculation -> Some carryWeightCalculation
+        | None -> None
+
     {
         name = ""
         attributes = attributes
@@ -49,11 +56,12 @@ let init (settingData: SettingData) =
         settingData = settingData
         weightClassOption =
             WeightClassOption.init
-                settingData.carryWeightCalculationMap
+                carryWeightCalculationOption
                 settingData.weightClassSet
                 attributes
                 coreSkills
                 equipment
+        carryWeightCalculationOption = carryWeightCalculationOption
     }
 
 let coreSkillToMap (coreSkills: Skill Set) =
@@ -304,7 +312,7 @@ let update msg (model: Character) =
                     weightClassOption =
                         WeightClassOption.update
                             (WeightClassOption.DetermineWeightClass(
-                                model.settingData.carryWeightCalculationMap,
+                                model.carryWeightCalculationOption,
                                 model.settingData.weightClassSet,
                                 model.attributes,
                                 (Skills.update // We recalculate the core skills without the weightClassOption AttributeDeterminedDiceMod since that should only be factored into skill dice pool and not the num dice for determining carry weight
@@ -414,10 +422,18 @@ let view (model: Character) dispatch =
             model.combatSpeeds
             (CombatSpeedsMsg >> dispatch)
 
-        EffectList.view (model.settingData.effectMap.Keys |> Set.ofSeq) model.characterEffects (fun msg ->
-            (EffectListMsg msg |> dispatch))
+        match model.carryWeightCalculationOption with
+        | Some carryWeightCalculation ->
+            WeightClassOption.view
+                model.weightClassOption
+                (sumItemElementListWeight model.equipment)
+                (calculateCarryWeight (carryWeightCalculation) model.attributes model.coreSkills)
+        | None -> []
 
-        WeightClassOption.view model.weightClassOption //(CarryWeightStatOptionMsg >> dispatch)
+        |> EffectList.view
+            (model.settingData.effectMap.Keys |> Set.ofSeq)
+            model.characterEffects
+            (EffectListMsg >> dispatch)
 
         ItemElement.equipmentView
             (model.settingData.itemElementMap.Keys |> Set.ofSeq)

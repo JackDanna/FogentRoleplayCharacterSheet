@@ -9,20 +9,14 @@ open FogentRoleplayLib.TextEffect
 
 type Msg =
     | DetermineWeightClass of
-        Map<string, CarryWeightCalculation> *
+        option<CarryWeightCalculation> *
         WeightClass Set *
         Attribute Set *
         Skill Set *
         ItemElement List
 
-let init
-    (carryWeightCalculationMap: Map<string, CarryWeightCalculation>)
-    weightClassSet
-    attributes
-    coreSkills
-    equipment
-    =
-    match carryWeightCalculationMap.TryFind "Carry Weight" with
+let init (carryWeightCalculationOption) weightClassSet attributes coreSkills equipment =
+    match carryWeightCalculationOption with
     | Some carryWeightCalculation ->
         determineWeightClass
             (calculateCarryWeight (carryWeightCalculation) attributes coreSkills)
@@ -32,21 +26,24 @@ let init
 
 let update msg (model: WeightClass option) =
     match msg with
-    | DetermineWeightClass(carryWeightCalculationMap, weightClassSet, attributes, coreSkills, equipment) ->
-        init carryWeightCalculationMap weightClassSet attributes coreSkills equipment
+    | DetermineWeightClass(carryWeightCalculationOption, weightClassSet, attributes, coreSkills, equipment) ->
+        init carryWeightCalculationOption weightClassSet attributes coreSkills equipment
 
 open Feliz
 open Feliz.Bulma
 
-let view (model: WeightClass option) =
+let view (model: WeightClass option) equipmentWeight maxWeight =
     match model with
     | Some weightClass ->
         weightClass.attributeDeterminedDiceModEffect
         |> (fun (attributeDeterminedDiceMod: FogentRoleplayLib.AttributeDeterminedDiceMod.AttributeDeterminedDiceMod) -> {
             attributeDeterminedDiceMod with
-                durationAndSource = { duration = ""; source = "" }
+                durationAndSource = {
+                    duration = "Indefinite"
+                    source = weightClassOptionSourceString model equipmentWeight maxWeight
+                }
         })
         |> attributeDeterminedDiceModToTextEffect
         |> NonInteractiveTextEffect.view
-    | None -> [ Html.none ]
-    |> Bulma.box
+    | None -> []
+    |> List.map Html.td
