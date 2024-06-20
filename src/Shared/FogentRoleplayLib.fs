@@ -1334,7 +1334,7 @@ module DicePoolCalculation =
         ]
         |> List.collect id
 
-    let createSkillDicePool
+    let createSkillDicePoolMods
         skillName
         skillLevel
         governingAttributeNameSet
@@ -1343,22 +1343,26 @@ module DicePoolCalculation =
         let skillLevelDiceMod = skillLevel |> neg1To5ToInt |> intToD6DicePoolMod
         createDicePoolModList skillName skillLevelDiceMod governingAttributeNameSet dicePoolCalculationData
 
-    let calculateDicePool skillName levelDiceMod governingAttributeNameSet dicePoolCalculationData =
-        createDicePoolModList skillName levelDiceMod governingAttributeNameSet dicePoolCalculationData
-        |> dicePoolModListToDicePool
-
     let calculateSkillDicePool
         skillName
         skillLevel
         governingAttributeNameSet
         (dicePoolCalculationData: DicePoolCalculationData)
         =
-        createSkillDicePool skillName skillLevel governingAttributeNameSet dicePoolCalculationData
+        createSkillDicePoolMods skillName skillLevel governingAttributeNameSet dicePoolCalculationData
         |> dicePoolModListToDicePool
 
-    let calculateVocationStatDicePool vocationStatName vocationStatLevel attributeSet dicePoolCalculationData =
+    let calculateVocationStatDicePool
+        vocationStatName
+        vocationStatLevel
+        governingAttributeNameSet
+        dicePoolCalculationData
+        =
         let vocationStatDiceMod = vocationStatLevel |> zeroToFiveToInt |> intToD6DicePoolMod
-        calculateDicePool vocationStatName vocationStatDiceMod attributeSet dicePoolCalculationData
+
+        createDicePoolModList vocationStatName vocationStatDiceMod governingAttributeNameSet dicePoolCalculationData
+        |> dicePoolModListToDicePool
+
 
 module Skill =
     open Neg1To5
@@ -1710,7 +1714,7 @@ module CombatRoll =
                                 dicePoolCalculationData
 
             |> (fun skill ->
-                createSkillDicePool skill.name skill.level skill.governingAttributeNames dicePoolCalculationData)
+                createSkillDicePoolMods skill.name skill.level skill.governingAttributeNames dicePoolCalculationData)
             |> (fun skillDicePoolModList ->
                 createCombatRoll weapon itemTier.baseDice skillDicePoolModList weaponResourceOption))
 
