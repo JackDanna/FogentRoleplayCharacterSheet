@@ -41,16 +41,11 @@ let view (characterEffectNameList: string Set) (model: Effect list) (dispatch: M
                 Html.tableBody (
                     List.mapi
                         (fun position equipmentRow ->
-                            let characterEffect =
-                                (Effect.view equipmentRow (fun msg -> dispatch (ModifyEffect(position, msg))))
-
-                            let deleteEquipmentRowButton =
-                                Html.td [
-                                    Html.button [ prop.onClick (fun _ -> dispatch (Remove(position))); prop.text "-" ]
-                                ]
-                                |> List.singleton
-
-                            Html.tr (List.append characterEffect deleteEquipmentRowButton))
+                            (Effect.view equipmentRow (fun msg -> dispatch (ModifyEffect(position, msg))))
+                            @ (Html.button [ prop.onClick (fun _ -> dispatch (Remove(position))); prop.text "-" ]
+                               |> Html.td
+                               |> List.singleton)
+                            |> Html.tr)
                         model
                 )
                 Html.tfoot [
