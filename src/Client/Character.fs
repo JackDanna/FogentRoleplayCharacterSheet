@@ -303,11 +303,11 @@ let update msg (model: Character) =
         | _ -> msg
 
         |> (fun msg ->
-            let equipment = ItemElement.itemElementListUpdate msg model.equipment
+            let newEquipment = ItemElement.itemElementListUpdate msg model.equipment
 
             {
                 model with
-                    equipment = equipment
+                    equipment = newEquipment
                     weightClassOption =
                         WeightClassOption.update
                             (WeightClassOption.DetermineWeightClass(
@@ -319,7 +319,7 @@ let update msg (model: Character) =
                                         characterToDicePoolCalculationDataWithoutWeightClassOptionEffect model
                                     ))
                                     model.coreSkills),
-                                model.equipment
+                                newEquipment
                             ))
                             model.weightClassOption
             })
