@@ -1,6 +1,5 @@
 module WeightClassOption
 
-open FogentRoleplayLib.SettingData
 open FogentRoleplayLib.WeightClass
 open FogentRoleplayLib.CarryWeightCalculation
 open FogentRoleplayLib.ItemElement
@@ -10,7 +9,11 @@ open FogentRoleplayLib.TextEffect
 
 type Msg =
     | DetermineWeightClass of
-        option<Map<string, CarryWeightCalculation> * WeightClass Set * Attribute Set * Skill Set * ItemElement List>
+        Map<string, CarryWeightCalculation> *
+        WeightClass Set *
+        Attribute Set *
+        Skill Set *
+        ItemElement List
 
 let init
     (carryWeightCalculationMap: Map<string, CarryWeightCalculation>)
@@ -29,9 +32,8 @@ let init
 
 let update msg (model: WeightClass option) =
     match msg with
-    | DetermineWeightClass(Some(carryWeightCalculationMap, weightClassSet, attributes, coreSkills, equipment)) ->
+    | DetermineWeightClass(carryWeightCalculationMap, weightClassSet, attributes, coreSkills, equipment) ->
         init carryWeightCalculationMap weightClassSet attributes coreSkills equipment
-    | _ -> model
 
 open Feliz
 open Feliz.Bulma

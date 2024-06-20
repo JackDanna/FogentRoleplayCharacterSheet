@@ -101,6 +101,16 @@ let update msg (model: Character) =
                             dicePoolCalculationData
                         )
                     )
+                weightClassOption =
+                    WeightClassOption.update
+                        (WeightClassOption.DetermineWeightClass(
+                            character.settingData.carryWeightCalculationMap,
+                            character.settingData.weightClassSet,
+                            character.attributes,
+                            newCoreSkills,
+                            character.equipment
+                        ))
+                        character.weightClassOption
         }
 
     match msg with
