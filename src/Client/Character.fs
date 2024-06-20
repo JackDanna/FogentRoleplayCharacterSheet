@@ -19,7 +19,6 @@ type Msg =
     | CharacterInformationMsg of CharacterInformation.Msg
     | EffectListMsg of EffectList.Msg
     | CombatSpeedsMsg of CombatSpeeds.Msg
-// | WeightClassOptionMsg of WeightClassOption.Msg
 
 let init (settingData: SettingData) =
     let attributes =
@@ -372,11 +371,6 @@ let update msg (model: Character) =
             model with
                 combatSpeeds = CombatSpeeds.update msg model.combatSpeeds
         })
-
-// | WeightClassOptionMsg msg -> {
-//     model with
-//         weightClassOption = WeightClassOption.update (msg) model.weightClassOption
-//   }
 
 open Feliz
 open Feliz.Bulma
