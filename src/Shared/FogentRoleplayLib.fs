@@ -1353,8 +1353,8 @@ module DicePoolCalculation =
         governingAttributeNameSet
         (dicePoolCalculationData: DicePoolCalculationData)
         =
-        let skillLevelDiceMod = skillLevel |> neg1To5ToInt |> intToD6DicePoolMod
-        calculateDicePool skillName skillLevelDiceMod governingAttributeNameSet dicePoolCalculationData
+        createSkillDicePool skillName skillLevel governingAttributeNameSet dicePoolCalculationData
+        |> dicePoolModListToDicePool
 
     let calculateVocationStatDicePool vocationStatName vocationStatLevel attributeSet dicePoolCalculationData =
         let vocationStatDiceMod = vocationStatLevel |> zeroToFiveToInt |> intToD6DicePoolMod
