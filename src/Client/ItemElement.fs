@@ -138,7 +138,7 @@ let containerItemListView allItemStackNameSet (model: ItemElement list) (dispatc
 
 let equipmentView allItemStackNames (model: ItemElement list) (dispatch: ItemElementListMsgType -> unit) =
     Bulma.container [
-        Bulma.label ("Equiped Items: " + (string (sumItemElementListWeight model)))
+        Bulma.label "Equiped Items:"
         itemElementListView allItemStackNames model dispatch
         Bulma.label "Containers:"
         containerItemListView allItemStackNames model dispatch
