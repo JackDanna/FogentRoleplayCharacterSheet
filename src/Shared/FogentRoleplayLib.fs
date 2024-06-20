@@ -1334,10 +1334,6 @@ module DicePoolCalculation =
         ]
         |> List.collect id
 
-    let calculateDicePool skillName levelDiceMod governingAttributeNameSet dicePoolCalculationData =
-        createDicePoolModList skillName levelDiceMod governingAttributeNameSet dicePoolCalculationData
-        |> dicePoolModListToDicePool
-
     let createSkillDicePool
         skillName
         skillLevel
@@ -1346,6 +1342,10 @@ module DicePoolCalculation =
         =
         let skillLevelDiceMod = skillLevel |> neg1To5ToInt |> intToD6DicePoolMod
         createDicePoolModList skillName skillLevelDiceMod governingAttributeNameSet dicePoolCalculationData
+
+    let calculateDicePool skillName levelDiceMod governingAttributeNameSet dicePoolCalculationData =
+        createDicePoolModList skillName levelDiceMod governingAttributeNameSet dicePoolCalculationData
+        |> dicePoolModListToDicePool
 
     let calculateSkillDicePool
         skillName
