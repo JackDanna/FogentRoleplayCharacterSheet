@@ -1882,12 +1882,26 @@ module Character =
         weightClassOption: WeightClass option
     }
 
-    let characterToDicePoolCalculationData character = {
+    let characterToDicePoolCalculationDataWithoutWeightClassOptionEffect character = {
         effects =
             character.characterEffects
             @ itemElementListToNonContainedEffects character.equipment
         attributes = character.attributes
     }
+
+    let characterToDicePoolCalculationData character =
+        character
+        |> characterToDicePoolCalculationDataWithoutWeightClassOptionEffect
+        |> (fun dicePoolCalcuationData -> {
+            dicePoolCalcuationData with
+                effects =
+                    dicePoolCalcuationData.effects
+                    @ match character.weightClassOption with
+                      | Some weightClass -> [
+                          weightClass.attributeDeterminedDiceModEffect |> AttributeDeterminedDiceMod
+                        ]
+                      | None -> []
+        })
 
     open MundaneOrMagicVocationExtras
 

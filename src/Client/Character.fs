@@ -67,6 +67,26 @@ let update msg (model: Character) =
 
     let dicePoolCalculationData = characterToDicePoolCalculationData model
 
+    let determineWeightClassForCharacter character =
+        let dicePoolCalculationDataWithoutWeightClassOptionEffect =
+            characterToDicePoolCalculationDataWithoutWeightClassOptionEffect character
+
+        {
+            character with
+                weightClassOption =
+                    WeightClassOption.update
+                        (WeightClassOption.DetermineWeightClass(
+                            character.settingData.carryWeightCalculationMap,
+                            character.settingData.weightClassSet,
+                            character.attributes,
+                            (Skills.update // We recalculate the core skills without the weightClassOption AttributeDeterminedDiceMod since that should only be factored into skill dice pool and not the num dice for determining carry weight
+                                (Skills.CalculateSkillDicePools(dicePoolCalculationDataWithoutWeightClassOptionEffect))
+                                character.coreSkills),
+                            character.equipment
+                        ))
+                        character.weightClassOption
+        }
+
     let newEffectsForCharacter character =
         let newDicePoolCalculationData = characterToDicePoolCalculationData character
 
@@ -101,16 +121,6 @@ let update msg (model: Character) =
                             dicePoolCalculationData
                         )
                     )
-                weightClassOption =
-                    WeightClassOption.update
-                        (WeightClassOption.DetermineWeightClass(
-                            character.settingData.carryWeightCalculationMap,
-                            character.settingData.weightClassSet,
-                            character.attributes,
-                            newCoreSkills,
-                            character.equipment
-                        ))
-                        character.weightClassOption
         }
 
     match msg with
@@ -309,6 +319,7 @@ let update msg (model: Character) =
             model with
                 equipment = ItemElement.itemElementListUpdate msg model.equipment
         })
+        |> determineWeightClassForCharacter
         |> newEffectsForCharacter
 
     // | OffPersonContainerInstanceListMsg msg ->
