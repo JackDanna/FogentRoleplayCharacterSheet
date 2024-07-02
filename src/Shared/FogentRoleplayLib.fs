@@ -1297,7 +1297,6 @@ module ItemElement =
         |> List.collect (fun (name, weaponResourceList) ->
             List.map (fun weaponResource -> (name, weaponResource)) weaponResourceList)
 
-
 module DicePoolCalculation =
     open Attribute
     open DicePoolMod
@@ -1363,7 +1362,6 @@ module DicePoolCalculation =
 
         createDicePoolModList vocationStatName vocationStatDiceMod governingAttributeNameSet dicePoolCalculationData
         |> dicePoolModListToDicePool
-
 
 module Skill =
     open Neg1To5
