@@ -925,7 +925,6 @@ module PhysicalDefense =
         durationAndSource: DurationAndSource
     }
 
-
 module SkillDiceMod =
     open DurationAndSource
     open DicePoolMod
