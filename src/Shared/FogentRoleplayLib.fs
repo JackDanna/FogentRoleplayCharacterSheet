@@ -1035,12 +1035,13 @@ module AttributeStatAdjustment =
 //         $"{movementSpeedCalculation.baseMovementSpeed} ft (base), +{movementSpeedCalculation.feetPerAttributeLvl} ft (per {movementSpeedCalculation.governingAttribute}), +{movementSpeedCalculation.feetPerSkillLvl} ft (per {movementSpeedCalculation.governingSkill})"
 
 module BaseDiceMod =
+    open SkillName
     open DurationAndSource
     open DicePool
 
     type BaseDiceMod = {
         name: string
-        effectedSkillName: string
+        effectedSkillName: SkillName
         baseDice: DicePool
         durationAndSource: DurationAndSource
     }
