@@ -1492,7 +1492,6 @@ module CombatRoll =
         (weaponDamageTypeSet: DamageType Set)
         (weaponEO: EngageableOpponents)
         (weaponAOEOption: AreaOfEffect option)
-        (baseDice: DicePool)
         (skillDicePoolModList: DicePoolMod List)
         (resource: option<string * WeaponResource>)
         (weaponHandedSuffixString: string)
@@ -1504,7 +1503,9 @@ module CombatRoll =
             weaponResourceClassOptionToWeaponResourceClass resource
 
         let dicePool =
-            modifyDicePoolByDicePoolModList baseDice (skillDicePoolModList @ [ weaponDiceMod; offHandWeaponDiceMod ])
+            modifyDicePoolByDicePoolModList
+                emptyDicePool
+                (skillDicePoolModList @ [ weaponDiceMod; offHandWeaponDiceMod ])
 
         let numDice = dicePool |> dicePoolToNumDice
 
@@ -1551,7 +1552,6 @@ module CombatRoll =
 
     let createCombatRoll
         (weapon: Weapon)
-        (baseDice: DicePool)
         (skillDicePoolModList: DicePoolMod List)
         tupledWeaponResourceOption
         : CombatRoll list =
@@ -1564,7 +1564,6 @@ module CombatRoll =
                 weapon.damageTypes
                 weapon.engageableOpponents
                 weapon.areaOfEffectOption
-                baseDice
                 skillDicePoolModList
                 tupledWeaponResourceOption
 
@@ -1633,8 +1632,7 @@ module CombatRoll =
 
             |> (fun skill ->
                 createSkillDicePoolMods skill.name skill.level skill.governingAttributeNames dicePoolCalculationData)
-            |> (fun skillDicePoolModList ->
-                createCombatRoll weapon itemTier.baseDice skillDicePoolModList weaponResourceOption))
+            |> (fun skillDicePoolModList -> createCombatRoll weapon skillDicePoolModList weaponResourceOption))
 
 module CharacterInformation =
     type CharacterInformation = {
