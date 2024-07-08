@@ -740,8 +740,6 @@ module Weapon =
         resourceNameOption: ResourceName option
     }
 
-    let weaponToName weapon = weapon.name
-
 module Container =
     type Container = {
         name: string
@@ -968,8 +966,6 @@ module BaseDiceMod =
         baseDice: DicePool
         durationAndSource: DurationAndSource
     }
-
-    let baseDiceModToName baseDiceMod = baseDiceMod.name
 
     let findBaseDiceForSkill skillName baseDiceModList =
         baseDiceModList
