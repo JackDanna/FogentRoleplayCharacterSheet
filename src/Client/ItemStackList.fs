@@ -35,14 +35,7 @@ let view (allItemStackNameSet: string Set) (model: ItemElement list) (dispatch: 
             table.isBordered
             prop.children [
                 Html.thead [
-                    List.map (fun (thString: string) -> Html.th thString) [
-                        "Name"
-                        "#"
-                        "Effect"
-                        "Tier"
-                        "LB"
-                        "Value"
-                    ]
+                    List.map (fun (thString: string) -> Html.th thString) [ "Name"; "#"; "Effect"; "LB"; "Value" ]
                     |> Html.tr
                 ]
                 Html.tableBody (

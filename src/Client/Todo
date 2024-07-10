@@ -9,3 +9,5 @@ Magic Combat Skills
 Refactor Skill lists to be a tupe of (skillName * skillLevel)
 
 Attributes are reversed
+
+Item Durability

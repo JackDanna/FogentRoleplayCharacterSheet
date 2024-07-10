@@ -747,16 +747,6 @@ module Container =
         volumeFtCubed: float
     }
 
-module ItemTier =
-    open DicePool
-
-    type ItemTier = {
-        name: string
-        level: int
-        baseDice: DicePool
-        durabilityMax: uint
-    }
-
 module WeaponSpell =
 
     open DicePoolMod
@@ -1107,13 +1097,11 @@ module Effect =
 // Item
 
 module Item =
-    open ItemTier
     open Effect
 
     type Item = {
         name: string
         itemEffectSet: Effect Set
-        itemTier: ItemTier
         value: string
         weight: float
     }
@@ -1173,10 +1161,6 @@ module ItemElement =
         let temp = itemElementToItem itemElement
         temp.name
 
-    let getItemElementTier itemElement =
-        let temp = itemElementToItem itemElement
-        temp.itemTier
-
     let rec getItemElementWeight itemElement =
         match itemElement with
         | Item item -> item.weight
@@ -1199,6 +1183,9 @@ module ItemElement =
 
     let itemElementToWeaponList =
         itemElementToNonContainedEffects >> effectsToWeaponList
+
+    let itemElementToBaseDiceEffectList =
+        itemElementToNonContainedEffects >> effectsToBaseDiceModList
 
     let itemElementToNameAndEffectList itemElement =
         (itemElementToName itemElement, itemElementToNonContainedEffects itemElement)
@@ -1467,6 +1454,7 @@ module CombatRoll =
     open Effect
     open DicePoolCalculation
     open Skill
+    open BaseDiceMod
 
     type CombatRoll = {
         name: string
@@ -1525,7 +1513,6 @@ module CombatRoll =
         }
 
     open Weapon
-    open ItemTier
 
     let temp
         preloadedCreateWeaponCombatRoll
@@ -1593,13 +1580,48 @@ module CombatRoll =
         let tryFindWeaponSkill weaponSkillName (skills: Skill List) =
             skills |> List.tryFind (fun skill -> skill.name = weaponSkillName)
 
-        //let tryFindWeaponResources weapon
+        let itemElementToWeaponAndBaseDiceModTuple itemElement =
+
+            let itemElementEffects = itemElement |> itemElementToNonContainedEffects
+
+            let weapons = effectsToWeaponList itemElementEffects
+
+            let baseDiceModEffects: BaseDiceMod list =
+                effectsToBaseDiceModList itemElementEffects
+
+            // This is only a temporaty function, it really should do a sort for the greatest baseDice once I add it into the BaseDiceMod Type
+            let findGreatestBaseDiceOrDefaultTo3d6 (baseDiceModEffectsForWeaponSkill: BaseDiceMod list) =
+                if baseDiceModEffectsForWeaponSkill.Length > 1 then
+                    let temp = baseDiceModEffectsForWeaponSkill[0]
+                    temp.baseDice
+                else
+                    base3d6DicePool
+
+            let findWeaponBaseDice
+                (weapon: Weapon)
+                baseDiceModEffects
+                (weaponSkillDataMap: Map<string, WeaponSkillData>)
+                =
+                weapon.name
+                |> weaponSkillDataMap.TryFind
+                |> function
+                    | None -> base3d6DicePool
+                    | Some weaponSkillData ->
+                        baseDiceModEffects
+                        |> List.filter (fun baseDiceModEffect ->
+                            baseDiceModEffect.effectedSkillName = weaponSkillData.name)
+                        |> findGreatestBaseDiceOrDefaultTo3d6
+
+            weapons
+            |> List.map (fun weapon ->
+
+                (itemElementToName itemElement,
+                 weapon,
+                 (findWeaponBaseDice weapon baseDiceModEffects weaponSkillDataMap)))
+
         equipmentList
         // Step 1: filter down to a tuple of item name, tier, and weapon
-        |> List.collect (fun itemElement ->
-            itemElement
-            |> itemElementToWeaponList
-            |> List.map (fun weapon -> (itemElementToName itemElement, weapon, getItemElementTier itemElement)))
+        |> List.collect itemElementToWeaponAndBaseDiceModTuple
         // Step 2: Find weapons that have weapon Resources. If weapon has a weapon resource, but no weapon resource is in equipment then none, else save tuple with weapon resource tuple. If weapon has no weapon resource, than just return tuple with none for the weaponResource tuple.
         |> List.collect (fun (weaponItemName, weapon, itemTier) ->
             match weapon.resourceNameOption with
