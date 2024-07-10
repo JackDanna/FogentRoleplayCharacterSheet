@@ -338,7 +338,11 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.BaseDiceMod
 
     let weaponSkillBaseDiceMods =
-        Seq.zip (weaponSkillDataMap.Values) (baseDiceTiers)
+        weaponSkillDataMap.Values
+        |> Seq.collect (fun weaponSkillData ->
+            baseDiceTiers
+            |> Set.map (fun baseDiceTier -> (weaponSkillData, baseDiceTier))
+            |> Set.toSeq)
         |> Seq.map (fun (weaponSkill: WeaponSkillData, baseDiceTier: BaseDiceTier) -> {
             name = baseDiceTier.itemPrefix + " " + weaponSkill.name
             effectedSkillName = weaponSkill.name
