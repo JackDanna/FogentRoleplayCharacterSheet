@@ -19,7 +19,6 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.AttributeName
     open FogentRoleplayLib.Container
     open FogentRoleplayLib.WeaponResource
-    open FogentRoleplayLib.ItemTier
     open FogentRoleplayLib.PhysicalDefense
     open FogentRoleplayLib.SkillDiceMod
     open FogentRoleplayLib.SetAreaOfEffect
@@ -224,6 +223,7 @@ module FogentRoleplayServerData =
             resourceNameOption = resourceOptionMap row.["resourceClass"]
         })
 
+    // WeaponSkillData
     let weaponSkillDataMap =
         makeFogentRoleplayDataSet "WeaponSkillData.csv" (fun row -> {
             name = string row.["skillName"]
@@ -269,17 +269,6 @@ module FogentRoleplayServerData =
             damageTypeSet = stringToDamageTypeSet row.["damageTypes"]
             NamedAreaOfEffectOption = namedAreaOfEffectOptionMap row.["areaOfEffect"]
         })
-
-    // ItemTier
-    let itemTierMap =
-        makeFogentRoleplayDataSet "ItemTierData.csv" (fun row -> {
-            name = string row.["desc"]
-            level = int row.["level"]
-            baseDice = parseDicePoolString row.["baseDice"]
-            durabilityMax = uint row.["durabilityMax"]
-        })
-        |> Set.map (fun (itemTier: ItemTier) -> itemTier.name, itemTier)
-        |> Map.ofSeq
 
     // PhysicalDefense
     let physicalDefenseSet =
@@ -334,6 +323,37 @@ module FogentRoleplayServerData =
             attributeDeterminedDiceModEffect.name, attributeDeterminedDiceModEffect)
         |> Map.ofSeq
 
+    // BaseDiceTiers
+    open FogentRoleplayLib.BaseDiceTier
+
+    let baseDiceTiers =
+        makeFogentRoleplayDataSet "BaseDiceTierData.csv" (fun row -> {
+            itemPrefix = string row.["itemPrefix"]
+            level = int row.["level"]
+            baseDice = parseDicePoolString row.["baseDice"]
+        //itemDurabilityMax = uint row.["itemDurabilityMax"]
+        })
+
+    // BaseDiceModEffect
+    open FogentRoleplayLib.BaseDiceMod
+
+    let weaponSkillBaseDiceMods =
+        Seq.zip (weaponSkillDataMap.Values) (baseDiceTiers)
+        |> Seq.map (fun (weaponSkill: WeaponSkillData, baseDiceTier: BaseDiceTier) -> {
+            name = baseDiceTier.itemPrefix + " " + weaponSkill.name
+            effectedSkillName = weaponSkill.name
+            baseDiceTier = baseDiceTier
+            durationAndSource = { duration = ""; source = "" }
+        })
+        |> Set.ofSeq
+
+    // Need to make baseDiceMods for magic skill and core skills
+    let magicSkillBaseDiceMods = Set.empty
+
+    let coreSkillBaseDiceMods = Set.empty
+
+    let baseDiceModSet =
+        Set.unionMany [ weaponSkillBaseDiceMods; magicSkillBaseDiceMods; coreSkillBaseDiceMods ]
 
     // WeightClass
     let weightClassSet: WeightClass Set =
@@ -411,6 +431,7 @@ module FogentRoleplayServerData =
             Set.map AttributeStatAdjustment attributeStatAdjustmentEffectData
             Set.map PhysicalDefense physicalDefenseSet
             Set.map AttributeDeterminedDiceMod attributeDeterminedDiceModSet
+            Set.map BaseDiceMod baseDiceModSet
             Set.map TextEffect textEffect
         ]
         |> Set.unionMany
@@ -428,15 +449,16 @@ module FogentRoleplayServerData =
     open FogentRoleplayLib.Item
     open System
 
-    let createItemFromRow (row1: CsvRow) = {
-        name = string row1.["desc"]
+    let createItemFromRow (row: CsvRow) = {
+        name = string row.["desc"]
         itemEffectSet =
-            Set.union
-                (stringToEffectSet effectDataMap row1.["itemClasses"])
-                (stringToEffectSet effectDataMap row1.["itemEffects"])
-        itemTier = itemTierMap.Item row1.["itemTier"]
-        value = string row1.["value"]
-        weight = float row1.["weight"]
+            Set.unionMany [
+                (stringToEffectSet effectDataMap row.["itemClasses"])
+                (stringToEffectSet effectDataMap row.["itemEffects"])
+                (stringToEffectSet effectDataMap row.["itemTier"])
+            ]
+        value = string row.["value"]
+        weight = float row.["weight"]
     }
 
     let itemStackMap =

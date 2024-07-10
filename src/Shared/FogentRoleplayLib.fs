@@ -945,15 +945,26 @@ module AttributeStatAdjustment =
     let attributeStatAdjustmentToEffectString attributeStatAdjustment =
         $"{attributeStatAdjustment.adjustment} {attributeStatAdjustment.attribute}"
 
+module BaseDiceTier =
+
+    open DicePool
+
+    type BaseDiceTier = {
+        itemPrefix: string
+        level: int
+        baseDice: DicePool
+    }
+
 module BaseDiceMod =
     open SkillName
     open DurationAndSource
     open DicePool
+    open BaseDiceTier
 
     type BaseDiceMod = {
         name: string
         effectedSkillName: SkillName
-        baseDice: DicePool
+        baseDiceTier: BaseDiceTier
         durationAndSource: DurationAndSource
     }
 
@@ -962,7 +973,7 @@ module BaseDiceMod =
         |> List.tryFind (fun baseDiceEffect -> baseDiceEffect.effectedSkillName = skillName)
         |> (fun baseDiceEffectOption ->
             match baseDiceEffectOption with
-            | Some baseDiceEffect -> baseDiceEffect.baseDice
+            | Some baseDiceEffect -> baseDiceEffect.baseDiceTier.baseDice
             | None -> base3d6DicePool)
 
 module TextEffect =
@@ -1593,7 +1604,7 @@ module CombatRoll =
             let findGreatestBaseDiceOrDefaultTo3d6 (baseDiceModEffectsForWeaponSkill: BaseDiceMod list) =
                 if baseDiceModEffectsForWeaponSkill.Length > 1 then
                     let temp = baseDiceModEffectsForWeaponSkill[0]
-                    temp.baseDice
+                    temp.baseDiceTier.baseDice
                 else
                     base3d6DicePool
 
