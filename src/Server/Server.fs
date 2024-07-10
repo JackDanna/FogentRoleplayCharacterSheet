@@ -212,6 +212,7 @@ module FogentRoleplayServerData =
     let weaponSet =
         makeFogentRoleplayDataSet "WeaponClassData.csv" (fun row -> {
             name = string row.["name"]
+            governingSkillName = SkillName row.["governingSkillName"]
             oneHandedWeaponDice = parseDicePoolModOptionString row.["oneHandedWeaponDice"]
             twoHandedWeaponDice = parseDicePoolModOptionString row.["twoHandedWeaponDice"]
             penetration = uint row.["penetration"]
@@ -228,7 +229,6 @@ module FogentRoleplayServerData =
         makeFogentRoleplayDataSet "WeaponSkillData.csv" (fun row -> {
             name = string row.["skillName"]
             governingAttributes = stringToAttributes row.["governingAttributes"]
-            governedWeapons = commaSeperatedStringToSet row.["weaponsGoverned"]
         })
         |> Set.map (fun weaponSkillData -> weaponSkillData.name, weaponSkillData)
         |> Map.ofSeq

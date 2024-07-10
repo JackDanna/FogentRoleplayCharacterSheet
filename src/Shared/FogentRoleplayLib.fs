@@ -681,6 +681,9 @@ module AreaOfEffect =
         | Some resourceAOE -> Some(areaOfEffectToSetAreaOfEffect resourceAOE numDice)
         | None -> determineAOEOption aoe numDice
 
+module SkillName =
+    type SkillName = string
+
 // Item Building
 
 module ResourceName =
@@ -726,9 +729,11 @@ module Weapon =
     open AreaOfEffect
     open Penetration
     open ResourceName
+    open SkillName
 
     type Weapon = {
         name: string
+        governingSkillName: SkillName
         oneHandedWeaponDice: DicePoolMod option
         twoHandedWeaponDice: DicePoolMod option
         penetration: Penetration
@@ -820,9 +825,6 @@ module Attribute =
 
     let sumGoverningAttributeD6DiceMods attributeSet governingAttributeNameSet =
         sumAttributesLevels governingAttributeNameSet attributeSet |> intToD6DicePoolMod
-
-module SkillName =
-    type SkillName = string
 
 module CoreSkillData =
     open AttributeName
@@ -968,13 +970,16 @@ module BaseDiceMod =
         durationAndSource: DurationAndSource
     }
 
-    let findBaseDiceForSkill skillName baseDiceModList =
+    let tryFindBaseDiceMod skillName baseDiceModList =
         baseDiceModList
         |> List.tryFind (fun baseDiceEffect -> baseDiceEffect.effectedSkillName = skillName)
-        |> (fun baseDiceEffectOption ->
-            match baseDiceEffectOption with
-            | Some baseDiceEffect -> baseDiceEffect.baseDiceTier.baseDice
-            | None -> base3d6DicePool)
+
+    let findBaseDiceWith3d6Default skillName baseDiceModList =
+        tryFindBaseDiceMod skillName baseDiceModList
+        |> function
+            | Some baseDiceMod -> baseDiceMod.baseDiceTier.baseDice
+            | None -> base3d6DicePool
+
 
 module TextEffect =
     open StringUtils
@@ -1097,6 +1102,13 @@ module Effect =
         | _ -> None
 
     let effectsToWeaponList = List.choose effectToWeaponOption
+
+    let effectToNonBaseDiceModEffects effects =
+        effects
+        |> List.filter (fun effect ->
+            match effect with
+            | BaseDiceMod _ -> false
+            | _ -> true)
 
     let effectToTextEffect effect =
         match effect with
@@ -1233,7 +1245,7 @@ module DicePoolCalculation =
         let baseDice =
             dicePoolCalculationData.effects
             |> effectsToBaseDiceModList
-            |> findBaseDiceForSkill skillName
+            |> findBaseDiceWith3d6Default skillName
 
         [
             [ baseDice |> AddDice ]
@@ -1283,6 +1295,7 @@ module DicePoolCalculation =
 module Skill =
     open Neg1To5
     open DicePool
+    open DicePoolMod
     open SkillName
     open DicePoolCalculation
     open AttributeName
@@ -1292,15 +1305,19 @@ module Skill =
         level: Neg1To5
         governingAttributeNames: AttributeName Set
         dicePool: DicePool
+        dicePoolModList: DicePoolMod List
     }
 
     let init name level governingAttributes dicePoolCalculationData =
+        let dicePoolModList: DicePoolMod list =
+            createSkillDicePoolMods name level governingAttributes dicePoolCalculationData
 
         {
             name = name
             level = level
             governingAttributeNames = governingAttributes
-            dicePool = calculateSkillDicePool name level governingAttributes dicePoolCalculationData
+            dicePool = dicePoolModListToDicePool dicePoolModList
+            dicePoolModList = dicePoolModList
         }
 
 module WeaponSkillData =
@@ -1309,7 +1326,6 @@ module WeaponSkillData =
     type WeaponSkillData = {
         name: string
         governingAttributes: AttributeName Set
-        governedWeapons: string Set
     }
 
 // Larger Character Building Blocks
@@ -1585,87 +1601,69 @@ module CombatRoll =
         (dicePoolCalculationData: DicePoolCalculationData)
         : CombatRoll List =
 
-        let tupledWeaponResourceList =
-            itemElementListToTupledWeaponResourceList equipmentList
-
-        let tryFindWeaponSkill weaponSkillName (skills: Skill List) =
-            skills |> List.tryFind (fun skill -> skill.name = weaponSkillName)
-
-        let itemElementToWeaponAndBaseDiceModTuple itemElement =
-
-            let itemElementEffects = itemElement |> itemElementToNonContainedEffects
-
-            let weapons = effectsToWeaponList itemElementEffects
-
-            let baseDiceModEffects: BaseDiceMod list =
-                effectsToBaseDiceModList itemElementEffects
-
-            // This is only a temporaty function, it really should do a sort for the greatest baseDice once I add it into the BaseDiceMod Type
-            let findGreatestBaseDiceOrDefaultTo3d6 (baseDiceModEffectsForWeaponSkill: BaseDiceMod list) =
-                if baseDiceModEffectsForWeaponSkill.Length > 1 then
-                    let temp = baseDiceModEffectsForWeaponSkill[0]
-                    temp.baseDiceTier.baseDice
-                else
-                    base3d6DicePool
-
-            let findWeaponBaseDice
-                (weapon: Weapon)
-                baseDiceModEffects
-                (weaponSkillDataMap: Map<string, WeaponSkillData>)
-                =
-                weapon.name
-                |> weaponSkillDataMap.TryFind
-                |> function
-                    | None -> base3d6DicePool
-                    | Some weaponSkillData ->
-                        baseDiceModEffects
-                        |> List.filter (fun baseDiceModEffect ->
-                            baseDiceModEffect.effectedSkillName = weaponSkillData.name)
-                        |> findGreatestBaseDiceOrDefaultTo3d6
-
-            weapons
-            |> List.map (fun weapon ->
-
-                (itemElementToName itemElement,
-                 weapon,
-                 (findWeaponBaseDice weapon baseDiceModEffects weaponSkillDataMap)))
-
         equipmentList
-        // Step 1: filter down to a tuple of item name, tier, and weapon
-        |> List.collect itemElementToWeaponAndBaseDiceModTuple
+        // Step 1: filter down to a tuple of item name and weapon
+        |> List.collect (fun itemElement ->
+            itemElement
+            |> itemElementToNonContainedEffects
+            |> effectsToWeaponList
+            |> List.map (fun weapon ->
+                let baseDiceModOption =
+                    itemElement
+                    |> itemElementToBaseDiceEffectList
+                    |> tryFindBaseDiceMod weapon.governingSkillName
+
+                // Filters out base Dice Mods that could be from other weapons
+                let filteredDicePoolCalculationData = {
+                    dicePoolCalculationData with
+                        effects =
+                            dicePoolCalculationData.effects
+                            |> effectToNonBaseDiceModEffects
+                            |> (fun effects ->
+                                match baseDiceModOption with
+                                | Some baseDiceMod -> List.append [ BaseDiceMod baseDiceMod ] effects
+                                | None -> effects)
+                }
+
+                (itemElementToName itemElement, weapon, filteredDicePoolCalculationData)))
         // Step 2: Find weapons that have weapon Resources. If weapon has a weapon resource, but no weapon resource is in equipment then none, else save tuple with weapon resource tuple. If weapon has no weapon resource, than just return tuple with none for the weaponResource tuple.
-        |> List.collect (fun (weaponItemName, weapon, itemTier) ->
+        |> List.collect (fun (itemElementName, weapon, filteredDicePoolCalculationData) ->
             match weapon.resourceNameOption with
             | Some resourceClass ->
-                tupledWeaponResourceList
+                equipmentList
+                |> itemElementListToTupledWeaponResourceList
                 |> List.choose (fun (weaponResourceItemName, weaponResource) ->
                     if weaponResource.resourceName = resourceClass then
-                        Some(weaponItemName, weapon, itemTier, Some(weaponResourceItemName, weaponResource))
+                        Some(
+                            itemElementName,
+                            weapon,
+                            filteredDicePoolCalculationData,
+                            Some(weaponResourceItemName, weaponResource)
+                        )
                     else
                         None)
-            | None -> List.singleton (weaponItemName, weapon, itemTier, None))
+            | None -> List.singleton (itemElementName, weapon, filteredDicePoolCalculationData, None))
+
         // Step 3: Try to find the weaponSkill that governs the specific weapon. If none exists, init a "fake" skill at level 0.
         // If some weaponSkillData exists, check if they have a weapon skill for it already.
-        //If so, return the skill, else make a "default" skill using weaponSkillData.
-        |> List.collect (fun (itemName, weapon, itemTier, weaponResourceOption) ->
-            weapon.name
+        // If so, return the skill, else make a "default" skill using weaponSkillData.
+        |> List.collect (fun (itemName, weapon, filteredDicePoolCalculationData, weaponResourceOption) ->
+            weapon.governingSkillName
             |> weaponSkillDataMap.TryFind
             |> function
-                | None -> Skill.init weapon.name Neg1To5.Zero Set.empty dicePoolCalculationData
+                | None -> Skill.init weapon.governingSkillName Neg1To5.Zero Set.empty filteredDicePoolCalculationData
                 | Some weaponSkillData ->
-                    tryFindWeaponSkill weaponSkillData.name weaponSkillList
+                    weaponSkillList
+                    |> List.tryFind (fun skill -> skill.name = weaponSkillData.name)
                     |> function
-                        | Some vocationalSkill -> vocationalSkill
+                        | Some skill -> skill
                         | None ->
                             Skill.init
                                 weaponSkillData.name
                                 Neg1To5.Zero
                                 weaponSkillData.governingAttributes
-                                dicePoolCalculationData
-
-            |> (fun skill ->
-                createSkillDicePoolMods skill.name skill.level skill.governingAttributeNames dicePoolCalculationData)
-            |> (fun skillDicePoolModList -> createCombatRoll weapon skillDicePoolModList weaponResourceOption))
+                                filteredDicePoolCalculationData
+            |> (fun skill -> createCombatRoll weapon skill.dicePoolModList weaponResourceOption))
 
 module CharacterInformation =
     type CharacterInformation = {

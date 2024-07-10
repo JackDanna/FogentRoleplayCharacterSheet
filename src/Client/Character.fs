@@ -105,7 +105,7 @@ let update msg (model: Character) =
                             character.equipment,
                             vocationListToWeaponSkillList character.vocationList,
                             character.settingData.weaponSkillDataMap,
-                            dicePoolCalculationData
+                            newDicePoolCalculationData
                         )
                     )
         }
