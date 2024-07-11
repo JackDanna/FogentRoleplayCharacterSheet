@@ -972,6 +972,7 @@ module BaseDiceMod =
 
     let tryFindBaseDiceMod skillName baseDiceModList =
         baseDiceModList
+        |> List.sortByDescending (fun baseDiceMod -> baseDiceMod.baseDiceTier.level)
         |> List.tryFind (fun baseDiceEffect -> baseDiceEffect.effectedSkillName = skillName)
 
     let findBaseDiceWith3d6Default skillName baseDiceModList =
@@ -979,7 +980,6 @@ module BaseDiceMod =
         |> function
             | Some baseDiceMod -> baseDiceMod.baseDiceTier.baseDice
             | None -> base3d6DicePool
-
 
 module TextEffect =
     open StringUtils
