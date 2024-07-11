@@ -2,7 +2,7 @@ module CombatSpeed
 
 open FogentRoleplayLib.CombatSpeed
 open FogentRoleplayLib.CombatSpeedCalculation
-open FogentRoleplayLib.DicePool
+open FogentRoleplayLib.DicePoolMod
 open FogentRoleplayLib.Skill
 open FogentRoleplayLib.Attribute
 open FogentRoleplayLib.Neg2To5
@@ -15,7 +15,7 @@ let init skills attributes combatSpeedCalculation : CombatSpeed =
         skills
         |> Set.toList
         |> List.find (fun (skill: Skill) -> skill.name = combatSpeedCalculation.governingSkillName)
-        |> (fun (skill: Skill) -> dicePoolToNumDice skill.dicePool)
+        |> (fun (skill: Skill) -> dicePoolModListToNumDice skill.dicePoolModList)
 
     let lvlOfAttributeAsInt =
         findAttributeWithAttributeName attributes combatSpeedCalculation.reactionSpeedAttributeName

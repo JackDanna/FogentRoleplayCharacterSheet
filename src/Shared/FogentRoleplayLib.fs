@@ -377,6 +377,8 @@ module DicePoolMod =
     let dicePoolModListToDicePool =
         combineDicePoolModList >> modifyDicePool emptyDicePool
 
+    let dicePoolModListToNumDice = dicePoolModListToDicePool >> dicePoolToNumDice
+
     let dicePoolModToString dicePoolMod =
         match dicePoolMod with
         | AddDice dicePool -> "+" + dicePoolToString dicePool
@@ -1278,7 +1280,6 @@ module DicePoolCalculation =
 
 module Skill =
     open Neg1To5
-    open DicePool
     open DicePoolMod
     open SkillName
     open DicePoolCalculation
@@ -1288,20 +1289,16 @@ module Skill =
         name: SkillName
         level: Neg1To5
         governingAttributeNames: AttributeName Set
-        dicePool: DicePool
         dicePoolModList: DicePoolMod List
     }
 
     let init name level governingAttributes dicePoolCalculationData =
-        let dicePoolModList: DicePoolMod list =
-            createSkillDicePoolMods name level governingAttributes dicePoolCalculationData
 
         {
             name = name
             level = level
             governingAttributeNames = governingAttributes
-            dicePool = dicePoolModListToDicePool dicePoolModList
-            dicePoolModList = dicePoolModList
+            dicePoolModList = createSkillDicePoolMods name level governingAttributes dicePoolCalculationData
         }
 
 module WeaponSkillData =

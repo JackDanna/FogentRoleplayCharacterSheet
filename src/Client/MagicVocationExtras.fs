@@ -6,6 +6,7 @@ open FogentRoleplayLib.Skill
 open FogentRoleplayLib.Neg1To5
 open FogentRoleplayLib.MagicSystem
 open FogentRoleplayLib.DicePool
+open FogentRoleplayLib.DicePoolMod
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.ZeroToFive
 
@@ -24,7 +25,7 @@ type Msg =
 let tryFindCoreSkillInMapWithDefault (coreSkillMap: Map<string, Skill>) governingCoreSkillName =
     match coreSkillMap.TryFind governingCoreSkillName with
     | None -> (Neg1To5.Zero, emptyDicePool)
-    | Some coreSkill -> (coreSkill.level, coreSkill.dicePool)
+    | Some coreSkill -> (coreSkill.level, coreSkill.dicePoolModList |> dicePoolModListToDicePool)
 
 let checkForResourcePoolOverflow resourcePool currentMagicResource =
     if resourcePool < currentMagicResource then

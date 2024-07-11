@@ -8,6 +8,7 @@ open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.AttributeName
 open FogentRoleplayLib.StringUtils
 open FogentRoleplayLib.CoreSkillData
+open FogentRoleplayLib.DicePoolMod
 
 type ZeroToFiveAndDicePoolCalculationData = ZeroToFive * DicePoolCalculationData
 
@@ -46,15 +47,15 @@ let update msg (model: Skill) =
         {
             model with
                 level = newLevel
-                dicePool =
-                    calculateSkillDicePool model.name newLevel model.governingAttributeNames dicePoolCalculationData
+                dicePoolModList =
+                    createSkillDicePoolMods model.name newLevel model.governingAttributeNames dicePoolCalculationData
         }
     | CalculateDicePool dicePoolCalculationData ->
 
         {
             model with
-                dicePool =
-                    calculateSkillDicePool model.name model.level model.governingAttributeNames dicePoolCalculationData
+                dicePoolModList =
+                    createSkillDicePoolMods model.name model.level model.governingAttributeNames dicePoolCalculationData
         }
     | CheckIfLevelCapExceeded(levelCap, dicePoolCalculationData) ->
         if (zeroToFiveToInt levelCap) < (neg1To5ToInt model.level) then
@@ -64,8 +65,8 @@ let update msg (model: Skill) =
             {
                 model with
                     level = convertedLevelCap
-                    dicePool =
-                        calculateSkillDicePool
+                    dicePoolModList =
+                        createSkillDicePoolMods
                             model.name
                             convertedLevelCap
                             model.governingAttributeNames
@@ -81,8 +82,8 @@ let update msg (model: Skill) =
         {
             model with
                 governingAttributeNames = newGoverningAttribteNameSet
-                dicePool =
-                    calculateSkillDicePool model.name model.level newGoverningAttribteNameSet dicePoolCalculationData
+                dicePoolModList =
+                    createSkillDicePoolMods model.name model.level newGoverningAttribteNameSet dicePoolCalculationData
         }
     | ModifySkillLevelWithVocationStatLevel(vocationStatLevel, dicePoolCalculationData) ->
         let newLevel = zeroToFiveToNeg1To5 vocationStatLevel
@@ -90,8 +91,8 @@ let update msg (model: Skill) =
         {
             model with
                 level = newLevel
-                dicePool =
-                    calculateSkillDicePool model.name newLevel model.governingAttributeNames dicePoolCalculationData
+                dicePoolModList =
+                    createSkillDicePoolMods model.name newLevel model.governingAttributeNames dicePoolCalculationData
         }
 
     | NoOp
@@ -146,7 +147,12 @@ let viewAsList attributeNameSet (model: Skill) dispatch userInputDisabled showGo
     Bulma.column [
         Neg1To5.view model.level ((fun msg -> ModifySkillLevel(msg, None, None)) >> dispatch) userInputDisabled
     ]
-    Bulma.column [ model.dicePool |> dicePoolToString |> prop.text ]
+    Bulma.column [
+        model.dicePoolModList
+        |> dicePoolModListToDicePool
+        |> dicePoolToString
+        |> prop.text
+    ]
 ]
 
 let view attributeNameSet (model: Skill) dispatch disableChangeLevel showGoverningSkillColumn =
