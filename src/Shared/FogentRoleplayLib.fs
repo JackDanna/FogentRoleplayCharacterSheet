@@ -1484,6 +1484,11 @@ module CombatRoll =
     open WeaponResource
     open AreaOfEffect
     open WeaponSkillData
+    open Vocation
+
+    open MagicVocationSkill
+    open MundaneVocationSkill
+    open MundaneOrMagicVocationExtras
 
     type CombatRoll = {
         itemName: string
@@ -1498,6 +1503,16 @@ module CombatRoll =
         weaponTypeName: string
         handedVariation: string
     }
+
+    let vocationListToWeaponSkillList (vocationList: Vocation List) =
+        vocationList
+        |> List.collect (fun vocation ->
+            match vocation.mundaneOrMagicVocationExtras with
+            | MagicVocationExtras magicVocationExtras ->
+                magicVocationSkillsToWeaponSkills magicVocationExtras.magicVocationSkills
+                |> List.ofSeq
+            | MundaneVocationExtras mundaneVocationSkills ->
+                mundaneVocationSkillsToWeaponSkills mundaneVocationSkills |> List.ofSeq)
 
     let weaponResourceClassOptionToWeaponResourceClass (resource: option<string * WeaponResource>) =
         match resource with
@@ -1671,6 +1686,22 @@ module CombatRoll =
             |> (fun skill ->
                 createHandedVariationCombatRolls itemName weapon skill.dicePoolModList weaponResourceOption))
 
+    let createCombatRolls
+        (equipmentList: ItemElement List)
+        (vocationList: Vocation List)
+        (weaponSkillDataMap: Map<string, WeaponSkillData>)
+        (dicePoolCalculationData: DicePoolCalculationData)
+        : CombatRoll List =
+
+        let weaponCombatRolls =
+            createWeaponItemCombatRolls
+                equipmentList
+                (vocationListToWeaponSkillList vocationList)
+                weaponSkillDataMap
+                dicePoolCalculationData
+
+        List.collect id [ weaponCombatRolls ]
+
 module CharacterInformation =
     type CharacterInformation = {
         notes: string
@@ -1843,8 +1874,6 @@ module Character =
     open CharacterInformation
     open Effect
     open CombatSpeed
-    open MagicVocationSkill
-    open MundaneVocationSkill
     open SettingData
     open WeightClass
     open CarryWeightCalculation
@@ -1885,15 +1914,3 @@ module Character =
                         ]
                       | None -> []
         })
-
-    open MundaneOrMagicVocationExtras
-
-    let vocationListToWeaponSkillList (vocationList: Vocation List) =
-        vocationList
-        |> List.collect (fun vocation ->
-            match vocation.mundaneOrMagicVocationExtras with
-            | MagicVocationExtras magicVocationExtras ->
-                magicVocationSkillsToWeaponSkills magicVocationExtras.magicVocationSkills
-                |> List.ofSeq
-            | MundaneVocationExtras mundaneVocationSkills ->
-                mundaneVocationSkillsToWeaponSkills mundaneVocationSkills |> List.ofSeq)
