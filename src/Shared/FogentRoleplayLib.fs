@@ -1346,6 +1346,14 @@ module MundaneVocationSkill =
     let mundaneVocationSkillsToSkills mundaneVocationSkills =
         Set.map mundaneVocationSkillToSkill mundaneVocationSkills
 
+    let mundaneVocationSkillToWeaponSkillOption =
+        function
+        | VocationalSkill _ -> None
+        | WeaponSkill skill -> Some skill
+
+    let mundaneVocationSkillsToWeaponSkills seq =
+        Seq.choose mundaneVocationSkillToWeaponSkillOption seq
+
 module MundaneVocation =
     open VocationStat
     open MundaneVocationSkill
@@ -1428,6 +1436,14 @@ module MagicVocationSkill =
 
     let magicVocationSkillsToSkills magicVocationSkills =
         Set.map magicVocationSkillToSkill magicVocationSkills
+
+    let magicVocationSkillToWeaponSkillOption =
+        function
+        | MagicSkill _ -> None
+        | MundaneVocationSkill mundaneVocationSkill -> mundaneVocationSkillToWeaponSkillOption mundaneVocationSkill
+
+    let magicVocationSkillsToWeaponSkills magicVocationSkills : seq<Skill> =
+        Seq.choose magicVocationSkillToWeaponSkillOption magicVocationSkills
 
 module MagicVocationExtras =
     open MagicSystem
@@ -1885,7 +1901,7 @@ module Character =
         |> List.collect (fun vocation ->
             match vocation.mundaneOrMagicVocationExtras with
             | MagicVocationExtras magicVocationExtras ->
-                magicVocationSkillsToSkills magicVocationExtras.magicVocationSkills
+                magicVocationSkillsToWeaponSkills magicVocationExtras.magicVocationSkills
                 |> List.ofSeq
             | MundaneVocationExtras mundaneVocationSkills ->
-                mundaneVocationSkillsToSkills mundaneVocationSkills |> List.ofSeq)
+                mundaneVocationSkillsToWeaponSkills mundaneVocationSkills |> List.ofSeq)
