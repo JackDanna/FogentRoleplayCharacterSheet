@@ -1471,6 +1471,11 @@ module CombatRoll =
     open DicePoolCalculation
     open Skill
     open BaseDiceMod
+    open Weapon
+    open ItemElement
+    open WeaponResource
+    open AreaOfEffect
+    open WeaponSkillData
 
     type CombatRoll = {
         itemName: string
@@ -1486,11 +1491,6 @@ module CombatRoll =
         handedVariation: string
     }
 
-    open ItemElement
-
-    open WeaponResource
-    open AreaOfEffect
-
     let weaponResourceClassOptionToWeaponResourceClass (resource: option<string * WeaponResource>) =
         match resource with
         | Some(weaponResourceItemName, resource) ->
@@ -1502,7 +1502,7 @@ module CombatRoll =
              resource.NamedAreaOfEffectOption)
         | None -> ("", emptyDicePoolMod, 0u, None, Set.empty, None)
 
-    let createWeaponCombatRoll
+    let createCombatRoll
         (itemName: string)
         (weaponName: string)
         (weaponPenetration: Penetration)
@@ -1544,32 +1544,7 @@ module CombatRoll =
             handedVariation = handedVariationName
         }
 
-    open Weapon
-
-    let temp
-        preloadedCreateWeaponCombatRoll
-        (handedVariationString: string)
-        (weaponHandedDicePoolModOption: DicePoolMod option)
-        =
-        match weaponHandedDicePoolModOption with
-        | Some weaponHandedDice -> [
-            preloadedCreateWeaponCombatRoll handedVariationString weaponHandedDice emptyDicePoolMod
-          ]
-        | None -> []
-
-    let temp2
-        preloadedCreateWeaponCombatRoll
-        (handedVariationString: string)
-        (weaponHandedDicePoolModOption: DicePoolMod option)
-        (offHandedDicePoolModOption: DicePoolMod option)
-        =
-        match weaponHandedDicePoolModOption, offHandedDicePoolModOption with
-        | Some weaponHandedDice, Some offHandedDicePoolMod -> [
-            preloadedCreateWeaponCombatRoll handedVariationString weaponHandedDice offHandedDicePoolMod
-          ]
-        | _, _ -> []
-
-    let createCombatRoll
+    let createHandedVariationCombatRolls
         (itemName: string)
         (weapon: Weapon)
         (skillDicePoolModList: DicePoolMod List)
@@ -1577,7 +1552,7 @@ module CombatRoll =
         : CombatRoll list =
 
         let preloadedCreateWeaponCombatRoll =
-            createWeaponCombatRoll
+            createCombatRoll
                 itemName
                 weapon.name
                 weapon.penetration
@@ -1588,14 +1563,33 @@ module CombatRoll =
                 skillDicePoolModList
                 tupledWeaponResourceOption
 
-        [
-            (temp preloadedCreateWeaponCombatRoll "One-Handed" weapon.oneHandedDiceMod)
-            (temp preloadedCreateWeaponCombatRoll "Two-Handed" weapon.twoHandedDiceMod)
-            (temp2 preloadedCreateWeaponCombatRoll "Dual-Wielded" weapon.oneHandedDiceMod weapon.dualWieldedDiceMod)
-        ]
-        |> List.collect id
+        let oneHandedCombatRollOption =
+            match weapon.oneHandedDiceMod with
+            | Some oneHandedDiceMod ->
+                preloadedCreateWeaponCombatRoll "One-Handed" oneHandedDiceMod emptyDicePoolMod
+                |> Some
+            | None -> None
 
-    open WeaponSkillData
+        let twoHandedCombatRollOption =
+            match weapon.twoHandedDiceMod with
+            | Some twoHandedDiceMod ->
+                preloadedCreateWeaponCombatRoll "Two-Handed" twoHandedDiceMod emptyDicePoolMod
+                |> Some
+            | None -> None
+
+        let dualWieldedCombatRollOption =
+            match weapon.oneHandedDiceMod, weapon.dualWieldedDiceMod with
+            | Some weaponHandedDice, Some offHandedDicePoolMod ->
+                preloadedCreateWeaponCombatRoll "Dual-Wielded" weaponHandedDice offHandedDicePoolMod
+                |> Some
+            | _, _ -> None
+
+        [
+            oneHandedCombatRollOption
+            twoHandedCombatRollOption
+            dualWieldedCombatRollOption
+        ]
+        |> List.choose id
 
     let createWeaponItemCombatRolls
         (equipmentList: ItemElement List)
@@ -1666,7 +1660,8 @@ module CombatRoll =
                                 Neg1To5.Zero
                                 weaponSkillData.governingAttributes
                                 filteredDicePoolCalculationData
-            |> (fun skill -> createCombatRoll itemName weapon skill.dicePoolModList weaponResourceOption))
+            |> (fun skill ->
+                createHandedVariationCombatRolls itemName weapon skill.dicePoolModList weaponResourceOption))
 
 module CharacterInformation =
     type CharacterInformation = {
