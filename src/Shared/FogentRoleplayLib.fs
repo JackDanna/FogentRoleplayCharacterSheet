@@ -1548,7 +1548,7 @@ module CombatRoll =
         (itemName: string)
         (weapon: Weapon)
         (skillDicePoolModList: DicePoolMod List)
-        tupledWeaponResourceOption
+        itemResourceNameAndWeaponResourceOption
         : CombatRoll list =
 
         let preloadedCreateWeaponCombatRoll =
@@ -1561,7 +1561,7 @@ module CombatRoll =
                 weapon.engageableOpponents
                 weapon.areaOfEffectOption
                 skillDicePoolModList
-                tupledWeaponResourceOption
+                itemResourceNameAndWeaponResourceOption
 
         let oneHandedCombatRollOption =
             match weapon.oneHandedDiceMod with
