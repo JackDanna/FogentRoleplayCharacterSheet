@@ -1512,9 +1512,9 @@ module CombatRoll =
         (weaponAOEOption: AreaOfEffect option)
         (skillDicePoolModList: DicePoolMod List)
         (resource: option<string * WeaponResource>)
-        (weaponHandedSuffixString: string)
+        (handedVariationName: string)
         (weaponDiceMod: DicePoolMod)
-        (offHandWeaponDiceMod: DicePoolMod)
+        (offHandedWeaponDiceMod: DicePoolMod)
         : CombatRoll =
 
         let (resourceDesc, resourceDice, resourcePenetration, resourceRange, resourceDamageTypeSet, resourceAreaOfEffect) =
@@ -1523,7 +1523,7 @@ module CombatRoll =
         let dicePool =
             modifyDicePoolByDicePoolModList
                 emptyDicePool
-                (skillDicePoolModList @ [ weaponDiceMod; offHandWeaponDiceMod ])
+                (skillDicePoolModList @ [ weaponDiceMod; offHandedWeaponDiceMod ])
 
         let numDice = dicePool |> dicePoolToNumDice
 
@@ -1541,7 +1541,7 @@ module CombatRoll =
                  | Calculation eoCalc -> Some eoCalc.name
                  | Calculated _ -> None)
             weaponTypeName = weaponName
-            handedVariation = weaponHandedSuffixString
+            handedVariation = handedVariationName
         }
 
     open Weapon
