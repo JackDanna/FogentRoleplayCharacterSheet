@@ -710,17 +710,6 @@ module WeaponResource =
 
     let weaponResourceToName weaponResource = weaponResource.name
 
-    let weaponResourceClassOptionToWeaponResourceClass (resource: option<string * WeaponResource>) =
-        match resource with
-        | Some(weaponResourceItemName, resource) ->
-            (" (" + resource.name + ")",
-             resource.dicePoolMod,
-             resource.penetration,
-             resource.rangeOption,
-             resource.damageTypeSet,
-             resource.NamedAreaOfEffectOption)
-        | None -> ("", uintToD6DicePoolMod (0u), 0u, None, Set.empty, None)
-
 module Weapon =
     open DicePoolMod
     open Range
@@ -1502,6 +1491,17 @@ module CombatRoll =
     open WeaponResource
     open AreaOfEffect
 
+    let weaponResourceClassOptionToWeaponResourceClass (resource: option<string * WeaponResource>) =
+        match resource with
+        | Some(weaponResourceItemName, resource) ->
+            (" (" + resource.name + ")",
+             resource.dicePoolMod,
+             resource.penetration,
+             resource.rangeOption,
+             resource.damageTypeSet,
+             resource.NamedAreaOfEffectOption)
+        | None -> ("", emptyDicePoolMod, 0u, None, Set.empty, None)
+
     let createWeaponCombatRoll
         (itemName: string)
         (weaponName: string)
@@ -1589,13 +1589,9 @@ module CombatRoll =
                 tupledWeaponResourceOption
 
         [
-            (temp preloadedCreateWeaponCombatRoll " (One-Handed)" weapon.oneHandedWeaponDice)
-            (temp preloadedCreateWeaponCombatRoll " (Two-Handed)" weapon.twoHandedWeaponDice)
-            (temp2
-                preloadedCreateWeaponCombatRoll
-                " (Dual-Wielded)"
-                weapon.oneHandedWeaponDice
-                weapon.dualWieldableBonus)
+            (temp preloadedCreateWeaponCombatRoll "One-Handed" weapon.oneHandedWeaponDice)
+            (temp preloadedCreateWeaponCombatRoll "Two-Handed" weapon.twoHandedWeaponDice)
+            (temp2 preloadedCreateWeaponCombatRoll "Dual-Wielded" weapon.oneHandedWeaponDice weapon.dualWieldableBonus)
         ]
         |> List.collect id
 
