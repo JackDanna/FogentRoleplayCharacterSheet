@@ -213,13 +213,13 @@ module FogentRoleplayServerData =
         makeFogentRoleplayDataSet "WeaponClassData.csv" (fun row -> {
             name = string row.["name"]
             governingSkillName = SkillName row.["governingSkillName"]
-            oneHandedWeaponDice = parseDicePoolModOptionString row.["oneHandedWeaponDice"]
-            twoHandedWeaponDice = parseDicePoolModOptionString row.["twoHandedWeaponDice"]
+            oneHandedDiceMod = parseDicePoolModOptionString row.["oneHandedWeaponDice"]
+            twoHandedDiceMod = parseDicePoolModOptionString row.["twoHandedWeaponDice"]
             penetration = uint row.["penetration"]
             range = rangeMap.Item row.["range"]
             damageTypes = stringToDamageTypeSet row.["damageTypes"]
             engageableOpponents = engageableOpponentsMap row.["engageableOpponents"]
-            dualWieldableBonus = parseDicePoolModOptionString row.["dualWieldableBonus"]
+            dualWieldedDiceMod = parseDicePoolModOptionString row.["dualWieldableBonus"]
             areaOfEffectOption = namedAreaOfEffectOptionMap row.["areaOfEffect"]
             resourceNameOption = resourceOptionMap row.["resourceClass"]
         })

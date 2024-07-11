@@ -723,13 +723,13 @@ module Weapon =
     type Weapon = {
         name: string
         governingSkillName: SkillName
-        oneHandedWeaponDice: DicePoolMod option
-        twoHandedWeaponDice: DicePoolMod option
+        oneHandedDiceMod: DicePoolMod option
+        twoHandedDiceMod: DicePoolMod option
         penetration: Penetration
         range: Range
         damageTypes: DamageType Set
         engageableOpponents: EngageableOpponents
-        dualWieldableBonus: DicePoolMod option
+        dualWieldedDiceMod: DicePoolMod option
         areaOfEffectOption: AreaOfEffect option
         resourceNameOption: ResourceName option
     }
@@ -1589,9 +1589,9 @@ module CombatRoll =
                 tupledWeaponResourceOption
 
         [
-            (temp preloadedCreateWeaponCombatRoll "One-Handed" weapon.oneHandedWeaponDice)
-            (temp preloadedCreateWeaponCombatRoll "Two-Handed" weapon.twoHandedWeaponDice)
-            (temp2 preloadedCreateWeaponCombatRoll "Dual-Wielded" weapon.oneHandedWeaponDice weapon.dualWieldableBonus)
+            (temp preloadedCreateWeaponCombatRoll "One-Handed" weapon.oneHandedDiceMod)
+            (temp preloadedCreateWeaponCombatRoll "Two-Handed" weapon.twoHandedDiceMod)
+            (temp2 preloadedCreateWeaponCombatRoll "Dual-Wielded" weapon.oneHandedDiceMod weapon.dualWieldedDiceMod)
         ]
         |> List.collect id
 
