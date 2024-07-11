@@ -33,7 +33,9 @@ open Feliz.Bulma
 
 let combatRollRow (model: CombatRoll) =
     Html.tr [
-        Html.td model.name
+        Html.td model.itemName
+        Html.td model.weaponTypeName
+        Html.td model.handedVariation
         Html.td (sprintf "%s (%s)" (model.dicePool |> dicePoolToString) model.weaponAndResourceDicePoolModString)
         Html.td (int model.penetration)
         Html.td (sprintf "%s (%s)" (calculatedRangeToString model.calculatedRange) model.calculatedRange.name)
@@ -55,7 +57,9 @@ let view (model: CombatRoll list) =
             prop.children [
                 Html.thead [
                     [
-                        "Name"
+                        "Item Name"
+                        "Weapon Type"
+                        "Handed Variation"
                         "Dice Poll"
                         "Penetration"
                         "Effective/MaxRange"

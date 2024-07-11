@@ -1484,7 +1484,7 @@ module CombatRoll =
     open BaseDiceMod
 
     type CombatRoll = {
-        name: string
+        itemName: string
         dicePool: DicePool
         weaponAndResourceDicePoolModString: string
         calculatedRange: CalculatedRange
@@ -1493,6 +1493,8 @@ module CombatRoll =
         setAreaOfEffectOption: SetAreaOfEffect Option
         calculatedEngageableOpponents: CalculatedEngageableOpponents
         eoName: string option
+        weaponTypeName: string
+        handedVariation: string
     }
 
     open ItemElement
@@ -1526,7 +1528,7 @@ module CombatRoll =
         let numDice = dicePool |> dicePoolToNumDice
 
         {
-            name = $"{itemName} - ({weaponName}) {resourceDesc + weaponHandedSuffixString}"
+            itemName = itemName
             dicePool = dicePool
             weaponAndResourceDicePoolModString = dicePoolModListToString [ weaponDiceMod; resourceDice ]
             calculatedRange = determineGreatestRange numDice weaponRange resourceRange
@@ -1538,6 +1540,8 @@ module CombatRoll =
                 (match weaponEO with
                  | Calculation eoCalc -> Some eoCalc.name
                  | Calculated _ -> None)
+            weaponTypeName = weaponName
+            handedVariation = weaponHandedSuffixString
         }
 
     open Weapon
