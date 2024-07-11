@@ -1501,6 +1501,7 @@ module CombatRoll =
     open AreaOfEffect
 
     let createWeaponCombatRoll
+        (itemName: string)
         (weaponName: string)
         (weaponPenetration: Penetration)
         (weaponRange: Range)
@@ -1525,7 +1526,7 @@ module CombatRoll =
         let numDice = dicePool |> dicePoolToNumDice
 
         {
-            name = weaponName + resourceDesc + weaponHandedSuffixString
+            name = $"{itemName} - ({weaponName}) {resourceDesc + weaponHandedSuffixString}"
             dicePool = dicePool
             weaponAndResourceDicePoolModString = dicePoolModListToString [ weaponDiceMod; resourceDice ]
             calculatedRange = determineGreatestRange numDice weaponRange resourceRange
@@ -1565,6 +1566,7 @@ module CombatRoll =
         | _, _ -> []
 
     let createCombatRoll
+        (itemName: string)
         (weapon: Weapon)
         (skillDicePoolModList: DicePoolMod List)
         tupledWeaponResourceOption
@@ -1572,6 +1574,7 @@ module CombatRoll =
 
         let preloadedCreateWeaponCombatRoll =
             createWeaponCombatRoll
+                itemName
                 weapon.name
                 weapon.penetration
                 weapon.range
@@ -1582,11 +1585,11 @@ module CombatRoll =
                 tupledWeaponResourceOption
 
         [
-            (temp preloadedCreateWeaponCombatRoll " (one-handed)" weapon.oneHandedWeaponDice)
-            (temp preloadedCreateWeaponCombatRoll " (two-handed)" weapon.twoHandedWeaponDice)
+            (temp preloadedCreateWeaponCombatRoll " (One-Handed)" weapon.oneHandedWeaponDice)
+            (temp preloadedCreateWeaponCombatRoll " (Two-Handed)" weapon.twoHandedWeaponDice)
             (temp2
                 preloadedCreateWeaponCombatRoll
-                " (dual-wielded)"
+                " (Dual-Wielded)"
                 weapon.oneHandedWeaponDice
                 weapon.dualWieldableBonus)
         ]
@@ -1663,7 +1666,7 @@ module CombatRoll =
                                 Neg1To5.Zero
                                 weaponSkillData.governingAttributes
                                 filteredDicePoolCalculationData
-            |> (fun skill -> createCombatRoll weapon skill.dicePoolModList weaponResourceOption))
+            |> (fun skill -> createCombatRoll itemName weapon skill.dicePoolModList weaponResourceOption))
 
 module CharacterInformation =
     type CharacterInformation = {
