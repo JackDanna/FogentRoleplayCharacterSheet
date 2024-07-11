@@ -347,11 +347,6 @@ module DicePoolMod =
         | AddDice diceToAdd -> combineDicePools [ dicePool; diceToAdd ]
         | RemoveDice diceToRemove -> removeDiceFromDicePool dicePool diceToRemove |> (fun (dicePool, _) -> dicePool)
 
-    let dicePoolModToInt dicePoolMod =
-        match dicePoolMod with
-        | AddDice dicePool -> dicePoolToNumDice dicePool |> int
-        | RemoveDice dicePoolPenalty -> int dicePoolPenalty * -1
-
     let combineDicePoolModList dicePoolModList =
 
         let combinedPositiveDicePool =
