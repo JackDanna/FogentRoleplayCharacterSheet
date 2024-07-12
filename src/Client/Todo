@@ -11,3 +11,5 @@ Refactor Skill lists to be a tupe of (skillName * skillLevel)
 Attributes are reversed
 
 Item Durability
+
+Magic Skill data should maybe live on magic Skill
