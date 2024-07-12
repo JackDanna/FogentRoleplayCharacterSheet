@@ -11,6 +11,7 @@ open FogentRoleplayLib.Vocation
 open FogentRoleplayLib.StringUtils
 open FogentRoleplayLib.WeaponSkillData
 open FogentRoleplayLib.DicePoolCalculation
+open FogentRoleplayLib.WeaponSpell
 
 
 
@@ -19,14 +20,19 @@ type Msg =
         ItemElement List *
         Vocation List *
         Map<string, WeaponSkillData> *
+        WeaponSpell Set *
         DicePoolCalculationData
 
 let init () : CombatRoll list = []
 
 let update msg : CombatRoll list =
     match msg with
-    | RecalculateCombatRollList(equipmentList, weaponSkillList, weaponSkillDataMap, dicePoolCalculationData) ->
-        createCombatRolls equipmentList weaponSkillList weaponSkillDataMap dicePoolCalculationData
+    | RecalculateCombatRollList(equipmentList,
+                                weaponSkillList,
+                                weaponSkillDataMap,
+                                weaponSpellSet,
+                                dicePoolCalculationData) ->
+        createCombatRolls equipmentList weaponSkillList weaponSkillDataMap weaponSpellSet dicePoolCalculationData
 
 open Feliz
 open Feliz.Bulma

@@ -237,9 +237,9 @@ module FogentRoleplayServerData =
     let weaponSpellSet: WeaponSpell Set =
         makeFogentRoleplayDataSet "WeaponSpellData.csv" (fun row -> {
             name = string row.["name"]
-            oneHandedWeaponDice = parseDicePoolModOptionString row.["oneHandedWeaponDice"]
-            twoHandedWeaponDice = parseDicePoolModOptionString row.["twoHandedWeaponDice"]
-            dualWieldableBonus = parseDicePoolModOptionString row.["dualWieldableBonus"]
+            oneHandedDiceMod = parseDicePoolModOptionString row.["oneHandedWeaponDice"]
+            twoHandedDiceMod = parseDicePoolModOptionString row.["twoHandedWeaponDice"]
+            dualWieldedDiceMod = parseDicePoolModOptionString row.["dualWieldableBonus"]
             penetration = uint row.["penetration"]
             range = rangeMap.Item row.["range"]
             engageableOpponents = engageableOpponentsMap row.["engageableOpponents"]

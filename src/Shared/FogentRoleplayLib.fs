@@ -748,9 +748,9 @@ module WeaponSpell =
 
     type WeaponSpell = {
         name: string
-        oneHandedWeaponDice: DicePoolMod option
-        twoHandedWeaponDice: DicePoolMod option
-        dualWieldableBonus: DicePoolMod option
+        oneHandedDiceMod: DicePoolMod option
+        twoHandedDiceMod: DicePoolMod option
+        dualWieldedDiceMod: DicePoolMod option
         penetration: Penetration
         range: Range
         engageableOpponents: EngageableOpponents
@@ -1437,6 +1437,14 @@ module MagicVocationSkill =
     let magicVocationSkillsToWeaponSkills magicVocationSkills : seq<Skill> =
         Seq.choose magicVocationSkillToWeaponSkillOption magicVocationSkills
 
+    let magicVocationSKillToMagicSkill =
+        function
+        | MagicSkill skill -> Some skill
+        | _ -> None
+
+    let magicVocationSkillstoMagicSkills magicVocationSkills : seq<Skill> =
+        Seq.choose magicVocationSKillToMagicSkill magicVocationSkills
+
 module MagicVocationExtras =
     open MagicSystem
     open MagicVocationSkill
@@ -1448,6 +1456,15 @@ module MagicVocationExtras =
         coreSkillResourcePool: uint
         currentMagicResource: uint
     }
+
+    let magicVocationExtrasToWeaponSkills magicVocationExtras =
+        magicVocationExtras.magicVocationSkills |> magicVocationSkillsToWeaponSkills
+
+    let magicVocationExtrasToMagicSkills magicVocationExtras =
+        magicVocationExtras.magicVocationSkills |> magicVocationSkillstoMagicSkills
+
+    let magicVocationExtrasToMagicSkillsAndMagicSystem magicVocationExtras =
+        (magicVocationExtrasToMagicSkills magicVocationExtras, magicVocationExtras.magicSystem)
 
 module MundaneOrMagicVocationExtras =
     open MundaneVocationSkill
@@ -1461,10 +1478,30 @@ module Vocation =
     open VocationStat
     open MundaneOrMagicVocationExtras
 
+    open MagicVocationExtras
+    open MundaneVocationSkill
+
     type Vocation = {
         vocationStat: VocationStat
         mundaneOrMagicVocationExtras: MundaneOrMagicVocationExtras
     }
+
+    let vocationListToWeaponSkillList (vocationList: Vocation List) =
+        vocationList
+        |> List.collect (fun vocation ->
+            match vocation.mundaneOrMagicVocationExtras with
+            | MagicVocationExtras magicVocationExtras ->
+                magicVocationExtrasToWeaponSkills magicVocationExtras |> List.ofSeq
+            | MundaneVocationExtras mundaneVocationSkills ->
+                mundaneVocationSkillsToWeaponSkills mundaneVocationSkills |> List.ofSeq)
+
+    let vocationListToMagicSkillsAndMagicSystem vocations =
+        vocations
+        |> List.choose (fun vocation ->
+            match vocation.mundaneOrMagicVocationExtras with
+            | MagicVocationExtras(magicVocationExtras: MagicVocationExtras.MagicVocationExtras) ->
+                magicVocationExtrasToMagicSkillsAndMagicSystem magicVocationExtras |> Some
+            | MundaneVocationExtras _ -> None)
 
 module CombatRoll =
 
@@ -1486,10 +1523,6 @@ module CombatRoll =
     open WeaponSkillData
     open Vocation
 
-    open MagicVocationSkill
-    open MundaneVocationSkill
-    open MundaneOrMagicVocationExtras
-
     type CombatRoll = {
         itemName: string
         dicePool: DicePool
@@ -1503,16 +1536,6 @@ module CombatRoll =
         weaponTypeName: string
         handedVariation: string
     }
-
-    let vocationListToWeaponSkillList (vocationList: Vocation List) =
-        vocationList
-        |> List.collect (fun vocation ->
-            match vocation.mundaneOrMagicVocationExtras with
-            | MagicVocationExtras magicVocationExtras ->
-                magicVocationSkillsToWeaponSkills magicVocationExtras.magicVocationSkills
-                |> List.ofSeq
-            | MundaneVocationExtras mundaneVocationSkills ->
-                mundaneVocationSkillsToWeaponSkills mundaneVocationSkills |> List.ofSeq)
 
     let weaponResourceClassOptionToWeaponResourceClass (resource: option<string * WeaponResource>) =
         match resource with
@@ -1567,9 +1590,39 @@ module CombatRoll =
             handedVariation = handedVariationName
         }
 
+    let preloadedCreateWeaponCombatRoll
+        itemName
+        name
+        penetration
+        range
+        damageTypes
+        engageableOpponents
+        areaOfEffectOption
+        skillDicePoolModList
+        itemResourceNameAndWeaponResourceOption
+        : string -> DicePoolMod -> DicePoolMod -> CombatRoll =
+        createCombatRoll
+            itemName
+            name
+            penetration
+            range
+            damageTypes
+            engageableOpponents
+            areaOfEffectOption
+            skillDicePoolModList
+            itemResourceNameAndWeaponResourceOption
+
     let createHandedVariationCombatRolls
         (itemName: string)
-        (weapon: Weapon)
+        name
+        oneHandedDiceMod
+        twoHandedDiceMod
+        dualWieldedDiceMod
+        penetration
+        range
+        damageTypes
+        engageableOpponents
+        areaOfEffectOption
         (skillDicePoolModList: DicePoolMod List)
         itemResourceNameAndWeaponResourceOption
         : CombatRoll list =
@@ -1577,31 +1630,31 @@ module CombatRoll =
         let preloadedCreateWeaponCombatRoll =
             createCombatRoll
                 itemName
-                weapon.name
-                weapon.penetration
-                weapon.range
-                weapon.damageTypes
-                weapon.engageableOpponents
-                weapon.areaOfEffectOption
+                name
+                penetration
+                range
+                damageTypes
+                engageableOpponents
+                areaOfEffectOption
                 skillDicePoolModList
                 itemResourceNameAndWeaponResourceOption
 
         let oneHandedCombatRollOption =
-            match weapon.oneHandedDiceMod with
+            match oneHandedDiceMod with
             | Some oneHandedDiceMod ->
                 preloadedCreateWeaponCombatRoll "One-Handed" oneHandedDiceMod emptyDicePoolMod
                 |> Some
             | None -> None
 
         let twoHandedCombatRollOption =
-            match weapon.twoHandedDiceMod with
+            match twoHandedDiceMod with
             | Some twoHandedDiceMod ->
                 preloadedCreateWeaponCombatRoll "Two-Handed" twoHandedDiceMod emptyDicePoolMod
                 |> Some
             | None -> None
 
         let dualWieldedCombatRollOption =
-            match weapon.oneHandedDiceMod, weapon.dualWieldedDiceMod with
+            match oneHandedDiceMod, dualWieldedDiceMod with
             | Some weaponHandedDice, Some offHandedDicePoolMod ->
                 preloadedCreateWeaponCombatRoll "Dual-Wielded" weaponHandedDice offHandedDicePoolMod
                 |> Some
@@ -1684,12 +1737,61 @@ module CombatRoll =
                                 weaponSkillData.governingAttributes
                                 filteredDicePoolCalculationData
             |> (fun skill ->
-                createHandedVariationCombatRolls itemName weapon skill.dicePoolModList weaponResourceOption))
+                createHandedVariationCombatRolls
+                    itemName
+                    weapon.name
+                    weapon.oneHandedDiceMod
+                    weapon.twoHandedDiceMod
+                    weapon.dualWieldedDiceMod
+                    weapon.penetration
+                    weapon.range
+                    weapon.damageTypes
+                    weapon.engageableOpponents
+                    weapon.areaOfEffectOption
+                    skill.dicePoolModList
+                    weaponResourceOption))
+
+    open WeaponSpell
+
+    let createMagicCombatRolls (vocationList: Vocation List) (weaponSpellSet: WeaponSpell Set) =
+
+        vocationList
+        |> vocationListToMagicSkillsAndMagicSystem
+        |> List.collect (fun (magicSkills, magicSystem: MagicSystem.MagicSystem) ->
+            magicSkills
+            |> Seq.map (fun magicSkill -> (magicSkill, magicSystem.magicSkillDataMap.Item magicSkill.name))
+            |> Seq.toList)
+        |> List.collect (fun (magicSkill, magicSkillData: MagicSkillData.MagicSkillData) ->
+            weaponSpellSet
+            |> Set.toSeq
+            |> Seq.choose (fun weaponSpell ->
+                if (isMeleeOrReachRange weaponSpell.range) && magicSkillData.isMeleeCapable then
+                    Some(magicSkill, magicSkillData, weaponSpell)
+                elif (not (isMeleeOrReachRange weaponSpell.range)) && magicSkillData.isRangeCapable then
+                    Some(magicSkill, magicSkillData, weaponSpell)
+                else
+                    None)
+            |> Seq.toList)
+        |> List.collect (fun (magicSkill, magicSkillData, weaponSpell: WeaponSpell) ->
+            createHandedVariationCombatRolls
+                magicSkill.name
+                weaponSpell.name
+                weaponSpell.oneHandedDiceMod
+                weaponSpell.twoHandedDiceMod
+                weaponSpell.dualWieldedDiceMod
+                weaponSpell.penetration
+                weaponSpell.range
+                magicSkillData.damageTypes
+                weaponSpell.engageableOpponents
+                weaponSpell.areaOfEffectOption
+                magicSkill.dicePoolModList
+                None)
 
     let createCombatRolls
         (equipmentList: ItemElement List)
         (vocationList: Vocation List)
         (weaponSkillDataMap: Map<string, WeaponSkillData>)
+        (weaponSpellSet: WeaponSpell Set)
         (dicePoolCalculationData: DicePoolCalculationData)
         : CombatRoll List =
 
@@ -1700,7 +1802,9 @@ module CombatRoll =
                 weaponSkillDataMap
                 dicePoolCalculationData
 
-        List.collect id [ weaponCombatRolls ]
+        let magicCombatRolls = createMagicCombatRolls vocationList weaponSpellSet
+
+        List.collect id [ weaponCombatRolls; magicCombatRolls ]
 
 module CharacterInformation =
     type CharacterInformation = {

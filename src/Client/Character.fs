@@ -105,6 +105,7 @@ let update msg (model: Character) =
                             character.equipment,
                             character.vocationList,
                             character.settingData.weaponSkillDataMap,
+                            character.settingData.weaponSpellSet,
                             newDicePoolCalculationData
                         )
                     )
@@ -275,6 +276,7 @@ let update msg (model: Character) =
                                     model.equipment,
                                     newVocationList,
                                     model.settingData.weaponSkillDataMap,
+                                    model.settingData.weaponSpellSet,
                                     dicePoolCalculationData
                                 )
                             )
