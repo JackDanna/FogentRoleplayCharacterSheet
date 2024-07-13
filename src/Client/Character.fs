@@ -80,21 +80,22 @@ let update msg (model: Character) =
         let newCoreSkills =
             Skills.update (Skills.CalculateSkillDicePools newDicePoolCalculationData) character.coreSkills
 
+        let newVocationList =
+            character.vocationList
+            |> VocationList.update (VocationList.CalculateDicePools newDicePoolCalculationData)
+            |> VocationList.update (
+                VocationMsgForAll(
+                    MundaneOrMagicVocationExtrasMsg(
+                        MundaneOrMagicVocationExtras.RecalculateCoreSkillResourcePool(coreSkillToMap newCoreSkills)
+                    )
+                )
+            )
+
         {
             character with
                 coreSkills = newCoreSkills
-                vocationList =
-                    character.vocationList
-                    |> VocationList.update (VocationList.CalculateDicePools newDicePoolCalculationData)
-                    |> VocationList.update (
-                        VocationMsgForAll(
-                            MundaneOrMagicVocationExtrasMsg(
-                                MundaneOrMagicVocationExtras.RecalculateCoreSkillResourcePool(
-                                    coreSkillToMap newCoreSkills
-                                )
-                            )
-                        )
-                    )
+                vocationList = newVocationList
+
                 combatSpeeds =
                     CombatSpeeds.update
                         (CombatSpeeds.RecalculateAllCombatSpeeds(newCoreSkills, character.attributes))
@@ -103,7 +104,7 @@ let update msg (model: Character) =
                     CombatRollList.update (
                         CombatRollList.RecalculateCombatRollList(
                             character.equipment,
-                            character.vocationList,
+                            newVocationList,
                             character.settingData.weaponSkillDataMap,
                             character.settingData.weaponSpellSet,
                             newDicePoolCalculationData
