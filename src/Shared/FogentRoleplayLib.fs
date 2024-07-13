@@ -1528,8 +1528,9 @@ module CombatRoll =
         weaponTypeName: string
         handedVariation: string
         resourceName: string
+        resourceDicePoolMod: DicePoolMod
         dicePool: DicePool
-        weaponDicePoolModString: string
+        weaponDicePoolModString: DicePoolMod
         calculatedRange: CalculatedRange
         penetration: Penetration
         damageTypeSet: DamageType Set
@@ -1564,7 +1565,7 @@ module CombatRoll =
         (offHandedWeaponDiceMod: DicePoolMod)
         : CombatRoll =
 
-        let (resourceDesc, resourceDice, resourcePenetration, resourceRange, resourceDamageTypeSet, resourceAreaOfEffect) =
+        let (resourceName, resourceDice, resourcePenetration, resourceRange, resourceDamageTypeSet, resourceAreaOfEffect) =
             weaponResourceClassOptionToWeaponResourceClass resource
 
         let dicePool =
@@ -1576,9 +1577,10 @@ module CombatRoll =
 
         {
             itemName = itemName
-            resourceName = resourceDesc
+            resourceName = resourceName
+            resourceDicePoolMod = resourceDice
             dicePool = dicePool
-            weaponDicePoolModString = dicePoolModToString weaponDiceMod
+            weaponDicePoolModString = weaponDiceMod
             calculatedRange = determineGreatestRange numDice weaponRange resourceRange
             penetration = weaponPenetration + resourcePenetration
             damageTypeSet = Set.union weaponDamageTypeSet resourceDamageTypeSet

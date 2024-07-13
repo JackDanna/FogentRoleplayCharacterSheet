@@ -36,13 +36,14 @@ let update msg : CombatRoll list =
 
 open Feliz
 open Feliz.Bulma
+open FogentRoleplayLib.DicePoolMod
 
 let combatRollRow (model: CombatRoll) =
     [
         model.itemName
         model.weaponTypeName
-        $"{model.handedVariation} ({model.weaponDicePoolModString})"
-        model.resourceName
+        $"{model.handedVariation} ({dicePoolModToString model.weaponDicePoolModString})"
+        $"{model.resourceName} ({dicePoolModToString model.resourceDicePoolMod})"
         (dicePoolToString model.dicePool)
         (string model.penetration)
         $"{calculatedRangeToString model.calculatedRange} ({model.calculatedRange.name})"
