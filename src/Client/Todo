@@ -1,15 +1,11 @@
-Containers
-
-Weight Classes
-
 Combat Rolls dual wielded doesn't show dual-wielded +1d6
 
-Magic Combat Skills
+Magic Combat Skills need resource used
 
-Refactor Skill lists to be a tupe of (skillName * skillLevel)
-
-Attributes are reversed
+Maybes:
 
 Item Durability
 
 Magic Skill data should maybe live on magic Skill
+
+Off person Containers
