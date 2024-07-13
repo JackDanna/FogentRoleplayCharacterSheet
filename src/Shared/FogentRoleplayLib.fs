@@ -1196,21 +1196,15 @@ module ItemElement =
     let itemElementToBaseDiceEffectList =
         itemElementToNonContainedEffects >> effectsToBaseDiceModList
 
-    let itemElementToNameAndEffectList itemElement =
-        (itemElementToName itemElement, itemElementToNonContainedEffects itemElement)
-
-    let itemElementListToNameAndEffectListList = List.map itemElementToNameAndEffectList
-
     // List stuff
 
     let itemElementListToEffectList = List.collect itemElementToNonContainedEffects
 
-    let itemElementListToTupledWeaponResourceList itemStackList =
+    let itemElementListToNonDuplicateWeaponResourceList itemStackList =
         itemStackList
-        |> itemElementListToNameAndEffectListList
-        |> List.map (fun (name, effectList) -> (name, effectsToWeaponResourceList effectList))
-        |> List.collect (fun (name, weaponResourceList) ->
-            List.map (fun weaponResource -> (name, weaponResource)) weaponResourceList)
+        |> itemElementListToEffectList
+        |> effectsToWeaponResourceList
+        |> List.distinct
 
 module DicePoolCalculation =
     open Attribute
@@ -1539,9 +1533,9 @@ module CombatRoll =
         eoName: string option
     }
 
-    let weaponResourceClassOptionToWeaponResourceClass (resource: option<string * WeaponResource>) =
+    let weaponResourceClassOptionToWeaponResourceClass resource =
         match resource with
-        | Some(weaponResourceItemName, resource) ->
+        | Some(resource: WeaponResource) ->
             (resource.name,
              resource.dicePoolMod,
              resource.penetration,
@@ -1559,7 +1553,7 @@ module CombatRoll =
         (weaponEO: EngageableOpponents)
         (weaponAOEOption: AreaOfEffect option)
         (skillDicePoolModList: DicePoolMod List)
-        (resource: option<string * WeaponResource>)
+        (resource: option<WeaponResource>)
         (handedVariationName: string)
         (weaponDiceMod: DicePoolMod)
         (offHandedWeaponDiceMod: DicePoolMod)
@@ -1706,15 +1700,10 @@ module CombatRoll =
             match weapon.resourceNameOption with
             | Some resourceClass ->
                 equipmentList
-                |> itemElementListToTupledWeaponResourceList
-                |> List.choose (fun (weaponResourceItemName, weaponResource) ->
+                |> itemElementListToNonDuplicateWeaponResourceList
+                |> List.choose (fun weaponResource ->
                     if weaponResource.resourceName = resourceClass then
-                        Some(
-                            itemElementName,
-                            weapon,
-                            filteredDicePoolCalculationData,
-                            Some(weaponResourceItemName, weaponResource)
-                        )
+                        Some(itemElementName, weapon, filteredDicePoolCalculationData, Some weaponResource)
                     else
                         None)
             | None -> List.singleton (itemElementName, weapon, filteredDicePoolCalculationData, None))
