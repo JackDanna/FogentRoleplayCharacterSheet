@@ -1542,7 +1542,7 @@ module CombatRoll =
     let weaponResourceClassOptionToWeaponResourceClass (resource: option<string * WeaponResource>) =
         match resource with
         | Some(weaponResourceItemName, resource) ->
-            (" (" + resource.name + ")",
+            (resource.name,
              resource.dicePoolMod,
              resource.penetration,
              resource.rangeOption,
