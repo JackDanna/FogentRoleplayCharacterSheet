@@ -1529,7 +1529,7 @@ module CombatRoll =
         handedVariation: string
         resourceName: string
         dicePool: DicePool
-        weaponAndResourceDicePoolModString: string
+        weaponDicePoolModString: string
         calculatedRange: CalculatedRange
         penetration: Penetration
         damageTypeSet: DamageType Set
@@ -1578,7 +1578,7 @@ module CombatRoll =
             itemName = itemName
             resourceName = resourceDesc
             dicePool = dicePool
-            weaponAndResourceDicePoolModString = dicePoolModListToString [ weaponDiceMod; resourceDice ]
+            weaponDicePoolModString = dicePoolModToString weaponDiceMod
             calculatedRange = determineGreatestRange numDice weaponRange resourceRange
             penetration = weaponPenetration + resourcePenetration
             damageTypeSet = Set.union weaponDamageTypeSet resourceDamageTypeSet

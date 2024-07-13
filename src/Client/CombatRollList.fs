@@ -41,7 +41,7 @@ let combatRollRow (model: CombatRoll) =
     [
         model.itemName
         model.weaponTypeName
-        $"{model.handedVariation} ({model.weaponAndResourceDicePoolModString})"
+        $"{model.handedVariation} ({model.weaponDicePoolModString})"
         model.resourceName
         (dicePoolToString model.dicePool)
         (string model.penetration)
