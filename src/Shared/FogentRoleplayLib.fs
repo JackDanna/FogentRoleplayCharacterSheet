@@ -1674,8 +1674,7 @@ module CombatRoll =
         // Step 1: filter down to a tuple of item name and weapon
         |> List.collect (fun itemElement ->
             itemElement
-            |> itemElementToNonContainedEffects
-            |> effectsToWeaponList
+            |> itemElementToWeaponList
             |> List.map (fun weapon ->
                 let baseDiceModOption =
                     itemElement
