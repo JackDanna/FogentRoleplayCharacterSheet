@@ -281,10 +281,23 @@ let update msg (model: Character) =
                                 )
                             )
                 })
-        | _ -> {
-            model with
-                vocationList = VocationList.update msg model.vocationList
-          }
+        | _ ->
+            let newVocationList = VocationList.update msg model.vocationList
+
+            {
+                model with
+                    vocationList = newVocationList
+                    combatRollList =
+                        CombatRollList.update (
+                            CombatRollList.RecalculateCombatRollList(
+                                model.equipment,
+                                newVocationList,
+                                model.settingData.weaponSkillDataMap,
+                                model.settingData.weaponSpellSet,
+                                dicePoolCalculationData
+                            )
+                        )
+            }
     | EquipmentMsg msg ->
         match msg with
         | ItemElement.ItemElementListMsgType.Insert(itemName, _) ->
