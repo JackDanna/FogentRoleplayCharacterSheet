@@ -150,6 +150,7 @@ open Feliz.Bulma
 let view attributeNameSet (weaponSkillNames) (model: MagicVocationExtras) dispatch =
 
     MagicVocationSkills.view
+        model.magicSystem.name
         attributeNameSet
         (model.magicSystem.magicSkillDataMap.Keys |> Set.ofSeq)
         weaponSkillNames

@@ -76,7 +76,7 @@ let update msg (model: MagicVocationSkill Set) =
 open Feliz
 open Feliz.Bulma
 
-let view attributeNameSet magicSkillNames weaponSkillNames model (dispatch: Msg -> unit) =
+let view magicSystemName attributeNameSet magicSkillNames weaponSkillNames model (dispatch: Msg -> unit) =
     model
     |> Set.toList
     |> List.mapi (fun index mundaneVocationSkill ->
@@ -91,7 +91,7 @@ let view attributeNameSet magicSkillNames weaponSkillNames model (dispatch: Msg 
             ViewUtils.textInputWithDropdownSet
                 (fun input -> InsertMagicVocationSkill(input, None, None, None, None, None) |> dispatch)
                 (Set.union magicSkillNames weaponSkillNames)
-                "mundaneVocationSkills"
+                magicSystemName
         ]
 
     )
