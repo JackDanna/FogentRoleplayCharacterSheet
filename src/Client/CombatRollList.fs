@@ -38,22 +38,23 @@ open Feliz
 open Feliz.Bulma
 
 let combatRollRow (model: CombatRoll) =
-    Html.tr [
-        Html.td model.itemName
-        Html.td model.weaponTypeName
-        Html.td model.handedVariation
-        Html.td (sprintf "%s (%s)" (model.dicePool |> dicePoolToString) model.weaponAndResourceDicePoolModString)
-        Html.td (int model.penetration)
-        Html.td (sprintf "%s (%s)" (calculatedRangeToString model.calculatedRange) model.calculatedRange.name)
-        Html.td (stringSetToStringSeperatedByCommas model.damageTypeSet)
-        Html.td (
-            match model.eoName with
-            | Some eoName -> eoName
-            | None -> ""
-            |> sprintf "%d (%s)" model.calculatedEngageableOpponents
-        )
-        Html.td (setAreaOfEffectOptionToString model.setAreaOfEffectOption)
+    [
+        model.itemName
+        model.weaponTypeName
+        model.handedVariation
+        model.resourceName
+        $"{dicePoolToString model.dicePool} ({model.weaponAndResourceDicePoolModString})"
+        (string model.penetration)
+        $"{calculatedRangeToString model.calculatedRange} ({model.calculatedRange.name})"
+        (stringSetToStringSeperatedByCommas model.damageTypeSet)
+        (match model.eoName with
+         | Some eoName -> eoName
+         | None -> ""
+         |> sprintf "%d (%s)" model.calculatedEngageableOpponents)
+        (setAreaOfEffectOptionToString model.setAreaOfEffectOption)
     ]
+    |> List.map Html.td
+    |> Html.tr
 
 let view (model: CombatRoll list) =
     Bulma.container [
@@ -66,6 +67,7 @@ let view (model: CombatRoll list) =
                         "Item Name"
                         "Weapon Type"
                         "Handed Variation"
+                        "Resource"
                         "Dice Poll"
                         "Penetration"
                         "Effective/MaxRange"

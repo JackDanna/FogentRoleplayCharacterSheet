@@ -1525,6 +1525,9 @@ module CombatRoll =
 
     type CombatRoll = {
         itemName: string
+        weaponTypeName: string
+        handedVariation: string
+        resourceName: string
         dicePool: DicePool
         weaponAndResourceDicePoolModString: string
         calculatedRange: CalculatedRange
@@ -1533,8 +1536,6 @@ module CombatRoll =
         setAreaOfEffectOption: SetAreaOfEffect Option
         calculatedEngageableOpponents: CalculatedEngageableOpponents
         eoName: string option
-        weaponTypeName: string
-        handedVariation: string
     }
 
     let weaponResourceClassOptionToWeaponResourceClass (resource: option<string * WeaponResource>) =
@@ -1575,6 +1576,7 @@ module CombatRoll =
 
         {
             itemName = itemName
+            resourceName = resourceDesc
             dicePool = dicePool
             weaponAndResourceDicePoolModString = dicePoolModListToString [ weaponDiceMod; resourceDice ]
             calculatedRange = determineGreatestRange numDice weaponRange resourceRange
