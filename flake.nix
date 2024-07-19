@@ -70,9 +70,9 @@
         buildInputs = with pkgs; [
           dotnet-sdk_8
           nodejs_20
-          postgresql_16
-          start_postgres
-          stop_postgres
+          postgresql
+          pgadmin4
+
 
           gnome.gnome-terminal
           bashInteractive
@@ -106,7 +106,23 @@
         ];
 
         shellHook = ''
-          ${postgres_setup}
+          
+          export PGDATA="$PWD/pgdata"
+          export PGHOST="$PWD/postgres"
+          export PGUSER="admin"
+          export PGDATABASE="postgres"
+          export PGSOCKET="$PWD/postgres"
+          
+          if [ ! -d "$PGDATA" ]; then
+            initdb -U $PGUSER
+            echo "unix_socket_directories = '$PGSOCKET'" >> $PGDATA/postgresql.conf
+          fi
+          
+          if [ ! -d "$PGHOST" ]; then
+            mkdir -p "$PGHOST"
+          fi
+          
+          pg_ctl -D "$PGDATA" -l "$PGHOST/log" -o "-k '$PGSOCKET'" start
 
           export PS1+="${name}> "
           echo "Welcome to the Fogent Roleplay Character Sheet Shell"
