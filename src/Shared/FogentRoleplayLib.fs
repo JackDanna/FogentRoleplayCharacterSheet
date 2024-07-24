@@ -82,7 +82,7 @@ module EngageableOpponents =
     type EngageableOpponentsCalculation = {
         name: string
         combatRollDivisor: uint
-        maxEO: uint option
+        maxEOOption: uint option
     }
 
     let eoCalculationSetToMap eoCalculationSet =
@@ -100,7 +100,7 @@ module EngageableOpponents =
         match engageableOpponents with
         | Calculated calculatedEngageableOpponents -> calculatedEngageableOpponents
         | Calculation eoCalculation ->
-            divideUintsThenCompareToMaxThenRound numDice eoCalculation.combatRollDivisor eoCalculation.maxEO true
+            divideUintsThenCompareToMaxThenRound numDice eoCalculation.combatRollDivisor eoCalculation.maxEOOption true
 
     //Todo: this needs to only parse uints
     let parseMaxEngageableOpponentsString input =

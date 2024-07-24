@@ -65,12 +65,16 @@ module FogentRoleplayServerData =
         damageTypes |> stringSetToTypeMap |> mapAndStringToValueSet
 
     // EngageableOpponents
-    let engageableOpponentsMap =
+
+    let engageableOpponentsCalculations: Set<EngageableOpponentsCalculation> =
         makeFogentRoleplayDataSet "EngageableOpponentsCalculationData.csv" (fun row -> {
             name = string row.["name"]
             combatRollDivisor = uint row.["combatRollDivisor"]
-            maxEO = parseMaxEngageableOpponentsString row.["maxEO"]
+            maxEOOption = parseMaxEngageableOpponentsString row.["maxEO"]
         })
+
+    let engageableOpponentsMap =
+        engageableOpponentsCalculations
         |> eoCalculationSetToMap
         |> parseEngaeableOpponentsString
 
@@ -548,6 +552,54 @@ module Database =
             |> Sql.execute (fun read -> read.string nameHeader |> DamageType)
             |> Set.ofList
 
+    module EngageableOpponentsCalculationDatabase =
+        open FogentRoleplayLib.EngageableOpponents // Assuming this is where EngageableOpponentsCalculation is defined
+
+        let engageableOpponentsTableName = "engageable_opponents_calculation"
+        let nameHeader = "name"
+        let combatRollDivisorHeader = "combat_roll_divisor"
+        let maxEOOptionHeader = "max_eo_option"
+
+        let initEngageableOpponentsTable () =
+            databaseConnection
+            |> Sql.query
+                $"""
+                CREATE TABLE IF NOT EXISTS {engageableOpponentsTableName} (
+                    {nameHeader} VARCHAR(100) PRIMARY KEY,
+                    {combatRollDivisorHeader} INTEGER NOT NULL,
+                    {maxEOOptionHeader} INTEGER
+                )
+            """
+            |> Sql.executeNonQuery
+            |> function
+                | affectedRows ->
+                    printfn "Table %s created successfully. Rows affected: %d" engageableOpponentsTableName affectedRows
+
+        let insertEngageableOpponentsCalculation (calculation: EngageableOpponentsCalculation) =
+            databaseConnection
+            |> Sql.query
+                $"INSERT INTO {engageableOpponentsTableName} ({nameHeader}, {combatRollDivisorHeader}, {maxEOOptionHeader}) VALUES (@{nameHeader}, @{combatRollDivisorHeader}, @{maxEOOptionHeader})"
+            |> Sql.parameters [
+                $"@{nameHeader}", Sql.string calculation.name
+                $"@{combatRollDivisorHeader}", Sql.int (int calculation.combatRollDivisor)
+                $"@{maxEOOptionHeader}", Sql.intOrNone (calculation.maxEOOption |> Option.map int)
+            ]
+            |> Sql.executeNonQuery
+
+        let insertEngageableOpponentsCalculations =
+            Set.map insertEngageableOpponentsCalculation
+
+        let getEngageableOpponentsCalculations () =
+            databaseConnection
+            |> Sql.query
+                $"SELECT {nameHeader}, {combatRollDivisorHeader}, {maxEOOptionHeader} FROM {engageableOpponentsTableName}"
+            |> Sql.execute (fun read -> {
+                name = read.string nameHeader
+                combatRollDivisor = read.int combatRollDivisorHeader |> uint
+                maxEOOption = read.intOrNone maxEOOptionHeader |> Option.map uint
+            })
+            |> Set.ofList
+
     module CalculatedRangesDatabase =
         open FogentRoleplayLib.Range
         let calculatedRangesTableName = "calculated_ranges"
@@ -653,15 +705,18 @@ module Database =
     open FogentRoleplayServerData
 
     open DamageTypesDatabase
+    open EngageableOpponentsCalculationDatabase
     open CalculatedRangesDatabase
     open RangeCalculationsDatabase
     // Init Database
     let initDatabase () =
         initDamageTypesTable ()
+        initEngageableOpponentsTable ()
         initCalculatedRangesTable ()
         initRangeCalculationTable ()
 
-        insertDamageTypes damageTypes
+//insertDamageTypes damageTypes
+//insertEngageableOpponentsCalculations engageableOpponentsCalculations
 //insertCalculatedRanges calculatedRanges
 //insertRangeCalculations rangeCalculations
 
