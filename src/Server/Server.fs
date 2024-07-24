@@ -547,6 +547,15 @@ module Database =
 
     let insertCalculatedRanges = List.map insertCalculatedRange
 
+    let getCalculatedRanges () =
+        databaseConnection
+        |> Sql.query "SELECT name, effective_range, max_range_option FROM calculated_ranges"
+        |> Sql.execute (fun read -> {
+            name = read.string "name"
+            effectiveRange = read.int "effective_range" |> uint
+            maxRangeOption = read.intOrNone "max_range_option" |> Option.map uint
+        })
+
     // Range Calculations
     let rangeCalculationsTableName = "range_calculations"
 
@@ -586,6 +595,17 @@ module Database =
         |> ignore
 
     let insertRangeCalculations = List.map insertRangeCalculation
+
+    let getRangeCalculations () =
+        databaseConnection
+        |> Sql.query $"SELECT * FROM {rangeCalculationsTableName}"
+        |> Sql.execute (fun read -> {
+            name = read.string "name"
+            numDicePerEffectiveRangeUnit = read.int "num_dice_per_effective_range_unit" |> uint
+            ftPerEffectiveRangeUnit = read.int "ft_per_effective_range_unit" |> uint
+            roundEffectiveRangeUp = read.bool "round_effective_range_up"
+            maxRangeOption = read.intOrNone "max_range_option" |> Option.map uint
+        })
 
     // Init Database
     let initDatabase () =
