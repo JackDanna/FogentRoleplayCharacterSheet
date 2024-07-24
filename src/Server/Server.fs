@@ -514,9 +514,8 @@ module Database =
 
     let databaseConnection = databaseConnectionString |> Sql.connect
 
-    open FogentRoleplayLib.Range
-
     module CalculatedRangesDatabase =
+        open FogentRoleplayLib.Range
         let calculatedRangesTableName = "calculated_ranges"
         let nameHeader = "name"
         let effectRangeHeader = "effective_range"
@@ -561,6 +560,7 @@ module Database =
             })
 
     module RangeCalculationsDatabase =
+        open FogentRoleplayLib.Range
         let rangeCalculationsTableName = "range_calculations"
         let nameHeader = "name"
         let numDicePerEffectiveRangeUnitHeader = "num_dice_per_effective_range_unit"
