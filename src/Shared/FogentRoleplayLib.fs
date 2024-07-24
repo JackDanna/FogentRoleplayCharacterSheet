@@ -1386,9 +1386,10 @@ module MagicResourcePool =
 
 module MagicSkillData =
     open DamageType
+    open SkillName
 
     type MagicSkillData = {
-        name: string
+        name: SkillName
         damageTypes: DamageType Set
         isMeleeCapable: bool
         isRangeCapable: bool
