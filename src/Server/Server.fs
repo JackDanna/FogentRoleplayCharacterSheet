@@ -187,13 +187,16 @@ module FogentRoleplayServerData =
     let stringToAttributes = mapAndStringToValueSet attributeNameMap
 
     //MagicSkillData
-    let magicSkillDataMap =
+    let magicSkillDataSet: Set<MagicSkillData> =
         makeFogentRoleplayDataSet "MagicSkillData.csv" (fun row -> {
-            name = string row.["name"]
+            name = SkillName row.["name"]
             damageTypes = stringToDamageTypeSet (string row.["damageTypes"])
             isMeleeCapable = Bool row.["meleeCapable"]
             isRangeCapable = Bool row.["rangeCapable"]
         })
+
+    let magicSkillDataMap =
+        magicSkillDataSet
         |> Set.map (fun magicSkill -> magicSkill.name, magicSkill)
         |> Map.ofSeq
 
@@ -558,7 +561,7 @@ module Database =
         let combatRollDivisorHeader = "combat_roll_divisor"
         let maxEOOptionHeader = "max_eo_option"
 
-        let initEngageableOpponentsTable () =
+        let initEngageableOpponentsCalculationTable () =
             databaseConnection
             |> Sql.query
                 $"""
@@ -714,8 +717,8 @@ module Database =
                 $"""
                 CREATE TABLE IF NOT EXISTS {sphereCalculationsTableName} (
                     {nameHeader} VARCHAR(100) PRIMARY KEY,
-                    {initRadiusHeader} REAL NOT NULL,
-                    {radiusPerDiceHeader} REAL NOT NULL
+                    {initRadiusHeader} DECIMAL NOT NULL,
+                    {radiusPerDiceHeader} DECIMAL NOT NULL
                 )
             """
             |> Sql.executeNonQuery
@@ -742,8 +745,8 @@ module Database =
                 $"SELECT {nameHeader}, {initRadiusHeader}, {radiusPerDiceHeader} FROM {sphereCalculationsTableName}"
             |> Sql.execute (fun read -> {
                 name = read.string nameHeader
-                initRadius = read.decimal initRadiusHeader |> float
-                radiusPerDice = read.decimal radiusPerDiceHeader |> float
+                initRadius = read.float initRadiusHeader |> float
+                radiusPerDice = read.float radiusPerDiceHeader |> float
             })
             |> Set.ofList
 
@@ -930,6 +933,61 @@ module Database =
             })
             |> Set.ofSeq
 
+    module MagicSkillDataDatabase =
+
+        open FogentRoleplayLib.MagicSkillData
+        open FogentRoleplayLib.SkillName
+        open FogentRoleplayLib.DamageType
+
+        let magicSkillDataTableName = "magic_skill_data"
+        let nameHeader = "name"
+        let damageTypesHeader = "damage_types"
+        let isMeleeCapableHeader = "is_melee_capable"
+        let isRangeCapableHeader = "is_range_capable"
+
+        let initMagicSkillDataTable () =
+            databaseConnection
+            |> Sql.query
+                $"""
+                CREATE TABLE IF NOT EXISTS {magicSkillDataTableName} (
+                    {nameHeader} VARCHAR(100) PRIMARY KEY,
+                    {damageTypesHeader} TEXT[] NOT NULL,
+                    {isMeleeCapableHeader} BOOLEAN NOT NULL,
+                    {isRangeCapableHeader} BOOLEAN NOT NULL
+                );
+            """
+            |> Sql.executeNonQuery
+            |> function
+                | affectedRows ->
+                    printfn "Table %s created successfully. Rows affected: %d" magicSkillDataTableName affectedRows
+
+        let insertMagicSkillData (magicSkillData: MagicSkillData) =
+            databaseConnection
+            |> Sql.query
+                $"INSERT INTO {magicSkillDataTableName} ({nameHeader}, {damageTypesHeader}, {isMeleeCapableHeader}, {isRangeCapableHeader}) VALUES (@{nameHeader}, @{damageTypesHeader}, @{isMeleeCapableHeader}, @{isRangeCapableHeader})"
+            |> Sql.parameters [
+                $"@{nameHeader}", Sql.string (SkillName magicSkillData.name)
+                $"@{damageTypesHeader}",
+                Sql.stringArray (magicSkillData.damageTypes |> Set.toArray |> Array.map DamageType)
+                $"@{isMeleeCapableHeader}", Sql.bool magicSkillData.isMeleeCapable
+                $"@{isRangeCapableHeader}", Sql.bool magicSkillData.isRangeCapable
+            ]
+            |> Sql.executeNonQuery
+
+        let insertMagicSkillDataSet = Set.map insertMagicSkillData
+
+        let getMagicSkillDataSet () : Set<MagicSkillData> =
+            databaseConnection
+            |> Sql.query
+                $"SELECT {nameHeader}, {damageTypesHeader}, {isMeleeCapableHeader}, {isRangeCapableHeader} FROM {magicSkillDataTableName}"
+            |> Sql.execute (fun read -> {
+                name = SkillName(read.string nameHeader)
+                damageTypes = read.stringArray damageTypesHeader |> Array.map DamageType |> Set.ofArray
+                isMeleeCapable = read.bool isMeleeCapableHeader
+                isRangeCapable = read.bool isRangeCapableHeader
+            })
+            |> Set.ofSeq
+
     open DamageTypesDatabase
     open EngageableOpponentsCalculationDatabase
     open CalculatedRangesDatabase
@@ -939,10 +997,11 @@ module Database =
     open SetSphereDatabase
     open SetConeDatabase
     open CoreSkillDataDatabase
+    open MagicSkillDataDatabase
     // Init Database
     let initDatabase () =
         initDamageTypesTable ()
-        initEngageableOpponentsTable ()
+        initEngageableOpponentsCalculationTable ()
         initCalculatedRangesTable ()
         initRangeCalculationTable ()
         initSphereCalculationTable ()
@@ -950,6 +1009,7 @@ module Database =
         initSetSphereTable ()
         initSetConeTable ()
         initCoreSkillDataTable ()
+        initMagicSkillDataTable ()
 
 open Database
 
@@ -965,7 +1025,8 @@ initDatabase ()
 //ConeCalculationDatabase.insertConeCalculations coneCalculationSet
 //SetSphereDatabase.insertSetSpheres setSphereSet
 //SetConeDatabase.insertSetCones setConeSet
-CoreSkillDataDatabase.insertCoreSkillDataSet coreSkillDataSet
+//CoreSkillDataDatabase.insertCoreSkillDataSet coreSkillDataSet
+//MagicSkillDataDatabase.insertMagicSkillDataSet magicSkillDataSet
 
 let fallenDataApi: IFogentRoleplayDataApi = {
     getInitData =
