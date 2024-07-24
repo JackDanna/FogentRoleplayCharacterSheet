@@ -108,17 +108,12 @@ module FogentRoleplayServerData =
         | _ -> rangeMap.Item string |> Some
 
     // AreaOfEffect
-    let SetConeSet =
-        makeFogentRoleplayDataSet "AreaOfEffects/SetCone.csv" (fun row -> {
-            name = string row.["name"]
-            baseAndHeight = uint row.["Triangle Base/Height (ft)"]
-            angle = float row.["Cone Angle (degrees)"]
-        })
 
-    let SetSphereSet =
-        makeFogentRoleplayDataSet "AreaOfEffects/SetSphere.csv" (fun row -> {
-            name = row.["Name"]
-            radius = uint row.["Radius(ft)"]
+    let sphereCalculationSet =
+        makeFogentRoleplayDataSet "AreaOfEffects/SphereCalculation.csv" (fun row -> {
+            name = string row.["name"]
+            initRadius = float row.["Init Radius"]
+            radiusPerDice = float row.["Radius per Dice"]
         })
 
     let coneCalculationSet =
@@ -129,11 +124,17 @@ module FogentRoleplayServerData =
             baseAndHeightPerDice = float row.["base/height per unit"]
         })
 
-    let sphereCalculationSet =
-        makeFogentRoleplayDataSet "AreaOfEffects/SphereCalculation.csv" (fun row -> {
+    let SetSphereSet =
+        makeFogentRoleplayDataSet "AreaOfEffects/SetSphere.csv" (fun row -> {
+            name = row.["Name"]
+            radius = uint row.["Radius(ft)"]
+        })
+
+    let SetConeSet =
+        makeFogentRoleplayDataSet "AreaOfEffects/SetCone.csv" (fun row -> {
             name = string row.["name"]
-            initRadius = float row.["Init Radius"]
-            radiusPerDice = float row.["Radius per Dice"]
+            baseAndHeight = uint row.["Triangle Base/Height (ft)"]
+            angle = float row.["Cone Angle (degrees)"]
         })
 
     let areaOfEffectMap =
