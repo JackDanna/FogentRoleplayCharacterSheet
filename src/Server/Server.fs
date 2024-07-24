@@ -702,29 +702,77 @@ module Database =
                 maxRangeOption = read.intOrNone maxRangeOptionHeader |> Option.map uint
             })
 
-    open FogentRoleplayServerData
+    module SphereCalculationDatabase =
+        open FogentRoleplayLib.AreaOfEffectCalculation // Assuming this is where SphereCalculation is defined
+
+        let sphereCalculationsTableName = "sphere_calculations"
+        let nameHeader = "name"
+        let initRadiusHeader = "init_radius"
+        let radiusPerDiceHeader = "radius_per_dice"
+
+        let initSphereCalculationTable () =
+            databaseConnection
+            |> Sql.query
+                $"""
+                CREATE TABLE IF NOT EXISTS {sphereCalculationsTableName} (
+                    {nameHeader} VARCHAR(100) PRIMARY KEY,
+                    {initRadiusHeader} REAL NOT NULL,
+                    {radiusPerDiceHeader} REAL NOT NULL
+                )
+            """
+            |> Sql.executeNonQuery
+            |> function
+                | affectedRows ->
+                    printfn "Table %s created successfully. Rows affected: %d" sphereCalculationsTableName affectedRows
+
+        let insertSphereCalculation (calculation: SphereCalculation) =
+            databaseConnection
+            |> Sql.query
+                $"INSERT INTO {sphereCalculationsTableName} ({nameHeader}, {initRadiusHeader}, {radiusPerDiceHeader}) VALUES (@{nameHeader}, @{initRadiusHeader}, @{radiusPerDiceHeader})"
+            |> Sql.parameters [
+                $"@{nameHeader}", Sql.string calculation.name
+                $"@{initRadiusHeader}", Sql.decimal (decimal calculation.initRadius)
+                $"@{radiusPerDiceHeader}", Sql.decimal (decimal calculation.radiusPerDice)
+            ]
+            |> Sql.executeNonQuery
+
+        let insertSphereCalculations = Set.map insertSphereCalculation
+
+        let getSphereCalculations () =
+            databaseConnection
+            |> Sql.query
+                $"SELECT {nameHeader}, {initRadiusHeader}, {radiusPerDiceHeader} FROM {sphereCalculationsTableName}"
+            |> Sql.execute (fun read -> {
+                name = read.string nameHeader
+                initRadius = read.decimal initRadiusHeader |> float
+                radiusPerDice = read.decimal radiusPerDiceHeader |> float
+            })
+            |> Set.ofList
 
     open DamageTypesDatabase
     open EngageableOpponentsCalculationDatabase
     open CalculatedRangesDatabase
     open RangeCalculationsDatabase
+    open SphereCalculationDatabase
     // Init Database
     let initDatabase () =
         initDamageTypesTable ()
         initEngageableOpponentsTable ()
         initCalculatedRangesTable ()
         initRangeCalculationTable ()
+        initSphereCalculationTable ()
+
+open Database
+
+open FogentRoleplayServerData
+
+initDatabase ()
 
 //insertDamageTypes damageTypes
 //insertEngageableOpponentsCalculations engageableOpponentsCalculations
 //insertCalculatedRanges calculatedRanges
 //insertRangeCalculations rangeCalculations
-
-
-
-open Database
-
-initDatabase ()
+//SphereCalculationDatabase.insertSphereCalculations sphereCalculationSet
 
 let fallenDataApi: IFogentRoleplayDataApi = {
     getInitData =
