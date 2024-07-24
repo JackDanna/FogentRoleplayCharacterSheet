@@ -57,10 +57,12 @@ module FogentRoleplayServerData =
         | _ -> failwith ("Error: returns " + boolString)
 
     // DamageType
-    let stringToDamageTypeSet =
+
+    let damageTypes =
         makeFogentRoleplayDataSet "DamageTypeData.csv" (fun row -> (DamageType row.["name"]))
-        |> stringSetToTypeMap
-        |> mapAndStringToValueSet
+
+    let stringToDamageTypeSet =
+        damageTypes |> stringSetToTypeMap |> mapAndStringToValueSet
 
     // EngageableOpponents
     let engageableOpponentsMap =
