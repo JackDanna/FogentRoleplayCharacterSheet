@@ -564,17 +564,17 @@ module AreaOfEffectCalculation =
 
 module SetAreaOfEffect =
 
+    type SetSphere = { name: string; radius: uint }
+
     type SetCone = {
         name: string
         baseAndHeight: uint
         angle: float
     }
 
-    type SetSphere = { name: string; radius: uint }
-
     type SetAreaOfEffect =
-        | SetCone of SetCone
         | SetSphere of SetSphere
+        | SetCone of SetCone
 
     let setConeToString decimalPlaces (setCone: SetCone) =
         // let decimalLimitedArea =
