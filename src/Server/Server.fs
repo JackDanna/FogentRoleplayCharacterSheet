@@ -801,6 +801,48 @@ module Database =
             })
             |> Set.ofList
 
+    module SetSphereDatabase =
+        open FogentRoleplayLib.SetAreaOfEffect
+
+        let setSpheresTableName = "set_spheres"
+        let nameHeader = "name"
+        let radiusHeader = "radius"
+
+        let initSetSphereTable () =
+            databaseConnection
+            |> Sql.query
+                $"""
+                CREATE TABLE IF NOT EXISTS {setSpheresTableName} (
+                    {nameHeader} VARCHAR(100) PRIMARY KEY,
+                    {radiusHeader} INTEGER NOT NULL
+                )
+            """
+            |> Sql.executeNonQuery
+            |> function
+                | affectedRows ->
+                    printfn "Table %s created successfully. Rows affected: %d" setSpheresTableName affectedRows
+
+        let insertSetSphere (setSphere: SetSphere) =
+            databaseConnection
+            |> Sql.query
+                $"INSERT INTO {setSpheresTableName} ({nameHeader}, {radiusHeader}) VALUES (@{nameHeader}, @{radiusHeader})"
+            |> Sql.parameters [
+                $"@{nameHeader}", Sql.string setSphere.name
+                $"@{radiusHeader}", Sql.int (int setSphere.radius)
+            ]
+            |> Sql.executeNonQuery
+
+        let insertSetSpheres = Set.map insertSetSphere
+
+        let getSetSpheres () : Set<SetSphere> =
+            databaseConnection
+            |> Sql.query $"SELECT {nameHeader}, {radiusHeader} FROM {setSpheresTableName}"
+            |> Sql.execute (fun read -> {
+                name = read.string nameHeader
+                radius = read.int radiusHeader |> uint
+            })
+            |> Set.ofSeq
+
     module SetConeDatabase =
         open FogentRoleplayLib.SetAreaOfEffect // Assuming this is where SetCone is defined
 
@@ -853,6 +895,7 @@ module Database =
     open RangeCalculationsDatabase
     open SphereCalculationDatabase
     open ConeCalculationDatabase
+    open SetSphereDatabase
     open SetConeDatabase
     // Init Database
     let initDatabase () =
@@ -862,6 +905,7 @@ module Database =
         initRangeCalculationTable ()
         initSphereCalculationTable ()
         initConeCalculationTable ()
+        initSetSphereTable ()
         initSetConeTable ()
 
 open Database
@@ -876,6 +920,7 @@ initDatabase ()
 //insertRangeCalculations rangeCalculations
 //SphereCalculationDatabase.insertSphereCalculations sphereCalculationSet
 //ConeCalculationDatabase.insertConeCalculations coneCalculationSet
+//SetSphereDatabase.insertSetSpheres setSphereSet
 //SetConeDatabase.insertSetCones setConeSet
 
 let fallenDataApi: IFogentRoleplayDataApi = {
