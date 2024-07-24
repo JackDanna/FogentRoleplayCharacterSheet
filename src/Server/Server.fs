@@ -78,20 +78,23 @@ module FogentRoleplayServerData =
         | "" -> None
         | validInput -> Some(uint validInput)
 
-    let rangeMap =
-        (makeFogentRoleplayDataList "CalculatedRangeData.csv" (fun row -> {
+    let calculatedRanges: CalculatedRange list =
+        makeFogentRoleplayDataList "CalculatedRangeData.csv" (fun row -> {
             name = string row.["name"]
             effectiveRange = uint row.["effectiveRange"]
             maxRangeOption = parseMaxRangeOption row.["maxRangeOption"]
-         }),
-         makeFogentRoleplayDataList "RangeCalculationData.csv" (fun row -> {
-             name = string row.["name"]
-             numDicePerEffectiveRangeUnit = uint row.["numDicePerEffectiveRangeUnit"]
-             ftPerEffectiveRangeUnit = uint row.["ftPerEffectiveRangeUnit"]
-             roundEffectiveRangeUp = Bool row.["roundEffectiveRangeUp"]
-             maxRangeOption = parseMaxRangeOption row.["maxRangeOption"]
-         }))
-        ||> createRangeMap
+        })
+
+    let rangeCalculations =
+        makeFogentRoleplayDataList "RangeCalculationData.csv" (fun row -> {
+            name = string row.["name"]
+            numDicePerEffectiveRangeUnit = uint row.["numDicePerEffectiveRangeUnit"]
+            ftPerEffectiveRangeUnit = uint row.["ftPerEffectiveRangeUnit"]
+            roundEffectiveRangeUp = Bool row.["roundEffectiveRangeUp"]
+            maxRangeOption = parseMaxRangeOption row.["maxRangeOption"]
+        })
+
+    let rangeMap = (calculatedRanges, rangeCalculations) ||> createRangeMap
 
     let rangeOptionMap string =
         match string with
