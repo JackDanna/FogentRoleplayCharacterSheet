@@ -494,6 +494,113 @@ module FogentRoleplayServerData =
         |> List.map (fun itemElement -> (itemElementToName itemElement, itemElement))
         |> Map.ofSeq
 
+open Npgsql
+open Npgsql.FSharp
+
+module Database =
+    open FogentRoleplayServerData
+
+    let databaseConnectionString =
+        let host = System.Environment.GetEnvironmentVariable "PGHOST"
+        let username = System.Environment.GetEnvironmentVariable "PGUSER"
+        let password = ""
+        let database = System.Environment.GetEnvironmentVariable "PGDATABASE"
+
+        let connectionString =
+            $"Host={host};Username={username};Password={password};Database={database}"
+
+        let builder = new NpgsqlConnectionStringBuilder(connectionString)
+        builder.ToString()
+
+    let databaseConnection = databaseConnectionString |> Sql.connect
+
+    open FogentRoleplayLib.Range
+
+    // Calculated Ranges
+    let calculatedRangesTableName = "calculated_ranges"
+
+    let initCalculatedRangesTable () =
+        databaseConnection
+        |> Sql.query
+            $"""
+            CREATE TABLE IF NOT EXISTS {calculatedRangesTableName} (
+                name VARCHAR(100) PRIMARY KEY,
+                effective_range INTEGER NOT NULL,
+                max_range_option INTEGER
+            )
+        """
+        |> Sql.executeNonQuery
+        |> function
+            | affectedRows ->
+                printfn "Table %s created successfully. Rows affected: %d" calculatedRangesTableName affectedRows
+
+    let insertCalculatedRange (range: CalculatedRange) =
+        databaseConnection
+        |> Sql.query
+            $"INSERT INTO {calculatedRangesTableName} (name, effective_range, max_range_option) VALUES (@name, @effectiveRange, @maxRangeOption)"
+        |> Sql.parameters [
+            "@name", Sql.string range.name
+            "@effectiveRange", Sql.int (int range.effectiveRange)
+            "@maxRangeOption", Sql.intOrNone (range.maxRangeOption |> Option.map int)
+        ]
+        |> Sql.executeNonQuery
+
+    let insertCalculatedRanges = List.map insertCalculatedRange
+
+    // Range Calculations
+    let rangeCalculationsTableName = "range_calculations"
+
+    let initRangeCalculationTable () =
+        databaseConnection
+        |> Sql.query
+            $"""
+            CREATE TABLE IF NOT EXISTS {rangeCalculationsTableName} (
+                name VARCHAR(100) PRIMARY KEY,
+                num_dice_per_effective_range_unit INTEGER NOT NULL,
+                ft_per_effective_range_unit INTEGER NOT NULL,
+                round_effective_range_up BOOLEAN NOT NULL,
+                max_range_option INTEGER
+            )
+        """
+        |> Sql.executeNonQuery
+        |> function
+            | affectedRows ->
+                printfn "Table %s created successfully. Rows affected: %d" rangeCalculationsTableName affectedRows
+
+    let insertRangeCalculation (calc: RangeCalculation) =
+        databaseConnection
+        |> Sql.query
+            $"""
+            INSERT INTO {rangeCalculationsTableName}
+            (name, num_dice_per_effective_range_unit, ft_per_effective_range_unit, round_effective_range_up, max_range_option)
+            VALUES (@name, @numDice, @ftPerUnit, @roundUp, @maxRange)
+        """
+        |> Sql.parameters [
+            "@name", Sql.string calc.name
+            "@numDice", Sql.int (int calc.numDicePerEffectiveRangeUnit)
+            "@ftPerUnit", Sql.int (int calc.ftPerEffectiveRangeUnit)
+            "@roundUp", Sql.bool calc.roundEffectiveRangeUp
+            "@maxRange", Sql.intOrNone (calc.maxRangeOption |> Option.map int)
+        ]
+        |> Sql.executeNonQuery
+        |> ignore
+
+    let insertRangeCalculations = List.map insertRangeCalculation
+
+    // Init Database
+    let initDatabase () =
+        initCalculatedRangesTable ()
+        initRangeCalculationTable ()
+
+        insertCalculatedRanges calculatedRanges
+        insertRangeCalculations rangeCalculations
+
+
+
+open Database
+
+initDatabase ()
+
 let fallenDataApi: IFogentRoleplayDataApi = {
     getInitData =
         fun () -> async {
