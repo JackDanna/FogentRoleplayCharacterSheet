@@ -560,57 +560,64 @@ module Database =
                 maxRangeOption = read.intOrNone maxRangeOptionHeader |> Option.map uint
             })
 
-    // Range Calculations
-    let rangeCalculationsTableName = "range_calculations"
+    module RangeCalculationsDatabase =
+        let rangeCalculationsTableName = "range_calculations"
+        let nameHeader = "name"
+        let numDicePerEffectiveRangeUnitHeader = "num_dice_per_effective_range_unit"
+        let ftPerEffectiveRangeUnitHeader = "ft_per_effective_range_unit"
+        let roundEffectiveRangeUpHeader = "round_effective_range_up"
+        let maxRangeOptionHeader = "max_range_option"
 
-    let initRangeCalculationTable () =
-        databaseConnection
-        |> Sql.query
-            $"""
-            CREATE TABLE IF NOT EXISTS {rangeCalculationsTableName} (
-                name VARCHAR(100) PRIMARY KEY,
-                num_dice_per_effective_range_unit INTEGER NOT NULL,
-                ft_per_effective_range_unit INTEGER NOT NULL,
-                round_effective_range_up BOOLEAN NOT NULL,
-                max_range_option INTEGER
-            )
-        """
-        |> Sql.executeNonQuery
-        |> function
-            | affectedRows ->
-                printfn "Table %s created successfully. Rows affected: %d" rangeCalculationsTableName affectedRows
+        let initRangeCalculationTable () =
+            databaseConnection
+            |> Sql.query
+                $"""
+                CREATE TABLE IF NOT EXISTS {rangeCalculationsTableName} (
+                    {nameHeader} VARCHAR(100) PRIMARY KEY,
+                    {numDicePerEffectiveRangeUnitHeader} INTEGER NOT NULL,
+                    {ftPerEffectiveRangeUnitHeader} INTEGER NOT NULL,
+                    {roundEffectiveRangeUpHeader} BOOLEAN NOT NULL,
+                    {maxRangeOptionHeader} INTEGER
+                )
+            """
+            |> Sql.executeNonQuery
+            |> function
+                | affectedRows ->
+                    printfn "Table %s created successfully. Rows affected: %d" rangeCalculationsTableName affectedRows
 
-    let insertRangeCalculation (calc: RangeCalculation) =
-        databaseConnection
-        |> Sql.query
-            $"""
-            INSERT INTO {rangeCalculationsTableName}
-            (name, num_dice_per_effective_range_unit, ft_per_effective_range_unit, round_effective_range_up, max_range_option)
-            VALUES (@name, @numDice, @ftPerUnit, @roundUp, @maxRange)
-        """
-        |> Sql.parameters [
-            "@name", Sql.string calc.name
-            "@numDice", Sql.int (int calc.numDicePerEffectiveRangeUnit)
-            "@ftPerUnit", Sql.int (int calc.ftPerEffectiveRangeUnit)
-            "@roundUp", Sql.bool calc.roundEffectiveRangeUp
-            "@maxRange", Sql.intOrNone (calc.maxRangeOption |> Option.map int)
-        ]
-        |> Sql.executeNonQuery
-        |> ignore
+        let insertRangeCalculation (calc: RangeCalculation) =
+            databaseConnection
+            |> Sql.query
+                $"""
+                INSERT INTO {rangeCalculationsTableName}
+                ({nameHeader}, {numDicePerEffectiveRangeUnitHeader}, {ftPerEffectiveRangeUnitHeader}, {roundEffectiveRangeUpHeader}, {maxRangeOptionHeader})
+                VALUES (@{nameHeader}, @{numDicePerEffectiveRangeUnitHeader}, @{ftPerEffectiveRangeUnitHeader}, @{roundEffectiveRangeUpHeader}, @{maxRangeOptionHeader})
+            """
+            |> Sql.parameters [
+                $"@{nameHeader}", Sql.string calc.name
+                $"@{numDicePerEffectiveRangeUnitHeader}", Sql.int (int calc.numDicePerEffectiveRangeUnit)
+                $"@{ftPerEffectiveRangeUnitHeader}", Sql.int (int calc.ftPerEffectiveRangeUnit)
+                $"@{roundEffectiveRangeUpHeader}", Sql.bool calc.roundEffectiveRangeUp
+                $"@{maxRangeOptionHeader}", Sql.intOrNone (calc.maxRangeOption |> Option.map int)
+            ]
+            |> Sql.executeNonQuery
+            |> ignore
 
-    let insertRangeCalculations = List.map insertRangeCalculation
+        let insertRangeCalculations = List.map insertRangeCalculation
 
-    let getRangeCalculations () =
-        databaseConnection
-        |> Sql.query $"SELECT * FROM {rangeCalculationsTableName}"
-        |> Sql.execute (fun read -> {
-            name = read.string "name"
-            numDicePerEffectiveRangeUnit = read.int "num_dice_per_effective_range_unit" |> uint
-            ftPerEffectiveRangeUnit = read.int "ft_per_effective_range_unit" |> uint
-            roundEffectiveRangeUp = read.bool "round_effective_range_up"
-            maxRangeOption = read.intOrNone "max_range_option" |> Option.map uint
-        })
+        let getRangeCalculations () =
+            databaseConnection
+            |> Sql.query $"SELECT * FROM {rangeCalculationsTableName}"
+            |> Sql.execute (fun read -> {
+                name = read.string nameHeader
+                numDicePerEffectiveRangeUnit = read.int numDicePerEffectiveRangeUnitHeader |> uint
+                ftPerEffectiveRangeUnit = read.int ftPerEffectiveRangeUnitHeader |> uint
+                roundEffectiveRangeUp = read.bool roundEffectiveRangeUpHeader
+                maxRangeOption = read.intOrNone maxRangeOptionHeader |> Option.map uint
+            })
 
+    open CalculatedRangesDatabase
+    open RangeCalculationsDatabase
     // Init Database
     let initDatabase () =
         initCalculatedRangesTable ()
