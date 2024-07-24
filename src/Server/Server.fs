@@ -516,45 +516,49 @@ module Database =
 
     open FogentRoleplayLib.Range
 
-    // Calculated Ranges
-    let calculatedRangesTableName = "calculated_ranges"
+    module CalculatedRangesDatabase =
+        let calculatedRangesTableName = "calculated_ranges"
+        let nameHeader = "name"
+        let effectRangeHeader = "effective_range"
+        let maxRangeOptionHeader = "max_range_option"
 
-    let initCalculatedRangesTable () =
-        databaseConnection
-        |> Sql.query
-            $"""
-            CREATE TABLE IF NOT EXISTS {calculatedRangesTableName} (
-                name VARCHAR(100) PRIMARY KEY,
-                effective_range INTEGER NOT NULL,
-                max_range_option INTEGER
-            )
-        """
-        |> Sql.executeNonQuery
-        |> function
-            | affectedRows ->
-                printfn "Table %s created successfully. Rows affected: %d" calculatedRangesTableName affectedRows
+        let initCalculatedRangesTable () =
+            databaseConnection
+            |> Sql.query
+                $"""
+                CREATE TABLE IF NOT EXISTS {calculatedRangesTableName} (
+                    {nameHeader} VARCHAR(100) PRIMARY KEY,
+                    {effectRangeHeader} INTEGER NOT NULL,
+                    {maxRangeOptionHeader} INTEGER
+                )
+            """
+            |> Sql.executeNonQuery
+            |> function
+                | affectedRows ->
+                    printfn "Table %s created successfully. Rows affected: %d" calculatedRangesTableName affectedRows
 
-    let insertCalculatedRange (range: CalculatedRange) =
-        databaseConnection
-        |> Sql.query
-            $"INSERT INTO {calculatedRangesTableName} (name, effective_range, max_range_option) VALUES (@name, @effectiveRange, @maxRangeOption)"
-        |> Sql.parameters [
-            "@name", Sql.string range.name
-            "@effectiveRange", Sql.int (int range.effectiveRange)
-            "@maxRangeOption", Sql.intOrNone (range.maxRangeOption |> Option.map int)
-        ]
-        |> Sql.executeNonQuery
+        let insertCalculatedRange (range: CalculatedRange) =
+            databaseConnection
+            |> Sql.query
+                $"INSERT INTO {calculatedRangesTableName} ({nameHeader}, {effectRangeHeader}, {maxRangeOptionHeader}) VALUES (@{nameHeader}, @{effectRangeHeader}, @{maxRangeOptionHeader})"
+            |> Sql.parameters [
+                $"@{nameHeader}", Sql.string range.name
+                $"@{effectRangeHeader}", Sql.int (int range.effectiveRange)
+                $"@{maxRangeOptionHeader}", Sql.intOrNone (range.maxRangeOption |> Option.map int)
+            ]
+            |> Sql.executeNonQuery
 
-    let insertCalculatedRanges = List.map insertCalculatedRange
+        let insertCalculatedRanges = List.map insertCalculatedRange
 
-    let getCalculatedRanges () =
-        databaseConnection
-        |> Sql.query "SELECT name, effective_range, max_range_option FROM calculated_ranges"
-        |> Sql.execute (fun read -> {
-            name = read.string "name"
-            effectiveRange = read.int "effective_range" |> uint
-            maxRangeOption = read.intOrNone "max_range_option" |> Option.map uint
-        })
+        let getCalculatedRanges () =
+            databaseConnection
+            |> Sql.query
+                $"SELECT {nameHeader}, {effectRangeHeader}, {maxRangeOptionHeader} FROM {calculatedRangesTableName}"
+            |> Sql.execute (fun read -> {
+                name = read.string nameHeader
+                effectiveRange = read.int effectRangeHeader |> uint
+                maxRangeOption = read.intOrNone maxRangeOptionHeader |> Option.map uint
+            })
 
     // Range Calculations
     let rangeCalculationsTableName = "range_calculations"
