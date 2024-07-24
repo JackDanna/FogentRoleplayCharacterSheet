@@ -124,13 +124,13 @@ module FogentRoleplayServerData =
             baseAndHeightPerDice = float row.["base/height per unit"]
         })
 
-    let SetSphereSet =
+    let setSphereSet =
         makeFogentRoleplayDataSet "AreaOfEffects/SetSphere.csv" (fun row -> {
             name = row.["Name"]
             radius = uint row.["Radius(ft)"]
         })
 
-    let SetConeSet =
+    let setConeSet =
         makeFogentRoleplayDataSet "AreaOfEffects/SetCone.csv" (fun row -> {
             name = string row.["name"]
             baseAndHeight = uint row.["Triangle Base/Height (ft)"]
@@ -139,10 +139,10 @@ module FogentRoleplayServerData =
 
     let areaOfEffectMap =
         [
-            Set.map (fun (setCone: SetCone) -> (setCone.name, setCone |> SetCone |> SetAreaOfEffect)) SetConeSet
+            Set.map (fun (setCone: SetCone) -> (setCone.name, setCone |> SetCone |> SetAreaOfEffect)) setConeSet
             Set.map
                 (fun (setSphere: SetSphere) -> (setSphere.name, setSphere |> SetSphere |> SetAreaOfEffect))
-                SetSphereSet
+                setSphereSet
             Set.map
                 (fun (coneCalculation: ConeCalculation) ->
                     (coneCalculation.name, coneCalculation |> ConeCalculation |> AreaOfEffectCalculation))
@@ -801,12 +801,59 @@ module Database =
             })
             |> Set.ofList
 
+    module SetConeDatabase =
+        open FogentRoleplayLib.SetAreaOfEffect // Assuming this is where SetCone is defined
+
+        let setConesTableName = "set_cones"
+        let nameHeader = "name"
+        let baseAndHeightHeader = "base_and_height"
+        let angleHeader = "angle"
+
+        let initSetConeTable () =
+            databaseConnection
+            |> Sql.query
+                $"""
+                CREATE TABLE IF NOT EXISTS {setConesTableName} (
+                    {nameHeader} VARCHAR(100) PRIMARY KEY,
+                    {baseAndHeightHeader} INTEGER NOT NULL,
+                    {angleHeader} DECIMAL(10, 2) NOT NULL
+                )
+            """
+            |> Sql.executeNonQuery
+            |> function
+                | affectedRows ->
+                    printfn "Table %s created successfully. Rows affected: %d" setConesTableName affectedRows
+
+        let insertSetCone (setCone: SetCone) =
+            databaseConnection
+            |> Sql.query
+                $"INSERT INTO {setConesTableName} ({nameHeader}, {baseAndHeightHeader}, {angleHeader}) VALUES (@{nameHeader}, @{baseAndHeightHeader}, @{angleHeader})"
+            |> Sql.parameters [
+                $"@{nameHeader}", Sql.string setCone.name
+                $"@{baseAndHeightHeader}", Sql.int (int setCone.baseAndHeight)
+                $"@{angleHeader}", Sql.decimal (decimal setCone.angle)
+            ]
+            |> Sql.executeNonQuery
+
+        let insertSetCones = Set.map insertSetCone
+
+        let getSetCones () =
+            databaseConnection
+            |> Sql.query $"SELECT {nameHeader}, {baseAndHeightHeader}, {angleHeader} FROM {setConesTableName}"
+            |> Sql.execute (fun read -> {
+                name = read.string nameHeader
+                baseAndHeight = read.int baseAndHeightHeader |> uint
+                angle = read.decimal angleHeader |> float
+            })
+            |> Set.ofList
+
     open DamageTypesDatabase
     open EngageableOpponentsCalculationDatabase
     open CalculatedRangesDatabase
     open RangeCalculationsDatabase
     open SphereCalculationDatabase
     open ConeCalculationDatabase
+    open SetConeDatabase
     // Init Database
     let initDatabase () =
         initDamageTypesTable ()
@@ -815,6 +862,7 @@ module Database =
         initRangeCalculationTable ()
         initSphereCalculationTable ()
         initConeCalculationTable ()
+        initSetConeTable ()
 
 open Database
 
@@ -828,6 +876,7 @@ initDatabase ()
 //insertRangeCalculations rangeCalculations
 //SphereCalculationDatabase.insertSphereCalculations sphereCalculationSet
 //ConeCalculationDatabase.insertConeCalculations coneCalculationSet
+//SetConeDatabase.insertSetCones setConeSet
 
 let fallenDataApi: IFogentRoleplayDataApi = {
     getInitData =
