@@ -704,7 +704,7 @@ module Database =
             })
 
     module SphereCalculationDatabase =
-        open FogentRoleplayLib.AreaOfEffectCalculation // Assuming this is where SphereCalculation is defined
+        open FogentRoleplayLib.AreaOfEffectCalculation
 
         let sphereCalculationsTableName = "sphere_calculations"
         let nameHeader = "name"
@@ -750,11 +750,63 @@ module Database =
             })
             |> Set.ofList
 
+    module ConeCalculationDatabase =
+        open FogentRoleplayLib.AreaOfEffectCalculation
+
+        let coneCalculationsTableName = "cone_calculations"
+        let nameHeader = "name"
+        let initBaseAndHeightHeader = "init_base_and_height"
+        let baseAndHeightPerDiceHeader = "base_and_height_per_dice"
+        let angleHeader = "angle"
+
+        let initConeCalculationTable () =
+            databaseConnection
+            |> Sql.query
+                $"""
+                CREATE TABLE IF NOT EXISTS {coneCalculationsTableName} (
+                    {nameHeader} VARCHAR(100) PRIMARY KEY,
+                    {initBaseAndHeightHeader} DECIMAL(10, 2) NOT NULL,
+                    {baseAndHeightPerDiceHeader} DECIMAL(10, 2) NOT NULL,
+                    {angleHeader} DECIMAL(10, 2) NOT NULL
+                )
+            """
+            |> Sql.executeNonQuery
+            |> function
+                | affectedRows ->
+                    printfn "Table %s created successfully. Rows affected: %d" coneCalculationsTableName affectedRows
+
+        let insertConeCalculation (calculation: ConeCalculation) =
+            databaseConnection
+            |> Sql.query
+                $"INSERT INTO {coneCalculationsTableName} ({nameHeader}, {initBaseAndHeightHeader}, {baseAndHeightPerDiceHeader}, {angleHeader}) VALUES (@{nameHeader}, @{initBaseAndHeightHeader}, @{baseAndHeightPerDiceHeader}, @{angleHeader})"
+            |> Sql.parameters [
+                $"@{nameHeader}", Sql.string calculation.name
+                $"@{initBaseAndHeightHeader}", Sql.decimal (decimal calculation.initBaseAndHeight)
+                $"@{baseAndHeightPerDiceHeader}", Sql.decimal (decimal calculation.baseAndHeightPerDice)
+                $"@{angleHeader}", Sql.decimal (decimal calculation.angle)
+            ]
+            |> Sql.executeNonQuery
+
+        let insertConeCalculations = Set.map insertConeCalculation
+
+        let getConeCalculations () =
+            databaseConnection
+            |> Sql.query
+                $"SELECT {nameHeader}, {initBaseAndHeightHeader}, {baseAndHeightPerDiceHeader}, {angleHeader} FROM {coneCalculationsTableName}"
+            |> Sql.execute (fun read -> {
+                name = read.string nameHeader
+                initBaseAndHeight = read.decimal initBaseAndHeightHeader |> float
+                baseAndHeightPerDice = read.decimal baseAndHeightPerDiceHeader |> float
+                angle = read.decimal angleHeader |> float
+            })
+            |> Set.ofList
+
     open DamageTypesDatabase
     open EngageableOpponentsCalculationDatabase
     open CalculatedRangesDatabase
     open RangeCalculationsDatabase
     open SphereCalculationDatabase
+    open ConeCalculationDatabase
     // Init Database
     let initDatabase () =
         initDamageTypesTable ()
@@ -762,6 +814,7 @@ module Database =
         initCalculatedRangesTable ()
         initRangeCalculationTable ()
         initSphereCalculationTable ()
+        initConeCalculationTable ()
 
 open Database
 
@@ -774,6 +827,7 @@ initDatabase ()
 //insertCalculatedRanges calculatedRanges
 //insertRangeCalculations rangeCalculations
 //SphereCalculationDatabase.insertSphereCalculations sphereCalculationSet
+//ConeCalculationDatabase.insertConeCalculations coneCalculationSet
 
 let fallenDataApi: IFogentRoleplayDataApi = {
     getInitData =
