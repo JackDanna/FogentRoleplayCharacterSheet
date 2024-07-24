@@ -172,18 +172,15 @@ module FogentRoleplayServerData =
         | _ -> resourceMap.Item string |> Some
 
     // AttributeAndCoreSkill
-    let coreSkillDataSet, attributeNameSet =
-        let coreSkillDataSet =
-            makeFogentRoleplayDataSet "CoreSkillData.csv" (fun row -> {
-                skillName = SkillName row.["name"]
-                attributeName = AttributeName row.["governingAttribute"]
-            })
 
-        let attributeNameSet: AttributeName Set =
-            coreSkillDataSet |> Set.map (fun coreSkillData -> coreSkillData.attributeName)
+    let coreSkillDataSet: Set<CoreSkillData> =
+        makeFogentRoleplayDataSet "CoreSkillData.csv" (fun row -> {
+            skillName = SkillName row.["name"]
+            attributeName = AttributeName row.["governingAttribute"]
+        })
 
-
-        coreSkillDataSet, attributeNameSet
+    let attributeNameSet =
+        coreSkillDataSet |> Set.map (fun coreSkillData -> coreSkillData.attributeName)
 
     let attributeNameMap = stringSetToTypeMap attributeNameSet
 
@@ -889,6 +886,50 @@ module Database =
             })
             |> Set.ofList
 
+    module CoreSkillDataDatabase =
+        open FogentRoleplayLib.CoreSkillData
+        open FogentRoleplayLib.SkillName
+        open FogentRoleplayLib.AttributeName
+
+        let coreSkillDataTableName = "core_skill_data"
+        let skillNameHeader = "skill_name"
+        let attributeNameHeader = "attribute_name"
+
+        let initCoreSkillDataTable () =
+            databaseConnection
+            |> Sql.query
+                $"""
+                CREATE TABLE IF NOT EXISTS {coreSkillDataTableName} (
+                    {skillNameHeader} VARCHAR(100) PRIMARY KEY,
+                    {attributeNameHeader} VARCHAR(100) NOT NULL
+                )
+            """
+            |> Sql.executeNonQuery
+            |> function
+                | affectedRows ->
+                    printfn "Table %s created successfully. Rows affected: %d" coreSkillDataTableName affectedRows
+
+        let insertCoreSkillData (coreSkillData: CoreSkillData) =
+            databaseConnection
+            |> Sql.query
+                $"INSERT INTO {coreSkillDataTableName} ({skillNameHeader}, {attributeNameHeader}) VALUES (@{skillNameHeader}, @{attributeNameHeader})"
+            |> Sql.parameters [
+                $"@{skillNameHeader}", Sql.string (SkillName coreSkillData.skillName)
+                $"@{attributeNameHeader}", Sql.string (AttributeName coreSkillData.attributeName)
+            ]
+            |> Sql.executeNonQuery
+
+        let insertCoreSkillDataSet = Set.map insertCoreSkillData
+
+        let getCoreSkillDataSet () : Set<CoreSkillData> =
+            databaseConnection
+            |> Sql.query $"SELECT {skillNameHeader}, {attributeNameHeader} FROM {coreSkillDataTableName}"
+            |> Sql.execute (fun read -> {
+                skillName = SkillName(read.string skillNameHeader)
+                attributeName = AttributeName(read.string attributeNameHeader)
+            })
+            |> Set.ofSeq
+
     open DamageTypesDatabase
     open EngageableOpponentsCalculationDatabase
     open CalculatedRangesDatabase
@@ -897,6 +938,7 @@ module Database =
     open ConeCalculationDatabase
     open SetSphereDatabase
     open SetConeDatabase
+    open CoreSkillDataDatabase
     // Init Database
     let initDatabase () =
         initDamageTypesTable ()
@@ -907,6 +949,7 @@ module Database =
         initConeCalculationTable ()
         initSetSphereTable ()
         initSetConeTable ()
+        initCoreSkillDataTable ()
 
 open Database
 
@@ -922,6 +965,7 @@ initDatabase ()
 //ConeCalculationDatabase.insertConeCalculations coneCalculationSet
 //SetSphereDatabase.insertSetSpheres setSphereSet
 //SetConeDatabase.insertSetCones setConeSet
+CoreSkillDataDatabase.insertCoreSkillDataSet coreSkillDataSet
 
 let fallenDataApi: IFogentRoleplayDataApi = {
     getInitData =
