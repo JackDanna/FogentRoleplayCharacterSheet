@@ -500,7 +500,6 @@ open Npgsql
 open Npgsql.FSharp
 
 module Database =
-    open FogentRoleplayServerData
 
     let databaseConnectionString =
         let host = System.Environment.GetEnvironmentVariable "PGHOST"
@@ -515,6 +514,39 @@ module Database =
         builder.ToString()
 
     let databaseConnection = databaseConnectionString |> Sql.connect
+
+    module DamageTypesDatabase =
+        open FogentRoleplayLib.DamageType
+
+        let damageTypesTableName = "damage_types"
+        let nameHeader = "name"
+
+        let initDamageTypesTable () =
+            databaseConnection
+            |> Sql.query
+                $"""
+                CREATE TABLE IF NOT EXISTS {damageTypesTableName} (
+                    {nameHeader} VARCHAR(100) PRIMARY KEY
+                )
+            """
+            |> Sql.executeNonQuery
+            |> function
+                | affectedRows ->
+                    printfn "Table %s created successfully. Rows affected: %d" damageTypesTableName affectedRows
+
+        let insertDamageType (damageType: DamageType) =
+            databaseConnection
+            |> Sql.query $"INSERT INTO {damageTypesTableName} ({nameHeader}) VALUES (@{nameHeader})"
+            |> Sql.parameters [ $"@{nameHeader}", Sql.string damageType ]
+            |> Sql.executeNonQuery
+
+        let insertDamageTypes = Set.map insertDamageType
+
+        let getDamageTypes () =
+            databaseConnection
+            |> Sql.query $"SELECT {nameHeader} FROM {damageTypesTableName}"
+            |> Sql.execute (fun read -> read.string nameHeader |> DamageType)
+            |> Set.ofList
 
     module CalculatedRangesDatabase =
         open FogentRoleplayLib.Range
@@ -618,15 +650,20 @@ module Database =
                 maxRangeOption = read.intOrNone maxRangeOptionHeader |> Option.map uint
             })
 
+    open FogentRoleplayServerData
+
+    open DamageTypesDatabase
     open CalculatedRangesDatabase
     open RangeCalculationsDatabase
     // Init Database
     let initDatabase () =
+        initDamageTypesTable ()
         initCalculatedRangesTable ()
         initRangeCalculationTable ()
 
-        insertCalculatedRanges calculatedRanges
-        insertRangeCalculations rangeCalculations
+        insertDamageTypes damageTypes
+//insertCalculatedRanges calculatedRanges
+//insertRangeCalculations rangeCalculations
 
 
 
