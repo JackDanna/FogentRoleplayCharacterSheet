@@ -976,7 +976,7 @@ module Database =
 
         let insertMagicSkillDataSet = Set.map insertMagicSkillData
 
-        let getMagicSkillDataSet () : Set<MagicSkillData> =
+        let getMagicSkillDataSet (damageTypeMap: Map<string, DamageType>) : Set<MagicSkillData> =
             databaseConnection
             |> Sql.query
                 $"SELECT {nameHeader}, {damageTypesHeader}, {isMeleeCapableHeader}, {isRangeCapableHeader} FROM {magicSkillDataTableName}"
@@ -1028,23 +1028,38 @@ initDatabase ()
 //CoreSkillDataDatabase.insertCoreSkillDataSet coreSkillDataSet
 //MagicSkillDataDatabase.insertMagicSkillDataSet magicSkillDataSet
 
-let fallenDataApi: IFogentRoleplayDataApi = {
-    getInitData =
-        fun () -> async {
-            return {
-                attributeNameSet = FogentRoleplayServerData.attributeNameSet
-                coreSkillDataSet = FogentRoleplayServerData.coreSkillDataSet
-                itemElementMap = FogentRoleplayServerData.itemStackMap
-                weaponSpellSet = FogentRoleplayServerData.weaponSpellSet
-                magicSystemMap = FogentRoleplayServerData.magicSystemData
-                weaponSkillDataMap = FogentRoleplayServerData.weaponSkillDataMap
-                effectMap = FogentRoleplayServerData.effectDataMap
-                combatSpeedCalculationMap = FogentRoleplayServerData.combatSpeedCalculationMap
-                carryWeightCalculationMap = FogentRoleplayServerData.carryWeightCalculationMap
-                weightClassSet = FogentRoleplayServerData.weightClassSet
+let fallenDataApi: IFogentRoleplayDataApi =
+
+    let damageTypeSet = DamageTypesDatabase.getDamageTypes ()
+
+    let engageableOpponentsCalculationSet =
+        EngageableOpponentsCalculationDatabase.getEngageableOpponentsCalculations ()
+
+    let calculatedRangeSet = CalculatedRangesDatabase.getCalculatedRanges ()
+    let rangeCalculationSet = RangeCalculationsDatabase.getRangeCalculations ()
+    let sphereCalculationSet = SphereCalculationDatabase.getSphereCalculations ()
+    let coneCalculationSet = ConeCalculationDatabase.getConeCalculations ()
+    let setSphereSet = SetSphereDatabase.getSetSpheres ()
+    let setConeSet = SetConeDatabase.getSetCones ()
+
+
+    {
+        getInitData =
+            fun () -> async {
+                return {
+                    attributeNameSet = FogentRoleplayServerData.attributeNameSet
+                    coreSkillDataSet = FogentRoleplayServerData.coreSkillDataSet
+                    itemElementMap = FogentRoleplayServerData.itemStackMap
+                    weaponSpellSet = FogentRoleplayServerData.weaponSpellSet
+                    magicSystemMap = FogentRoleplayServerData.magicSystemData
+                    weaponSkillDataMap = FogentRoleplayServerData.weaponSkillDataMap
+                    effectMap = FogentRoleplayServerData.effectDataMap
+                    combatSpeedCalculationMap = FogentRoleplayServerData.combatSpeedCalculationMap
+                    carryWeightCalculationMap = FogentRoleplayServerData.carryWeightCalculationMap
+                    weightClassSet = FogentRoleplayServerData.weightClassSet
+                }
             }
-        }
-}
+    }
 
 let webApp =
     Remoting.createApi ()
