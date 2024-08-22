@@ -5,14 +5,9 @@ open Elmish
 open Fable.Remoting.Client
 open Shared
 
-open FogentRoleplayLib.Character
-open FogentRoleplayLib.SettingData
+type Model = { characterList: CharacterList.Model }
 
-type Model = { character: Character }
-
-type Msg =
-    | CharacterMsg of Character.Msg
-    | GotInitSettingData of SettingData
+type Msg = CharacterListMsg of CharacterList.Msg
 
 let fogentRoleplayDataApi =
     Remoting.createApi ()
@@ -20,31 +15,20 @@ let fogentRoleplayDataApi =
     |> Remoting.buildProxy<IFogentRoleplayDataApi>
 
 let init () : Model * Cmd<Msg> =
-    let defaultAttributeSet = Set.empty
-    let defaultCoreSkillList = Set.empty
-
-    {
-        character = Character.init (FogentRoleplayLib.SettingData.init ())
-    },
-
-    Cmd.OfAsync.perform fogentRoleplayDataApi.getInitData () GotInitSettingData
+    let characterList, characterListCmd = CharacterList.init ()
+    { characterList = characterList }, characterListCmd
 
 let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
     match msg with
-    | CharacterMsg characterMsg ->
+    | CharacterListMsg characterListMsg ->
+        let characterList, characterListCmd =
+            CharacterList.update characterListMsg model.characterList
 
         {
             model with
-                character = Character.update characterMsg model.character
+                characterList = characterList
         },
-        Cmd.none
-    | GotInitSettingData newSettingData ->
-
-        {
-            model with
-                character = Character.init newSettingData
-        },
-        Cmd.none
+        Cmd.map Msg.CharacterListMsg characterListCmd
 
 open Feliz
 open Feliz.Bulma
@@ -74,6 +58,6 @@ let view (model: Model) (dispatch: Msg -> unit) =
                 ]
             ]
 
-            Bulma.heroBody [ Character.view model.character (CharacterMsg >> dispatch) ]
+            Bulma.heroBody [ CharacterList.view model.characterList (CharacterListMsg >> dispatch) ]
         ]
     ]
