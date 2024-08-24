@@ -9,11 +9,6 @@ type Model = { characterList: CharacterList.Model }
 
 type Msg = CharacterListMsg of CharacterList.Msg
 
-let fogentRoleplayDataApi =
-    Remoting.createApi ()
-    |> Remoting.withRouteBuilder Route.builder
-    |> Remoting.buildProxy<IFogentRoleplayDataApi>
-
 let init () : Model * Cmd<Msg> =
     let characterList, characterListCmd = CharacterList.init ()
     { characterList = characterList }, characterListCmd
