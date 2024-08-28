@@ -44,7 +44,11 @@
     <None Include="index.html" />
     <None Include="paket.references" />
     <Compile Include="CharacterList.fs" />
+    <Compile Include="Extensions.fs" />
+    <Compile Include="Login.fs" />
+    <Compile Include="Overview.fs" />
     <Compile Include="Index.fs" />
+    <Compile Include="NewIndex.fs" />
     <Compile Include="App.fs" />
     <None Include="vite.config.mts" />
   </ItemGroup>

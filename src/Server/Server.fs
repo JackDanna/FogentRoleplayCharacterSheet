@@ -1053,7 +1053,9 @@ open FogentRoleplayServerData
 
 // let allPeople = damageTypeCollection.FindAll() |> Seq.toList
 
-let fallenDataApi: IFogentRoleplayDataApi =
+open FogentRoleplayLib.SettingData
+
+let fallenDataApi =
 
     let damageTypeSet = DamageTypesDatabase.getDamageTypes ()
 
@@ -1067,29 +1069,45 @@ let fallenDataApi: IFogentRoleplayDataApi =
     let setSphereSet = SetSphereDatabase.getSetSpheres ()
     let setConeSet = SetConeDatabase.getSetCones ()
 
-
-    {
-        getInitData =
-            fun () -> async {
-                return {
-                    attributeNameSet = FogentRoleplayServerData.attributeNameSet
-                    coreSkillDataSet = FogentRoleplayServerData.coreSkillDataSet
-                    itemElementMap = FogentRoleplayServerData.itemStackMap
-                    weaponSpellSet = FogentRoleplayServerData.weaponSpellSet
-                    magicSystemMap = FogentRoleplayServerData.magicSystemData
-                    weaponSkillDataMap = FogentRoleplayServerData.weaponSkillDataMap
-                    effectMap = FogentRoleplayServerData.effectDataMap
-                    combatSpeedCalculationMap = FogentRoleplayServerData.combatSpeedCalculationMap
-                    carryWeightCalculationMap = FogentRoleplayServerData.carryWeightCalculationMap
-                    weightClassSet = FogentRoleplayServerData.weightClassSet
-                }
-            }
+    fun () -> async {
+        return {
+            attributeNameSet = FogentRoleplayServerData.attributeNameSet
+            coreSkillDataSet = FogentRoleplayServerData.coreSkillDataSet
+            itemElementMap = FogentRoleplayServerData.itemStackMap
+            weaponSpellSet = FogentRoleplayServerData.weaponSpellSet
+            magicSystemMap = FogentRoleplayServerData.magicSystemData
+            weaponSkillDataMap = FogentRoleplayServerData.weaponSkillDataMap
+            effectMap = FogentRoleplayServerData.effectDataMap
+            combatSpeedCalculationMap = FogentRoleplayServerData.combatSpeedCalculationMap
+            carryWeightCalculationMap = FogentRoleplayServerData.carryWeightCalculationMap
+            weightClassSet = FogentRoleplayServerData.weightClassSet
+        }
     }
+
+let login login = async {
+    if login.userName = "admin" && login.password = "admin" then
+        let accessToken = System.Guid.NewGuid().ToString()
+
+        return
+            LoggedIn {
+                username = login.userName
+                token = JWT accessToken
+                id = 0
+            }
+    else
+        return UsernameOrPasswordIncorrect
+}
+
+let api: IFogentRoleplayDataApi = {
+    getInitData = fallenDataApi
+    login = login
+}
+
 
 let webApp =
     Remoting.createApi ()
     |> Remoting.withRouteBuilder Route.builder
-    |> Remoting.fromValue fallenDataApi
+    |> Remoting.fromValue api
     |> Remoting.buildHttpHandler
 
 let app = application {
