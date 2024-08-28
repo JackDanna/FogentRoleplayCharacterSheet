@@ -8,13 +8,20 @@ open Fable.Remoting.Client
 open FogentRoleplayLib.Character
 open FogentRoleplayLib.SettingData
 
+open Shared.UserData
+
 
 type Model = {
     characterList: Character List
     selectedCharacter: int option
 }
 
-let init () =
+let fogentRoleplayDataApi =
+    Remoting.createApi ()
+    |> Remoting.withRouteBuilder Route.builder
+    |> Remoting.buildProxy<IFogentRoleplayDataApi>
+
+let init (userData: UserData) =
     {
         characterList = []
         selectedCharacter = None
@@ -27,11 +34,6 @@ type Msg =
     | AddNewCharacter
     | GotInitSettingData of SettingData
     | CharacterMsg of Character.Msg
-
-let fogentRoleplayDataApi =
-    Remoting.createApi ()
-    |> Remoting.withRouteBuilder Route.builder
-    |> Remoting.buildProxy<IFogentRoleplayDataApi>
 
 let update msg model =
     match msg with

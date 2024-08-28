@@ -2,15 +2,12 @@ module Index
 
 open Elmish
 
-open Fable.Remoting.Client
-open Shared
-
 type Model = { characterList: CharacterList.Model }
 
 type Msg = CharacterListMsg of CharacterList.Msg
 
-let init () : Model * Cmd<Msg> =
-    let characterList, characterListCmd = CharacterList.init ()
+let init (userData) : Model * Cmd<Msg> =
+    let characterList, characterListCmd = CharacterList.init (userData)
     { characterList = characterList }, characterListCmd
 
 let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =

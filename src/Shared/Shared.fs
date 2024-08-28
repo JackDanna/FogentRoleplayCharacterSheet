@@ -27,4 +27,5 @@ module Route =
 type IFogentRoleplayDataApi = {
     getInitData: unit -> Async<SettingData>
     login: Login -> Async<LoginResult>
+    getCharacterList: UserData.UserData -> Async<Character List>
 }

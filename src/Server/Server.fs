@@ -1098,9 +1098,17 @@ let login login = async {
         return UsernameOrPasswordIncorrect
 }
 
+open FogentRoleplayLib.Character
+
+let getCharacterList (userData: UserData.UserData) : Async<Character list> = async {
+    // In here I will have to search the DB for which characters the player has access to
+    return List.empty
+}
+
 let api: IFogentRoleplayDataApi = {
     getInitData = fallenDataApi
     login = login
+    getCharacterList = getCharacterList
 }
 
 

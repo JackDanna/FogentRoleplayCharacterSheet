@@ -166,7 +166,7 @@ let view model dispatch =
     let activePage =
         match model.page with
         | Page.Login login -> Login.render login (LoginMsg >> dispatch)
-        | Page.Overview overview -> Overview.render overview (OverviewMsg >> dispatch)
+        | Page.Overview overview -> Overview.view overview (OverviewMsg >> dispatch)
         | Page.Home -> index model dispatch
         | Page.NotFound -> Html.h1 "Not Found"
 
