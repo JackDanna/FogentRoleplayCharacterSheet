@@ -129,7 +129,6 @@ let update msg model =
     | _, _ -> model, Cmd.none
 
 open Feliz
-open Feliz.Bulma
 
 let index model dispatch =
     match model.user with
@@ -164,13 +163,17 @@ let index model dispatch =
 let view model dispatch =
     let activePage =
         match model.page with
-        | Page.Login login -> Login.render login (LoginMsg >> dispatch)
+        | Page.Login login -> Login.view login (LoginMsg >> dispatch)
         | Page.Overview overview -> Overview.view overview (OverviewMsg >> dispatch)
         | Page.Home -> index model dispatch
         | Page.NotFound -> Html.h1 "Not Found"
 
     React.router [
         router.onUrlChanged (parseUrl >> UrlChanged >> dispatch)
-        router.children [ Html.div [ prop.style [ style.padding 20 ]; prop.children [ activePage ] ] ]
-
+        router.children [
+            Html.div [
+                //prop.style [ style.padding 40 ];
+                prop.children [ activePage ]
+            ]
+        ]
     ]

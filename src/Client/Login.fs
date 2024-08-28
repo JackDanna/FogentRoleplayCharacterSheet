@@ -123,7 +123,7 @@ let centered (children: ReactElement list) =
         prop.children children
     ]
 
-let render (state: Model) (dispatch: Msg -> unit) =
+let view (state: Model) (dispatch: Msg -> unit) =
     layout [
         Html.div [
             prop.className "box"
