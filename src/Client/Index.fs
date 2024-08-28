@@ -25,7 +25,6 @@ type Page =
     | Home
     | Login of Login.Model
     | Overview of Overview.State
-    //| CharacterListPage of UserData
     | NotFound
 
 type Model = { page: Page; url: Url; user: User }
