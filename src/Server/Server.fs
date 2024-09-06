@@ -1084,7 +1084,7 @@ let fallenDataApi =
         }
     }
 
-let login login = async {
+let login (login: Login) = async {
     if login.userName = "admin" && login.password = "admin" then
         let accessToken = System.Guid.NewGuid().ToString()
 
@@ -1100,7 +1100,7 @@ let login login = async {
 
 open FogentRoleplayLib.Character
 
-let getCharacterList (userData: UserData.UserData) : Async<Character list> = async {
+let getCharacterList (userData: UserData) : Async<Character list> = async {
     // In here I will have to search the DB for which characters the player has access to
     return List.empty
 }

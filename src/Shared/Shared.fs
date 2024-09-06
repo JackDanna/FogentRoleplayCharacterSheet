@@ -6,19 +6,19 @@ open FogentRoleplayLib.Character
 
 type JWT = string
 
-module UserData =
-    type UserData = {
-        id: int
-        username: string
-        token: JWT
-    //character: Character list
-    }
+
+type UserData = {
+    id: int
+    username: string
+    token: JWT
+//character: Character list
+}
 
 type Login = { userName: string; password: string }
 
 type LoginResult =
     | UsernameOrPasswordIncorrect
-    | LoggedIn of UserData.UserData
+    | LoggedIn of UserData
 
 module Route =
     let builder typeName methodName =
@@ -27,5 +27,5 @@ module Route =
 type IFogentRoleplayDataApi = {
     getInitData: unit -> Async<SettingData>
     login: Login -> Async<LoginResult>
-    getCharacterList: UserData.UserData -> Async<Character List>
+    getCharacterList: UserData -> Async<Character List>
 }

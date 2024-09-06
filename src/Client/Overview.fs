@@ -5,13 +5,13 @@ open Elmish
 open Feliz
 
 type State = {
-    User: Shared.UserData.UserData
+    User: Shared.UserData
     CharacterList: CharacterList.Model
 }
 
 type Msg = CharacterListMsg of CharacterList.Msg
 
-let init (user: Shared.UserData.UserData) =
+let init (user: Shared.UserData) =
     let characterListModel, characterListCmd = CharacterList.init user
 
     {

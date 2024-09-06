@@ -8,8 +8,6 @@ open Fable.Remoting.Client
 open FogentRoleplayLib.Character
 open FogentRoleplayLib.SettingData
 
-open Shared.UserData
-
 
 type Model = {
     characterList: Character List

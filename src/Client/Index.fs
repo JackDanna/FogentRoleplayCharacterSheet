@@ -8,7 +8,6 @@ open Fable.Remoting.Client
 open Feliz.Router
 //open Page
 open Shared
-open Shared.UserData
 
 type User =
     | Guest
