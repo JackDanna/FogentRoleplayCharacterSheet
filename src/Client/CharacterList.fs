@@ -17,7 +17,7 @@ type Model = {
 let fogentRoleplayDataApi =
     Remoting.createApi ()
     |> Remoting.withRouteBuilder Route.builder
-    |> Remoting.buildProxy<IFogentRoleplayDataApi>
+    |> Remoting.buildProxy<IUserApi>
 
 let init (userData: UserData) =
     {
@@ -54,7 +54,7 @@ let update msg model =
         },
         Cmd.none
 
-    | AddNewCharacter -> model, Cmd.OfAsync.perform fogentRoleplayDataApi.getInitData () GotInitSettingData
+    | AddNewCharacter -> model, Cmd.OfAsync.perform fogentRoleplayDataApi.getInitCharacterData () GotInitSettingData
     | GotInitSettingData settingData ->
         {
             model with

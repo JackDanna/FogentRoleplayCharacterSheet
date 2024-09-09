@@ -76,7 +76,7 @@ let init () =
 let fogentRoleplayDataApi =
     Remoting.createApi ()
     |> Remoting.withRouteBuilder Route.builder
-    |> Remoting.buildProxy<IFogentRoleplayDataApi>
+    |> Remoting.buildProxy<IUserApi>
 
 let update msg model =
     match msg, model.page with

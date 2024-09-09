@@ -1084,19 +1084,7 @@ let fallenDataApi =
         }
     }
 
-let login (login: Login) = async {
-    if login.userName = "admin" && login.password = "admin" then
-        let accessToken = System.Guid.NewGuid().ToString()
-
-        return
-            LoggedIn {
-                username = login.userName
-                token = JWT accessToken
-                id = 0
-            }
-    else
-        return UsernameOrPasswordIncorrect
-}
+open Authorize
 
 open FogentRoleplayLib.Character
 
@@ -1105,17 +1093,17 @@ let getCharacterList (userData: UserData) : Async<Character list> = async {
     return List.empty
 }
 
-let api: IFogentRoleplayDataApi = {
-    getInitData = fallenDataApi
-    login = login
+let guestApi: IGuestApi = { login = login }
+
+let userApi: IUserApi = {
+    getInitCharacterData = fallenDataApi
     getCharacterList = getCharacterList
 }
-
 
 let webApp =
     Remoting.createApi ()
     |> Remoting.withRouteBuilder Route.builder
-    |> Remoting.fromValue api
+    |> Remoting.fromValue userApi
     |> Remoting.buildHttpHandler
 
 let app = application {

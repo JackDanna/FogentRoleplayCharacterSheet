@@ -30,7 +30,7 @@ let init () =
 let fogentRoleplayDataApi =
     Remoting.createApi ()
     |> Remoting.withRouteBuilder Route.builder
-    |> Remoting.buildProxy<IFogentRoleplayDataApi>
+    |> Remoting.buildProxy<IUserApi>
 
 let update (msg: Msg) (model: Model) =
     match msg with
