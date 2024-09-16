@@ -14,27 +14,42 @@ type Model = {
     selectedCharacter: int option
 }
 
-let fogentRoleplayDataApi =
+let userApi token =
     Remoting.createApi ()
+    |> Remoting.withAuthorizationHeader $"Bearer {token}"
     |> Remoting.withRouteBuilder Route.builder
     |> Remoting.buildProxy<IUserApi>
 
-let init (userData: UserData) =
-    {
-        characterList = []
-        selectedCharacter = None
-    },
-    Cmd.none
-
 type Msg =
+    | GotCharacterList of Character list
     | SelectCharacter of int
     | DeleteCharacter of int
     | AddNewCharacter
     | GotInitSettingData of SettingData
     | CharacterMsg of Character.Msg
 
+let init (userData: UserData) =
+    let api = userApi userData.token
+
+    let getCharacterList = async {
+        let! result = api.getCharacterList userData
+        return GotCharacterList(result)
+    }
+
+    {
+        characterList = []
+        selectedCharacter = None
+    },
+    Cmd.fromAsync getCharacterList
+
 let update msg model =
     match msg with
+    | GotCharacterList characterList ->
+        {
+            model with
+                characterList = characterList
+        },
+        Cmd.none
     | SelectCharacter pos ->
         let indexExists = List.tryItem pos model.characterList |> Option.isSome
 
@@ -54,7 +69,7 @@ let update msg model =
         },
         Cmd.none
 
-    | AddNewCharacter -> model, Cmd.OfAsync.perform fogentRoleplayDataApi.getInitCharacterData () GotInitSettingData
+    | AddNewCharacter -> model, Cmd.OfAsync.perform (userApi.getInitSettingData ()) model GotInitSettingData
     | GotInitSettingData settingData ->
         {
             model with

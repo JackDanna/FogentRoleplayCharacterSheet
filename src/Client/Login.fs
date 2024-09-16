@@ -27,10 +27,10 @@ let init () =
     },
     Cmd.none
 
-let fogentRoleplayDataApi =
+let guestApi =
     Remoting.createApi ()
     |> Remoting.withRouteBuilder Route.builder
-    |> Remoting.buildProxy<IUserApi>
+    |> Remoting.buildProxy<IGuestApi>
 
 let update (msg: Msg) (model: Model) =
     match msg with
@@ -59,7 +59,7 @@ let update (msg: Msg) (model: Model) =
 
         let login = async {
             //let! loginResult = Api.login state.Username state.Password
-            let! loginResult = fogentRoleplayDataApi.login model.login
+            let! loginResult = guestApi.login model.login
             return Login(Finished loginResult)
         }
 

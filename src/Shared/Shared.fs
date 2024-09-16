@@ -20,6 +20,6 @@ module Route =
 type IGuestApi = { login: Login -> Async<LoginResult> }
 
 type IUserApi = {
-    getInitCharacterData: unit -> Async<SettingData>
+    getInitSettingData: unit -> Async<SettingData>
     getCharacterList: UserData -> Async<Character List>
 }
