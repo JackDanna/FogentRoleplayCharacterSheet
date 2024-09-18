@@ -2,12 +2,20 @@
 module Overview
 
 open Elmish
-open Feliz
+
+open Fable.Remoting.Client
+open Shared
 
 type State = {
     User: Shared.UserData
     CharacterList: CharacterList.Model
 }
+
+let getUserApi token =
+    Remoting.createApi ()
+    |> Remoting.withAuthorizationHeader $"Bearer {token}"
+    |> Remoting.withRouteBuilder Route.builder
+    |> Remoting.buildProxy<IUserApi>
 
 type Msg = CharacterListMsg of CharacterList.Msg
 
@@ -20,18 +28,36 @@ let init (user: Shared.UserData) =
     },
     Cmd.map CharacterListMsg characterListCmd
 
+
 let update (msg: Msg) (state: State) : State * Cmd<Msg> =
 
-    match msg with
-    | CharacterListMsg msg ->
-        let characterListModel, characterListCmd =
-            CharacterList.update msg state.CharacterList
+    let userApi = getUserApi state.User.token
 
-        {
-            state with
-                CharacterList = characterListModel
-        },
-        Cmd.map CharacterListMsg characterListCmd
+    match msg with
+    | CharacterListMsg(characterListMsg: CharacterList.Msg) ->
+        match characterListMsg with
+        | CharacterList.Msg.AddNewCharacter _ ->
+
+            let characterListModel, characterListCmd =
+                CharacterList.update
+                    (userApi.getInitSettingData |> Some |> CharacterList.Msg.AddNewCharacter)
+                    state.CharacterList
+
+            {
+                state with
+                    CharacterList = characterListModel
+            },
+            Cmd.map CharacterListMsg characterListCmd
+
+        | _ ->
+            let characterListModel, characterListCmd =
+                CharacterList.update characterListMsg state.CharacterList
+
+            {
+                state with
+                    CharacterList = characterListModel
+            },
+            Cmd.map CharacterListMsg characterListCmd
 
 open Feliz.Bulma
 

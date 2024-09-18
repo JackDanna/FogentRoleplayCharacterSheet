@@ -3,6 +3,7 @@ module CharacterList
 open Elmish
 
 open Shared
+
 open Fable.Remoting.Client
 
 open FogentRoleplayLib.Character
@@ -14,7 +15,7 @@ type Model = {
     selectedCharacter: int option
 }
 
-let userApi token =
+let getUserApi (token: JWT) =
     Remoting.createApi ()
     |> Remoting.withAuthorizationHeader $"Bearer {token}"
     |> Remoting.withRouteBuilder Route.builder
@@ -24,12 +25,13 @@ type Msg =
     | GotCharacterList of Character list
     | SelectCharacter of int
     | DeleteCharacter of int
-    | AddNewCharacter
+    | AddNewCharacter of option<UserData>
     | GotInitSettingData of SettingData
     | CharacterMsg of Character.Msg
 
 let init (userData: UserData) =
-    let api = userApi userData.token
+
+    let api = getUserApi userData.token
 
     let getCharacterList = async {
         let! result = api.getCharacterList userData
@@ -69,7 +71,14 @@ let update msg model =
         },
         Cmd.none
 
-    | AddNewCharacter -> model, Cmd.OfAsync.perform (userApi.getInitSettingData ()) model GotInitSettingData
+    | AddNewCharacter getInitSettingDataOption ->
+        match getInitSettingDataOption with
+        | None -> model, Cmd.none
+        | Some getInitSettingData ->
+            let api = getUserApi getInitSettingData.token
+            //let api = userApi userData.token
+            model, Cmd.OfAsync.perform api.getInitSettingData () GotInitSettingData
+
     | GotInitSettingData settingData ->
         {
             model with
@@ -110,7 +119,7 @@ let view model dispatch =
                 model.characterList
             |> List.append [
                 Html.button [
-                    prop.onClick (fun _ -> (dispatch AddNewCharacter))
+                    prop.onClick (fun _ -> (dispatch (AddNewCharacter (Some model.))))
                     prop.text "Add New Character"
                 ]
             ]
