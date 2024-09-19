@@ -5,6 +5,8 @@ open FSharp.Data
 open FogentRoleplayLib.StringUtils
 open FogentRoleplayLib.DamageType
 open FogentRoleplayLib.EngageableOpponents
+open FogentRoleplayLib.RangeCalculation
+open FogentRoleplayLib.CalculatedRange
 open FogentRoleplayLib.Range
 open FogentRoleplayLib.ResourceName
 open FogentRoleplayLib.Weapon
@@ -15,8 +17,12 @@ open FogentRoleplayLib.Container
 open FogentRoleplayLib.WeaponResource
 open FogentRoleplayLib.PhysicalDefense
 open FogentRoleplayLib.SkillDiceMod
+open FogentRoleplayLib.SetSphere
+open FogentRoleplayLib.SetCone
 open FogentRoleplayLib.SetAreaOfEffect
 open FogentRoleplayLib.AreaOfEffect
+open FogentRoleplayLib.SphereCalculation
+open FogentRoleplayLib.ConeCalculation
 open FogentRoleplayLib.AreaOfEffectCalculation
 open FogentRoleplayLib.AttributeDeterminedDiceMod
 open FogentRoleplayLib.WeightClass
@@ -72,11 +78,13 @@ let engageableOpponentsMap =
     |> eoCalculationSetToMap
     |> parseEngaeableOpponentsString
 
-// Range
+// Range Utilities
 let parseMaxRangeOption input =
     match input with
     | "" -> None
     | validInput -> Some(uint validInput)
+
+// CalculatedRange
 
 let calculatedRanges: CalculatedRange list =
     makeFogentRoleplayDataList "CalculatedRangeData.csv" (fun row -> {
@@ -84,6 +92,8 @@ let calculatedRanges: CalculatedRange list =
         effectiveRange = uint row.["effectiveRange"]
         maxRangeOption = parseMaxRangeOption row.["maxRangeOption"]
     })
+
+// RangeCalculation
 
 let rangeCalculations =
     makeFogentRoleplayDataList "RangeCalculationData.csv" (fun row -> {
@@ -94,6 +104,8 @@ let rangeCalculations =
         maxRangeOption = parseMaxRangeOption row.["maxRangeOption"]
     })
 
+// Range
+
 let rangeMap = (calculatedRanges, rangeCalculations) ||> createRangeMap
 
 let rangeOptionMap string =
@@ -101,7 +113,7 @@ let rangeOptionMap string =
     | "None" -> None
     | _ -> rangeMap.Item string |> Some
 
-// AreaOfEffect
+// SphereCalculation
 
 let sphereCalculationSet =
     makeFogentRoleplayDataSet "AreaOfEffects/SphereCalculation.csv" (fun row -> {
@@ -110,6 +122,8 @@ let sphereCalculationSet =
         radiusPerDice = float row.["Radius per Dice"]
     })
 
+// ConeCalculation
+
 let coneCalculationSet =
     makeFogentRoleplayDataSet "AreaOfEffects/ConeCalculation.csv" (fun row -> {
         name = string row.["name"]
@@ -117,6 +131,8 @@ let coneCalculationSet =
         initBaseAndHeight = float row.["init triangle base/height"]
         baseAndHeightPerDice = float row.["base/height per unit"]
     })
+
+// SetSphere
 
 let setSphereSet =
     makeFogentRoleplayDataSet "AreaOfEffects/SetSphere.csv" (fun row -> {

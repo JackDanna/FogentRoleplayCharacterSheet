@@ -99,7 +99,7 @@ module EngageableOpponentsCalculationDatabase =
         |> Set.ofList
 
 module CalculatedRangesDatabase =
-    open FogentRoleplayLib.Range
+    open FogentRoleplayLib.CalculatedRange
     let calculatedRangesTableName = "calculated_ranges"
     let nameHeader = "name"
     let effectRangeHeader = "effective_range"
@@ -144,7 +144,7 @@ module CalculatedRangesDatabase =
         })
 
 module RangeCalculationsDatabase =
-    open FogentRoleplayLib.Range
+    open FogentRoleplayLib.RangeCalculation
     let rangeCalculationsTableName = "range_calculations"
     let nameHeader = "name"
     let numDicePerEffectiveRangeUnitHeader = "num_dice_per_effective_range_unit"
@@ -201,7 +201,7 @@ module RangeCalculationsDatabase =
         })
 
 module SphereCalculationDatabase =
-    open FogentRoleplayLib.AreaOfEffectCalculation
+    open FogentRoleplayLib.SphereCalculation
 
     let sphereCalculationsTableName = "sphere_calculations"
     let nameHeader = "name"
@@ -248,7 +248,7 @@ module SphereCalculationDatabase =
         |> Set.ofList
 
 module ConeCalculationDatabase =
-    open FogentRoleplayLib.AreaOfEffectCalculation
+    open FogentRoleplayLib.ConeCalculation
 
     let coneCalculationsTableName = "cone_calculations"
     let nameHeader = "name"
@@ -299,7 +299,7 @@ module ConeCalculationDatabase =
         |> Set.ofList
 
 module SetSphereDatabase =
-    open FogentRoleplayLib.SetAreaOfEffect
+    open FogentRoleplayLib.SetSphere
 
     let setSpheresTableName = "set_spheres"
     let nameHeader = "name"
@@ -341,7 +341,7 @@ module SetSphereDatabase =
         |> Set.ofSeq
 
 module SetConeDatabase =
-    open FogentRoleplayLib.SetAreaOfEffect // Assuming this is where SetCone is defined
+    open FogentRoleplayLib.SetCone // Assuming this is where SetCone is defined
 
     let setConesTableName = "set_cones"
     let nameHeader = "name"

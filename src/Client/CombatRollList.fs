@@ -3,7 +3,7 @@ module CombatRollList
 open FogentRoleplayLib.CombatRoll
 
 open FogentRoleplayLib.DicePool
-open FogentRoleplayLib.Range
+open FogentRoleplayLib.CalculatedRange
 open FogentRoleplayLib.SetAreaOfEffect
 open FogentRoleplayLib.ItemElement
 open FogentRoleplayLib.Vocation

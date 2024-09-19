@@ -451,16 +451,7 @@ module BattleMapUOM =
     open Feet
     let feetPerBattleMapUOM = 5u
 
-module Range =
-
-    open System
-    open MathUtils
-
-    type CalculatedRange = {
-        name: string
-        effectiveRange: uint
-        maxRangeOption: uint option
-    }
+module RangeCalculation =
 
     type RangeCalculation = {
         name: string
@@ -470,11 +461,13 @@ module Range =
         maxRangeOption: uint option
     }
 
-    type Range =
-        | CalculatedRange of CalculatedRange
-        | RangeCalculation of RangeCalculation
+module CalculatedRange =
 
-    //type RangeAdjustment = int
+    type CalculatedRange = {
+        name: string
+        effectiveRange: uint
+        maxRangeOption: uint option
+    }
 
     let calculatedRangeToString (calculatedRange: CalculatedRange) =
         match calculatedRange.maxRangeOption with
@@ -482,7 +475,19 @@ module Range =
         | None -> ""
         |> sprintf "%d/%s" calculatedRange.effectiveRange
 
-    let calculateRangeCalculation numDice rangeCalculation = {
+
+module Range =
+
+    open System
+
+    open RangeCalculation
+    open CalculatedRange
+
+    type Range =
+        | CalculatedRange of CalculatedRange
+        | RangeCalculation of RangeCalculation
+
+    let rangeCalculationToCalculatedRange numDice (rangeCalculation: RangeCalculation) = {
         name = rangeCalculation.name
         effectiveRange =
             if rangeCalculation.roundEffectiveRangeUp then
@@ -501,7 +506,7 @@ module Range =
     let rangeToCalculatedRange (numDice: uint) (range: Range) : CalculatedRange =
         match range with
         | CalculatedRange calculatedRange -> calculatedRange
-        | RangeCalculation rangeCalculation -> calculateRangeCalculation numDice rangeCalculation
+        | RangeCalculation rangeCalculation -> rangeCalculationToCalculatedRange numDice rangeCalculation
 
     let determineGreatestRange numDice (primaryRange: Range) (optionalRange: Range option) =
         let calculatedPrimaryRange = rangeToCalculatedRange numDice primaryRange
@@ -543,14 +548,14 @@ module Range =
             | _ -> false
         | _ -> false
 
-module AreaOfEffectCalculation =
-
+module SphereCalculation =
     type SphereCalculation = {
         name: string
         initRadius: float
         radiusPerDice: float
     }
 
+module ConeCalculation =
     type ConeCalculation = {
         name: string
         initBaseAndHeight: float
@@ -558,23 +563,39 @@ module AreaOfEffectCalculation =
         angle: float
     }
 
+module AreaOfEffectCalculation =
+
+    open SphereCalculation
+    open ConeCalculation
+
     type AreaOfEffectCalculation =
         | SphereCalculation of SphereCalculation
         | ConeCalculation of ConeCalculation
 
-module SetAreaOfEffect =
+module SetSphere =
 
     type SetSphere = { name: string; radius: uint }
+
+    let setSphereToString decimalPlaces calculatedSphere =
+        // let decimalLimitedArea =
+        //     calculatedSphere.area.ToString("F" + decimalPlaces.ToString())
+
+        let decimalLimitedRadius =
+            calculatedSphere.radius.ToString("F" + decimalPlaces.ToString())
+
+        sprintf
+            // "area: %s ft^2, radius: %s ft"
+            // decimalLimitedArea
+            "radius: %s ft"
+            decimalLimitedRadius
+
+module SetCone =
 
     type SetCone = {
         name: string
         baseAndHeight: uint
         angle: float
     }
-
-    type SetAreaOfEffect =
-        | SetSphere of SetSphere
-        | SetCone of SetCone
 
     let setConeToString decimalPlaces (setCone: SetCone) =
         // let decimalLimitedArea =
@@ -589,18 +610,13 @@ module SetAreaOfEffect =
             setCone.baseAndHeight
             decimalLimitedAngle
 
-    let setSphereToString decimalPlaces calculatedSphere =
-        // let decimalLimitedArea =
-        //     calculatedSphere.area.ToString("F" + decimalPlaces.ToString())
+module SetAreaOfEffect =
+    open SetSphere
+    open SetCone
 
-        let decimalLimitedRadius =
-            calculatedSphere.radius.ToString("F" + decimalPlaces.ToString())
-
-        sprintf
-            // "area: %s ft^2, radius: %s ft"
-            // decimalLimitedArea
-            "radius: %s ft"
-            decimalLimitedRadius
+    type SetAreaOfEffect =
+        | SetSphere of SetSphere
+        | SetCone of SetCone
 
     let setAreaOfEffectToString (setAOE: SetAreaOfEffect) =
         let decimalPlaces = 1
@@ -618,6 +634,10 @@ module AreaOfEffect =
     open System
     open MathUtils
     open BattleMapUOM
+    open SphereCalculation
+    open ConeCalculation
+    open SetCone
+    open SetSphere
     open AreaOfEffectCalculation
     open SetAreaOfEffect
 
@@ -1503,6 +1523,7 @@ module CombatRoll =
     open DicePool
     open DicePoolMod
     open Penetration
+    open CalculatedRange
     open Range
     open DamageType
     open SetAreaOfEffect
