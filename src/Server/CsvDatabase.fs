@@ -39,6 +39,8 @@ open FogentRoleplayLib.TextEffect
 open FogentRoleplayLib.MagicSkillData
 open FogentRoleplayLib.CoreSkillData
 
+open DatabaseUtils
+
 let makeFogentRoleplayDataPath fileName =
     __SOURCE_DIRECTORY__ + "../../../FogentRoleplayData/" + fileName
 
@@ -59,7 +61,7 @@ let Bool boolString =
 // DamageType
 
 let damageTypes =
-    makeFogentRoleplayDataSet "DamageTypeData.csv" (fun row -> (DamageType row.["name"]))
+    makeFogentRoleplayDataSet (tableNameToCSVFileName damagageTypeTableName) (fun row -> (DamageType row.["name"]))
 
 let stringToDamageTypeSet =
     damageTypes |> stringSetToTypeMap |> mapAndStringToValueSet
@@ -67,7 +69,7 @@ let stringToDamageTypeSet =
 // EngageableOpponents
 
 let engageableOpponentsCalculations: Set<EngageableOpponentsCalculation> =
-    makeFogentRoleplayDataSet "EngageableOpponentsCalculationData.csv" (fun row -> {
+    makeFogentRoleplayDataSet (tableNameToCSVFileName engageableOpponentsCalculationTableName) (fun row -> {
         name = string row.["name"]
         combatRollDivisor = uint row.["combatRollDivisor"]
         maxEOOption = parseMaxEngageableOpponentsString row.["maxEO"]
@@ -87,7 +89,7 @@ let parseMaxRangeOption input =
 // CalculatedRange
 
 let calculatedRanges: CalculatedRange list =
-    makeFogentRoleplayDataList "CalculatedRangeData.csv" (fun row -> {
+    makeFogentRoleplayDataList (tableNameToCSVFileName calculatedRangeTableName) (fun row -> {
         name = string row.["name"]
         effectiveRange = uint row.["effectiveRange"]
         maxRangeOption = parseMaxRangeOption row.["maxRangeOption"]
@@ -96,7 +98,7 @@ let calculatedRanges: CalculatedRange list =
 // RangeCalculation
 
 let rangeCalculations =
-    makeFogentRoleplayDataList "RangeCalculationData.csv" (fun row -> {
+    makeFogentRoleplayDataList (tableNameToCSVFileName rangeCalculationTableName) (fun row -> {
         name = string row.["name"]
         numDicePerEffectiveRangeUnit = uint row.["numDicePerEffectiveRangeUnit"]
         ftPerEffectiveRangeUnit = uint row.["ftPerEffectiveRangeUnit"]
@@ -116,7 +118,7 @@ let rangeOptionMap string =
 // SphereCalculation
 
 let sphereCalculationSet =
-    makeFogentRoleplayDataSet "AreaOfEffects/SphereCalculation.csv" (fun row -> {
+    makeFogentRoleplayDataSet $"AreaOfEffects/{tableNameToCSVFileName sphereCalculationTableName}" (fun row -> {
         name = string row.["name"]
         initRadius = float row.["Init Radius"]
         radiusPerDice = float row.["Radius per Dice"]
