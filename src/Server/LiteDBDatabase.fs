@@ -136,5 +136,18 @@ let insertSetSphere sss =
     |> Seq.map (fun ss -> idSetSphere.Insert({ Id = 0; setSphere = ss }))
     |> ignore
 
+//SetCone
+
+open FogentRoleplayLib.SetCone
+
+[<CLIMutable>]
+type IdSetCone = { Id: int; setCone: SetCone }
+
+let idSetCone = db.GetCollection<IdSetCone>(setConeTableName)
+
+let insertSetCone scs =
+    scs |> List.map (fun sc -> idSetCone.Insert({ Id = 0; setCone = sc })) |> ignore
+
+// AreaOfEffect ??
 
 let allPeople = idDamageTypes.FindAll() |> Seq.toList

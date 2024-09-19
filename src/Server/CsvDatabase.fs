@@ -150,6 +150,8 @@ let setSphereSet =
         radius = uint row.["Radius(ft)"]
     })
 
+// SetCone
+
 let setConeSet =
     makeFogentRoleplayDataSetExcludingFileExtension $"AreaOfEffects/{setConeTableName}" (fun row -> {
         name = string row.["name"]
