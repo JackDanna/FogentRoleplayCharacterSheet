@@ -183,7 +183,7 @@ let namedAreaOfEffectOptionMap key =
 
 // ResourceClass
 let resourceMap =
-    makeFogentRoleplayDataSetExcludingFileExtension resourceClassTableName (fun row -> (ResourceName row.["name"]))
+    makeFogentRoleplayDataSetExcludingFileExtension resourceNameTableName (fun row -> (ResourceName row.["name"]))
     |> stringSetToTypeMap
 
 let resourceOptionMap string =
@@ -194,7 +194,7 @@ let resourceOptionMap string =
 // AttributeAndCoreSkill
 
 let coreSkillDataSet: Set<CoreSkillData> =
-    makeFogentRoleplayDataSetExcludingFileExtension coreSkillTableName (fun row -> {
+    makeFogentRoleplayDataSetExcludingFileExtension coreSkillDataTableName (fun row -> {
         skillName = SkillName row.["name"]
         attributeName = AttributeName row.["governingAttribute"]
     })

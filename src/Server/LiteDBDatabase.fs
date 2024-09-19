@@ -12,111 +12,65 @@ let db =
     let connStr = "Filename=fogentData.db;mode=Exclusive"
     new LiteDatabase(connStr, mapper)
 
-// DamageType
+[<CLIMutable>]
+type IdWrapper<'T> = 
+    { 
+        Id: int
+        Entity: 'T 
+    }
 
+let collectionFromDB<'T> =
+    db.GetCollection<IdWrapper<'T>>(typeof<'T>.Name)
+
+let insertEntity (entity: 'T) (collection:LiteCollection<IdWrapper<'T>>) =
+    collection.Insert({ Id = 0; Entity = entity })
+
+let insertEntities (entities: 'T seq) =
+
+    entities
+    |> Seq.map (fun entity -> insertEntity entity collectionFromDB<'T>)
+    |> ignore
+
+// DamageType
 open FogentRoleplayLib.DamageType
 
-[<CLIMutable>]
-type IdDamageType = { Id: int; damageType: DamageType }
-
-let idDamageTypes: LiteCollection<IdDamageType> =
-    db.GetCollection<IdDamageType>(damagageTypeTableName)
-
-let insertDamageTypes (damageTypes: DamageType seq) =
-    damageTypes
-    |> Seq.map (fun damageType -> idDamageTypes.Insert({ Id = 0; damageType = damageType }))
-    |> ignore
+let idDamageTypes: LiteCollection<IdWrapper<DamageType>> =
+    collectionFromDB<DamageType>
 
 // EngageableOpponents
 
 open FogentRoleplayLib.EngageableOpponents
 
-[<CLIMutable>]
-type IdEngageableOpponentsCalculation = {
-    Id: int
-    engageableOpponentsCalculation: EngageableOpponentsCalculation
-}
-
 let idEngageableOpponentsCalculations =
-    db.GetCollection<IdEngageableOpponentsCalculation>(engageableOpponentsCalculationTableName)
-
-let insertEngageableOpponentsCalculations eocs =
-    eocs
-    |> Seq.map (fun eoc ->
-        idEngageableOpponentsCalculations.Insert(
-            {
-                Id = 0
-                engageableOpponentsCalculation = eoc
-            }
-        ))
-    |> ignore
+    db.GetCollection<IdWrapper<EngageableOpponents>>(engageableOpponentsCalculationTableName)
 
 // CalculatedRange
 
 open FogentRoleplayLib.CalculatedRange
 
-[<CLIMutable>]
-type IdCalculatedRange = {
-    Id: int
-    calculatedRange: CalculatedRange
-}
-
 let idCalculatedRanges =
-    db.GetCollection<IdCalculatedRange>(calculatedRangeTableName)
-
-let insertCalculatedRange crs =
-    crs
-    |> Seq.map (fun cr -> idCalculatedRanges.Insert({ Id = 0; calculatedRange = cr }))
-    |> ignore
+    db.GetCollection<IdWrapper<CalculatedRange>>(calculatedRangeTableName)
 
 // RangeCalculation
 
 open FogentRoleplayLib.RangeCalculation
 
-[<CLIMutable>]
-type IdRangeCalculation = {
-    Id: int
-    rangeCalculation: RangeCalculation
-}
-
 let idRangeCalculations =
-    db.GetCollection<IdRangeCalculation>(rangeCalculationTableName)
-
-let insertRangeCalculation rcs =
-    rcs
-    |> Seq.map (fun rc -> idRangeCalculations.Insert({ Id = 0; rangeCalculation = rc }))
-    |> ignore
+    db.GetCollection<IdWrapper<RangeCalculation>>(rangeCalculationTableName)
 
 // SphereCalculation
 
 open FogentRoleplayLib.SphereCalculation
 
-[<CLIMutable>]
-type IdSphereCalculation = {
-    Id: int
-    sphereCalculation: SphereCalculation
-}
-
 let idSphereCalculations =
-    db.GetCollection<IdSphereCalculation>(sphereCalculationTableName)
-
-let insertSphereCalculation scs =
-    scs
-    |> Seq.map (fun sc -> idSphereCalculations.Insert({ Id = 0; sphereCalculation = sc }))
-    |> ignore
+    db.GetCollection<IdWrapper<SphereCalculation>>(sphereCalculationTableName)
 
 // ConeCalculation
 
 open FogentRoleplayLib.ConeCalculation
 
-[<CLIMutable>]
-type IdConeCalculation = {
-    Id: int
-    coneCalculation: ConeCalculation
-}
-
 let idConeCalculation =
-    db.GetCollection<IdConeCalculation>(coneCalculationTableName)
+    db.GetCollection<IdWrapper<ConeCalculation>>(coneCalculationTableName)
 
 let insertConeCalculationFromCSV ccs =
     ccs
@@ -146,8 +100,49 @@ type IdSetCone = { Id: int; setCone: SetCone }
 let idSetCone = db.GetCollection<IdSetCone>(setConeTableName)
 
 let insertSetCone scs =
-    scs |> List.map (fun sc -> idSetCone.Insert({ Id = 0; setCone = sc })) |> ignore
+    scs |> Seq.map (fun sc -> idSetCone.Insert({ Id = 0; setCone = sc })) |> ignore
 
-// AreaOfEffect ??
+// AreaOfEffect
+
+// ResourceClass
+
+open FogentRoleplayLib.ResourceName
+
+[<CLIMutable>]
+type IdResourceName = { Id: int; resourceName: ResourceName }
+
+let idResourceNames = db.GetCollection<IdResourceName>(resourceNameTableName)
+
+let insertResourceNames rns =
+    rns
+    |> Seq.map (fun rn -> idResourceNames.Insert({ Id = 0; resourceName = rn }))
+    |> ignore
+
+// Attribute
+
+// CoreSkillData
+
+open FogentRoleplayLib.CoreSkillData
+
+[<CLIMutable>]
+type IdCoreSkillData = {
+    Id: int
+    coreSkillData: CoreSkillData
+}
+
+let idCoreSkillDatas = db.GetCollection<IdCoreSkillData>(coreSkillDataTableName)
+
+let insertCoreSkillData csds =
+    csds
+    |> Seq.map (fun csd -> idCoreSkillDatas.Insert({ Id = 0; coreSkillData = csd }))
+    |> ignore
+
+// MagicSkillData
+
+open FogentRoleplayLib.MagicSkillData
+
+[<CLIMutable>]
+type IdMagicSkillData = {Id: int; magicSkillData = }
+
 
 let allPeople = idDamageTypes.FindAll() |> Seq.toList
