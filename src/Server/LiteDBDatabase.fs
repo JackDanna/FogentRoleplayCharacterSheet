@@ -5,6 +5,7 @@ open System
 open System.Collections.Generic
 open LiteDB
 open LiteDB.FSharp
+open DatabaseUtils
 
 let db =
     let mapper = FSharpBsonMapper()
@@ -18,12 +19,12 @@ open FogentRoleplayLib.DamageType
 [<CLIMutable>]
 type IdDamageType = { Id: int; damageType: DamageType }
 
-let damageTypeCollection: LiteCollection<IdDamageType> =
-    db.GetCollection<IdDamageType>("damageTypes")
+let idDamageTypes: LiteCollection<IdDamageType> =
+    db.GetCollection<IdDamageType>(damagageTypeTableName)
 
-let insertDamageTypesFromCSV (damageTypes: DamageType seq) =
+let insertDamageTypes (damageTypes: DamageType seq) =
     damageTypes
-    |> Seq.map (fun damageType -> damageTypeCollection.Insert({ Id = 0; damageType = damageType }))
+    |> Seq.map (fun damageType -> idDamageTypes.Insert({ Id = 0; damageType = damageType }))
     |> ignore
 
 // EngageableOpponents
@@ -36,13 +37,13 @@ type IdEngageableOpponentsCalculation = {
     engageableOpponentsCalculation: EngageableOpponentsCalculation
 }
 
-let idEngageableOpponentsCalculation =
-    db.GetCollection<IdEngageableOpponentsCalculation>("engageableOpponentsCalculations")
+let idEngageableOpponentsCalculations =
+    db.GetCollection<IdEngageableOpponentsCalculation>(engageableOpponentsCalculationTableName)
 
-let insertEngageableOpponentsCalculation eocs =
+let insertEngageableOpponentsCalculations eocs =
     eocs
     |> Seq.map (fun eoc ->
-        idEngageableOpponentsCalculation.Insert(
+        idEngageableOpponentsCalculations.Insert(
             {
                 Id = 0
                 engageableOpponentsCalculation = eoc
@@ -60,11 +61,12 @@ type IdCalculatedRange = {
     calculatedRange: CalculatedRange
 }
 
-let idCalculatedRange = db.GetCollection<IdCalculatedRange>("calculatedRanges")
+let idCalculatedRanges =
+    db.GetCollection<IdCalculatedRange>(calculatedRangeTableName)
 
-let insertCalculatedRangeFromCSV crs =
+let insertCalculatedRange crs =
     crs
-    |> Seq.map (fun cr -> idCalculatedRange.Insert({ Id = 0; calculatedRange = cr }))
+    |> Seq.map (fun cr -> idCalculatedRanges.Insert({ Id = 0; calculatedRange = cr }))
     |> ignore
 
 // RangeCalculation
@@ -77,11 +79,12 @@ type IdRangeCalculation = {
     rangeCalculation: RangeCalculation
 }
 
-let idRangeCalculation = db.GetCollection<IdRangeCalculation>("rangeCalculation")
+let idRangeCalculations =
+    db.GetCollection<IdRangeCalculation>(rangeCalculationTableName)
 
-let insertRangeCalculationFromCSV rcs =
+let insertRangeCalculation rcs =
     rcs
-    |> Seq.map (fun rc -> idRangeCalculation.Insert({ Id = 0; rangeCalculation = rc }))
+    |> Seq.map (fun rc -> idRangeCalculations.Insert({ Id = 0; rangeCalculation = rc }))
     |> ignore
 
 // SphereCalculation
@@ -95,9 +98,9 @@ type IdSphereCalculation = {
 }
 
 let idSphereCalculations =
-    db.GetCollection<IdSphereCalculation>("sphereCalculations")
+    db.GetCollection<IdSphereCalculation>(sphereCalculationTableName)
 
-let insertSphereCalculationFromCSV scs =
+let insertSphereCalculation scs =
     scs
     |> Seq.map (fun sc -> idSphereCalculations.Insert({ Id = 0; sphereCalculation = sc }))
     |> ignore
@@ -112,7 +115,8 @@ type IdConeCalculation = {
     coneCalculation: ConeCalculation
 }
 
-let idConeCalculation = db.GetCollection<IdConeCalculation>("coneCalculations")
+let idConeCalculation =
+    db.GetCollection<IdConeCalculation>(coneCalculationTableName)
 
 let insertConeCalculationFromCSV ccs =
     ccs
@@ -125,12 +129,12 @@ open FogentRoleplayLib.SetSphere
 [<CLIMutable>]
 type IdSetSphere = { Id: int; setSphere: SetSphere }
 
-let idSetSphere = db.GetCollection<IdSetSphere>("sphereCalculations")
+let idSetSphere = db.GetCollection<IdSetSphere>(setSphereTableName)
 
-let insertSetSphereFromCSV sss =
+let insertSetSphere sss =
     sss
     |> Seq.map (fun ss -> idSetSphere.Insert({ Id = 0; setSphere = ss }))
     |> ignore
 
 
-let allPeople = damageTypeCollection.FindAll() |> Seq.toList
+let allPeople = idDamageTypes.FindAll() |> Seq.toList
