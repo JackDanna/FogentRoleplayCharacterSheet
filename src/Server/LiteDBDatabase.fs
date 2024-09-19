@@ -16,10 +16,10 @@ let db =
 open FogentRoleplayLib.DamageType
 
 [<CLIMutable>]
-type DamageTypeDocument = { Id: int; damageType: DamageType }
+type IdDamageType = { Id: int; damageType: DamageType }
 
-let damageTypeCollection: LiteCollection<DamageTypeDocument> =
-    db.GetCollection<DamageTypeDocument>("damageTypes")
+let damageTypeCollection: LiteCollection<IdDamageType> =
+    db.GetCollection<IdDamageType>("damageTypes")
 
 let insertDamageTypesFromCSV (damageTypes: DamageType seq) =
     damageTypes
