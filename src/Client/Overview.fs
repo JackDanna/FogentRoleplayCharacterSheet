@@ -51,7 +51,8 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     | GotInitSettingDataForAddNewCharacter settingData ->
         {
             state with
-                CharacterList = CharacterList.update (CharacterList.Msg.AddNewCharacter settingData) state.CharacterList
+                CharacterList =
+                    CharacterList.update (CharacterList.Msg.AddNewCharacter(Some settingData)) state.CharacterList
         },
         Cmd.none
 

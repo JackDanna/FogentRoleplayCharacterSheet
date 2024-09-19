@@ -25,7 +25,7 @@ type Msg =
     | GotCharacterList of Character list
     | SelectCharacter of int
     | DeleteCharacter of int
-    | AddNewCharacter of SettingData
+    | AddNewCharacter of SettingData option
     | CharacterMsg of Character.Msg
 
 let init (userData: UserData) =
@@ -63,12 +63,13 @@ let update msg model =
             characterList = List.removeAt pos model.characterList
       }
 
-    | AddNewCharacter settingData ->
-
-        {
+    | AddNewCharacter settingDataOption ->
+        match settingDataOption with
+        | None -> model
+        | Some settingData -> {
             model with
                 characterList = List.append model.characterList [ Character.init (settingData) ]
-        }
+          }
 
     | CharacterMsg msg ->
         match model.selectedCharacter with
