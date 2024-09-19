@@ -25,8 +25,7 @@ type Msg =
     | GotCharacterList of Character list
     | SelectCharacter of int
     | DeleteCharacter of int
-    | AddNewCharacter of option<UserData>
-    | GotInitSettingData of SettingData
+    | AddNewCharacter of SettingData
     | CharacterMsg of Character.Msg
 
 let init (userData: UserData) =
@@ -46,49 +45,34 @@ let init (userData: UserData) =
 
 let update msg model =
     match msg with
-    | GotCharacterList characterList ->
-        {
-            model with
-                characterList = characterList
-        },
-        Cmd.none
+    | GotCharacterList characterList -> {
+        model with
+            characterList = characterList
+      }
     | SelectCharacter pos ->
-        let indexExists = List.tryItem pos model.characterList |> Option.isSome
-
-        if indexExists then
+        if List.tryItem pos model.characterList |> Option.isSome then
             {
                 model with
                     selectedCharacter = Some pos
             }
         else
             model
-        |> (fun model -> model, Cmd.none)
 
-    | DeleteCharacter pos ->
-        {
-            model with
-                characterList = List.removeAt pos model.characterList
-        },
-        Cmd.none
+    | DeleteCharacter pos -> {
+        model with
+            characterList = List.removeAt pos model.characterList
+      }
 
-    | AddNewCharacter getInitSettingDataOption ->
-        match getInitSettingDataOption with
-        | None -> model, Cmd.none
-        | Some getInitSettingData ->
-            let api = getUserApi getInitSettingData.token
-            //let api = userApi userData.token
-            model, Cmd.OfAsync.perform api.getInitSettingData () GotInitSettingData
+    | AddNewCharacter settingData ->
 
-    | GotInitSettingData settingData ->
         {
             model with
                 characterList = List.append model.characterList [ Character.init (settingData) ]
-        },
-        Cmd.none
+        }
 
     | CharacterMsg msg ->
         match model.selectedCharacter with
-        | None -> model, Cmd.none
+        | None -> model
         | Some pos ->
             let updatedCharacter = Character.update msg model.characterList[pos]
 
@@ -97,8 +81,7 @@ let update msg model =
                     characterList =
                         model.characterList
                         |> List.mapi (fun index x -> if index = pos then updatedCharacter else x)
-            },
-            Cmd.none
+            }
 
 open Feliz
 open Feliz.Bulma
@@ -119,7 +102,7 @@ let view model dispatch =
                 model.characterList
             |> List.append [
                 Html.button [
-                    prop.onClick (fun _ -> (dispatch (AddNewCharacter (Some model.))))
+                    prop.onClick (fun _ -> (dispatch (AddNewCharacter None)))
                     prop.text "Add New Character"
                 ]
             ]

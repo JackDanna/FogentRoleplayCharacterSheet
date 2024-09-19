@@ -17,7 +17,9 @@ let getUserApi token =
     |> Remoting.withRouteBuilder Route.builder
     |> Remoting.buildProxy<IUserApi>
 
-type Msg = CharacterListMsg of CharacterList.Msg
+type Msg =
+    | CharacterListMsg of CharacterList.Msg
+    | GotInitSettingDataForAddNewCharacter of FogentRoleplayLib.SettingData.SettingData
 
 let init (user: Shared.UserData) =
     let characterListModel, characterListCmd = CharacterList.init user
@@ -38,27 +40,22 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
         match characterListMsg with
         | CharacterList.Msg.AddNewCharacter _ ->
 
-            let characterListModel, characterListCmd =
-                CharacterList.update
-                    (userApi.getInitSettingData |> Some |> CharacterList.Msg.AddNewCharacter)
-                    state.CharacterList
-
-            {
-                state with
-                    CharacterList = characterListModel
-            },
-            Cmd.map CharacterListMsg characterListCmd
+            state, Cmd.OfAsync.perform userApi.getInitSettingData () GotInitSettingDataForAddNewCharacter
 
         | _ ->
-            let characterListModel, characterListCmd =
-                CharacterList.update characterListMsg state.CharacterList
-
             {
                 state with
-                    CharacterList = characterListModel
+                    CharacterList = CharacterList.update characterListMsg state.CharacterList
             },
-            Cmd.map CharacterListMsg characterListCmd
+            Cmd.none
+    | GotInitSettingDataForAddNewCharacter settingData ->
+        {
+            state with
+                CharacterList = CharacterList.update (CharacterList.Msg.AddNewCharacter settingData) state.CharacterList
+        },
+        Cmd.none
 
+open Feliz
 open Feliz.Bulma
 
 let view (model: State) dispatch =
