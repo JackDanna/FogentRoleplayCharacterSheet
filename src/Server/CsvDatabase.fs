@@ -491,3 +491,18 @@ let itemStackMap =
     |> List.choose id
     |> List.map (fun itemElement -> (itemElementToName itemElement, itemElement))
     |> Map.ofSeq
+
+open FogentRoleplayLib.SettingData
+
+let getInitSettingDataFromCSV () : SettingData = {
+    attributeNameSet = attributeNameSet
+    coreSkillDataSet = coreSkillDataSet
+    itemElementMap = itemStackMap
+    weaponSpellSet = weaponSpellSet
+    magicSystemMap = magicSystemData
+    weaponSkillDataMap = weaponSkillDataMap
+    effectMap = effectDataMap
+    combatSpeedCalculationMap = combatSpeedCalculationMap
+    carryWeightCalculationMap = carryWeightCalculationMap
+    weightClassSet = weightClassSet
+}

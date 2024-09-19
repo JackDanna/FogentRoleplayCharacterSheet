@@ -4,30 +4,17 @@ module Api
 //open Azure.Storage.Blobs
 open Fable.Remoting.Server
 open Fable.Remoting.Giraffe
-open Microsoft.AspNetCore.Http
+//open Microsoft.AspNetCore.Http
 //open SAFE
 open Shared
 //open Storage
-open System
+//open System
 
 
 open FogentRoleplayLib.SettingData
 open CsvDatabase
 
-let getInitSettingData () = async {
-    return {
-        attributeNameSet = attributeNameSet
-        coreSkillDataSet = coreSkillDataSet
-        itemElementMap = itemStackMap
-        weaponSpellSet = weaponSpellSet
-        magicSystemMap = magicSystemData
-        weaponSkillDataMap = weaponSkillDataMap
-        effectMap = effectDataMap
-        combatSpeedCalculationMap = combatSpeedCalculationMap
-        carryWeightCalculationMap = carryWeightCalculationMap
-        weightClassSet = weightClassSet
-    }
-}
+let getInitSettingData () = async { return getInitSettingDataFromCSV () }
 
 open FogentRoleplayLib.Character
 
