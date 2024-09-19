@@ -44,13 +44,20 @@ open DatabaseUtils
 let makeFogentRoleplayDataPath fileName =
     __SOURCE_DIRECTORY__ + "../../../FogentRoleplayData/" + fileName
 
-let makeFogentRoleplayDataList fileName mappingFunc =
+let makeFogentRoleplayDataSeq fileName mappingFunc =
     CsvFile.Load(makeFogentRoleplayDataPath fileName, hasHeaders = true).Rows
     |> Seq.map (mappingFunc)
+
+let makeFogentRoleplayDataSeqExcludingFileExtionsion fileNameWithoutExtension mappingFunc =
+    makeFogentRoleplayDataSeq (tableNameToCSVFileName fileNameWithoutExtension) mappingFunc
+
+let makeFogentRoleplayDataListExcludingFileExtension fileNameWithoutExtension mappingFunc =
+    makeFogentRoleplayDataSeqExcludingFileExtionsion fileNameWithoutExtension mappingFunc
     |> List.ofSeq
 
-let makeFogentRoleplayDataSet fileName mappingFunc =
-    makeFogentRoleplayDataList fileName mappingFunc |> Set.ofList
+let makeFogentRoleplayDataSetExcludingFileExtension fileNameWithoutExtension mappingFunc =
+    makeFogentRoleplayDataSeqExcludingFileExtionsion fileNameWithoutExtension mappingFunc
+    |> Set.ofSeq
 
 let Bool boolString =
     match boolString with
@@ -61,7 +68,7 @@ let Bool boolString =
 // DamageType
 
 let damageTypes =
-    makeFogentRoleplayDataSet (tableNameToCSVFileName damagageTypeTableName) (fun row -> (DamageType row.["name"]))
+    makeFogentRoleplayDataSetExcludingFileExtension damagageTypeTableName (fun row -> (DamageType row.["name"]))
 
 let stringToDamageTypeSet =
     damageTypes |> stringSetToTypeMap |> mapAndStringToValueSet
@@ -69,7 +76,7 @@ let stringToDamageTypeSet =
 // EngageableOpponents
 
 let engageableOpponentsCalculations: Set<EngageableOpponentsCalculation> =
-    makeFogentRoleplayDataSet (tableNameToCSVFileName engageableOpponentsCalculationTableName) (fun row -> {
+    makeFogentRoleplayDataSetExcludingFileExtension engageableOpponentsCalculationTableName (fun row -> {
         name = string row.["name"]
         combatRollDivisor = uint row.["combatRollDivisor"]
         maxEOOption = parseMaxEngageableOpponentsString row.["maxEO"]
@@ -89,7 +96,7 @@ let parseMaxRangeOption input =
 // CalculatedRange
 
 let calculatedRanges: CalculatedRange list =
-    makeFogentRoleplayDataList (tableNameToCSVFileName calculatedRangeTableName) (fun row -> {
+    makeFogentRoleplayDataListExcludingFileExtension calculatedRangeTableName (fun row -> {
         name = string row.["name"]
         effectiveRange = uint row.["effectiveRange"]
         maxRangeOption = parseMaxRangeOption row.["maxRangeOption"]
@@ -98,7 +105,7 @@ let calculatedRanges: CalculatedRange list =
 // RangeCalculation
 
 let rangeCalculations =
-    makeFogentRoleplayDataList (tableNameToCSVFileName rangeCalculationTableName) (fun row -> {
+    makeFogentRoleplayDataListExcludingFileExtension rangeCalculationTableName (fun row -> {
         name = string row.["name"]
         numDicePerEffectiveRangeUnit = uint row.["numDicePerEffectiveRangeUnit"]
         ftPerEffectiveRangeUnit = uint row.["ftPerEffectiveRangeUnit"]
@@ -118,7 +125,7 @@ let rangeOptionMap string =
 // SphereCalculation
 
 let sphereCalculationSet =
-    makeFogentRoleplayDataSet $"AreaOfEffects/{tableNameToCSVFileName sphereCalculationTableName}" (fun row -> {
+    makeFogentRoleplayDataSetExcludingFileExtension $"AreaOfEffects/{sphereCalculationTableName}" (fun row -> {
         name = string row.["name"]
         initRadius = float row.["Init Radius"]
         radiusPerDice = float row.["Radius per Dice"]
@@ -127,7 +134,8 @@ let sphereCalculationSet =
 // ConeCalculation
 
 let coneCalculationSet =
-    makeFogentRoleplayDataSet "AreaOfEffects/ConeCalculation.csv" (fun row -> {
+
+    makeFogentRoleplayDataSetExcludingFileExtension $"AreaOfEffects/{coneCalculationTableName}" (fun row -> {
         name = string row.["name"]
         angle = float row.["angle"]
         initBaseAndHeight = float row.["init triangle base/height"]
@@ -137,13 +145,13 @@ let coneCalculationSet =
 // SetSphere
 
 let setSphereSet =
-    makeFogentRoleplayDataSet "AreaOfEffects/SetSphere.csv" (fun row -> {
+    makeFogentRoleplayDataSetExcludingFileExtension $"AreaOfEffects/{setSphereTableName}" (fun row -> {
         name = row.["Name"]
         radius = uint row.["Radius(ft)"]
     })
 
 let setConeSet =
-    makeFogentRoleplayDataSet "AreaOfEffects/SetCone.csv" (fun row -> {
+    makeFogentRoleplayDataSetExcludingFileExtension $"AreaOfEffects/{setConeTableName}" (fun row -> {
         name = string row.["name"]
         baseAndHeight = uint row.["Triangle Base/Height (ft)"]
         angle = float row.["Cone Angle (degrees)"]
@@ -173,7 +181,7 @@ let namedAreaOfEffectOptionMap key =
 
 // ResourceClass
 let resourceMap =
-    makeFogentRoleplayDataSet "ResourceClassData.csv" (fun row -> (ResourceName row.["name"]))
+    makeFogentRoleplayDataSetExcludingFileExtension resourceClassTableName (fun row -> (ResourceName row.["name"]))
     |> stringSetToTypeMap
 
 let resourceOptionMap string =
@@ -184,7 +192,7 @@ let resourceOptionMap string =
 // AttributeAndCoreSkill
 
 let coreSkillDataSet: Set<CoreSkillData> =
-    makeFogentRoleplayDataSet "CoreSkillData.csv" (fun row -> {
+    makeFogentRoleplayDataSetExcludingFileExtension coreSkillTableName (fun row -> {
         skillName = SkillName row.["name"]
         attributeName = AttributeName row.["governingAttribute"]
     })
@@ -198,7 +206,7 @@ let stringToAttributes = mapAndStringToValueSet attributeNameMap
 
 //MagicSkillData
 let magicSkillDataSet: Set<MagicSkillData> =
-    makeFogentRoleplayDataSet "MagicSkillData.csv" (fun row -> {
+    makeFogentRoleplayDataSetExcludingFileExtension magicSkillTableName (fun row -> {
         name = SkillName row.["name"]
         damageTypes = stringToDamageTypeSet (string row.["damageTypes"])
         isMeleeCapable = Bool row.["meleeCapable"]
@@ -212,7 +220,7 @@ let magicSkillDataMap =
 
 // MagicSystem
 let magicSystemData =
-    makeFogentRoleplayDataSet "MagicSystemData.csv" (fun row -> {
+    makeFogentRoleplayDataSetExcludingFileExtension magicSystemTableName (fun row -> {
         name = row.["name"]
         vocationName = row.["vocationName"]
         vocationGoverningAttributeSet = stringToAttributes row.["vocationGoverningAttributeSet"]
@@ -230,7 +238,7 @@ let magicSystemData =
 
 // WeaponClass
 let weaponSet =
-    makeFogentRoleplayDataSet "WeaponClassData.csv" (fun row -> {
+    makeFogentRoleplayDataSetExcludingFileExtension weaponClassTableName (fun row -> {
         name = string row.["name"]
         governingSkillName = SkillName row.["governingSkillName"]
         oneHandedDiceMod = parseDicePoolModOptionString row.["oneHandedWeaponDice"]
@@ -246,7 +254,7 @@ let weaponSet =
 
 // WeaponSkillData
 let weaponSkillDataMap =
-    makeFogentRoleplayDataSet "WeaponSkillData.csv" (fun row -> {
+    makeFogentRoleplayDataSetExcludingFileExtension weaponSkillTableName (fun row -> {
         name = string row.["skillName"]
         governingAttributes = stringToAttributes row.["governingAttributes"]
     })
@@ -255,7 +263,7 @@ let weaponSkillDataMap =
 
 // WeaponSpell
 let weaponSpellSet: WeaponSpell Set =
-    makeFogentRoleplayDataSet "WeaponSpellData.csv" (fun row -> {
+    makeFogentRoleplayDataSetExcludingFileExtension weaponSpellTableName (fun row -> {
         name = string row.["name"]
         oneHandedDiceMod = parseDicePoolModOptionString row.["oneHandedWeaponDice"]
         twoHandedDiceMod = parseDicePoolModOptionString row.["twoHandedWeaponDice"]
@@ -269,7 +277,7 @@ let weaponSpellSet: WeaponSpell Set =
 
 // Container
 let containerMap =
-    makeFogentRoleplayDataSet "ContainerClassData.csv" (fun row -> {
+    makeFogentRoleplayDataSetExcludingFileExtension containerTableName (fun row -> {
         name = string row.["Name"]
         weightCapacity = float row.["Weight Capacity"]
         volumeFtCubed = float row.["Volume"]
@@ -280,7 +288,7 @@ let containerMap =
 
 //WeaponResource
 let weaponResourceSet =
-    makeFogentRoleplayDataSet "WeaponResourceClassData.csv" (fun row -> {
+    makeFogentRoleplayDataSetExcludingFileExtension weaponResourceTableName (fun row -> {
         name = string row.["desc"]
         resourceName = resourceMap.Item row.["resourceClass"]
         dicePoolMod = parseDicePoolModString row.["resourceDice"]
@@ -292,7 +300,7 @@ let weaponResourceSet =
 
 // PhysicalDefense
 let physicalDefenseSet =
-    makeFogentRoleplayDataSet "PhysicalDefenseEffect.csv" (fun row -> {
+    makeFogentRoleplayDataSetExcludingFileExtension physicalDefenseTableName (fun row -> {
         name = string row.["name"]
         physicalDefense = float row.["physicalDefense"]
         durationAndSource = {
@@ -303,7 +311,7 @@ let physicalDefenseSet =
 
 // SkillDiceModEffect
 let skillDiceModEffectSet =
-    makeFogentRoleplayDataSet "SkillDiceModEffect.csv" (fun row -> {
+    makeFogentRoleplayDataSetExcludingFileExtension skillDiceModTableName (fun row -> {
         name = string row.["Name"]
         skillToEffect = string row.["Skill"]
         diceMod = parseDicePoolModString row.["Dice Mod"]
@@ -315,7 +323,7 @@ let skillDiceModEffectSet =
 
 // // AttributeStatAdjustmentEffect
 let attributeStatAdjustmentEffectData =
-    makeFogentRoleplayDataSet "Effect/AttributeStatAdjustment.csv" (fun row -> {
+    makeFogentRoleplayDataSetExcludingFileExtension $"Effect/{attributeStatAdjustmentTableName}" (fun row -> {
         name = string row.["Name"]
         attribute = AttributeName row.["Attribute"]
         adjustment = int row.["Adjustment"]
@@ -327,7 +335,7 @@ let attributeStatAdjustmentEffectData =
 
 // AttributeDeterminedDiceModEffect
 let attributeDeterminedDiceModSet =
-    makeFogentRoleplayDataSet "Effect/AttributeDeterminedDiceMod.csv" (fun row -> {
+    makeFogentRoleplayDataSetExcludingFileExtension $"Effect/{attributeDeterminedDiceModTableName}" (fun row -> {
         name = row.["name"]
         attributesToEffect = stringToAttributes row.["attributesToEffect"]
         dicePoolMod = parseDicePoolModString row.["dicePoolMod"]
@@ -347,7 +355,7 @@ let attributeDeterminedDiceModMap =
 open FogentRoleplayLib.BaseDiceTier
 
 let baseDiceTiers =
-    makeFogentRoleplayDataSet "BaseDiceTierData.csv" (fun row -> {
+    makeFogentRoleplayDataSetExcludingFileExtension baseDiceTierTableName (fun row -> {
         itemPrefix = string row.["itemPrefix"]
         level = int row.["level"]
         baseDice = parseDicePoolString row.["baseDice"]
@@ -381,7 +389,7 @@ let baseDiceModSet =
 
 // WeightClass
 let weightClassSet: WeightClass Set =
-    makeFogentRoleplayDataSet "WeightClassData.csv" (fun row -> {
+    makeFogentRoleplayDataSetExcludingFileExtension weightClassTableName (fun row -> {
         name = row.["name"]
         bottomPercentOption =
             if "" = row.["bottomPercent"] then
@@ -401,7 +409,7 @@ open FogentRoleplayLib.SpeedCalculation
 open FogentRoleplayLib.CombatSpeedCalculation
 
 let speedMap: Map<string, SpeedCalculation> =
-    makeFogentRoleplayDataSet "Speed.csv" (fun row -> {
+    makeFogentRoleplayDataSetExcludingFileExtension speedCalculationTableName (fun row -> {
         name = row.["name"]
         feetPerGoverningSkillDice = float row.["feetPerGoverningSkillDice"]
         feetPerReactionSpeedAttribute = float row.["feetPerReactionSpeedAttribute"]
@@ -410,7 +418,7 @@ let speedMap: Map<string, SpeedCalculation> =
     |> Map.ofSeq
 
 let combatSpeedCalculationMap =
-    makeFogentRoleplayDataSet "CombatSpeed.csv" (fun row -> {
+    makeFogentRoleplayDataSetExcludingFileExtension combatSpeedCalculationTableName (fun row -> {
         name = row.["name"]
         governingSkillName = SkillName row.["governingSkillName"]
         reactionSpeedAttributeName = AttributeName row.["reactionSpeedAttributeName"]
@@ -423,7 +431,7 @@ let combatSpeedCalculationMap =
 open FogentRoleplayLib.CarryWeightCalculation
 
 let carryWeightCalculationMap =
-    makeFogentRoleplayDataSet "CarryWeightCalculationData.csv" (fun row -> {
+    makeFogentRoleplayDataSetExcludingFileExtension carryWeightCalculationTableName (fun row -> {
         name = string row.["name"]
         baseWeight = uint row.["baseWeight"]
         governingAttribute = AttributeName row.["governingAttribute"]
@@ -436,7 +444,7 @@ let carryWeightCalculationMap =
 
 // TextEffectForDisplay
 let textEffect: TextEffect Set =
-    makeFogentRoleplayDataSet "Effect/TextEffect.csv" (fun row -> {
+    makeFogentRoleplayDataSetExcludingFileExtension $"Effect/{textEffectTableName}" (fun row -> {
         name = string row.["Name"]
         effect = string row.["Effect"]
         durationAndSource = {
@@ -484,8 +492,8 @@ let createItemFromRow (row: CsvRow) = {
     weight = float row.["weight"]
 }
 
-let itemStackMap =
-    makeFogentRoleplayDataSet "ItemData.csv" (fun row ->
+let itemElementMap =
+    makeFogentRoleplayDataSetExcludingFileExtension itemElementTableName (fun row ->
 
         match row.["quantity"] with
         | quantity when isNumeric quantity ->
@@ -515,7 +523,7 @@ open FogentRoleplayLib.SettingData
 let getInitSettingDataFromCSV () : SettingData = {
     attributeNameSet = attributeNameSet
     coreSkillDataSet = coreSkillDataSet
-    itemElementMap = itemStackMap
+    itemElementMap = itemElementMap
     weaponSpellSet = weaponSpellSet
     magicSystemMap = magicSystemData
     weaponSkillDataMap = weaponSkillDataMap
