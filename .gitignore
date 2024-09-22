@@ -68,3 +68,4 @@ lib*.pc
 /Release/
 /tmp_install/
 /portlock/
+temp/token.txt
