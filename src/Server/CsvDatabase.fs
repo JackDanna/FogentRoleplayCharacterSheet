@@ -138,7 +138,7 @@ let coneCalculationSet =
     makeFogentRoleplayDataSetExcludingFileExtension $"AreaOfEffects/{coneCalculationTableName}" (fun row -> {
         name = string row.["name"]
         angle = float row.["angle"]
-        initBaseAndHeight = float row.["init triangle base/height"]
+        initBaseAndHeight = float row.["initBaseAndHeight"]
         baseAndHeightPerDice = float row.["base/height per unit"]
     })
 
