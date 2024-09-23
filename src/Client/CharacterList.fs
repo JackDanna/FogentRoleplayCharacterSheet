@@ -11,7 +11,7 @@ open FogentRoleplayLib.SettingData
 
 
 type Model = {
-    characterList: Character List
+    idCharacterList: IdCharacter List
     selectedCharacter: int option
 }
 
@@ -22,7 +22,7 @@ let getUserApi (token: JWT) =
     |> Remoting.buildProxy<IUserApi>
 
 type Msg =
-    | GotCharacterList of Character list
+    | GotIdCharacterList of IdCharacter list
     | SelectCharacter of int
     | DeleteCharacter of int
     | AddNewCharacter of SettingData option
@@ -33,24 +33,24 @@ let init (userData: UserData) =
     let api = getUserApi userData.token
 
     let getCharacterList = async {
-        let! result = api.getCharacterList userData
-        return GotCharacterList(result)
+        let! result = api.getIdCharacterList userData
+        return GotIdCharacterList(result)
     }
 
     {
-        characterList = []
+        idCharacterList = []
         selectedCharacter = None
     },
     Cmd.fromAsync getCharacterList
 
 let update msg model =
     match msg with
-    | GotCharacterList characterList -> {
+    | GotIdCharacterList idCharacterList -> {
         model with
-            characterList = characterList
+            idCharacterList = idCharacterList
       }
     | SelectCharacter pos ->
-        if List.tryItem pos model.characterList |> Option.isSome then
+        if List.tryItem pos model.idCharacterList |> Option.isSome then
             {
                 model with
                     selectedCharacter = Some pos
@@ -60,7 +60,7 @@ let update msg model =
 
     | DeleteCharacter pos -> {
         model with
-            characterList = List.removeAt pos model.characterList
+            idCharacterList = List.removeAt pos model.idCharacterList
       }
 
     | AddNewCharacter settingDataOption ->
@@ -68,20 +68,31 @@ let update msg model =
         | None -> model
         | Some settingData -> {
             model with
-                characterList = List.append model.characterList [ Character.init (settingData) ]
+                idCharacterList =
+                    settingData
+                    |> Character.init
+                    |> createAutoIncrementedIdCharacter
+                    |> List.singleton
+                    |> List.append model.idCharacterList
           }
 
     | CharacterMsg msg ->
         match model.selectedCharacter with
         | None -> model
         | Some pos ->
-            let updatedCharacter = Character.update msg model.characterList[pos]
 
             {
                 model with
-                    characterList =
-                        model.characterList
-                        |> List.mapi (fun index x -> if index = pos then updatedCharacter else x)
+                    idCharacterList =
+                        model.idCharacterList
+                        |> List.mapi (fun index x ->
+                            if index = pos then
+                                {
+                                    model.idCharacterList[pos] with
+                                        Character = Character.update msg model.idCharacterList[pos].Character
+                                }
+                            else
+                                x)
             }
 
 open Feliz
@@ -94,13 +105,13 @@ let view model dispatch =
             List.mapi
                 (fun position character ->
                     Bulma.container [
-                        Html.text character.name
+                        Html.text character.Character.name
                         Html.button [
                             prop.onClick (fun _ -> dispatch (SelectCharacter position))
                             prop.text "Select"
                         ]
                     ])
-                model.characterList
+                model.idCharacterList
             |> List.append [
                 Html.button [
                     prop.onClick (fun _ -> (dispatch (AddNewCharacter None)))
@@ -110,6 +121,6 @@ let view model dispatch =
         )
 
         match model.selectedCharacter with
-        | Some index -> Character.view model.characterList[index] (CharacterMsg >> dispatch)
+        | Some index -> Character.view model.idCharacterList[index].Character (CharacterMsg >> dispatch)
         | None -> Html.none
     ]

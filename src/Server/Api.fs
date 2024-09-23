@@ -10,22 +10,25 @@ open Shared
 //open Storage
 //open System
 
-
-open FogentRoleplayLib.SettingData
 open CsvDatabase
+open LiteDBDatabase
 
 let getInitSettingData () = async { return getInitSettingDataFromCSV () }
 
-open FogentRoleplayLib.Character
-
-let getCharacterList (userData: UserData) : Async<Character list> = async {
+let getCharacterList (userData: UserData) = async {
     // In here I will have to search the DB for which characters the player has access to
-    return List.empty
+    return
+        userData.username
+        |> usernameToIdUser
+        |> function
+            | Some idUser -> getCharactersForUser idUser.Id
+            | None -> Seq.empty
+        |> List.ofSeq
 }
 
 let userApi: IUserApi = {
     getInitSettingData = getInitSettingData
-    getCharacterList = getCharacterList
+    getIdCharacterList = getCharacterList
 }
 
 open Authorize
