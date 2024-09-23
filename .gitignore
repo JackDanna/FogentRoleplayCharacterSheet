@@ -69,3 +69,4 @@ lib*.pc
 /tmp_install/
 /portlock/
 temp/token.txt
+src/Server/fogentData.db
