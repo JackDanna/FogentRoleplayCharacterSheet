@@ -13,6 +13,7 @@ open Shared
 open CsvDatabase
 open LiteDBDatabase
 
+let addNewCharacter username = async { return LiteDBDatabase.addNewCharacter (getInitSettingDataFromCSV ()) username }
 let getInitSettingData () = async { return getInitSettingDataFromCSV () }
 
 let getCharacterList (userData: UserData) = async {
@@ -27,6 +28,7 @@ let getCharacterList (userData: UserData) = async {
 }
 
 let userApi: IUserApi = {
+    addNewCharacter = addNewCharacter
     getInitSettingData = getInitSettingData
     getIdCharacterList = getCharacterList
 }

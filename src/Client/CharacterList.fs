@@ -25,7 +25,7 @@ type Msg =
     | GotIdCharacterList of IdCharacter list
     | SelectCharacter of int
     | DeleteCharacter of int
-    | AddNewCharacter of SettingData option
+    | AddNewCharacter
     | CharacterMsg of Character.Msg
 
 let init (userData: UserData) =
@@ -62,19 +62,7 @@ let update msg model =
         model with
             idCharacterList = List.removeAt pos model.idCharacterList
       }
-
-    | AddNewCharacter settingDataOption ->
-        match settingDataOption with
-        | None -> model
-        | Some settingData -> {
-            model with
-                idCharacterList =
-                    settingData
-                    |> Character.init
-                    |> createAutoIncrementedIdCharacter
-                    |> List.singleton
-                    |> List.append model.idCharacterList
-          }
+    | AddNewCharacter -> model
 
     | CharacterMsg msg ->
         match model.selectedCharacter with
@@ -114,7 +102,7 @@ let view model dispatch =
                 model.idCharacterList
             |> List.append [
                 Html.button [
-                    prop.onClick (fun _ -> (dispatch (AddNewCharacter None)))
+                    prop.onClick (fun _ -> (dispatch (AddNewCharacter)))
                     prop.text "Add New Character"
                 ]
             ]

@@ -19,7 +19,8 @@ let getUserApi token =
 
 type Msg =
     | CharacterListMsg of CharacterList.Msg
-    | GotInitSettingDataForAddNewCharacter of FogentRoleplayLib.SettingData.SettingData
+    //| GotInitSettingDataForAddNewCharacter of FogentRoleplayLib.SettingData.SettingData
+    | GotNewIdCharacters of IdCharacter List
 
 let init (user: Shared.UserData) =
     let characterListModel, characterListCmd = CharacterList.init user
@@ -38,9 +39,9 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
     match msg with
     | CharacterListMsg(characterListMsg: CharacterList.Msg) ->
         match characterListMsg with
-        | CharacterList.Msg.AddNewCharacter _ ->
+        | CharacterList.Msg.AddNewCharacter ->
 
-            state, Cmd.OfAsync.perform userApi.getInitSettingData () GotInitSettingDataForAddNewCharacter
+            state, Cmd.OfAsync.perform userApi.addNewCharacter state.User.username GotNewIdCharacters
 
         | _ ->
             {
@@ -48,13 +49,21 @@ let update (msg: Msg) (state: State) : State * Cmd<Msg> =
                     CharacterList = CharacterList.update characterListMsg state.CharacterList
             },
             Cmd.none
-    | GotInitSettingDataForAddNewCharacter settingData ->
+    | GotNewIdCharacters idCharacterList ->
         {
             state with
                 CharacterList =
-                    CharacterList.update (CharacterList.Msg.AddNewCharacter(Some settingData)) state.CharacterList
+                    CharacterList.update (CharacterList.Msg.GotIdCharacterList(idCharacterList)) state.CharacterList
         },
         Cmd.none
+
+// | GotInitSettingDataForAddNewCharacter settingData ->
+//     {
+//         state with
+//             CharacterList =
+//                 CharacterList.update (CharacterList.Msg.AddNewCharacter(Some settingData)) state.CharacterList
+//     },
+//     Cmd.none
 
 open Feliz
 open Feliz.Bulma

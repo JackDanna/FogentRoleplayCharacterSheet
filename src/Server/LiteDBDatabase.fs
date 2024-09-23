@@ -68,9 +68,6 @@ let insertCharacter userId (character: Character) =
     grantAccess userId idCharacter.Id
     idCharacter
 
-let addNewCharacter settingData userId =
-    insertCharacter userId (FogentRoleplayLib.Character.init settingData)
-
 let getCharactersForUser userId =
     userCharacterAccesses.Find(fun uca -> uca.UserId = userId)
     |> Seq.map (fun uca -> characters.FindById(BsonValue(uca.CharacterId)))
@@ -79,8 +76,21 @@ let getUsersForCharacter characterId =
     userCharacterAccesses.Find(fun uca -> uca.CharacterId = characterId)
     |> Seq.map (fun uca -> users.FindById(BsonValue(uca.UserId)))
 
-let usernameToIdUser username =
+let usernameToIdUser (username: Username) =
     users.Find(fun idUser -> idUser.Login.userName = username) |> Seq.tryHead
+
+let addNewCharacter settingData username =
+
+    match usernameToIdUser username with
+    | Some idUser ->
+        settingData
+        |> FogentRoleplayLib.Character.init
+        |> insertCharacter idUser.Id
+        |> ignore
+
+        getCharactersForUser idUser.Id
+    | None -> Seq.empty
+    |> List.ofSeq
 
 let isValidUserLogin login =
 
@@ -94,3 +104,5 @@ let isValidUserLogin login =
     |> (function
     | Some _ -> true
     | None ->
+        insertNewUser login // TESTING, REMOVE ASAP: This automatically creates a user if it doesn't exists,
+        false)

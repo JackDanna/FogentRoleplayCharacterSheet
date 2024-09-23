@@ -19,7 +19,8 @@ module IdCharacter =
     let createAutoIncrementedIdCharacter character = { Id = 0; Character = character }
 
 type JWT = string
-type UserData = { username: string; token: JWT }
+type Username = string
+type UserData = { username: Username; token: JWT }
 
 type LoginResult =
     | UsernameOrPasswordIncorrect
@@ -32,6 +33,7 @@ module Route =
 type IGuestApi = { login: Login -> Async<LoginResult> }
 
 type IUserApi = {
+    addNewCharacter: Username -> Async<IdCharacter List>
     getInitSettingData: unit -> Async<SettingData>
-    getIdCharacterList: UserData -> Async<IdCharacter.IdCharacter List>
+    getIdCharacterList: UserData -> Async<IdCharacter List>
 }
