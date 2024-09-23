@@ -4,7 +4,7 @@ open FogentRoleplayLib.ItemElement
 
 // Inits
 
-let itemElementListInit () = []
+let init = FogentRoleplayLib.ListUtils.init
 
 // Msgs
 

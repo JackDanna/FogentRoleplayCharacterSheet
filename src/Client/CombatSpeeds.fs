@@ -10,7 +10,7 @@ type Msg =
     | Insert of string * option<Skill Set> * option<Attribute Set> * option<Map<string, CombatSpeedCalculation>>
     | Remove of int
 
-let init () : CombatSpeed List = []
+let init = FogentRoleplayLib.ListUtils.init
 
 let update msg model =
     match msg with

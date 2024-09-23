@@ -20,48 +20,7 @@ type Msg =
     | EffectListMsg of EffectList.Msg
     | CombatSpeedsMsg of CombatSpeeds.Msg
 
-let init (settingData: SettingData) =
-    let attributes =
-        Set.map (fun x -> Attribute.init x.attributeName) settingData.coreSkillDataSet
-
-    let effects = EffectList.init ()
-
-    let dicePoolCalculationData: DicePoolCalculationData = {
-        effects = effects
-        attributes = attributes
-    }
-
-    let equipment = ItemElement.itemElementListInit ()
-
-    let coreSkills =
-        Skills.initCoreSkills settingData.coreSkillDataSet dicePoolCalculationData
-
-    let carryWeightCalculationOption =
-        match settingData.carryWeightCalculationMap.TryFind "Carry Weight" with
-        | Some carryWeightCalculation -> Some carryWeightCalculation
-        | None -> None
-
-    {
-        name = ""
-        attributes = attributes
-        coreSkills = coreSkills
-        destinyPoints = DestinyPoints.init ()
-        vocationList = VocationList.init ()
-        equipment = equipment
-        combatRollList = CombatRollList.init ()
-        characterInformation = CharacterInformation.init ()
-        characterEffects = effects
-        combatSpeeds = CombatSpeeds.init ()
-        settingData = settingData
-        weightClassOption =
-            WeightClassOption.init
-                carryWeightCalculationOption
-                settingData.weightClassSet
-                attributes
-                coreSkills
-                equipment
-        carryWeightCalculationOption = carryWeightCalculationOption
-    }
+let init = FogentRoleplayLib.Character.init
 
 let coreSkillToMap (coreSkills: Skill Set) =
     coreSkills |> Set.map (fun x -> x.name, x) |> Map.ofSeq

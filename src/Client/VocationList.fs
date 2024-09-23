@@ -15,7 +15,7 @@ type Msg =
     | Remove of int
     | CalculateDicePools of DicePoolCalculationData
 
-let init () = []
+let init () = FogentRoleplayLib.ListUtils.init
 
 let update msg model =
     match msg with

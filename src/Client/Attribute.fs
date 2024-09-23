@@ -4,10 +4,7 @@ open FogentRoleplayLib.Attribute
 
 type Msg = Neg2To5Msg of Neg2To5.Msg
 
-let init attributeName = {
-    attributeName = attributeName
-    level = Neg2To5.init ()
-}
+let init = FogentRoleplayLib.Attribute.init
 
 let update msg model =
     match msg with

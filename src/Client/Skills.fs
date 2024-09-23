@@ -7,10 +7,7 @@ type Msg =
     | ModifySkillAtPosition of int * Skill.Msg
     | CalculateSkillDicePools of DicePoolCalculationData
 
-let initCoreSkills coreSkillDataSet dicePoolCalculationData =
-    Set.map
-        (fun (coreSkillData: CoreSkillData) -> Skill.initCoreSkill coreSkillData dicePoolCalculationData)
-        coreSkillDataSet
+let initCoreSkills = FogentRoleplayLib.Skill.initCoreSkills
 
 let update msg model =
     match msg with

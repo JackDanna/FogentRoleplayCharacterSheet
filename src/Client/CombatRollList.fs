@@ -23,7 +23,7 @@ type Msg =
         WeaponSpell Set *
         DicePoolCalculationData
 
-let init () : CombatRoll list = []
+let init = FogentRoleplayLib.ListUtils.init
 
 let update msg : CombatRoll list =
     match msg with

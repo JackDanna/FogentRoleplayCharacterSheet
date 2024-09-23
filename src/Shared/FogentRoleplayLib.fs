@@ -1,5 +1,8 @@
 namespace FogentRoleplayLib
 // Utils
+module ListUtils =
+    let init () = []
+
 module ParsingUtils =
 
     let commaAndSpace = ", "
@@ -205,6 +208,8 @@ module Neg2To5 =
         | Three
         | Four
         | Five
+
+    let init () = Zero
 
     let intToNeg2To5Option num =
         match num with
@@ -801,6 +806,11 @@ module Attribute =
         level: Neg2To5
     }
 
+    let init attributeName = {
+        attributeName = attributeName
+        level = Neg2To5.init ()
+    }
+
     let attributesToAttributeNames attributes =
         Seq.map (fun attriubte -> attriubte.attributeName) attributes
 
@@ -1315,6 +1325,20 @@ module Skill =
             dicePoolModList = createSkillDicePoolMods name level governingAttributes dicePoolCalculationData
         }
 
+    open CoreSkillData
+
+    let initCoreSkill coreSkillData dicePoolCalculationData =
+        init
+            coreSkillData.skillName
+            (Neg1To5.init ())
+            (Set.ofList [ coreSkillData.attributeName ])
+            dicePoolCalculationData
+
+    let initCoreSkills coreSkillDataSet dicePoolCalculationData =
+        Set.map
+            (fun (coreSkillData: CoreSkillData) -> initCoreSkill coreSkillData dicePoolCalculationData)
+            coreSkillDataSet
+
 module WeaponSkillData =
     open AttributeName
 
@@ -1828,6 +1852,15 @@ module CharacterInformation =
         backstory: string
     }
 
+    let init () = {
+        notes = ""
+        appearance = ""
+        disposition = ""
+        beliefsAndMorality = ""
+        goalsAndAspirations = ""
+        backstory = ""
+    }
+
 module CarryWeightCalculation =
     open Attribute
     open Neg1To5
@@ -1926,6 +1959,18 @@ module WeightClass =
                 // Only if impossible case is defined that can never be used
                 false)
 
+    open CarryWeightCalculation
+    open ItemElement
+
+    let init (carryWeightCalculationOption) weightClassSet attributes coreSkills equipment =
+        match carryWeightCalculationOption with
+        | Some carryWeightCalculation ->
+            determineWeightClass
+                (calculateCarryWeight (carryWeightCalculation) attributes coreSkills)
+                (sumItemElementListWeight equipment)
+                (weightClassSet)
+        | None -> None
+
 module SettingData =
 
     open AttributeName
@@ -1972,6 +2017,8 @@ module ZeroToThree =
         | Two
         | Three
 
+    let init () = Zero
+
     let zeroToThreeToUint zeroToThree =
         match zeroToThree with
         | Zero -> 0u
@@ -1993,6 +2040,9 @@ module Character =
     open SettingData
     open WeightClass
     open CarryWeightCalculation
+    open CoreSkillData
+    open ListUtils
+    open WeightClass
 
     type Character = {
         name: string
@@ -2009,6 +2059,44 @@ module Character =
         weightClassOption: WeightClass option
         carryWeightCalculationOption: CarryWeightCalculation option
     }
+
+    let init (settingData: SettingData) =
+        let attributes =
+            Set.map (fun x -> Attribute.init x.attributeName) settingData.coreSkillDataSet
+
+        let effects = ListUtils.init ()
+
+        let dicePoolCalculationData: DicePoolCalculationData = {
+            effects = effects
+            attributes = attributes
+        }
+
+        let equipment = ListUtils.init ()
+
+        let coreSkills =
+            Skill.initCoreSkills settingData.coreSkillDataSet dicePoolCalculationData
+
+        let carryWeightCalculationOption =
+            match settingData.carryWeightCalculationMap.TryFind "Carry Weight" with
+            | Some carryWeightCalculation -> Some carryWeightCalculation
+            | None -> None
+
+        {
+            name = ""
+            attributes = attributes
+            coreSkills = coreSkills
+            destinyPoints = ZeroToThree.init ()
+            vocationList = ListUtils.init ()
+            equipment = equipment
+            combatRollList = ListUtils.init ()
+            characterInformation = CharacterInformation.init ()
+            characterEffects = effects
+            combatSpeeds = ListUtils.init ()
+            settingData = settingData
+            weightClassOption =
+                WeightClass.init carryWeightCalculationOption settingData.weightClassSet attributes coreSkills equipment
+            carryWeightCalculationOption = carryWeightCalculationOption
+        }
 
     let characterToDicePoolCalculationDataWithoutWeightClassOptionEffect character = {
         effects =

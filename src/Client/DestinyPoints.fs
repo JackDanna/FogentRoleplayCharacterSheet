@@ -7,7 +7,7 @@ type Msg =
     | ToggleTwo of bool
     | ToggleThree of bool
 
-let init () = Zero
+let init = FogentRoleplayLib.ZeroToThree.init
 
 let update msg model =
     match msg with

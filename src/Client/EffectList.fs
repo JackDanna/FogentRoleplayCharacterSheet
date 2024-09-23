@@ -2,12 +2,12 @@ module EffectList
 
 open FogentRoleplayLib.Effect
 
+let init = FogentRoleplayLib.ListUtils.init
+
 type Msg =
     | ModifyEffect of int * Effect.Msg
     | Insert of string * option<Map<string, Effect>>
     | Remove of int
-
-let init () : Effect list = []
 
 let update msg (model: Effect list) =
     match msg with

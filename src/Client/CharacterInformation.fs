@@ -10,14 +10,7 @@ type Msg =
     | SetGoalsAndAspirations of string
     | SetBackstory of string
 
-let init () = {
-    notes = ""
-    appearance = ""
-    disposition = ""
-    beliefsAndMorality = ""
-    goalsAndAspirations = ""
-    backstory = ""
-}
+let init = FogentRoleplayLib.CharacterInformation.init
 
 let update (msg: Msg) (model: CharacterInformation) =
     match msg with

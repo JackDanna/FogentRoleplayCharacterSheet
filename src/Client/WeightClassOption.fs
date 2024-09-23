@@ -15,14 +15,7 @@ type Msg =
         Skill Set *
         ItemElement List
 
-let init (carryWeightCalculationOption) weightClassSet attributes coreSkills equipment =
-    match carryWeightCalculationOption with
-    | Some carryWeightCalculation ->
-        determineWeightClass
-            (calculateCarryWeight (carryWeightCalculation) attributes coreSkills)
-            (sumItemElementListWeight equipment)
-            (weightClassSet)
-    | None -> None
+let init = FogentRoleplayLib.WeightClass.init
 
 let update msg (model: WeightClass option) =
     match msg with

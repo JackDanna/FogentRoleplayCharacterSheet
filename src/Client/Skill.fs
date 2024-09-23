@@ -22,12 +22,7 @@ type Msg =
 
 let init = FogentRoleplayLib.Skill.init
 
-let initCoreSkill coreSkillData dicePoolCalculationData =
-    FogentRoleplayLib.Skill.init
-        coreSkillData.skillName
-        Neg1To5.Zero
-        (Set.ofList [ coreSkillData.attributeName ])
-        dicePoolCalculationData
+let initCoreSkill = FogentRoleplayLib.Skill.initCoreSkill
 
 let update msg (model: Skill) =
 
