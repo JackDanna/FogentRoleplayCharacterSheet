@@ -81,3 +81,16 @@ let getUsersForCharacter characterId =
 
 let usernameToIdUser username =
     users.Find(fun idUser -> idUser.Login.userName = username) |> Seq.tryHead
+
+let isValidUserLogin login =
+
+    users.Find(
+        Query.And(
+            Query.EQ("Login.userName", BsonValue(login.userName)),
+            Query.EQ("Login.password", BsonValue(login.password))
+        )
+    )
+    |> Seq.tryHead
+    |> (function
+    | Some _ -> true
+    | None ->
