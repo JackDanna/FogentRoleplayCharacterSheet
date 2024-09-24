@@ -1987,7 +1987,7 @@ module SettingData =
     type SettingData = {
         attributeNameSet: AttributeName Set
         coreSkillDataSet: CoreSkillData Set
-        itemElementMap: Map<string, ItemElement>
+        itemElementSet: ItemElement Set
         weaponSpellSet: WeaponSpell Set
         magicSystemMap: Map<string, MagicSystem>
         weaponSkillDataMap: Map<string, WeaponSkillData>
@@ -2000,7 +2000,7 @@ module SettingData =
     let init () = {
         attributeNameSet = Set.empty
         coreSkillDataSet = Set.empty
-        itemElementMap = Map.empty
+        itemElementSet = Set.empty
         weaponSpellSet = Set.empty
         magicSystemMap = Map.empty
         weaponSkillDataMap = Map.empty

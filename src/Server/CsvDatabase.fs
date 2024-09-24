@@ -494,8 +494,8 @@ let createItemFromRow (row: CsvRow) = {
     weight = float row.["weight"]
 }
 
-let itemElementMap =
-    makeFogentRoleplayDataListExcludingFileExtension itemElementTableName (fun row ->
+let itemElementSet =
+    makeFogentRoleplayDataSetExcludingFileExtension itemElementTableName (fun row ->
 
         match row.["quantity"] with
         | quantity when isNumeric quantity ->
@@ -515,16 +515,15 @@ let itemElementMap =
             |> ContainerItem
             |> Some
         | _ -> None)
-    |> List.choose id
-    |> List.map (fun itemElement -> (itemElementToName itemElement, itemElement))
-    |> Map.ofSeq
+    |> Seq.choose id
+    |> Set.ofSeq
 
 open FogentRoleplayLib.SettingData
 
 let getInitSettingDataFromCSV () : SettingData = {
     attributeNameSet = attributeNameSet
     coreSkillDataSet = coreSkillDataSet
-    itemElementMap = itemElementMap
+    itemElementSet = itemElementSet
     weaponSpellSet = weaponSpellSet
     magicSystemMap = magicSystemData
     weaponSkillDataMap = weaponSkillDataMap

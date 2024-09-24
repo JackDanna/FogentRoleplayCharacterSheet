@@ -236,7 +236,7 @@ let update msg (model: Character) =
     | EquipmentMsg msg ->
         match msg with
         | ItemElement.ItemElementListMsgType.Insert(itemName, _) ->
-            (ItemElement.ItemElementListMsgType.Insert(itemName, Some model.settingData.itemElementMap))
+            (ItemElement.ItemElementListMsgType.Insert(itemName, Some model.settingData.itemElementSet))
 
         | ItemElement.ItemElementListMsgType.ModifyItemElement(pos1,
                                                                ItemElement.ItemElementMsgType.ContainerItemMsg(ItemElement.ContainerItemMsgType.ItemElementListMsg(ItemElement.ItemElementListMsgType.Insert(itemName,
@@ -245,7 +245,7 @@ let update msg (model: Character) =
                 pos1,
                 ItemElement.ItemElementMsgType.ContainerItemMsg(
                     ItemElement.ContainerItemMsgType.ItemElementListMsg(
-                        ItemElement.ItemElementListMsgType.Insert(itemName, Some model.settingData.itemElementMap)
+                        ItemElement.ItemElementListMsgType.Insert(itemName, Some model.settingData.itemElementSet)
                     )
                 )
             ))
@@ -380,7 +380,7 @@ let view (model: Character) dispatch =
             (EffectListMsg >> dispatch)
 
         ItemElement.equipmentView
-            (model.settingData.itemElementMap.Keys |> Set.ofSeq)
+            (model.settingData.itemElementSet |> Set.map itemElementToName)
             model.equipment
             (EquipmentMsg >> dispatch)
 
