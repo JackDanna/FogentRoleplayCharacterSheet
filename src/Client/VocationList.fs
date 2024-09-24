@@ -7,11 +7,7 @@ open FogentRoleplayLib.Skill
 type Msg =
     | VocationMsgAtPosition of int * Vocation.Msg
     | VocationMsgForAll of Vocation.Msg
-    | InsertVocation of
-        string *
-        option<Map<string, Skill>> *
-        option<DicePoolCalculationData> *
-        option<Map<string, MagicSystem>>
+    | InsertVocation of string * option<Map<string, Skill>> * option<DicePoolCalculationData> * option<MagicSystem Set>
     | Remove of int
     | CalculateDicePools of DicePoolCalculationData
 
@@ -27,8 +23,8 @@ let update msg model =
             else
                 vocation)
     | VocationMsgForAll msg -> List.map (fun vocation -> Vocation.update msg vocation) model
-    | InsertVocation(vocationName, Some coreSkillMap, Some dicePoolCalculationData, Some magicSystemMap) ->
-        Vocation.init vocationName coreSkillMap dicePoolCalculationData magicSystemMap
+    | InsertVocation(vocationName, Some coreSkillMap, Some dicePoolCalculationData, Some magicSystemSet) ->
+        Vocation.init vocationName coreSkillMap dicePoolCalculationData (makeMagicSystemDataMap magicSystemSet)
         |> List.singleton
         |> List.append model
 

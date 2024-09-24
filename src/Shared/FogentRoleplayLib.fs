@@ -1462,6 +1462,11 @@ module MagicSystem =
         magicSkillDataSet: MagicSkillData Set
     }
 
+    let makeMagicSystemDataMap magicSystemDataSeq =
+        magicSystemDataSeq
+        |> Seq.map (fun magicSystem -> magicSystem.name, magicSystem)
+        |> Map.ofSeq
+
 module MagicVocationSkill =
     open MundaneVocationSkill
     open Skill
@@ -2002,7 +2007,7 @@ module SettingData =
         coreSkillDataSet: CoreSkillData Set
         itemElementSet: ItemElement Set
         weaponSpellSet: WeaponSpell Set
-        magicSystemMap: Map<string, MagicSystem>
+        magicSystemSet: MagicSystem Set
         weaponSkillDataMap: Map<string, WeaponSkillData>
         effectMap: Map<string, Effect>
         combatSpeedCalculationMap: Map<string, CombatSpeedCalculation>
@@ -2015,7 +2020,7 @@ module SettingData =
         coreSkillDataSet = Set.empty
         itemElementSet = Set.empty
         weaponSpellSet = Set.empty
-        magicSystemMap = Map.empty
+        magicSystemSet = Set.empty
         weaponSkillDataMap = Map.empty
         effectMap = Map.empty
         combatSpeedCalculationMap = Map.empty

@@ -136,7 +136,7 @@ let update msg (model: Character) =
                             vocationName,
                             Some(coreSkillToMap model.coreSkills),
                             Some dicePoolCalculationData,
-                            Some model.settingData.magicSystemMap
+                            Some model.settingData.magicSystemSet
                         ))
                         model.vocationList
           }
@@ -354,7 +354,7 @@ let view (model: Character) dispatch =
 
         VocationList.view
             model.settingData.attributeNameSet
-            (model.settingData.magicSystemMap.Keys |> Set.ofSeq)
+            (model.settingData.magicSystemSet |> Seq.map (fun x -> x.name))
             (model.settingData.weaponSkillDataMap.Keys |> Set.ofSeq)
             model.vocationList
             (VocationListMsg >> dispatch)
