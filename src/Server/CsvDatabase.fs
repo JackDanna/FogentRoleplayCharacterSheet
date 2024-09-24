@@ -495,7 +495,7 @@ let createItemFromRow (row: CsvRow) = {
 }
 
 let itemElementMap =
-    makeFogentRoleplayDataSetExcludingFileExtension itemElementTableName (fun row ->
+    makeFogentRoleplayDataListExcludingFileExtension itemElementTableName (fun row ->
 
         match row.["quantity"] with
         | quantity when isNumeric quantity ->
@@ -515,7 +515,6 @@ let itemElementMap =
             |> ContainerItem
             |> Some
         | _ -> None)
-    |> Set.toList
     |> List.choose id
     |> List.map (fun itemElement -> (itemElementToName itemElement, itemElement))
     |> Map.ofSeq
