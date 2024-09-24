@@ -1351,6 +1351,11 @@ module WeaponSkillData =
         governingAttributes: AttributeName Set
     }
 
+    let makeWeaponSkillDataMap weaponSkillDataSeq =
+        weaponSkillDataSeq
+        |> Seq.map (fun weaponSkillData -> weaponSkillData.name, weaponSkillData)
+        |> Map.ofSeq
+
 // Larger Character Building Blocks
 
 module VocationStat =
@@ -2008,7 +2013,7 @@ module SettingData =
         itemElementSet: ItemElement Set
         weaponSpellSet: WeaponSpell Set
         magicSystemSet: MagicSystem Set
-        weaponSkillDataMap: Map<string, WeaponSkillData>
+        weaponSkillDataSet: WeaponSkillData Set
         effectMap: Map<string, Effect>
         combatSpeedCalculationMap: Map<string, CombatSpeedCalculation>
         carryWeightCalculationMap: Map<string, CarryWeightCalculation>
@@ -2021,7 +2026,7 @@ module SettingData =
         itemElementSet = Set.empty
         weaponSpellSet = Set.empty
         magicSystemSet = Set.empty
-        weaponSkillDataMap = Map.empty
+        weaponSkillDataSet = Set.empty
         effectMap = Map.empty
         combatSpeedCalculationMap = Map.empty
         carryWeightCalculationMap = Map.empty

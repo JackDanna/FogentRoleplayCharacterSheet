@@ -7,6 +7,7 @@ open FogentRoleplayLib.Skill
 open FogentRoleplayLib.SettingData
 open FogentRoleplayLib.ItemElement
 open FogentRoleplayLib.CarryWeightCalculation
+open FogentRoleplayLib.WeaponSkillData
 
 type Msg =
     | SetSettingData of SettingData
@@ -42,7 +43,7 @@ let updateVocationListThenCombatRollList msgs dicePoolCalculation model =
                     CombatRollList.RecalculateCombatRollList(
                         model.equipment,
                         newVocationList,
-                        model.settingData.weaponSkillDataMap,
+                        makeWeaponSkillDataMap model.settingData.weaponSkillDataSet,
                         model.settingData.weaponSpellSet,
                         dicePoolCalculation
                     )
@@ -52,6 +53,8 @@ let updateVocationListThenCombatRollList msgs dicePoolCalculation model =
 let update msg (model: Character) =
 
     let dicePoolCalculationData = characterToDicePoolCalculationData model
+
+    let weaponSkillDataMap = makeWeaponSkillDataMap model.settingData.weaponSkillDataSet
 
     let newEffectsForCharacter character =
         let newDicePoolCalculationData = characterToDicePoolCalculationData character
@@ -160,7 +163,7 @@ let update msg (model: Character) =
                             name,
                             vocationStatLevelOption,
                             Some dicePoolCalculationData,
-                            Some model.settingData.weaponSkillDataMap
+                            Some weaponSkillDataMap
                         )
 
                     | MundaneVocationSkills.ModifyMundaneVocationSkillAtPosition(pos2,
@@ -192,7 +195,7 @@ let update msg (model: Character) =
                             vocationStatLevelOption,
                             Some model.settingData.attributeNameSet,
                             Some dicePoolCalculationData,
-                            Some model.settingData.weaponSkillDataMap,
+                            Some weaponSkillDataMap,
                             magicSkillDataMapOption
                         )
 
@@ -355,7 +358,7 @@ let view (model: Character) dispatch =
         VocationList.view
             model.settingData.attributeNameSet
             (model.settingData.magicSystemSet |> Seq.map (fun x -> x.name))
-            (model.settingData.weaponSkillDataMap.Keys |> Set.ofSeq)
+            (model.settingData.weaponSkillDataSet |> Set.map (fun x -> x.name))
             model.vocationList
             (VocationListMsg >> dispatch)
 

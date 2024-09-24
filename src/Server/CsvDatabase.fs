@@ -249,13 +249,13 @@ let weaponSet =
     })
 
 // WeaponSkillData
-let weaponSkillDataMap =
+let weaponSkillDataSet =
     makeFogentRoleplayDataSetExcludingFileExtension weaponSkillTableName (fun row -> {
         name = string row.["skillName"]
         governingAttributes = stringToAttributes row.["governingAttributes"]
     })
-    |> Set.map (fun weaponSkillData -> weaponSkillData.name, weaponSkillData)
-    |> Map.ofSeq
+
+let weaponSkillDataMap = makeWeaponSkillDataMap weaponSkillDataSet
 
 // WeaponSpell
 let weaponSpellSet: WeaponSpell Set =
@@ -520,7 +520,7 @@ let getInitSettingDataFromCSV () : SettingData = {
     itemElementSet = itemElementSet
     weaponSpellSet = weaponSpellSet
     magicSystemSet = magicSystemSet
-    weaponSkillDataMap = weaponSkillDataMap
+    weaponSkillDataSet = weaponSkillDataSet
     effectMap = effectDataMap
     combatSpeedCalculationMap = combatSpeedCalculationMap
     carryWeightCalculationMap = carryWeightCalculationMap
