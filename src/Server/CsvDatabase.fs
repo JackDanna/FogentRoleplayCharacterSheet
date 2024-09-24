@@ -450,7 +450,7 @@ let textEffect: TextEffect Set =
     })
 
 // Effect
-let effectDataMap =
+let effectDataSet =
     [
         Set.map Weapon weaponSet
         Set.map WeaponResource weaponResourceSet
@@ -462,8 +462,8 @@ let effectDataMap =
         Set.map TextEffect textEffect
     ]
     |> Set.unionMany
-    |> Set.map (fun (effect: Effect) -> effectToEffectName effect, effect)
-    |> Map.ofSeq
+
+let effectDataMap = makeEffectDataMap effectDataSet
 
 // Item
 let stringToEffectSet (effectMap: Map<string, Effect>) (input: string) =
@@ -521,7 +521,7 @@ let getInitSettingDataFromCSV () : SettingData = {
     weaponSpellSet = weaponSpellSet
     magicSystemSet = magicSystemSet
     weaponSkillDataSet = weaponSkillDataSet
-    effectMap = effectDataMap
+    effectSet = effectDataSet
     combatSpeedCalculationMap = combatSpeedCalculationMap
     carryWeightCalculationMap = carryWeightCalculationMap
     weightClassSet = weightClassSet

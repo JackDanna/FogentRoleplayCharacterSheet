@@ -1078,6 +1078,11 @@ module Effect =
         | BaseDiceMod baseDiceEffect -> baseDiceEffect.name
         | TextEffect textEffect -> textEffect.name
 
+    let makeEffectDataMap effectDataSeq =
+        effectDataSeq
+        |> Seq.map (fun (effect: Effect) -> effectToEffectName effect, effect)
+        |> Map.ofSeq
+
     let effectsToCommaSeperatedEffectNames effects =
         effects
         |> Set.map effectToEffectName
@@ -2014,7 +2019,7 @@ module SettingData =
         weaponSpellSet: WeaponSpell Set
         magicSystemSet: MagicSystem Set
         weaponSkillDataSet: WeaponSkillData Set
-        effectMap: Map<string, Effect>
+        effectSet: Effect Set
         combatSpeedCalculationMap: Map<string, CombatSpeedCalculation>
         carryWeightCalculationMap: Map<string, CarryWeightCalculation>
         weightClassSet: WeightClass Set
@@ -2027,7 +2032,7 @@ module SettingData =
         weaponSpellSet = Set.empty
         magicSystemSet = Set.empty
         weaponSkillDataSet = Set.empty
-        effectMap = Map.empty
+        effectSet = Set.empty
         combatSpeedCalculationMap = Map.empty
         carryWeightCalculationMap = Map.empty
         weightClassSet = Set.empty

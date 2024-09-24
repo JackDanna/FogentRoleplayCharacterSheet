@@ -8,6 +8,7 @@ open FogentRoleplayLib.SettingData
 open FogentRoleplayLib.ItemElement
 open FogentRoleplayLib.CarryWeightCalculation
 open FogentRoleplayLib.WeaponSkillData
+open FogentRoleplayLib.Effect
 
 type Msg =
     | SetSettingData of SettingData
@@ -302,7 +303,8 @@ let update msg (model: Character) =
 
     | EffectListMsg(msg) ->
         match msg with
-        | EffectList.Insert(effectName, _) -> EffectList.Insert(effectName, Some model.settingData.effectMap)
+        | EffectList.Insert(effectName, _) ->
+            EffectList.Insert(effectName, Some(makeEffectDataMap model.settingData.effectSet))
         | _ -> msg
         |> (fun msg -> {
             model with
@@ -378,7 +380,7 @@ let view (model: Character) dispatch =
         | None -> []
 
         |> EffectList.view
-            (model.settingData.effectMap.Keys |> Set.ofSeq)
+            (model.settingData.effectSet |> Set.map effectToEffectName)
             model.characterEffects
             (EffectListMsg >> dispatch)
 
