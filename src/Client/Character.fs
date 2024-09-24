@@ -9,6 +9,7 @@ open FogentRoleplayLib.ItemElement
 open FogentRoleplayLib.CarryWeightCalculation
 open FogentRoleplayLib.WeaponSkillData
 open FogentRoleplayLib.Effect
+open FogentRoleplayLib.CombatSpeedCalculation
 
 type Msg =
     | SetSettingData of SettingData
@@ -319,7 +320,7 @@ let update msg (model: Character) =
                 name,
                 Some model.coreSkills,
                 Some model.attributes,
-                Some model.settingData.combatSpeedCalculationMap
+                Some(makeCombatSpeedCalculationMap model.settingData.combatSpeedCalculationSet)
             )
         | _ -> msg
         |> (fun msg -> {
@@ -367,7 +368,7 @@ let view (model: Character) dispatch =
         CombatRollList.view model.combatRollList
 
         CombatSpeeds.view
-            (model.settingData.combatSpeedCalculationMap.Keys |> Set.ofSeq)
+            (model.settingData.combatSpeedCalculationSet |> Set.map (fun x -> x.name))
             model.combatSpeeds
             (CombatSpeedsMsg >> dispatch)
 

@@ -877,6 +877,11 @@ module CombatSpeedCalculation =
         speed: SpeedCalculation
     }
 
+    let makeCombatSpeedCalculationMap combatSpeedCalculationSeq =
+        combatSpeedCalculationSeq
+        |> Seq.map (fun combatSpeed -> combatSpeed.name, combatSpeed)
+        |> Map.ofSeq
+
     let combatSpeedCalculationToDescription combatSpeedCalculation =
         sprintf
             "+%.1f ft (per %s Dice), +/-%.1f (per %s)"
@@ -2020,7 +2025,7 @@ module SettingData =
         magicSystemSet: MagicSystem Set
         weaponSkillDataSet: WeaponSkillData Set
         effectSet: Effect Set
-        combatSpeedCalculationMap: Map<string, CombatSpeedCalculation>
+        combatSpeedCalculationSet: CombatSpeedCalculation Set
         carryWeightCalculationMap: Map<string, CarryWeightCalculation>
         weightClassSet: WeightClass Set
     }
@@ -2033,7 +2038,7 @@ module SettingData =
         magicSystemSet = Set.empty
         weaponSkillDataSet = Set.empty
         effectSet = Set.empty
-        combatSpeedCalculationMap = Map.empty
+        combatSpeedCalculationSet = Set.empty
         carryWeightCalculationMap = Map.empty
         weightClassSet = Set.empty
     }

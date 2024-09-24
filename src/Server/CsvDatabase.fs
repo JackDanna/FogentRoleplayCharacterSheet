@@ -413,15 +413,13 @@ let speedMap: Map<string, SpeedCalculation> =
     |> Set.map (fun speed -> (speed.name, speed))
     |> Map.ofSeq
 
-let combatSpeedCalculationMap =
+let combatSpeedCalculationSet =
     makeFogentRoleplayDataSetExcludingFileExtension combatSpeedCalculationTableName (fun row -> {
         name = row.["name"]
         governingSkillName = SkillName row.["governingSkillName"]
         reactionSpeedAttributeName = AttributeName row.["reactionSpeedAttributeName"]
         speed = speedMap.Item row.["speed"]
     })
-    |> Set.map (fun combatSpeed -> combatSpeed.name, combatSpeed)
-    |> Map.ofSeq
 
 // CarryWeightCalculation
 open FogentRoleplayLib.CarryWeightCalculation
@@ -522,7 +520,7 @@ let getInitSettingDataFromCSV () : SettingData = {
     magicSystemSet = magicSystemSet
     weaponSkillDataSet = weaponSkillDataSet
     effectSet = effectDataSet
-    combatSpeedCalculationMap = combatSpeedCalculationMap
+    combatSpeedCalculationSet = combatSpeedCalculationSet
     carryWeightCalculationMap = carryWeightCalculationMap
     weightClassSet = weightClassSet
 }
