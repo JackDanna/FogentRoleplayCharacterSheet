@@ -1,15 +1,16 @@
 module Character
 
-open FogentRoleplayLib.Character
-open FogentRoleplayLib.CoreSkillData
-open FogentRoleplayLib.DicePoolCalculation
-open FogentRoleplayLib.Skill
-open FogentRoleplayLib.SettingData
-open FogentRoleplayLib.ItemElement
-open FogentRoleplayLib.CarryWeightCalculation
-open FogentRoleplayLib.WeaponSkillData
-open FogentRoleplayLib.Effect
-open FogentRoleplayLib.CombatSpeedCalculation
+open FogentRoleplayLib
+open Character
+open CoreSkillData
+open DicePoolCalculation
+open Skill
+open SettingData
+open ItemElement
+open CarryWeightCalculation
+open WeaponSkillData
+open Effect
+open CombatSpeedCalculation
 
 type Msg =
     | SetSettingData of SettingData
