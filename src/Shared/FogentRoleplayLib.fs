@@ -1909,6 +1909,11 @@ module CarryWeightCalculation =
         weightIncreasePerSkill: uint
     }
 
+    let makeCarryWeightCalculationMap carryWeightCalculationSeq =
+        carryWeightCalculationSeq
+        |> Seq.map (fun carryWeightCalculation -> carryWeightCalculation.name, carryWeightCalculation)
+        |> Map.ofSeq
+
     let calculateCarryWeight (carryWeightCalculation: CarryWeightCalculation) attributes coreSkills =
 
         let attributeLevel =
@@ -2026,7 +2031,7 @@ module SettingData =
         weaponSkillDataSet: WeaponSkillData Set
         effectSet: Effect Set
         combatSpeedCalculationSet: CombatSpeedCalculation Set
-        carryWeightCalculationMap: Map<string, CarryWeightCalculation>
+        carryWeightCalculationSet: CarryWeightCalculation Set
         weightClassSet: WeightClass Set
     }
 
@@ -2039,7 +2044,7 @@ module SettingData =
         weaponSkillDataSet = Set.empty
         effectSet = Set.empty
         combatSpeedCalculationSet = Set.empty
-        carryWeightCalculationMap = Map.empty
+        carryWeightCalculationSet = Set.empty
         weightClassSet = Set.empty
     }
 
@@ -2110,7 +2115,7 @@ module Character =
             Skill.initCoreSkills settingData.coreSkillDataSet dicePoolCalculationData
 
         let carryWeightCalculationOption =
-            match settingData.carryWeightCalculationMap.TryFind "Carry Weight" with
+            match (makeCarryWeightCalculationMap settingData.carryWeightCalculationSet).TryFind "Carry Weight" with
             | Some carryWeightCalculation -> Some carryWeightCalculation
             | None -> None
 

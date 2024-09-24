@@ -424,7 +424,7 @@ let combatSpeedCalculationSet =
 // CarryWeightCalculation
 open FogentRoleplayLib.CarryWeightCalculation
 
-let carryWeightCalculationMap =
+let carryWeightCalculationSet =
     makeFogentRoleplayDataSetExcludingFileExtension carryWeightCalculationTableName (fun row -> {
         name = string row.["name"]
         baseWeight = uint row.["baseWeight"]
@@ -433,8 +433,6 @@ let carryWeightCalculationMap =
         governingSkill = string row.["governingSkill"]
         weightIncreasePerSkill = uint row.["weightIncreasePerSkill"]
     })
-    |> Set.map (fun carryWeightCalculation -> carryWeightCalculation.name, carryWeightCalculation)
-    |> Map.ofSeq
 
 // TextEffectForDisplay
 let textEffect: TextEffect Set =
@@ -521,6 +519,6 @@ let getInitSettingDataFromCSV () : SettingData = {
     weaponSkillDataSet = weaponSkillDataSet
     effectSet = effectDataSet
     combatSpeedCalculationSet = combatSpeedCalculationSet
-    carryWeightCalculationMap = carryWeightCalculationMap
+    carryWeightCalculationSet = carryWeightCalculationSet
     weightClassSet = weightClassSet
 }
