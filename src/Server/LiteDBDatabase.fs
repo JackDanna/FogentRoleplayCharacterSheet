@@ -1,10 +1,9 @@
 module LiteDBDatabase
 
-open System.IO
 open System
-open System.Collections.Generic
 open LiteDB
 open LiteDB.FSharp
+open System.Collections.Generic
 open Shared
 
 open FogentRoleplayLib.Character
@@ -33,7 +32,9 @@ let collectionFromDB<'T> = db.GetCollection<'T>(typeof<'T>.Name)
 // let insertEntities entities =
 //     entities |> Seq.map (fun entity -> insertEntity entity)
 
+[<CLIMutable>]
 type UserCharacterAccess = {
+    Id: int
     UserId: int
     CharacterId: int
 //AccessGranted: System.DateTime
@@ -54,6 +55,7 @@ let insertNewUser (user: Login) =
 let grantAccess userId characterId =
     userCharacterAccesses.Insert(
         {
+            Id = 0
             UserId = userId
             CharacterId = characterId
         //AccessGrantedDate = System.DateTime.UtcNow
@@ -70,11 +72,11 @@ let insertCharacter userId (character: Character) =
 
 let getCharactersForUser userId =
     userCharacterAccesses.Find(fun uca -> uca.UserId = userId)
-    |> Seq.map (fun uca -> characters.FindById(BsonValue(uca.CharacterId)))
+    |> Seq.map (fun uca -> characters.FindOne(fun character -> character.Id = uca.CharacterId))
 
 let getUsersForCharacter characterId =
     userCharacterAccesses.Find(fun uca -> uca.CharacterId = characterId)
-    |> Seq.map (fun uca -> users.FindById(BsonValue(uca.UserId)))
+    |> Seq.map (fun uca -> users.FindOne(fun user -> user.Id = uca.UserId))
 
 let usernameToIdUser (username: Username) =
     users.Find(fun idUser -> idUser.Login.userName = username) |> Seq.tryHead
