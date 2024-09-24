@@ -1443,6 +1443,12 @@ module MagicSkillData =
         isRangeCapable: bool
     }
 
+    let makeMagicSkillDataMap magicSkillDataSeq =
+        magicSkillDataSeq
+        |> Seq.map (fun magicSkill -> magicSkill.name, magicSkill)
+        |> Map.ofSeq
+
+
 module MagicSystem =
     open AttributeName
     open MagicSkillData
@@ -1453,7 +1459,7 @@ module MagicSystem =
         vocationGoverningAttributeSet: AttributeName Set
         resourceName: string
         governingCoreSkill: string
-        magicSkillDataMap: Map<string, MagicSkillData>
+        magicSkillDataSet: MagicSkillData Set
     }
 
 module MagicVocationSkill =
@@ -1798,8 +1804,11 @@ module CombatRoll =
         vocationList
         |> vocationListToMagicSkillsAndMagicSystem
         |> List.collect (fun (magicSkills, magicSystem: MagicSystem.MagicSystem) ->
+            let magicSkillDataMap =
+                MagicSkillData.makeMagicSkillDataMap magicSystem.magicSkillDataSet
+
             magicSkills
-            |> Seq.map (fun magicSkill -> (magicSkill, magicSystem.magicSkillDataMap.Item magicSkill.name))
+            |> Seq.map (fun magicSkill -> (magicSkill, magicSkillDataMap.Item magicSkill.name))
             |> Seq.toList)
         |> List.collect (fun (magicSkill, magicSkillData: MagicSkillData.MagicSkillData) ->
             weaponSpellSet

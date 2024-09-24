@@ -215,25 +215,21 @@ let magicSkillDataSet: Set<MagicSkillData> =
         isRangeCapable = Bool row.["rangeCapable"]
     })
 
-let magicSkillDataMap =
-    magicSkillDataSet
-    |> Set.map (fun magicSkill -> magicSkill.name, magicSkill)
-    |> Map.ofSeq
+let magicSkillDataMap = makeMagicSkillDataMap magicSkillDataSet
+
 
 // MagicSystem
-let magicSystemData =
+let magicSystemDataMap =
     makeFogentRoleplayDataSetExcludingFileExtension magicSystemTableName (fun row -> {
         name = row.["name"]
         vocationName = row.["vocationName"]
         vocationGoverningAttributeSet = stringToAttributes row.["vocationGoverningAttributeSet"]
         resourceName = row.["resourceName"]
         governingCoreSkill = row.["governingCoreSkill"]
-        magicSkillDataMap =
+        magicSkillDataSet =
             row.["magicSkillNameSet"]
             |> commaSeperatedStringToSet
             |> Set.map (fun key -> magicSkillDataMap.Item key)
-            |> Set.map (fun magicSkillData -> magicSkillData.name, magicSkillData)
-            |> Map.ofSeq
     })
     |> Set.map (fun magicSystem -> magicSystem.name, magicSystem)
     |> Map.ofSeq
@@ -525,7 +521,7 @@ let getInitSettingDataFromCSV () : SettingData = {
     coreSkillDataSet = coreSkillDataSet
     itemElementSet = itemElementSet
     weaponSpellSet = weaponSpellSet
-    magicSystemMap = magicSystemData
+    magicSystemMap = magicSystemDataMap
     weaponSkillDataMap = weaponSkillDataMap
     effectMap = effectDataMap
     combatSpeedCalculationMap = combatSpeedCalculationMap

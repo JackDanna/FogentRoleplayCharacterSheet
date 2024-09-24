@@ -18,7 +18,7 @@ type Msg =
         option<AttributeName Set> *
         option<DicePoolCalculationData> *
         option<Map<string, WeaponSkillData>> *
-        option<Map<string, MagicSkillData>>
+        option<MagicSkillData Set>
     | SetLevelForVocationalSkills of Skill.ZeroToFiveAndDicePoolCalculationData
 
 let init () = Set.empty
@@ -48,9 +48,9 @@ let update msg (model: MagicVocationSkill Set) =
                                Some vocationGoverningAttributeNames,
                                Some dicePoolCalculationData,
                                Some weaponSkillDataMap,
-                               Some magicSkillDataMap) ->
+                               Some magicSkillDataSet) ->
 
-        match magicSkillDataMap.TryFind skillName with
+        match (makeMagicSkillDataMap magicSkillDataSet).TryFind skillName with
         | Some magicSkillData ->
 
             MagicVocationSkill.initMagicSkill
