@@ -45,7 +45,7 @@ and itemElementListUpdate msg (model: ItemElement list) : ItemElement list =
                     equipment)
             model
     | Insert(itemElementName: string, Some itemElementSet) ->
-        match Seq.tryFind (fun x -> (itemElementToName x) = itemElementName) itemElementSet with
+        match tryFindItemElement itemElementSet itemElementName with
         | Some itemElement -> List.append model [ itemElement ]
         | None -> model
     | Remove position -> List.removeAt position model

@@ -1236,6 +1236,10 @@ module ItemElement =
         |> effectsToWeaponResourceList
         |> List.distinct
 
+    let tryFindItemElement itemElements itemElementName =
+        itemElements
+        |> Seq.tryFind (fun itemElement -> itemElementToName itemElement = itemElementName)
+
 module DicePoolCalculation =
     open Attribute
     open DicePoolMod
