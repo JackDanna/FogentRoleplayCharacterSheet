@@ -58,6 +58,7 @@ module LiteDBTypes =
     open AttributeDeterminedDiceMod
     open FogentRoleplayLib.Item
     open FogentRoleplayLib.WeaponSkillData
+    open FogentRoleplayLib.VocationStat
 
     type LiteDB_WeaponResource = {
         name: string
@@ -229,6 +230,20 @@ module LiteDBTypes =
         governingAttributeNameSet: AttributeName seq
         level: ZeroToFive
         dicePool: DicePool
+    }
+
+    let toVocationStat x : VocationStat = {
+        name = x.name
+        governingAttributeNameSet = Set.ofSeq x.governingAttributeNameSet
+        level = x.level
+        dicePool = x.dicePool
+    }
+
+    let toLiteDBVocationStat (x: VocationStat) = {
+        name = x.name
+        governingAttributeNameSet = x.governingAttributeNameSet
+        level = x.level
+        dicePool = x.dicePool
     }
 
     type LiteDB_MundaneVocationSkill =
