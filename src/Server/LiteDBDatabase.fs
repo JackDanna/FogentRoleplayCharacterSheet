@@ -63,6 +63,7 @@ module LiteDBTypes =
     open FogentRoleplayLib.MundaneVocation
     open FogentRoleplayLib.MagicSkillData
     open FogentRoleplayLib.MagicSystem
+    open FogentRoleplayLib.MagicVocationExtras
 
     type LiteDB_WeaponResource = {
         name: string
@@ -331,12 +332,12 @@ module LiteDBTypes =
         | MagicSkill of LiteDB_Skill
         | MundaneVocationSkill of LiteDB_MundaneVocationSkill
 
-    let toMagicSkill =
+    let toMagicVocationSkill =
         function
         | MagicSkill skill -> toSkill skill |> MagicVocationSkill.MagicSkill
         | MundaneVocationSkill skill -> toMundaneVocationSkill skill |> MagicVocationSkill.MundaneVocationSkill
 
-    let toLiteDB_MagicSkill =
+    let toLiteDB_MagicVocationSkill =
         function
         | MagicVocationSkill.MagicSkill skill -> toLiteDB_Skill skill |> MagicSkill
         | MagicVocationSkill.MundaneVocationSkill skill -> toLiteDB_MundaneVocationSkill skill |> MundaneVocationSkill
@@ -347,6 +348,22 @@ module LiteDBTypes =
         vocationResourcePool: uint
         coreSkillResourcePool: uint
         currentMagicResource: uint
+    }
+
+    let toMagicVocationExtras x : MagicVocationExtras = {
+        magicVocationSkills = x.magicVocationSkills |> Seq.map toMagicVocationSkill |> Set.ofSeq
+        magicSystem = toMagicSystem x.magicSystem
+        vocationResourcePool = x.vocationResourcePool
+        coreSkillResourcePool = x.coreSkillResourcePool
+        currentMagicResource = x.currentMagicResource
+    }
+
+    let toLiteDB_MagicVocationExtras (x: MagicVocationExtras) = {
+        magicVocationSkills = x.magicVocationSkills |> Seq.map toLiteDB_MagicVocationSkill
+        magicSystem = toLiteDB_MagicSystem x.magicSystem
+        vocationResourcePool = x.vocationResourcePool
+        coreSkillResourcePool = x.coreSkillResourcePool
+        currentMagicResource = x.currentMagicResource
     }
 
     type LiteDB_MundaneOrMagicVocationExtras =
