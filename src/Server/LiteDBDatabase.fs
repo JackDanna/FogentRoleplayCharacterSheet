@@ -53,6 +53,7 @@ module LiteDBTypes =
     open FogentRoleplayLib.SetAreaOfEffect
     open FogentRoleplayLib.WeaponSpell
     open FogentRoleplayLib.CombatSpeedCalculation
+    open FogentRoleplayLib.WeaponResource
 
     type LiteDB_WeaponResource = {
         name: string
@@ -61,7 +62,27 @@ module LiteDBTypes =
         penetration: Penetration
         rangeOption: Range option
         damageTypeSet: DamageType seq
-        NamedAreaOfEffectOption: AreaOfEffect option
+        namedAreaOfEffectOption: AreaOfEffect option
+    }
+
+    let toWeaponResource x : WeaponResource = {
+        name = x.name
+        resourceName = x.resourceName
+        dicePoolMod = x.dicePoolMod
+        penetration = x.penetration
+        rangeOption = x.rangeOption
+        damageTypeSet = Set.ofSeq x.damageTypeSet
+        namedAreaOfEffectOption = x.namedAreaOfEffectOption
+    }
+
+    let toLiteDB_WeaponResource (x: WeaponResource) = {
+        name = x.name
+        resourceName = x.resourceName
+        dicePoolMod = x.dicePoolMod
+        penetration = x.penetration
+        rangeOption = x.rangeOption
+        damageTypeSet = Set.toSeq x.damageTypeSet
+        namedAreaOfEffectOption = x.namedAreaOfEffectOption
     }
 
     type LiteDB_Weapon = {
