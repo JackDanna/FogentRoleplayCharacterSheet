@@ -60,6 +60,7 @@ module LiteDBTypes =
     open FogentRoleplayLib.WeaponSkillData
     open FogentRoleplayLib.VocationStat
     open FogentRoleplayLib.MundaneVocationSkill
+    open FogentRoleplayLib.MundaneVocation
 
     type LiteDB_WeaponResource = {
         name: string
@@ -240,7 +241,7 @@ module LiteDBTypes =
         dicePool = x.dicePool
     }
 
-    let toLiteDBVocationStat (x: VocationStat) = {
+    let toLite_DBVocationStat (x: VocationStat) = {
         name = x.name
         governingAttributeNameSet = x.governingAttributeNameSet
         level = x.level
@@ -264,6 +265,16 @@ module LiteDBTypes =
     type LiteDB_MundaneVocation = {
         vocationStat: LiteDB_VocationStat
         mundaneVocationSkills: LiteDB_MundaneVocationSkill seq
+    }
+
+    let toMundaneVocation (x: LiteDB_MundaneVocation) : MundaneVocation = {
+        vocationStat = x.vocationStat |> toVocationStat
+        mundaneVocationSkills = x.mundaneVocationSkills |> Seq.map toMundaneVocationSkill |> Set.ofSeq
+    }
+
+    let toLiteDB_MundaneVocation (x: MundaneVocation) : LiteDB_MundaneVocation = {
+        vocationStat = x.vocationStat |> toLite_DBVocationStat
+        mundaneVocationSkills = x.mundaneVocationSkills |> Seq.map toLiteDB_MundaneVocationSkill
     }
 
     type LiteDB_MagicSkillData = {
