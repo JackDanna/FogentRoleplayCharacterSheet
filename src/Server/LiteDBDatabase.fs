@@ -493,8 +493,8 @@ module LiteDBTypes =
 
     type LiteDB_Character = {
         name: string
-        attributes: Attribute List
-        coreSkills: LiteDB_Skill List
+        attributes: Attribute seq
+        coreSkills: LiteDB_Skill seq
         destinyPoints: ZeroToThree
         vocationList: LiteDB_Vocation list
         equipment: ItemElement List
@@ -505,6 +505,38 @@ module LiteDBTypes =
         settingData: SettingData
         weightClassOption: WeightClass option
         carryWeightCalculationOption: CarryWeightCalculation option
+    }
+
+    let toCharacter x : Character = {
+        name = x.name
+        attributes = Set.ofSeq x.attributes
+        coreSkills = x.coreSkills |> Seq.map toSkill |> Set.ofSeq
+        destinyPoints = x.destinyPoints
+        vocationList = x.vocationList |> List.map toVocation
+        equipment = x.equipment
+        combatRollList = x.combatRollList
+        characterInformation = x.characterInformation
+        characterEffects = x.characterEffects
+        combatSpeeds = x.combatSpeeds
+        settingData = x.settingData
+        weightClassOption = x.weightClassOption
+        carryWeightCalculationOption = x.carryWeightCalculationOption
+    }
+
+    let toLiteDB_Character (x: Character) = {
+        name = x.name
+        attributes = x.attributes
+        coreSkills = x.coreSkills |> Seq.map toLiteDB_Skill
+        destinyPoints = x.destinyPoints
+        vocationList = x.vocationList |> List.map toLiteDB_Vocation
+        equipment = x.equipment
+        combatRollList = x.combatRollList
+        characterInformation = x.characterInformation
+        characterEffects = x.characterEffects
+        combatSpeeds = x.combatSpeeds
+        settingData = x.settingData
+        weightClassOption = x.weightClassOption
+        carryWeightCalculationOption = x.carryWeightCalculationOption
     }
 
 let db =
