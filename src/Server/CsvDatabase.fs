@@ -291,7 +291,7 @@ let weaponResourceSet =
         penetration = uint row.["penetration"]
         rangeOption = rangeOptionMap row.["range"]
         damageTypeSet = stringToDamageTypeSet row.["damageTypes"]
-        NamedAreaOfEffectOption = namedAreaOfEffectOptionMap row.["areaOfEffect"]
+        namedAreaOfEffectOption = namedAreaOfEffectOptionMap row.["areaOfEffect"]
     })
 
 // PhysicalDefense
