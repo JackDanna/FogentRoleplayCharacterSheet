@@ -394,6 +394,16 @@ module LiteDBTypes =
         mundaneOrMagicVocationExtras: LiteDB_MundaneOrMagicVocationExtras
     }
 
+    let toVocation x : Vocation = {
+        vocationStat = toVocationStat x.vocationStat
+        mundaneOrMagicVocationExtras = toMundaneOrmagicVocationExtras x.mundaneOrMagicVocationExtras
+    }
+
+    let toLiteDB_Vocation (x: Vocation) = {
+        vocationStat = toLiteDB_VocationStat x.vocationStat
+        mundaneOrMagicVocationExtras = toLiteDB_MundaneOrmagicVocationExtras x.mundaneOrMagicVocationExtras
+    }
+
     type LiteDB_CombatRoll = {
         itemName: string
         weaponTypeName: string
