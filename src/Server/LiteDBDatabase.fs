@@ -539,6 +539,21 @@ module LiteDBTypes =
         carryWeightCalculationOption = x.carryWeightCalculationOption
     }
 
+    type IdLiteDB_Character = {
+        Id: int
+        LiteDB_Character: LiteDB_Character
+    }
+
+    let toIdCharacter (x: IdCharacter) : IdLiteDB_Character = {
+        Id = x.Id
+        LiteDB_Character = toLiteDB_Character x.Character
+    }
+
+    let toIdLiteDB_Character (x: IdLiteDB_Character) : IdCharacter = {
+        Id = x.Id
+        Character = toCharacter x.LiteDB_Character
+    }
+
 let db =
     let mapper = FSharpBsonMapper()
     let connStr = "Filename=fogentData.db;mode=Exclusive"
