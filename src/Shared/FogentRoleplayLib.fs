@@ -743,7 +743,7 @@ module WeaponResource =
         penetration: Penetration
         rangeOption: Range option
         damageTypeSet: DamageType Set
-        NamedAreaOfEffectOption: AreaOfEffect option
+        namedAreaOfEffectOption: AreaOfEffect option
     }
 
     let weaponResourceToName weaponResource = weaponResource.name
@@ -1632,7 +1632,7 @@ module CombatRoll =
              resource.penetration,
              resource.rangeOption,
              resource.damageTypeSet,
-             resource.NamedAreaOfEffectOption)
+             resource.namedAreaOfEffectOption)
         | None -> ("", emptyDicePoolMod, 0u, None, Set.empty, None)
 
     let createCombatRoll
