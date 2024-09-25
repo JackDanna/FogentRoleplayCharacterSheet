@@ -57,6 +57,7 @@ module LiteDBTypes =
     open Weapon
     open AttributeDeterminedDiceMod
     open FogentRoleplayLib.Item
+    open FogentRoleplayLib.WeaponSkillData
 
     type LiteDB_WeaponResource = {
         name: string
@@ -211,6 +212,16 @@ module LiteDBTypes =
     type LiteDB_WeaponSkillData = {
         name: string
         governingAttributes: AttributeName seq
+    }
+
+    let toWeaponSkillData x : WeaponSkillData = {
+        name = x.name
+        governingAttributes = Set.ofSeq x.governingAttributes
+    }
+
+    let toLiteDB_WeaponSkillData (x: WeaponSkillData) = {
+        name = x.name
+        governingAttributes = x.governingAttributes
     }
 
     type LiteDB_VocationStat = {
