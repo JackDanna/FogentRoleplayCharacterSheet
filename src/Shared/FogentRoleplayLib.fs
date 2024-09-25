@@ -150,6 +150,22 @@ module ZeroToFive =
 
     let zeroToFiveToInt = zeroToFiveToUint >> int
 
+module ZeroToThree =
+    type ZeroToThree =
+        | Zero
+        | One
+        | Two
+        | Three
+
+    let init () = Zero
+
+    let zeroToThreeToUint zeroToThree =
+        match zeroToThree with
+        | Zero -> 0u
+        | One -> 1u
+        | Two -> 2u
+        | Three -> 3u
+
 module Neg1To5 =
     open ZeroToFive
 
@@ -1463,7 +1479,6 @@ module MagicSkillData =
         |> Seq.map (fun magicSkill -> magicSkill.name, magicSkill)
         |> Map.ofSeq
 
-
 module MagicSystem =
     open AttributeName
     open MagicSkillData
@@ -2047,22 +2062,6 @@ module SettingData =
         carryWeightCalculationSet = Set.empty
         weightClassSet = Set.empty
     }
-
-module ZeroToThree =
-    type ZeroToThree =
-        | Zero
-        | One
-        | Two
-        | Three
-
-    let init () = Zero
-
-    let zeroToThreeToUint zeroToThree =
-        match zeroToThree with
-        | Zero -> 0u
-        | One -> 1u
-        | Two -> 2u
-        | Three -> 3u
 
 module Character =
     open Attribute
