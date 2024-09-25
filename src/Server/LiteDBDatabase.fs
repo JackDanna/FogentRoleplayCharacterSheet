@@ -1,19 +1,10 @@
 module LiteDBDatabase
 
-open System
 open LiteDB
 open LiteDB.FSharp
-//open System.Collections.Generic
 open Shared
 
 open FogentRoleplayLib.Character
-
-// [<CLIMutableAttribute>]
-// type Mut_IdUser = Shared.IdUser
-
-// [<CLIMutableAttribute>]
-// type Mut_IdCharacter = Shared.IdCharacter
-
 
 module LiteDBTypes =
     open FogentRoleplayLib
