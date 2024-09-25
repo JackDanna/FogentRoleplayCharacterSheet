@@ -62,6 +62,7 @@ module LiteDBTypes =
     open FogentRoleplayLib.BaseDiceMod
     open FogentRoleplayLib.TextEffect
     open FogentRoleplayLib.ItemStack
+    open FogentRoleplayLib.Container
 
     type LiteDB_WeaponResource = {
         name: string
@@ -220,6 +221,41 @@ module LiteDBTypes =
         item = toLiteDB_Item x.item
         quantity = x.quantity
     }
+
+    type LiteDB_ContainerItem = {
+        item: LiteDB_Item
+        containerTypeData: Container
+        containedElements: LiteDB_ItemElement list
+    }
+
+    and LiteDB_ItemElement =
+        | Item of LiteDB_Item
+        | ContainerItem of LiteDB_ContainerItem
+        | ItemStack of LiteDB_ItemStack
+
+    let rec toContainerItem x : ContainerItem = {
+        item = toItem x.item
+        containerTypeData = x.containerTypeData
+        containedElements = x.containedElements |> List.map toItemElement
+    }
+
+    and toItemElement =
+        function
+        | Item item -> toItem item |> ItemElement.Item
+        | ContainerItem x -> toContainerItem x |> ItemElement.ContainerItem
+        | ItemStack x -> toItemStack x |> ItemElement.ItemStack
+
+    let rec toLiteDB_ContainerItem (x: ContainerItem) = {
+        item = toLiteDB_Item x.item
+        containerTypeData = x.containerTypeData
+        containedElements = x.containedElements |> List.map toLiteDB_ItemElement
+    }
+
+    and toLiteDB_ItemElement =
+        function
+        | ItemElement.Item item -> toLiteDB_Item item |> Item
+        | ItemElement.ContainerItem x -> toLiteDB_ContainerItem x |> ContainerItem
+        | ItemElement.ItemStack x -> toLiteDB_ItemStack x |> ItemStack
 
     type LiteDB_DicePoolCalculationData = {
         attributes: Attribute seq
@@ -497,7 +533,7 @@ module LiteDBTypes =
     type LiteDB_SettingData = {
         attributeNameSet: AttributeName seq
         coreSkillDataSet: CoreSkillData seq
-        itemElementSet: ItemElement seq
+        itemElementSet: LiteDB_ItemElement seq
         weaponSpellSet: WeaponSpell seq
         magicSystemSet: LiteDB_MagicSystem seq
         weaponSkillDataSet: LiteDB_WeaponSkillData seq
@@ -510,7 +546,7 @@ module LiteDBTypes =
     let toSettingData x : SettingData = {
         attributeNameSet = Set.ofSeq x.attributeNameSet
         coreSkillDataSet = Set.ofSeq x.coreSkillDataSet
-        itemElementSet = Set.ofSeq x.itemElementSet
+        itemElementSet = x.itemElementSet |> Seq.map toItemElement |> Set.ofSeq
         weaponSpellSet = Set.ofSeq x.weaponSpellSet
         magicSystemSet = x.magicSystemSet |> Seq.map toMagicSystem |> Set.ofSeq
         weaponSkillDataSet = x.weaponSkillDataSet |> Seq.map toWeaponSkillData |> Set.ofSeq
@@ -523,7 +559,7 @@ module LiteDBTypes =
     let toLiteDB_SettingData (x: SettingData) = {
         attributeNameSet = x.attributeNameSet
         coreSkillDataSet = x.coreSkillDataSet
-        itemElementSet = x.itemElementSet
+        itemElementSet = x.itemElementSet |> Seq.map toLiteDB_ItemElement
         weaponSpellSet = x.weaponSpellSet
         magicSystemSet = x.magicSystemSet |> Seq.map toLiteDB_MagicSystem
         weaponSkillDataSet = x.weaponSkillDataSet |> Seq.map toLiteDB_WeaponSkillData
@@ -539,12 +575,12 @@ module LiteDBTypes =
         coreSkills: LiteDB_Skill seq
         destinyPoints: ZeroToThree
         vocationList: LiteDB_Vocation list
-        equipment: ItemElement List
+        equipment: LiteDB_ItemElement List
         combatRollList: CombatRoll List
         characterInformation: CharacterInformation
         characterEffects: LiteDB_Effect List
         combatSpeeds: CombatSpeed List
-        settingData: SettingData
+        settingData: LiteDB_SettingData
         weightClassOption: WeightClass option
         carryWeightCalculationOption: CarryWeightCalculation option
     }
@@ -555,12 +591,12 @@ module LiteDBTypes =
         coreSkills = x.coreSkills |> Seq.map toSkill |> Set.ofSeq
         destinyPoints = x.destinyPoints
         vocationList = x.vocationList |> List.map toVocation
-        equipment = x.equipment
+        equipment = x.equipment |> List.map toItemElement
         combatRollList = x.combatRollList
         characterInformation = x.characterInformation
         characterEffects = x.characterEffects |> List.map toEffect
         combatSpeeds = x.combatSpeeds
-        settingData = x.settingData
+        settingData = toSettingData x.settingData
         weightClassOption = x.weightClassOption
         carryWeightCalculationOption = x.carryWeightCalculationOption
     }
@@ -571,12 +607,12 @@ module LiteDBTypes =
         coreSkills = x.coreSkills |> Seq.map toLiteDB_Skill
         destinyPoints = x.destinyPoints
         vocationList = x.vocationList |> List.map toLiteDB_Vocation
-        equipment = x.equipment
+        equipment = x.equipment |> List.map toLiteDB_ItemElement
         combatRollList = x.combatRollList
         characterInformation = x.characterInformation
         characterEffects = x.characterEffects |> List.map toLiteDB_Effect
         combatSpeeds = x.combatSpeeds
-        settingData = x.settingData
+        settingData = toLiteDB_SettingData x.settingData
         weightClassOption = x.weightClassOption
         carryWeightCalculationOption = x.carryWeightCalculationOption
     }
