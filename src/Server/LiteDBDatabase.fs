@@ -52,7 +52,6 @@ module LiteDBTypes =
     open FogentRoleplayLib.WeaponSkillData
     open FogentRoleplayLib.VocationStat
     open FogentRoleplayLib.MundaneVocationSkill
-    open FogentRoleplayLib.MundaneVocation
     open FogentRoleplayLib.MagicSkillData
     open FogentRoleplayLib.MagicSystem
     open FogentRoleplayLib.MagicVocationExtras
@@ -259,17 +258,17 @@ module LiteDBTypes =
 
     type LiteDB_DicePoolCalculationData = {
         attributes: Attribute seq
-        effects: Effect List
+        effects: LiteDB_Effect List
     }
 
     let toDicePoolCalculationData x : DicePoolCalculationData = {
         attributes = Set.ofSeq x.attributes
-        effects = x.effects
+        effects = x.effects |> List.map toEffect
     }
 
     let toLiteDB_DicePoolCalculationData (x: DicePoolCalculationData) = {
         attributes = x.attributes
-        effects = x.effects
+        effects = x.effects |> List.map toLiteDB_Effect
     }
 
     type LiteDB_Skill = {
@@ -342,21 +341,6 @@ module LiteDBTypes =
         function
         | MundaneVocationSkill.VocationalSkill skill -> toLiteDB_Skill skill |> VocationalSkill
         | MundaneVocationSkill.WeaponSkill skill -> toLiteDB_Skill skill |> WeaponSkill
-
-    type LiteDB_MundaneVocation = {
-        vocationStat: LiteDB_VocationStat
-        mundaneVocationSkills: LiteDB_MundaneVocationSkill seq
-    }
-
-    let toMundaneVocation (x: LiteDB_MundaneVocation) : MundaneVocation = {
-        vocationStat = x.vocationStat |> toVocationStat
-        mundaneVocationSkills = x.mundaneVocationSkills |> Seq.map toMundaneVocationSkill |> Set.ofSeq
-    }
-
-    let toLiteDB_MundaneVocation (x: MundaneVocation) : LiteDB_MundaneVocation = {
-        vocationStat = x.vocationStat |> toLiteDB_VocationStat
-        mundaneVocationSkills = x.mundaneVocationSkills |> Seq.map toLiteDB_MundaneVocationSkill
-    }
 
     type LiteDB_MagicSkillData = {
         name: SkillName
@@ -576,7 +560,7 @@ module LiteDBTypes =
         destinyPoints: ZeroToThree
         vocationList: LiteDB_Vocation list
         equipment: LiteDB_ItemElement List
-        combatRollList: CombatRoll List
+        combatRollList: LiteDB_CombatRoll List
         characterInformation: CharacterInformation
         characterEffects: LiteDB_Effect List
         combatSpeeds: CombatSpeed List
@@ -592,7 +576,7 @@ module LiteDBTypes =
         destinyPoints = x.destinyPoints
         vocationList = x.vocationList |> List.map toVocation
         equipment = x.equipment |> List.map toItemElement
-        combatRollList = x.combatRollList
+        combatRollList = x.combatRollList |> List.map toCombatRoll
         characterInformation = x.characterInformation
         characterEffects = x.characterEffects |> List.map toEffect
         combatSpeeds = x.combatSpeeds
@@ -608,7 +592,7 @@ module LiteDBTypes =
         destinyPoints = x.destinyPoints
         vocationList = x.vocationList |> List.map toLiteDB_Vocation
         equipment = x.equipment |> List.map toLiteDB_ItemElement
-        combatRollList = x.combatRollList
+        combatRollList = x.combatRollList |> List.map toLiteDB_CombatRoll
         characterInformation = x.characterInformation
         characterEffects = x.characterEffects |> List.map toLiteDB_Effect
         combatSpeeds = x.combatSpeeds
