@@ -56,6 +56,7 @@ module LiteDBTypes =
     open WeaponResource
     open Weapon
     open AttributeDeterminedDiceMod
+    open FogentRoleplayLib.Item
 
     type LiteDB_WeaponResource = {
         name: string
@@ -155,6 +156,20 @@ module LiteDBTypes =
         itemEffectSet: Effect seq
         value: string
         weight: float
+    }
+
+    let toItem x : Item = {
+        name = x.name
+        itemEffectSet = Set.ofSeq x.itemEffectSet
+        value = x.value
+        weight = x.weight
+    }
+
+    let toLiteDB_Item (x: Item) = {
+        name = x.name
+        itemEffectSet = x.itemEffectSet
+        value = x.value
+        weight = x.weight
     }
 
     type LiteDB_DicePoolCalculationData = {
