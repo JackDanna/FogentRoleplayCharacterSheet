@@ -465,6 +465,32 @@ module LiteDBTypes =
         weightClassSet: WeightClass seq
     }
 
+    let toSettingData x : SettingData = {
+        attributeNameSet = Set.ofSeq x.attributeNameSet
+        coreSkillDataSet = Set.ofSeq x.coreSkillDataSet
+        itemElementSet = Set.ofSeq x.itemElementSet
+        weaponSpellSet = Set.ofSeq x.weaponSpellSet
+        magicSystemSet = x.magicSystemSet |> Seq.map toMagicSystem |> Set.ofSeq
+        weaponSkillDataSet = x.weaponSkillDataSet |> Seq.map toWeaponSkillData |> Set.ofSeq
+        effectSet = Set.ofSeq x.effectSet
+        combatSpeedCalculationSet = Set.ofSeq x.combatSpeedCalculationSet
+        carryWeightCalculationSet = Set.ofSeq x.carryWeightCalculationSet
+        weightClassSet = Set.ofSeq x.weightClassSet
+    }
+
+    let toLiteDB_SettingData (x: SettingData) = {
+        attributeNameSet = x.attributeNameSet
+        coreSkillDataSet = x.coreSkillDataSet
+        itemElementSet = x.itemElementSet
+        weaponSpellSet = x.weaponSpellSet
+        magicSystemSet = x.magicSystemSet |> Seq.map toLiteDB_MagicSystem
+        weaponSkillDataSet = x.weaponSkillDataSet |> Seq.map toLiteDB_WeaponSkillData
+        effectSet = x.effectSet
+        combatSpeedCalculationSet = x.combatSpeedCalculationSet
+        carryWeightCalculationSet = x.carryWeightCalculationSet
+        weightClassSet = x.weightClassSet
+    }
+
     type LiteDB_Character = {
         name: string
         attributes: Attribute List
