@@ -497,6 +497,27 @@ module LiteDBTypes =
         eoName = x.eoName
     }
 
+    type LiteDB_WeightClass = {
+        name: string
+        bottomPercentOption: float option
+        topPercentOption: float option
+        attributeDeterminedDiceModEffect: LiteDB_AttributeDeterminedDiceMod
+    }
+
+    let toWeightClass x : WeightClass = {
+        name = x.name
+        bottomPercentOption = x.bottomPercentOption
+        topPercentOption = x.bottomPercentOption
+        attributeDeterminedDiceModEffect = toAttributeDeterminedDiceMod x.attributeDeterminedDiceModEffect
+    }
+
+    let toLiteDB_WeightClass (x: WeightClass) = {
+        name = x.name
+        bottomPercentOption = x.bottomPercentOption
+        topPercentOption = x.bottomPercentOption
+        attributeDeterminedDiceModEffect = toLiteDB_AttributeDeterminedDiceMod x.attributeDeterminedDiceModEffect
+    }
+
     type LiteDB_SettingData = {
         attributeNameSet: AttributeName seq
         coreSkillDataSet: CoreSkillData seq
@@ -507,7 +528,7 @@ module LiteDBTypes =
         effectSet: LiteDB_Effect seq
         combatSpeedCalculationSet: CombatSpeedCalculation seq
         carryWeightCalculationSet: CarryWeightCalculation seq
-        weightClassSet: WeightClass seq
+        weightClassSet: LiteDB_WeightClass seq
     }
 
     let toSettingData x : SettingData = {
@@ -520,7 +541,7 @@ module LiteDBTypes =
         effectSet = x.effectSet |> Seq.map toEffect |> Set.ofSeq
         combatSpeedCalculationSet = Set.ofSeq x.combatSpeedCalculationSet
         carryWeightCalculationSet = Set.ofSeq x.carryWeightCalculationSet
-        weightClassSet = Set.ofSeq x.weightClassSet
+        weightClassSet = x.weightClassSet |> Seq.map toWeightClass |> Set.ofSeq
     }
 
     let toLiteDB_SettingData (x: SettingData) = {
@@ -533,7 +554,7 @@ module LiteDBTypes =
         effectSet = x.effectSet |> Seq.map toLiteDB_Effect
         combatSpeedCalculationSet = x.combatSpeedCalculationSet
         carryWeightCalculationSet = x.carryWeightCalculationSet
-        weightClassSet = x.weightClassSet
+        weightClassSet = x.weightClassSet |> Seq.map toLiteDB_WeightClass
     }
 
     type LiteDB_Character = {
@@ -548,7 +569,7 @@ module LiteDBTypes =
         characterEffects: LiteDB_Effect List
         combatSpeeds: CombatSpeed List
         settingData: LiteDB_SettingData
-        weightClassOption: WeightClass option
+        weightClassOption: LiteDB_WeightClass option
         carryWeightCalculationOption: CarryWeightCalculation option
     }
 
@@ -564,7 +585,10 @@ module LiteDBTypes =
         characterEffects = x.characterEffects |> List.map toEffect
         combatSpeeds = x.combatSpeeds
         settingData = toSettingData x.settingData
-        weightClassOption = x.weightClassOption
+        weightClassOption =
+            match x.weightClassOption with
+            | None -> None
+            | Some weightClass -> weightClass |> toWeightClass |> Some
         carryWeightCalculationOption = x.carryWeightCalculationOption
     }
 
@@ -580,7 +604,10 @@ module LiteDBTypes =
         characterEffects = x.characterEffects |> List.map toLiteDB_Effect
         combatSpeeds = x.combatSpeeds
         settingData = toLiteDB_SettingData x.settingData
-        weightClassOption = x.weightClassOption
+        weightClassOption =
+            match x.weightClassOption with
+            | None -> None
+            | Some weightClass -> weightClass |> toLiteDB_WeightClass |> Some
         carryWeightCalculationOption = x.carryWeightCalculationOption
     }
 
