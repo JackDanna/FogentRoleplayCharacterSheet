@@ -420,6 +420,38 @@ module LiteDBTypes =
         eoName: string option
     }
 
+    let toCombatRoll x : CombatRoll = {
+        itemName = x.itemName
+        weaponTypeName = x.weaponTypeName
+        handedVariation = x.handedVariation
+        resourceName = x.resourceName
+        resourceDicePoolMod = x.resourceDicePoolMod
+        dicePool = x.dicePool
+        weaponandOffhandDicePoolModString = x.weaponandOffhandDicePoolModString
+        calculatedRange = x.calculatedRange
+        penetration = x.penetration
+        damageTypeSet = x.damageTypeSet |> Set.ofSeq
+        setAreaOfEffectOption = x.setAreaOfEffectOption
+        calculatedEngageableOpponents = x.calculatedEngageableOpponents
+        eoName = x.eoName
+    }
+
+    let toLiteDB_CombatRoll (x: CombatRoll) = {
+        itemName = x.itemName
+        weaponTypeName = x.weaponTypeName
+        handedVariation = x.handedVariation
+        resourceName = x.resourceName
+        resourceDicePoolMod = x.resourceDicePoolMod
+        dicePool = x.dicePool
+        weaponandOffhandDicePoolModString = x.weaponandOffhandDicePoolModString
+        calculatedRange = x.calculatedRange
+        penetration = x.penetration
+        damageTypeSet = x.damageTypeSet
+        setAreaOfEffectOption = x.setAreaOfEffectOption
+        calculatedEngageableOpponents = x.calculatedEngageableOpponents
+        eoName = x.eoName
+    }
+
     type LiteDB_SettingData = {
         attributeNameSet: AttributeName seq
         coreSkillDataSet: CoreSkillData seq
