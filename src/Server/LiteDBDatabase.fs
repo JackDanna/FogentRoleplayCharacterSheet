@@ -3,7 +3,7 @@ module LiteDBDatabase
 open System
 open LiteDB
 open LiteDB.FSharp
-open System.Collections.Generic
+//open System.Collections.Generic
 open Shared
 
 open FogentRoleplayLib.Character
@@ -175,6 +175,16 @@ module LiteDBTypes =
     type LiteDB_DicePoolCalculationData = {
         attributes: Attribute seq
         effects: Effect List
+    }
+
+    let toDicePoolCalculationData x : DicePoolCalculationData = {
+        attributes = Set.ofSeq x.attributes
+        effects = x.effects
+    }
+
+    let toLiteDB_DicePoolCalculationData (x: DicePoolCalculationData) = {
+        attributes = x.attributes
+        effects = x.effects
     }
 
     type LiteDB_Skill = {
