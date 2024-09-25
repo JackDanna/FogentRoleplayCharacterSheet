@@ -370,6 +370,25 @@ module LiteDBTypes =
         | MundaneVocationExtras of LiteDB_MundaneVocationSkill seq
         | MagicVocationExtras of LiteDB_MagicVocationExtras
 
+    let toMundaneOrmagicVocationExtras =
+        function
+        | MundaneVocationExtras skills ->
+            skills
+            |> Seq.map toMundaneVocationSkill
+            |> Set.ofSeq
+            |> MundaneOrMagicVocationExtras.MundaneVocationExtras
+        | MagicVocationExtras magicVocationExtras ->
+            magicVocationExtras
+            |> toMagicVocationExtras
+            |> MundaneOrMagicVocationExtras.MagicVocationExtras
+
+    let toLiteDB_MundaneOrmagicVocationExtras =
+        function
+        | MundaneOrMagicVocationExtras.MundaneVocationExtras skills ->
+            skills |> Seq.map toLiteDB_MundaneVocationSkill |> MundaneVocationExtras
+        | MundaneOrMagicVocationExtras.MagicVocationExtras magicVocationExtras ->
+            magicVocationExtras |> toLiteDB_MagicVocationExtras |> MagicVocationExtras
+
     type LiteDB_Vocation = {
         vocationStat: LiteDB_VocationStat
         mundaneOrMagicVocationExtras: LiteDB_MundaneOrMagicVocationExtras
