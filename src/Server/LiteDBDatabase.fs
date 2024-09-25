@@ -6,6 +6,7 @@ open Shared
 
 open FogentRoleplayLib.Character
 
+[<AutoOpenAttribute>]
 module LiteDBTypes =
     open FogentRoleplayLib
     open Attribute
@@ -530,17 +531,17 @@ module LiteDBTypes =
         carryWeightCalculationOption = x.carryWeightCalculationOption
     }
 
-    type IdLiteDB_Character = {
+    type LiteDB_IdCharacter = {
         Id: int
         LiteDB_Character: LiteDB_Character
     }
 
-    let toIdCharacter (x: IdCharacter) : IdLiteDB_Character = {
+    let toIdCharacter (x: IdCharacter) : LiteDB_IdCharacter = {
         Id = x.Id
         LiteDB_Character = toLiteDB_Character x.Character
     }
 
-    let toIdLiteDB_Character (x: IdLiteDB_Character) : IdCharacter = {
+    let toLiteDB_IdCharacter (x: LiteDB_IdCharacter) : IdCharacter = {
         Id = x.Id
         Character = toCharacter x.LiteDB_Character
     }
@@ -573,7 +574,7 @@ type UserCharacterAccess = {
 }
 
 let users = collectionFromDB<IdUser>
-let characters = collectionFromDB<IdCharacter>
+let characters = collectionFromDB<LiteDB_IdCharacter>
 let userCharacterAccesses = collectionFromDB<UserCharacterAccess>
 
 //users.EnsureIndex(fun (u: IdUser) -> u.Entity.userName) |> ignore
