@@ -341,7 +341,6 @@ module LiteDBTypes =
         | MagicVocationSkill.MagicSkill skill -> toLiteDB_Skill skill |> MagicSkill
         | MagicVocationSkill.MundaneVocationSkill skill -> toLiteDB_MundaneVocationSkill skill |> MundaneVocationSkill
 
-
     type LiteDB_MagicVocationExtras = {
         magicVocationSkills: LiteDB_MagicVocationSkill seq
         magicSystem: LiteDB_MagicSystem
