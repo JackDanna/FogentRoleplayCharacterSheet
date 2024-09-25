@@ -56,6 +56,12 @@ module LiteDBTypes =
     open FogentRoleplayLib.MagicSkillData
     open FogentRoleplayLib.MagicSystem
     open FogentRoleplayLib.MagicVocationExtras
+    open FogentRoleplayLib.SkillDiceMod
+    open FogentRoleplayLib.AttributeStatAdjustment
+    open FogentRoleplayLib.PhysicalDefense
+    open FogentRoleplayLib.BaseDiceMod
+    open FogentRoleplayLib.TextEffect
+    open FogentRoleplayLib.ItemStack
 
     type LiteDB_WeaponResource = {
         name: string
@@ -150,25 +156,69 @@ module LiteDBTypes =
         durationAndSource = x.durationAndSource
     }
 
+    type LiteDB_Effect =
+        | Weapon of LiteDB_Weapon
+        | WeaponResource of LiteDB_WeaponResource
+        | SkillDiceMod of SkillDiceMod
+        | AttributeStatAdjustment of AttributeStatAdjustment
+        | PhysicalDefense of PhysicalDefense
+        | AttributeDeterminedDiceMod of LiteDB_AttributeDeterminedDiceMod
+        | BaseDiceMod of BaseDiceMod
+        | TextEffect of TextEffect
+
+    let toEffect =
+        function
+        | Weapon weapon -> toWeapon weapon |> Effect.Weapon
+        | WeaponResource weaponResource -> toWeaponResource weaponResource |> Effect.WeaponResource
+        | SkillDiceMod x -> Effect.SkillDiceMod x
+        | AttributeStatAdjustment x -> Effect.AttributeStatAdjustment x
+        | PhysicalDefense x -> Effect.PhysicalDefense x
+        | AttributeDeterminedDiceMod x -> toAttributeDeterminedDiceMod x |> Effect.AttributeDeterminedDiceMod
+        | BaseDiceMod x -> Effect.BaseDiceMod x
+        | TextEffect x -> Effect.TextEffect x
+
+    let toLiteDB_Effect =
+        function
+        | Effect.Weapon weapon -> toLiteDB_Weapon weapon |> Weapon
+        | Effect.WeaponResource weaponResource -> toLiteDB_WeaponResource weaponResource |> WeaponResource
+        | Effect.SkillDiceMod x -> SkillDiceMod x
+        | Effect.AttributeStatAdjustment x -> AttributeStatAdjustment x
+        | Effect.PhysicalDefense x -> PhysicalDefense x
+        | Effect.AttributeDeterminedDiceMod x -> toLiteDB_AttributeDeterminedDiceMod x |> AttributeDeterminedDiceMod
+        | Effect.BaseDiceMod x -> BaseDiceMod x
+        | Effect.TextEffect x -> TextEffect x
+
     type LiteDB_Item = {
         name: string
-        itemEffectSet: Effect seq
+        itemEffectSet: LiteDB_Effect seq
         value: string
         weight: float
     }
 
     let toItem x : Item = {
         name = x.name
-        itemEffectSet = Set.ofSeq x.itemEffectSet
+        itemEffectSet = x.itemEffectSet |> Seq.map toEffect |> Set.ofSeq
         value = x.value
         weight = x.weight
     }
 
     let toLiteDB_Item (x: Item) = {
         name = x.name
-        itemEffectSet = x.itemEffectSet
+        itemEffectSet = x.itemEffectSet |> Seq.map toLiteDB_Effect
         value = x.value
         weight = x.weight
+    }
+
+    type LiteDB_ItemStack = { item: LiteDB_Item; quantity: uint }
+
+    let toItemStack x : ItemStack = {
+        item = toItem x.item
+        quantity = x.quantity
+    }
+
+    let toLiteDB_ItemStack (x: ItemStack) = {
+        item = toLiteDB_Item x.item
+        quantity = x.quantity
     }
 
     type LiteDB_DicePoolCalculationData = {
@@ -492,7 +542,7 @@ module LiteDBTypes =
         equipment: ItemElement List
         combatRollList: CombatRoll List
         characterInformation: CharacterInformation
-        characterEffects: Effect List
+        characterEffects: LiteDB_Effect List
         combatSpeeds: CombatSpeed List
         settingData: SettingData
         weightClassOption: WeightClass option
@@ -508,7 +558,7 @@ module LiteDBTypes =
         equipment = x.equipment
         combatRollList = x.combatRollList
         characterInformation = x.characterInformation
-        characterEffects = x.characterEffects
+        characterEffects = x.characterEffects |> List.map toEffect
         combatSpeeds = x.combatSpeeds
         settingData = x.settingData
         weightClassOption = x.weightClassOption
@@ -524,7 +574,7 @@ module LiteDBTypes =
         equipment = x.equipment
         combatRollList = x.combatRollList
         characterInformation = x.characterInformation
-        characterEffects = x.characterEffects
+        characterEffects = x.characterEffects |> List.map toLiteDB_Effect
         combatSpeeds = x.combatSpeeds
         settingData = x.settingData
         weightClassOption = x.weightClassOption
