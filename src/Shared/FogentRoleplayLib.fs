@@ -1419,15 +1419,6 @@ module MundaneVocationSkill =
     let mundaneVocationSkillsToWeaponSkills seq =
         Seq.choose mundaneVocationSkillToWeaponSkillOption seq
 
-module MundaneVocation =
-    open VocationStat
-    open MundaneVocationSkill
-
-    type MundaneVocation = {
-        vocationStat: VocationStat
-        mundaneVocationSkills: MundaneVocationSkill Set
-    }
-
 // Magic
 
 module MagicResourcePool =
