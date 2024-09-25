@@ -54,6 +54,7 @@ module LiteDBTypes =
     open FogentRoleplayLib.WeaponSpell
     open FogentRoleplayLib.CombatSpeedCalculation
     open FogentRoleplayLib.WeaponResource
+    open FogentRoleplayLib.Weapon
 
     type LiteDB_WeaponResource = {
         name: string
@@ -97,6 +98,34 @@ module LiteDBTypes =
         dualWieldedDiceMod: DicePoolMod option
         areaOfEffectOption: AreaOfEffect option
         resourceNameOption: ResourceName option
+    }
+
+    let toWeapon (x: LiteDB_Weapon) : Weapon = {
+        name = x.name
+        governingSkillName = x.governingSkillName
+        oneHandedDiceMod = x.oneHandedDiceMod
+        twoHandedDiceMod = x.twoHandedDiceMod
+        penetration = x.penetration
+        range = x.range
+        damageTypes = Set.ofSeq x.damageTypes
+        engageableOpponents = x.engageableOpponents
+        dualWieldedDiceMod = x.dualWieldedDiceMod
+        areaOfEffectOption = x.areaOfEffectOption
+        resourceNameOption = x.resourceNameOption
+    }
+
+    let toLiteDB_Weapon (x: Weapon) : LiteDB_Weapon = {
+        name = x.name
+        governingSkillName = x.governingSkillName
+        oneHandedDiceMod = x.oneHandedDiceMod
+        twoHandedDiceMod = x.twoHandedDiceMod
+        penetration = x.penetration
+        range = x.range
+        damageTypes = Set.toSeq x.damageTypes
+        engageableOpponents = x.engageableOpponents
+        dualWieldedDiceMod = x.dualWieldedDiceMod
+        areaOfEffectOption = x.areaOfEffectOption
+        resourceNameOption = x.resourceNameOption
     }
 
     type LiteDB_AttributeDeterminedDiceMod = {
