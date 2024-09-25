@@ -33,9 +33,7 @@ module LiteDBTypes =
     open DicePool
     open MundaneOrMagicVocationExtras
     open DamageType
-    open DicePoolMod
     open Range
-    open DamageType
     open AreaOfEffect
     open ResourceName
     open Penetration
@@ -255,21 +253,6 @@ module LiteDBTypes =
         | ItemElement.Item item -> toLiteDB_Item item |> Item
         | ItemElement.ContainerItem x -> toLiteDB_ContainerItem x |> ContainerItem
         | ItemElement.ItemStack x -> toLiteDB_ItemStack x |> ItemStack
-
-    type LiteDB_DicePoolCalculationData = {
-        attributes: Attribute seq
-        effects: LiteDB_Effect List
-    }
-
-    let toDicePoolCalculationData x : DicePoolCalculationData = {
-        attributes = Set.ofSeq x.attributes
-        effects = x.effects |> List.map toEffect
-    }
-
-    let toLiteDB_DicePoolCalculationData (x: DicePoolCalculationData) = {
-        attributes = x.attributes
-        effects = x.effects |> List.map toLiteDB_Effect
-    }
 
     type LiteDB_Skill = {
         name: SkillName
@@ -521,7 +504,7 @@ module LiteDBTypes =
         weaponSpellSet: WeaponSpell seq
         magicSystemSet: LiteDB_MagicSystem seq
         weaponSkillDataSet: LiteDB_WeaponSkillData seq
-        effectSet: Effect seq
+        effectSet: LiteDB_Effect seq
         combatSpeedCalculationSet: CombatSpeedCalculation seq
         carryWeightCalculationSet: CarryWeightCalculation seq
         weightClassSet: WeightClass seq
@@ -534,7 +517,7 @@ module LiteDBTypes =
         weaponSpellSet = Set.ofSeq x.weaponSpellSet
         magicSystemSet = x.magicSystemSet |> Seq.map toMagicSystem |> Set.ofSeq
         weaponSkillDataSet = x.weaponSkillDataSet |> Seq.map toWeaponSkillData |> Set.ofSeq
-        effectSet = Set.ofSeq x.effectSet
+        effectSet = x.effectSet |> Seq.map toEffect |> Set.ofSeq
         combatSpeedCalculationSet = Set.ofSeq x.combatSpeedCalculationSet
         carryWeightCalculationSet = Set.ofSeq x.carryWeightCalculationSet
         weightClassSet = Set.ofSeq x.weightClassSet
@@ -547,7 +530,7 @@ module LiteDBTypes =
         weaponSpellSet = x.weaponSpellSet
         magicSystemSet = x.magicSystemSet |> Seq.map toLiteDB_MagicSystem
         weaponSkillDataSet = x.weaponSkillDataSet |> Seq.map toLiteDB_WeaponSkillData
-        effectSet = x.effectSet
+        effectSet = x.effectSet |> Seq.map toLiteDB_Effect
         combatSpeedCalculationSet = x.combatSpeedCalculationSet
         carryWeightCalculationSet = x.carryWeightCalculationSet
         weightClassSet = x.weightClassSet
