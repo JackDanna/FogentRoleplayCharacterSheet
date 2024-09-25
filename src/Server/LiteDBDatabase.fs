@@ -49,12 +49,13 @@ module LiteDBTypes =
     open Penetration
     open EngageableOpponents
     open DurationAndSource
-    open FogentRoleplayLib.CalculatedRange
-    open FogentRoleplayLib.SetAreaOfEffect
-    open FogentRoleplayLib.WeaponSpell
-    open FogentRoleplayLib.CombatSpeedCalculation
-    open FogentRoleplayLib.WeaponResource
-    open FogentRoleplayLib.Weapon
+    open CalculatedRange
+    open SetAreaOfEffect
+    open WeaponSpell
+    open CombatSpeedCalculation
+    open WeaponResource
+    open Weapon
+    open AttributeDeterminedDiceMod
 
     type LiteDB_WeaponResource = {
         name: string
@@ -82,7 +83,7 @@ module LiteDBTypes =
         dicePoolMod = x.dicePoolMod
         penetration = x.penetration
         rangeOption = x.rangeOption
-        damageTypeSet = Set.toSeq x.damageTypeSet
+        damageTypeSet = x.damageTypeSet
         namedAreaOfEffectOption = x.namedAreaOfEffectOption
     }
 
@@ -121,7 +122,7 @@ module LiteDBTypes =
         twoHandedDiceMod = x.twoHandedDiceMod
         penetration = x.penetration
         range = x.range
-        damageTypes = Set.toSeq x.damageTypes
+        damageTypes = x.damageTypes
         engageableOpponents = x.engageableOpponents
         dualWieldedDiceMod = x.dualWieldedDiceMod
         areaOfEffectOption = x.areaOfEffectOption
@@ -133,6 +134,20 @@ module LiteDBTypes =
         attributesToEffect: AttributeName seq
         dicePoolMod: DicePoolMod
         durationAndSource: DurationAndSource
+    }
+
+    let toAttributeDeterminedDiceMod x : AttributeDeterminedDiceMod = {
+        name = x.name
+        attributesToEffect = Set.ofSeq x.attributesToEffect
+        dicePoolMod = x.dicePoolMod
+        durationAndSource = x.durationAndSource
+    }
+
+    let toLiteDB_AttributeDeterminedDiceMod (x: AttributeDeterminedDiceMod) : LiteDB_AttributeDeterminedDiceMod = {
+        name = x.name
+        attributesToEffect = x.attributesToEffect
+        dicePoolMod = x.dicePoolMod
+        durationAndSource = x.durationAndSource
     }
 
     type LiteDB_Item = {
