@@ -59,6 +59,7 @@ module LiteDBTypes =
     open FogentRoleplayLib.Item
     open FogentRoleplayLib.WeaponSkillData
     open FogentRoleplayLib.VocationStat
+    open FogentRoleplayLib.MundaneVocationSkill
 
     type LiteDB_WeaponResource = {
         name: string
@@ -249,6 +250,16 @@ module LiteDBTypes =
     type LiteDB_MundaneVocationSkill =
         | VocationalSkill of LiteDB_Skill
         | WeaponSkill of LiteDB_Skill
+
+    let toMundaneVocationSkill x : MundaneVocationSkill =
+        match x with
+        | VocationalSkill skill -> toSkill skill |> MundaneVocationSkill.VocationalSkill
+        | WeaponSkill skill -> toSkill skill |> MundaneVocationSkill.WeaponSkill
+
+    let toLiteDB_MundaneVocationSkill (x: MundaneVocationSkill) =
+        match x with
+        | MundaneVocationSkill.VocationalSkill skill -> toLiteDB_Skill skill |> VocationalSkill
+        | MundaneVocationSkill.WeaponSkill skill -> toLiteDB_Skill skill |> WeaponSkill
 
     type LiteDB_MundaneVocation = {
         vocationStat: LiteDB_VocationStat
