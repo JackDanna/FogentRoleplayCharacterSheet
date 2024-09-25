@@ -14,6 +14,199 @@ open FogentRoleplayLib.Character
 // [<CLIMutableAttribute>]
 // type Mut_IdCharacter = Shared.IdCharacter
 
+
+module LiteDBTypes =
+    open FogentRoleplayLib
+    open Attribute
+    open Skill
+    open ZeroToThree
+    open Vocation
+    open DicePoolCalculation
+    open ItemElement
+    open CombatRoll
+    open CharacterInformation
+    open Effect
+    open CombatSpeed
+    open SettingData
+    open WeightClass
+    open CarryWeightCalculation
+    open CoreSkillData
+    open ListUtils
+    open WeightClass
+    open SkillName
+    open Neg1To5
+    open AttributeName
+    open DicePoolMod
+    open ZeroToFive
+    open DicePool
+    open MundaneOrMagicVocationExtras
+    open DamageType
+    open DicePoolMod
+    open Range
+    open DamageType
+    open AreaOfEffect
+    open ResourceName
+    open Penetration
+    open EngageableOpponents
+    open DurationAndSource
+    open FogentRoleplayLib.CalculatedRange
+    open FogentRoleplayLib.SetAreaOfEffect
+    open FogentRoleplayLib.WeaponSpell
+    open FogentRoleplayLib.CombatSpeedCalculation
+
+    type LiteDB_WeaponResource = {
+        name: string
+        resourceName: ResourceName
+        dicePoolMod: DicePoolMod
+        penetration: Penetration
+        rangeOption: Range option
+        damageTypeSet: DamageType seq
+        NamedAreaOfEffectOption: AreaOfEffect option
+    }
+
+    type LiteDB_Weapon = {
+        name: string
+        governingSkillName: SkillName
+        oneHandedDiceMod: DicePoolMod option
+        twoHandedDiceMod: DicePoolMod option
+        penetration: Penetration
+        range: Range
+        damageTypes: DamageType seq
+        engageableOpponents: EngageableOpponents
+        dualWieldedDiceMod: DicePoolMod option
+        areaOfEffectOption: AreaOfEffect option
+        resourceNameOption: ResourceName option
+    }
+
+    type LiteDB_AttributeDeterminedDiceMod = {
+        name: string
+        attributesToEffect: AttributeName seq
+        dicePoolMod: DicePoolMod
+        durationAndSource: DurationAndSource
+    }
+
+    type LiteDB_Item = {
+        name: string
+        itemEffectSet: Effect seq
+        value: string
+        weight: float
+    }
+
+    type LiteDB_DicePoolCalculationData = {
+        attributes: Attribute seq
+        effects: Effect List
+    }
+
+    type LiteDB_Skill = {
+        name: SkillName
+        level: Neg1To5
+        governingAttributeNames: AttributeName seq
+        dicePoolModList: DicePoolMod List
+    }
+
+    type LiteDB_WeaponSkillData = {
+        name: string
+        governingAttributes: AttributeName seq
+    }
+
+    type LiteDB_VocationStat = {
+        name: string
+        governingAttributeNameSet: AttributeName seq
+        level: ZeroToFive
+        dicePool: DicePool
+    }
+
+    type LiteDB_MundaneVocationSkill =
+        | VocationalSkill of LiteDB_Skill
+        | WeaponSkill of LiteDB_Skill
+
+    type LiteDB_MundaneVocation = {
+        vocationStat: LiteDB_VocationStat
+        mundaneVocationSkills: LiteDB_MundaneVocationSkill seq
+    }
+
+    type LiteDB_MagicSkillData = {
+        name: SkillName
+        damageTypes: DamageType seq
+        isMeleeCapable: bool
+        isRangeCapable: bool
+    }
+
+    type LiteDB_MagicSystem = {
+        name: string
+        vocationName: string
+        vocationGoverningAttributeSet: AttributeName seq
+        resourceName: string
+        governingCoreSkill: string
+        magicSkillDataSet: LiteDB_MagicSkillData seq
+    }
+
+    type LiteDB_MagicVocationSkill =
+        | MagicSkill of LiteDB_Skill
+        | MundaneVocationSkill of LiteDB_MundaneVocationSkill
+
+    type LiteDB_MagicVocationExtras = {
+        magicVocationSkills: LiteDB_MagicVocationSkill seq
+        magicSystem: LiteDB_MagicSystem
+        vocationResourcePool: uint
+        coreSkillResourcePool: uint
+        currentMagicResource: uint
+    }
+
+    type LiteDB_MundaneOrMagicVocationExtras =
+        | MundaneVocationExtras of LiteDB_MundaneVocationSkill seq
+        | MagicVocationExtras of LiteDB_MagicVocationExtras
+
+    type LiteDB_Vocation = {
+        vocationStat: LiteDB_VocationStat
+        mundaneOrMagicVocationExtras: LiteDB_MundaneOrMagicVocationExtras
+    }
+
+    type LiteDB_CombatRoll = {
+        itemName: string
+        weaponTypeName: string
+        handedVariation: string
+        resourceName: string
+        resourceDicePoolMod: DicePoolMod
+        dicePool: DicePool
+        weaponandOffhandDicePoolModString: DicePoolMod
+        calculatedRange: CalculatedRange
+        penetration: Penetration
+        damageTypeSet: DamageType seq
+        setAreaOfEffectOption: SetAreaOfEffect Option
+        calculatedEngageableOpponents: CalculatedEngageableOpponents
+        eoName: string option
+    }
+
+    type LiteDB_SettingData = {
+        attributeNameSet: AttributeName seq
+        coreSkillDataSet: CoreSkillData seq
+        itemElementSet: ItemElement seq
+        weaponSpellSet: WeaponSpell seq
+        magicSystemSet: LiteDB_MagicSystem seq
+        weaponSkillDataSet: LiteDB_WeaponSkillData seq
+        effectSet: Effect seq
+        combatSpeedCalculationSet: CombatSpeedCalculation seq
+        carryWeightCalculationSet: CarryWeightCalculation seq
+        weightClassSet: WeightClass seq
+    }
+
+    type LiteDB_Character = {
+        name: string
+        attributes: Attribute List
+        coreSkills: LiteDB_Skill List
+        destinyPoints: ZeroToThree
+        vocationList: LiteDB_Vocation list
+        equipment: ItemElement List
+        combatRollList: CombatRoll List
+        characterInformation: CharacterInformation
+        characterEffects: Effect List
+        combatSpeeds: CombatSpeed List
+        settingData: SettingData
+        weightClassOption: WeightClass option
+        carryWeightCalculationOption: CarryWeightCalculation option
+    }
+
 let db =
     let mapper = FSharpBsonMapper()
     let connStr = "Filename=fogentData.db;mode=Exclusive"
