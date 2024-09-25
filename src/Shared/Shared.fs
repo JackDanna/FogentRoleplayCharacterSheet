@@ -35,5 +35,5 @@ type IGuestApi = { login: Login -> Async<LoginResult> }
 type IUserApi = {
     addNewCharacter: Username -> Async<IdCharacter List>
     getInitSettingData: unit -> Async<SettingData>
-    getIdCharacterList: UserData -> Async<IdCharacter List>
+    getIdCharacterList: Username -> Async<IdCharacter List>
 }

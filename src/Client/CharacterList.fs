@@ -33,7 +33,7 @@ let init (userData: UserData) =
     let api = getUserApi userData.token
 
     let getCharacterList = async {
-        let! result = api.getIdCharacterList userData
+        let! result = api.getIdCharacterList userData.username
         return GotIdCharacterList(result)
     }
 

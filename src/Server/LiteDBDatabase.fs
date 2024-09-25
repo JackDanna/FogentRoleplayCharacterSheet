@@ -531,19 +531,20 @@ module LiteDBTypes =
         carryWeightCalculationOption = x.carryWeightCalculationOption
     }
 
+    [<CLIMutableAttribute>]
     type LiteDB_IdCharacter = {
         Id: int
         LiteDB_Character: LiteDB_Character
     }
 
-    let toIdCharacter (x: IdCharacter) : LiteDB_IdCharacter = {
-        Id = x.Id
-        LiteDB_Character = toLiteDB_Character x.Character
-    }
-
-    let toLiteDB_IdCharacter (x: LiteDB_IdCharacter) : IdCharacter = {
+    let toIdCharacter (x: LiteDB_IdCharacter) : IdCharacter = {
         Id = x.Id
         Character = toCharacter x.LiteDB_Character
+    }
+
+    let toLiteDB_IdCharacter (x: IdCharacter) : LiteDB_IdCharacter = {
+        Id = x.Id
+        LiteDB_Character = toLiteDB_Character x.Character
     }
 
 let db =
@@ -574,7 +575,7 @@ type UserCharacterAccess = {
 }
 
 let users = collectionFromDB<IdUser>
-let characters = collectionFromDB<LiteDB_IdCharacter>
+let liteDB_IdCharacters = collectionFromDB<LiteDB_IdCharacter>
 let userCharacterAccesses = collectionFromDB<UserCharacterAccess>
 
 //users.EnsureIndex(fun (u: IdUser) -> u.Entity.userName) |> ignore
@@ -597,14 +598,17 @@ let grantAccess userId characterId =
     |> ignore
 
 let insertCharacter userId (character: Character) =
-    let idCharacter = createAutoIncrementedIdCharacter character
-    collectionFromDB.Insert(idCharacter) |> ignore
+    let idCharacter: LiteDB_IdCharacter =
+        character |> createAutoIncrementedIdCharacter |> toLiteDB_IdCharacter
+
+    liteDB_IdCharacters.Insert(idCharacter) |> ignore
     grantAccess userId idCharacter.Id
     idCharacter
 
-let getCharactersForUser userId =
+let userIdToIdCharacters userId =
     userCharacterAccesses.Find(fun uca -> uca.UserId = userId)
-    |> Seq.map (fun uca -> characters.FindOne(fun character -> character.Id = uca.CharacterId))
+    |> Seq.map (fun uca -> liteDB_IdCharacters.FindOne(fun character -> character.Id = uca.CharacterId))
+    |> Seq.map toIdCharacter
 
 let getUsersForCharacter characterId =
     userCharacterAccesses.Find(fun uca -> uca.CharacterId = characterId)
@@ -622,7 +626,7 @@ let addNewCharacter settingData username =
         |> insertCharacter idUser.Id
         |> ignore
 
-        getCharactersForUser idUser.Id
+        userIdToIdCharacters idUser.Id
     | None -> Seq.empty
     |> List.ofSeq
 
