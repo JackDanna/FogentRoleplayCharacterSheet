@@ -24,6 +24,7 @@ type Msg =
     | DeleteCharacter of int
     | AddNewCharacter
     | CharacterMsg of Character.Msg
+    | UpdatedIdCharacterOnDB of unit
 
 let init (user: Shared.UserData) =
     let api = getUserApi user.token
@@ -71,24 +72,34 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
         match model.selectedCharacter with
         | None -> model, Cmd.none
         | Some index ->
-            let alteredCharacter = {
-                model with
-                    idCharacterList =
-                        model.idCharacterList
-                        |> Seq.map (fun idCharacter ->
-                            if index = idCharacter.Id then
-                                {
-                                    idCharacter with
-                                        Character = Character.update msg idCharacter.Character
-                                }
-                            else
-                                idCharacter)
-            }
 
-            alteredCharacter
-            // Need an update function for the database
-            ,
-            Cmd.none
+            model.idCharacterList
+            |> Seq.tryFind (fun x -> x.Id = index)
+            |> function
+                | None -> model, Cmd.none
+                | Some idCharacter ->
+                    let updatedIdCharacter = {
+                        idCharacter with
+                            Character = Character.update msg idCharacter.Character
+                    }
+
+                    {
+                        model with
+                            idCharacterList =
+                                Seq.map
+                                    (fun x ->
+                                        if x.Id = updatedIdCharacter.Id then
+                                            updatedIdCharacter
+                                        else
+                                            x)
+                                    model.idCharacterList
+                    },
+                    Cmd.OfAsync.perform
+                        (userApi.updateIdCharacter model.User.username)
+                        updatedIdCharacter
+                        UpdatedIdCharacterOnDB
+
+    | UpdatedIdCharacterOnDB _ -> model, Cmd.none
 
 open Feliz
 open Feliz.Bulma

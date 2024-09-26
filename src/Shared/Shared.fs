@@ -36,4 +36,5 @@ type IUserApi = {
     addNewCharacter: Username -> Async<IdCharacter List>
     getInitSettingData: unit -> Async<SettingData>
     getIdCharacterList: Username -> Async<IdCharacter List>
+    updateIdCharacter: Username -> IdCharacter -> Async<unit>
 }

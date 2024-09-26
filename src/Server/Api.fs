@@ -22,15 +22,18 @@ let getCharacterList username = async {
         username
         |> usernameToIdUser
         |> function
-            | Some idUser -> userIdToIdCharacters idUser.Id
+            | Some idUser -> userIdToOwnedIdCharacters idUser.Id
             | None -> Seq.empty
         |> List.ofSeq
 }
+
+let updateIdCharaacter username idCharacter = async { return LiteDBDatabase.updateIdCharacter username idCharacter }
 
 let userApi: IUserApi = {
     addNewCharacter = addNewCharacter
     getInitSettingData = getInitSettingData
     getIdCharacterList = getCharacterList
+    updateIdCharacter = updateIdCharaacter
 }
 
 open Authorize

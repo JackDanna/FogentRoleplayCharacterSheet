@@ -677,7 +677,7 @@ let grantAccess userId characterId =
     )
     |> ignore
 
-let insertCharacter userId (character: Character) =
+let insertNewCharacter userId (character: Character) =
     let idCharacter: LiteDB_IdCharacter =
         character |> createAutoIncrementedIdCharacter |> toLiteDB_IdCharacter
 
@@ -685,7 +685,7 @@ let insertCharacter userId (character: Character) =
     grantAccess userId idCharacter.Id
     idCharacter
 
-let userIdToIdCharacters userId =
+let userIdToOwnedIdCharacters userId =
     userCharacterAccesses.Find(fun uca -> uca.UserId = userId)
     |> Seq.map (fun uca -> liteDB_IdCharacters.FindOne(fun character -> character.Id = uca.CharacterId))
     |> Seq.map toIdCharacter
@@ -703,12 +703,26 @@ let addNewCharacter settingData username =
     | Some idUser ->
         settingData
         |> FogentRoleplayLib.Character.init
-        |> insertCharacter idUser.Id
+        |> insertNewCharacter idUser.Id
         |> ignore
 
-        userIdToIdCharacters idUser.Id
+        userIdToOwnedIdCharacters idUser.Id
     | None -> Seq.empty
     |> List.ofSeq
+
+let updateIdCharacter username (idCharacterToUpdate: IdCharacter) =
+    username
+    |> usernameToIdUser
+    |> function
+        | None -> ()
+        | Some idUser ->
+            let doesUserOwnCharacter =
+                idUser.Id
+                |> userIdToOwnedIdCharacters
+                |> Seq.exists (fun ownedIdCharacter -> ownedIdCharacter.Id = idCharacterToUpdate.Id)
+
+            if doesUserOwnCharacter then
+                liteDB_IdCharacters.Update(toLiteDB_IdCharacter idCharacterToUpdate) |> ignore
 
 let isValidUserLogin login =
 

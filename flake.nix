@@ -83,7 +83,7 @@
               mhutchie.git-graph
               ms-dotnettools.csharp
               ionide.ionide-fsharp
-              vscodevim.vim
+              #vscodevim.vim
             ] ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
               {
                 name = "vscode-edit-csv";
