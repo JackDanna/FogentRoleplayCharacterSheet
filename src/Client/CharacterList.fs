@@ -7,8 +7,6 @@ open Shared
 open Fable.Remoting.Client
 
 open FogentRoleplayLib.Character
-open FogentRoleplayLib.SettingData
-
 
 type Model = {
     idCharacterList: IdCharacter List
