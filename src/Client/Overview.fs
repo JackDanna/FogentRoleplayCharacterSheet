@@ -6,9 +6,10 @@ open Elmish
 open Fable.Remoting.Client
 open Shared
 
-type State = {
+type Model = {
     User: Shared.UserData
-    CharacterList: CharacterList.Model
+    idCharacterList: IdCharacter seq
+    selectedCharacter: int option
 }
 
 let getUserApi token =
@@ -18,57 +19,81 @@ let getUserApi token =
     |> Remoting.buildProxy<IUserApi>
 
 type Msg =
-    | CharacterListMsg of CharacterList.Msg
-    //| GotInitSettingDataForAddNewCharacter of FogentRoleplayLib.SettingData.SettingData
-    | GotNewIdCharacters of IdCharacter List
+    | GotNewIdCharacterList of IdCharacter list
+    | SelectCharacter of int
+    | DeleteCharacter of int
+    | AddNewCharacter
+    | CharacterMsg of Character.Msg
 
 let init (user: Shared.UserData) =
-    let characterListModel, characterListCmd = CharacterList.init user
+    let api = getUserApi user.token
 
     {
         User = user
-        CharacterList = characterListModel
+        idCharacterList = []
+        selectedCharacter = None
     },
-    Cmd.map CharacterListMsg characterListCmd
+    Cmd.OfAsync.perform api.getIdCharacterList user.username GotNewIdCharacterList
 
 
-let update (msg: Msg) (state: State) : State * Cmd<Msg> =
+let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
 
-    let userApi = getUserApi state.User.token
+    let userApi = getUserApi model.User.token
 
     match msg with
-    | CharacterListMsg(characterListMsg: CharacterList.Msg) ->
-        match characterListMsg with
-        | CharacterList.Msg.AddNewCharacter ->
-
-            state, Cmd.OfAsync.perform userApi.addNewCharacter state.User.username GotNewIdCharacters
-
-        | _ ->
-            {
-                state with
-                    CharacterList = CharacterList.update characterListMsg state.CharacterList
-            },
-            Cmd.none
-    | GotNewIdCharacters idCharacterList ->
+    | GotNewIdCharacterList idCharacterList ->
         {
-            state with
-                CharacterList =
-                    CharacterList.update (CharacterList.Msg.GotIdCharacterList(idCharacterList)) state.CharacterList
+            model with
+                idCharacterList = idCharacterList
         },
         Cmd.none
+    | SelectCharacter index ->
+        if Seq.tryFind (fun x -> x.Id = index) model.idCharacterList |> Option.isSome then
+            {
+                model with
+                    selectedCharacter = Some index
+            },
+            Cmd.none
+        else
+            model, Cmd.none
 
-// | GotInitSettingDataForAddNewCharacter settingData ->
-//     {
-//         state with
-//             CharacterList =
-//                 CharacterList.update (CharacterList.Msg.AddNewCharacter(Some settingData)) state.CharacterList
-//     },
-//     Cmd.none
+    | DeleteCharacter id ->
+        {
+            model with
+                idCharacterList = Seq.filter (fun idCharacter -> idCharacter.Id <> id) model.idCharacterList
+        },
+        // Need to add deletion in the database
+        Cmd.none
+
+    | AddNewCharacter -> model, Cmd.OfAsync.perform userApi.addNewCharacter model.User.username GotNewIdCharacterList
+
+    | CharacterMsg msg ->
+        match model.selectedCharacter with
+        | None -> model, Cmd.none
+        | Some index ->
+            let alteredCharacter = {
+                model with
+                    idCharacterList =
+                        model.idCharacterList
+                        |> Seq.map (fun idCharacter ->
+                            if index = idCharacter.Id then
+                                {
+                                    idCharacter with
+                                        Character = Character.update msg idCharacter.Character
+                                }
+                            else
+                                idCharacter)
+            }
+
+            alteredCharacter
+            // Need an update function for the database
+            ,
+            Cmd.none
 
 open Feliz
 open Feliz.Bulma
 
-let view (model: State) dispatch =
+let view (model: Model) dispatch =
     Bulma.hero [
         hero.isFullHeight
         color.isDanger
@@ -93,6 +118,38 @@ let view (model: State) dispatch =
                 ]
             ]
 
-            Bulma.heroBody [ CharacterList.view model.CharacterList (CharacterListMsg >> dispatch) ]
+            Bulma.heroBody [
+
+                Bulma.container [
+
+                    Bulma.container (
+                        Seq.map
+                            (fun idCharacter ->
+                                Bulma.container [
+                                    Html.text idCharacter.Character.name
+                                    Html.button [
+                                        prop.onClick (fun _ -> dispatch (SelectCharacter idCharacter.Id))
+                                        prop.text "Select"
+                                    ]
+                                ])
+                            model.idCharacterList
+                        |> Seq.append [
+                            Html.button [
+                                prop.onClick (fun _ -> (dispatch (AddNewCharacter)))
+                                prop.text "Add New Character"
+                            ]
+                        ]
+                    )
+
+                    match model.selectedCharacter with
+                    | Some index ->
+                        Character.view
+                            (Seq.find (fun (idCharacter: IdCharacter) -> idCharacter.Id = index) model.idCharacterList)
+                                .Character
+                            (CharacterMsg >> dispatch)
+                    | None -> Html.none
+                ]
+
+            ]
         ]
     ]

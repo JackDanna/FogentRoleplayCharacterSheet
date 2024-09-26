@@ -23,7 +23,7 @@ type Url =
 type Page =
     | Home
     | Login of Login.Model
-    | Overview of Overview.State
+    | Overview of Overview.Model
     | NotFound
 
 type Model = { page: Page; url: Url; user: User }
