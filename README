@@ -2,8 +2,6 @@ Vocation input should display magic vocations
 
 Magic Vocations should automatically set their governing attribute names
 
-Need to flip the attribute and Core Skill tables, STR should come first.
-
 When magic skill addled, Calculate Magic combat rolls.
 
 Structer attributeAndSkill on server
@@ -11,5 +9,3 @@ Structer attributeAndSkill on server
 Combat Rolls can consume muliple weapon resources
 
 Re=check magic skill names against tables
-
-any new 
