@@ -16,21 +16,24 @@ open LiteDBDatabase
 let addNewCharacter username = async { return LiteDBDatabase.addNewCharacter (getInitSettingDataFromCSV ()) username }
 let getInitSettingData () = async { return getInitSettingDataFromCSV () }
 
-let getCharacterList (userData: UserData) = async {
+let getCharacterList username = async {
     // In here I will have to search the DB for which characters the player has access to
     return
-        userData.username
+        username
         |> usernameToIdUser
         |> function
-            | Some idUser -> getCharactersForUser idUser.Id
+            | Some idUser -> userIdToOwnedIdCharacters idUser.Id
             | None -> Seq.empty
         |> List.ofSeq
 }
+
+let updateIdCharaacter username idCharacter = async { return LiteDBDatabase.updateIdCharacter username idCharacter }
 
 let userApi: IUserApi = {
     addNewCharacter = addNewCharacter
     getInitSettingData = getInitSettingData
     getIdCharacterList = getCharacterList
+    updateIdCharacter = updateIdCharaacter
 }
 
 open Authorize

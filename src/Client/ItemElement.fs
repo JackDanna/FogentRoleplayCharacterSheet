@@ -16,7 +16,7 @@ and ItemElementMsgType =
 
 and ItemElementListMsgType =
     | ModifyItemElement of int * ItemElementMsgType
-    | Insert of string * option<Map<string, ItemElement>>
+    | Insert of string * option<ItemElement Set>
     | Remove of int
 
 // Updates
@@ -44,8 +44,8 @@ and itemElementListUpdate msg (model: ItemElement list) : ItemElement list =
                 else
                     equipment)
             model
-    | Insert(itemElementName: string, Some(itemElementMap: Map<string, ItemElement>)) ->
-        match itemElementMap.TryFind itemElementName with
+    | Insert(itemElementName: string, Some itemElementSet) ->
+        match tryFindItemElement itemElementSet itemElementName with
         | Some itemElement -> List.append model [ itemElement ]
         | None -> model
     | Remove position -> List.removeAt position model

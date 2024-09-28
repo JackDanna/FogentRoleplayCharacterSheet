@@ -1,12 +1,16 @@
 module Character
 
-open FogentRoleplayLib.Character
-open FogentRoleplayLib.CoreSkillData
-open FogentRoleplayLib.DicePoolCalculation
-open FogentRoleplayLib.Skill
-open FogentRoleplayLib.SettingData
-open FogentRoleplayLib.ItemElement
-open FogentRoleplayLib.CarryWeightCalculation
+open FogentRoleplayLib
+open Character
+open CoreSkillData
+open DicePoolCalculation
+open Skill
+open SettingData
+open ItemElement
+open CarryWeightCalculation
+open WeaponSkillData
+open Effect
+open CombatSpeedCalculation
 
 type Msg =
     | SetSettingData of SettingData
@@ -42,7 +46,7 @@ let updateVocationListThenCombatRollList msgs dicePoolCalculation model =
                     CombatRollList.RecalculateCombatRollList(
                         model.equipment,
                         newVocationList,
-                        model.settingData.weaponSkillDataMap,
+                        makeWeaponSkillDataMap model.settingData.weaponSkillDataSet,
                         model.settingData.weaponSpellSet,
                         dicePoolCalculation
                     )
@@ -52,6 +56,8 @@ let updateVocationListThenCombatRollList msgs dicePoolCalculation model =
 let update msg (model: Character) =
 
     let dicePoolCalculationData = characterToDicePoolCalculationData model
+
+    let weaponSkillDataMap = makeWeaponSkillDataMap model.settingData.weaponSkillDataSet
 
     let newEffectsForCharacter character =
         let newDicePoolCalculationData = characterToDicePoolCalculationData character
@@ -136,7 +142,7 @@ let update msg (model: Character) =
                             vocationName,
                             Some(coreSkillToMap model.coreSkills),
                             Some dicePoolCalculationData,
-                            Some model.settingData.magicSystemMap
+                            Some model.settingData.magicSystemSet
                         ))
                         model.vocationList
           }
@@ -160,7 +166,7 @@ let update msg (model: Character) =
                             name,
                             vocationStatLevelOption,
                             Some dicePoolCalculationData,
-                            Some model.settingData.weaponSkillDataMap
+                            Some weaponSkillDataMap
                         )
 
                     | MundaneVocationSkills.ModifyMundaneVocationSkillAtPosition(pos2,
@@ -192,7 +198,7 @@ let update msg (model: Character) =
                             vocationStatLevelOption,
                             Some model.settingData.attributeNameSet,
                             Some dicePoolCalculationData,
-                            Some model.settingData.weaponSkillDataMap,
+                            Some weaponSkillDataMap,
                             magicSkillDataMapOption
                         )
 
@@ -236,7 +242,7 @@ let update msg (model: Character) =
     | EquipmentMsg msg ->
         match msg with
         | ItemElement.ItemElementListMsgType.Insert(itemName, _) ->
-            (ItemElement.ItemElementListMsgType.Insert(itemName, Some model.settingData.itemElementMap))
+            (ItemElement.ItemElementListMsgType.Insert(itemName, Some model.settingData.itemElementSet))
 
         | ItemElement.ItemElementListMsgType.ModifyItemElement(pos1,
                                                                ItemElement.ItemElementMsgType.ContainerItemMsg(ItemElement.ContainerItemMsgType.ItemElementListMsg(ItemElement.ItemElementListMsgType.Insert(itemName,
@@ -245,7 +251,7 @@ let update msg (model: Character) =
                 pos1,
                 ItemElement.ItemElementMsgType.ContainerItemMsg(
                     ItemElement.ContainerItemMsgType.ItemElementListMsg(
-                        ItemElement.ItemElementListMsgType.Insert(itemName, Some model.settingData.itemElementMap)
+                        ItemElement.ItemElementListMsgType.Insert(itemName, Some model.settingData.itemElementSet)
                     )
                 )
             ))
@@ -299,7 +305,8 @@ let update msg (model: Character) =
 
     | EffectListMsg(msg) ->
         match msg with
-        | EffectList.Insert(effectName, _) -> EffectList.Insert(effectName, Some model.settingData.effectMap)
+        | EffectList.Insert(effectName, _) ->
+            EffectList.Insert(effectName, Some(makeEffectDataMap model.settingData.effectSet))
         | _ -> msg
         |> (fun msg -> {
             model with
@@ -314,7 +321,7 @@ let update msg (model: Character) =
                 name,
                 Some model.coreSkills,
                 Some model.attributes,
-                Some model.settingData.combatSpeedCalculationMap
+                Some(makeCombatSpeedCalculationMap model.settingData.combatSpeedCalculationSet)
             )
         | _ -> msg
         |> (fun msg -> {
@@ -354,15 +361,15 @@ let view (model: Character) dispatch =
 
         VocationList.view
             model.settingData.attributeNameSet
-            (model.settingData.magicSystemMap.Keys |> Set.ofSeq)
-            (model.settingData.weaponSkillDataMap.Keys |> Set.ofSeq)
+            (model.settingData.magicSystemSet |> Seq.map (fun x -> x.name))
+            (model.settingData.weaponSkillDataSet |> Set.map (fun x -> x.name))
             model.vocationList
             (VocationListMsg >> dispatch)
 
         CombatRollList.view model.combatRollList
 
         CombatSpeeds.view
-            (model.settingData.combatSpeedCalculationMap.Keys |> Set.ofSeq)
+            (model.settingData.combatSpeedCalculationSet |> Set.map (fun x -> x.name))
             model.combatSpeeds
             (CombatSpeedsMsg >> dispatch)
 
@@ -375,12 +382,12 @@ let view (model: Character) dispatch =
         | None -> []
 
         |> EffectList.view
-            (model.settingData.effectMap.Keys |> Set.ofSeq)
+            (model.settingData.effectSet |> Set.map effectToEffectName)
             model.characterEffects
             (EffectListMsg >> dispatch)
 
         ItemElement.equipmentView
-            (model.settingData.itemElementMap.Keys |> Set.ofSeq)
+            (model.settingData.itemElementSet |> Set.map itemElementToName)
             model.equipment
             (EquipmentMsg >> dispatch)
 

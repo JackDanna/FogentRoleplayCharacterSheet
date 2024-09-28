@@ -215,28 +215,22 @@ let magicSkillDataSet: Set<MagicSkillData> =
         isRangeCapable = Bool row.["rangeCapable"]
     })
 
-let magicSkillDataMap =
-    magicSkillDataSet
-    |> Set.map (fun magicSkill -> magicSkill.name, magicSkill)
-    |> Map.ofSeq
+let magicSkillDataMap = makeMagicSkillDataMap magicSkillDataSet
+
 
 // MagicSystem
-let magicSystemData =
+let magicSystemSet =
     makeFogentRoleplayDataSetExcludingFileExtension magicSystemTableName (fun row -> {
         name = row.["name"]
         vocationName = row.["vocationName"]
         vocationGoverningAttributeSet = stringToAttributes row.["vocationGoverningAttributeSet"]
         resourceName = row.["resourceName"]
         governingCoreSkill = row.["governingCoreSkill"]
-        magicSkillDataMap =
+        magicSkillDataSet =
             row.["magicSkillNameSet"]
             |> commaSeperatedStringToSet
             |> Set.map (fun key -> magicSkillDataMap.Item key)
-            |> Set.map (fun magicSkillData -> magicSkillData.name, magicSkillData)
-            |> Map.ofSeq
     })
-    |> Set.map (fun magicSystem -> magicSystem.name, magicSystem)
-    |> Map.ofSeq
 
 // WeaponClass
 let weaponSet =
@@ -255,13 +249,13 @@ let weaponSet =
     })
 
 // WeaponSkillData
-let weaponSkillDataMap =
+let weaponSkillDataSet =
     makeFogentRoleplayDataSetExcludingFileExtension weaponSkillTableName (fun row -> {
         name = string row.["skillName"]
         governingAttributes = stringToAttributes row.["governingAttributes"]
     })
-    |> Set.map (fun weaponSkillData -> weaponSkillData.name, weaponSkillData)
-    |> Map.ofSeq
+
+let weaponSkillDataMap = makeWeaponSkillDataMap weaponSkillDataSet
 
 // WeaponSpell
 let weaponSpellSet: WeaponSpell Set =
@@ -297,7 +291,7 @@ let weaponResourceSet =
         penetration = uint row.["penetration"]
         rangeOption = rangeOptionMap row.["range"]
         damageTypeSet = stringToDamageTypeSet row.["damageTypes"]
-        NamedAreaOfEffectOption = namedAreaOfEffectOptionMap row.["areaOfEffect"]
+        namedAreaOfEffectOption = namedAreaOfEffectOptionMap row.["areaOfEffect"]
     })
 
 // PhysicalDefense
@@ -419,20 +413,18 @@ let speedMap: Map<string, SpeedCalculation> =
     |> Set.map (fun speed -> (speed.name, speed))
     |> Map.ofSeq
 
-let combatSpeedCalculationMap =
+let combatSpeedCalculationSet =
     makeFogentRoleplayDataSetExcludingFileExtension combatSpeedCalculationTableName (fun row -> {
         name = row.["name"]
         governingSkillName = SkillName row.["governingSkillName"]
         reactionSpeedAttributeName = AttributeName row.["reactionSpeedAttributeName"]
         speed = speedMap.Item row.["speed"]
     })
-    |> Set.map (fun combatSpeed -> combatSpeed.name, combatSpeed)
-    |> Map.ofSeq
 
 // CarryWeightCalculation
 open FogentRoleplayLib.CarryWeightCalculation
 
-let carryWeightCalculationMap =
+let carryWeightCalculationSet =
     makeFogentRoleplayDataSetExcludingFileExtension carryWeightCalculationTableName (fun row -> {
         name = string row.["name"]
         baseWeight = uint row.["baseWeight"]
@@ -441,8 +433,6 @@ let carryWeightCalculationMap =
         governingSkill = string row.["governingSkill"]
         weightIncreasePerSkill = uint row.["weightIncreasePerSkill"]
     })
-    |> Set.map (fun carryWeightCalculation -> carryWeightCalculation.name, carryWeightCalculation)
-    |> Map.ofSeq
 
 // TextEffectForDisplay
 let textEffect: TextEffect Set =
@@ -456,7 +446,7 @@ let textEffect: TextEffect Set =
     })
 
 // Effect
-let effectDataMap =
+let effectDataSet =
     [
         Set.map Weapon weaponSet
         Set.map WeaponResource weaponResourceSet
@@ -468,8 +458,8 @@ let effectDataMap =
         Set.map TextEffect textEffect
     ]
     |> Set.unionMany
-    |> Set.map (fun (effect: Effect) -> effectToEffectName effect, effect)
-    |> Map.ofSeq
+
+let effectDataMap = makeEffectDataMap effectDataSet
 
 // Item
 let stringToEffectSet (effectMap: Map<string, Effect>) (input: string) =
@@ -494,8 +484,8 @@ let createItemFromRow (row: CsvRow) = {
     weight = float row.["weight"]
 }
 
-let itemElementMap =
-    makeFogentRoleplayDataListExcludingFileExtension itemElementTableName (fun row ->
+let itemElementSet =
+    makeFogentRoleplayDataSetExcludingFileExtension itemElementTableName (fun row ->
 
         match row.["quantity"] with
         | quantity when isNumeric quantity ->
@@ -515,21 +505,20 @@ let itemElementMap =
             |> ContainerItem
             |> Some
         | _ -> None)
-    |> List.choose id
-    |> List.map (fun itemElement -> (itemElementToName itemElement, itemElement))
-    |> Map.ofSeq
+    |> Seq.choose id
+    |> Set.ofSeq
 
 open FogentRoleplayLib.SettingData
 
 let getInitSettingDataFromCSV () : SettingData = {
     attributeNameSet = attributeNameSet
     coreSkillDataSet = coreSkillDataSet
-    itemElementMap = itemElementMap
+    itemElementSet = itemElementSet
     weaponSpellSet = weaponSpellSet
-    magicSystemMap = magicSystemData
-    weaponSkillDataMap = weaponSkillDataMap
-    effectMap = effectDataMap
-    combatSpeedCalculationMap = combatSpeedCalculationMap
-    carryWeightCalculationMap = carryWeightCalculationMap
+    magicSystemSet = magicSystemSet
+    weaponSkillDataSet = weaponSkillDataSet
+    effectSet = effectDataSet
+    combatSpeedCalculationSet = combatSpeedCalculationSet
+    carryWeightCalculationSet = carryWeightCalculationSet
     weightClassSet = weightClassSet
 }

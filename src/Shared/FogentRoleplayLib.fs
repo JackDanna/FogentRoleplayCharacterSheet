@@ -150,6 +150,22 @@ module ZeroToFive =
 
     let zeroToFiveToInt = zeroToFiveToUint >> int
 
+module ZeroToThree =
+    type ZeroToThree =
+        | Zero
+        | One
+        | Two
+        | Three
+
+    let init () = Zero
+
+    let zeroToThreeToUint zeroToThree =
+        match zeroToThree with
+        | Zero -> 0u
+        | One -> 1u
+        | Two -> 2u
+        | Three -> 3u
+
 module Neg1To5 =
     open ZeroToFive
 
@@ -727,7 +743,7 @@ module WeaponResource =
         penetration: Penetration
         rangeOption: Range option
         damageTypeSet: DamageType Set
-        NamedAreaOfEffectOption: AreaOfEffect option
+        namedAreaOfEffectOption: AreaOfEffect option
     }
 
     let weaponResourceToName weaponResource = weaponResource.name
@@ -876,6 +892,11 @@ module CombatSpeedCalculation =
         reactionSpeedAttributeName: AttributeName
         speed: SpeedCalculation
     }
+
+    let makeCombatSpeedCalculationMap combatSpeedCalculationSeq =
+        combatSpeedCalculationSeq
+        |> Seq.map (fun combatSpeed -> combatSpeed.name, combatSpeed)
+        |> Map.ofSeq
 
     let combatSpeedCalculationToDescription combatSpeedCalculation =
         sprintf
@@ -1078,6 +1099,11 @@ module Effect =
         | BaseDiceMod baseDiceEffect -> baseDiceEffect.name
         | TextEffect textEffect -> textEffect.name
 
+    let makeEffectDataMap effectDataSeq =
+        effectDataSeq
+        |> Seq.map (fun (effect: Effect) -> effectToEffectName effect, effect)
+        |> Map.ofSeq
+
     let effectsToCommaSeperatedEffectNames effects =
         effects
         |> Set.map effectToEffectName
@@ -1236,6 +1262,10 @@ module ItemElement =
         |> effectsToWeaponResourceList
         |> List.distinct
 
+    let tryFindItemElement itemElements itemElementName =
+        itemElements
+        |> Seq.tryFind (fun itemElement -> itemElementToName itemElement = itemElementName)
+
 module DicePoolCalculation =
     open Attribute
     open DicePoolMod
@@ -1347,6 +1377,11 @@ module WeaponSkillData =
         governingAttributes: AttributeName Set
     }
 
+    let makeWeaponSkillDataMap weaponSkillDataSeq =
+        weaponSkillDataSeq
+        |> Seq.map (fun weaponSkillData -> weaponSkillData.name, weaponSkillData)
+        |> Map.ofSeq
+
 // Larger Character Building Blocks
 
 module VocationStat =
@@ -1383,15 +1418,6 @@ module MundaneVocationSkill =
 
     let mundaneVocationSkillsToWeaponSkills seq =
         Seq.choose mundaneVocationSkillToWeaponSkillOption seq
-
-module MundaneVocation =
-    open VocationStat
-    open MundaneVocationSkill
-
-    type MundaneVocation = {
-        vocationStat: VocationStat
-        mundaneVocationSkills: MundaneVocationSkill Set
-    }
 
 // Magic
 
@@ -1439,6 +1465,11 @@ module MagicSkillData =
         isRangeCapable: bool
     }
 
+    let makeMagicSkillDataMap magicSkillDataSeq =
+        magicSkillDataSeq
+        |> Seq.map (fun magicSkill -> magicSkill.name, magicSkill)
+        |> Map.ofSeq
+
 module MagicSystem =
     open AttributeName
     open MagicSkillData
@@ -1449,8 +1480,13 @@ module MagicSystem =
         vocationGoverningAttributeSet: AttributeName Set
         resourceName: string
         governingCoreSkill: string
-        magicSkillDataMap: Map<string, MagicSkillData>
+        magicSkillDataSet: MagicSkillData Set
     }
+
+    let makeMagicSystemDataMap magicSystemDataSeq =
+        magicSystemDataSeq
+        |> Seq.map (fun magicSystem -> magicSystem.name, magicSystem)
+        |> Map.ofSeq
 
 module MagicVocationSkill =
     open MundaneVocationSkill
@@ -1587,7 +1623,7 @@ module CombatRoll =
              resource.penetration,
              resource.rangeOption,
              resource.damageTypeSet,
-             resource.NamedAreaOfEffectOption)
+             resource.namedAreaOfEffectOption)
         | None -> ("", emptyDicePoolMod, 0u, None, Set.empty, None)
 
     let createCombatRoll
@@ -1631,28 +1667,6 @@ module CombatRoll =
             weaponTypeName = weaponName
             handedVariation = handedVariationName
         }
-
-    let preloadedCreateWeaponCombatRoll
-        itemName
-        name
-        penetration
-        range
-        damageTypes
-        engageableOpponents
-        areaOfEffectOption
-        skillDicePoolModList
-        itemResourceNameAndWeaponResourceOption
-        : string -> DicePoolMod -> DicePoolMod -> CombatRoll =
-        createCombatRoll
-            itemName
-            name
-            penetration
-            range
-            damageTypes
-            engageableOpponents
-            areaOfEffectOption
-            skillDicePoolModList
-            itemResourceNameAndWeaponResourceOption
 
     let createHandedVariationCombatRolls
         (itemName: string)
@@ -1794,8 +1808,11 @@ module CombatRoll =
         vocationList
         |> vocationListToMagicSkillsAndMagicSystem
         |> List.collect (fun (magicSkills, magicSystem: MagicSystem.MagicSystem) ->
+            let magicSkillDataMap =
+                MagicSkillData.makeMagicSkillDataMap magicSystem.magicSkillDataSet
+
             magicSkills
-            |> Seq.map (fun magicSkill -> (magicSkill, magicSystem.magicSkillDataMap.Item magicSkill.name))
+            |> Seq.map (fun magicSkill -> (magicSkill, magicSkillDataMap.Item magicSkill.name))
             |> Seq.toList)
         |> List.collect (fun (magicSkill, magicSkillData: MagicSkillData.MagicSkillData) ->
             weaponSpellSet
@@ -1875,6 +1892,11 @@ module CarryWeightCalculation =
         governingSkill: string
         weightIncreasePerSkill: uint
     }
+
+    let makeCarryWeightCalculationMap carryWeightCalculationSeq =
+        carryWeightCalculationSeq
+        |> Seq.map (fun carryWeightCalculation -> carryWeightCalculation.name, carryWeightCalculation)
+        |> Map.ofSeq
 
     let calculateCarryWeight (carryWeightCalculation: CarryWeightCalculation) attributes coreSkills =
 
@@ -1987,44 +2009,28 @@ module SettingData =
     type SettingData = {
         attributeNameSet: AttributeName Set
         coreSkillDataSet: CoreSkillData Set
-        itemElementMap: Map<string, ItemElement>
+        itemElementSet: ItemElement Set
         weaponSpellSet: WeaponSpell Set
-        magicSystemMap: Map<string, MagicSystem>
-        weaponSkillDataMap: Map<string, WeaponSkillData>
-        effectMap: Map<string, Effect>
-        combatSpeedCalculationMap: Map<string, CombatSpeedCalculation>
-        carryWeightCalculationMap: Map<string, CarryWeightCalculation>
+        magicSystemSet: MagicSystem Set
+        weaponSkillDataSet: WeaponSkillData Set
+        effectSet: Effect Set
+        combatSpeedCalculationSet: CombatSpeedCalculation Set
+        carryWeightCalculationSet: CarryWeightCalculation Set
         weightClassSet: WeightClass Set
     }
 
     let init () = {
         attributeNameSet = Set.empty
         coreSkillDataSet = Set.empty
-        itemElementMap = Map.empty
+        itemElementSet = Set.empty
         weaponSpellSet = Set.empty
-        magicSystemMap = Map.empty
-        weaponSkillDataMap = Map.empty
-        effectMap = Map.empty
-        combatSpeedCalculationMap = Map.empty
-        carryWeightCalculationMap = Map.empty
+        magicSystemSet = Set.empty
+        weaponSkillDataSet = Set.empty
+        effectSet = Set.empty
+        combatSpeedCalculationSet = Set.empty
+        carryWeightCalculationSet = Set.empty
         weightClassSet = Set.empty
     }
-
-module ZeroToThree =
-    type ZeroToThree =
-        | Zero
-        | One
-        | Two
-        | Three
-
-    let init () = Zero
-
-    let zeroToThreeToUint zeroToThree =
-        match zeroToThree with
-        | Zero -> 0u
-        | One -> 1u
-        | Two -> 2u
-        | Three -> 3u
 
 module Character =
     open Attribute
@@ -2077,7 +2083,7 @@ module Character =
             Skill.initCoreSkills settingData.coreSkillDataSet dicePoolCalculationData
 
         let carryWeightCalculationOption =
-            match settingData.carryWeightCalculationMap.TryFind "Carry Weight" with
+            match (makeCarryWeightCalculationMap settingData.carryWeightCalculationSet).TryFind "Carry Weight" with
             | Some carryWeightCalculation -> Some carryWeightCalculation
             | None -> None
 

@@ -9,6 +9,7 @@ open FogentRoleplayLib.DicePool
 open FogentRoleplayLib.DicePoolMod
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.ZeroToFive
+open FogentRoleplayLib.MagicSkillData
 
 type RecalculateVocationResourcePoolMsg = ZeroToFive * DicePool
 type RecalculateCoreSkillResourcePoolMsg = Map<string, Skill>
@@ -74,7 +75,7 @@ let update msg (model: MagicVocationExtras) =
                     Some model.magicSystem.vocationGoverningAttributeSet,
                     dicePoolCalculationDataOption,
                     weaponSkillDataOption,
-                    Some model.magicSystem.magicSkillDataMap
+                    Some model.magicSystem.magicSkillDataSet
                 )
             | _ -> msg
 
@@ -152,7 +153,7 @@ let view attributeNameSet (weaponSkillNames) (model: MagicVocationExtras) dispat
     MagicVocationSkills.view
         model.magicSystem.name
         attributeNameSet
-        (model.magicSystem.magicSkillDataMap.Keys |> Set.ofSeq)
+        (Set.map (fun x -> x.name) model.magicSystem.magicSkillDataSet)
         weaponSkillNames
         model.magicVocationSkills
         (MagicVocationSkillsMsg >> dispatch)
