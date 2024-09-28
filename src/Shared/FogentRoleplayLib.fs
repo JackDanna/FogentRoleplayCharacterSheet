@@ -1668,28 +1668,6 @@ module CombatRoll =
             handedVariation = handedVariationName
         }
 
-    let preloadedCreateWeaponCombatRoll
-        itemName
-        name
-        penetration
-        range
-        damageTypes
-        engageableOpponents
-        areaOfEffectOption
-        skillDicePoolModList
-        itemResourceNameAndWeaponResourceOption
-        : string -> DicePoolMod -> DicePoolMod -> CombatRoll =
-        createCombatRoll
-            itemName
-            name
-            penetration
-            range
-            damageTypes
-            engageableOpponents
-            areaOfEffectOption
-            skillDicePoolModList
-            itemResourceNameAndWeaponResourceOption
-
     let createHandedVariationCombatRolls
         (itemName: string)
         name
