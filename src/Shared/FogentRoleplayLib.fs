@@ -748,6 +748,16 @@ module WeaponResource =
 
     let weaponResourceToName weaponResource = weaponResource.name
 
+module BaseDiceTier =
+
+    open DicePool
+
+    type BaseDiceTier = {
+        itemPrefix: string
+        level: int
+        baseDice: DicePool
+    }
+
 module Weapon =
     open DicePoolMod
     open Range
@@ -983,16 +993,6 @@ module AttributeStatAdjustment =
 
     let attributeStatAdjustmentToEffectString attributeStatAdjustment =
         $"{attributeStatAdjustment.adjustment} {attributeStatAdjustment.attribute}"
-
-module BaseDiceTier =
-
-    open DicePool
-
-    type BaseDiceTier = {
-        itemPrefix: string
-        level: int
-        baseDice: DicePool
-    }
 
 module BaseDiceMod =
     open SkillName
