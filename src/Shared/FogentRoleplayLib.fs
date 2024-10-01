@@ -999,7 +999,6 @@ module AttributeStatAdjustment =
 module BaseDiceMod =
     open SkillName
     open DurationAndSource
-    open DicePool
     open BaseDiceTier
 
     type BaseDiceMod = {
@@ -1008,17 +1007,6 @@ module BaseDiceMod =
         baseDiceTier: BaseDiceTier
         durationAndSource: DurationAndSource
     }
-
-    let tryFindBaseDiceMod skillName baseDiceModList =
-        baseDiceModList
-        |> List.sortByDescending (fun baseDiceMod -> baseDiceMod.baseDiceTier.level)
-        |> List.tryFind (fun baseDiceEffect -> baseDiceEffect.effectedSkillName = skillName)
-
-    let findBaseDiceWith3d6Default skillName baseDiceModList =
-        tryFindBaseDiceMod skillName baseDiceModList
-        |> function
-            | Some baseDiceMod -> baseDiceMod.baseDiceTier.baseDice
-            | None -> base3d6DicePool
 
 module TextEffect =
     open StringUtils
@@ -1131,7 +1119,7 @@ module Effect =
         | BaseDiceMod bdm -> Some bdm
         | _ -> None
 
-    let effectsToBaseDiceModList = List.choose effectToBaseDiceMod
+    let effectsToBaseDiceMods = Seq.choose effectToBaseDiceMod
 
     let effectToWeaponResourceOption effect =
         match effect with
@@ -1252,7 +1240,7 @@ module ItemElement =
         itemElementToNonContainedEffects >> effectsToWeaponList
 
     let itemElementToBaseDiceEffectList =
-        itemElementToNonContainedEffects >> effectsToBaseDiceModList
+        itemElementToNonContainedEffects >> effectsToBaseDiceMods
 
     // List stuff
 
@@ -1270,6 +1258,7 @@ module ItemElement =
 
 module DicePoolCalculation =
     open Attribute
+    open DicePool
     open DicePoolMod
     open BaseDiceTier
     open BaseDiceMod
@@ -1292,13 +1281,25 @@ module DicePoolCalculation =
         dicePoolCalculationData
         =
 
-        let baseDice =
+        let effectBaseDiceMods =
+            dicePoolCalculationData.effects
+            |> effectsToBaseDiceMods
+            |> Seq.map (fun x -> x.baseDiceTier)
+
+
+        let baseDice: DicePool =
             match weaponBaseDiceTierOption with
-            | Some itemBaseDiceTier -> itemBaseDiceTier.baseDice
-            | None ->
-                dicePoolCalculationData.effects
-                |> effectsToBaseDiceModList
-                |> findBaseDiceWith3d6Default skillName
+            | Some itemBaseDiceTier -> itemBaseDiceTier |> Seq.singleton
+            | None -> Seq.empty
+            |> Seq.append effectBaseDiceMods
+            |> (fun baseDiceModTierSeq ->
+                if Seq.isEmpty baseDiceModTierSeq then
+                    DicePool.base3d6DicePool
+                else
+                    baseDiceModTierSeq
+                    |> Seq.maxBy (fun baseDiceModTier -> baseDiceModTier.level)
+                    |> (fun baseDiceModTier -> baseDiceModTier.baseDice))
+
 
         [
             [ baseDice |> AddDice ]
@@ -1771,37 +1772,19 @@ module CombatRoll =
         |> List.collect (fun itemElement ->
             itemElement
             |> itemElementToWeaponList
-            |> List.map (fun weapon ->
-                let baseDiceModOption =
-                    itemElement
-                    |> itemElementToBaseDiceEffectList
-                    |> tryFindBaseDiceMod weapon.governingSkillName
-
-                // Filters out base Dice Mods that could be from other weapons
-                let filteredDicePoolCalculationData = {
-                    dicePoolCalculationData with
-                        effects =
-                            dicePoolCalculationData.effects
-                            |> effectToNonBaseDiceModEffects
-                            |> (fun effects ->
-                                match baseDiceModOption with
-                                | Some baseDiceMod -> List.append [ BaseDiceMod baseDiceMod ] effects
-                                | None -> effects)
-                }
-
-                (itemElementToName itemElement, weapon, filteredDicePoolCalculationData)))
+            |> List.map (fun weapon -> itemElementToName itemElement, weapon))
         // Step 2: Find weapons that have weapon Resources. If weapon has a weapon resource, but no weapon resource is in equipment then none, else save tuple with weapon resource tuple. If weapon has no weapon resource, than just return tuple with none for the weaponResource tuple.
-        |> List.collect (fun (itemElementName, weapon, filteredDicePoolCalculationData) ->
+        |> List.collect (fun (itemElementName, weapon: Weapon) ->
             match weapon.resourceNameOption with
             | Some resourceClass ->
                 equipmentList
                 |> itemElementListToNonDuplicateWeaponResourceList
                 |> List.choose (fun weaponResource ->
                     if weaponResource.resourceName = resourceClass then
-                        Some(itemElementName, weapon, filteredDicePoolCalculationData, Some weaponResource)
+                        Some(itemElementName, weapon, dicePoolCalculationData, Some weaponResource)
                     else
                         None)
-            | None -> List.singleton (itemElementName, weapon, filteredDicePoolCalculationData, None))
+            | None -> List.singleton (itemElementName, weapon, dicePoolCalculationData, None))
 
         // Step 3: Try to find the weaponSkill that governs the specific weapon. If none exists, init a "fake" skill at level 0.
         // If some weaponSkillData exists, check if they have a weapon skill for it already.
@@ -1810,7 +1793,7 @@ module CombatRoll =
             (fun
                 (itemName,
                  weapon,
-                 filteredDicePoolCalculationData: DicePoolCalculationData: DicePoolCalculationData,
+                 dicePoolCalculationData: DicePoolCalculationData: DicePoolCalculationData,
                  weaponResourceOption) ->
                 weapon.governingSkillName
                 |> weaponSkillDataMap.TryFind
@@ -1821,7 +1804,7 @@ module CombatRoll =
                             weapon.governingSkillName
                             emptyDicePoolMod
                             Set.empty
-                            filteredDicePoolCalculationData
+                            dicePoolCalculationData
 
                     | Some weaponSkillData ->
                         vocationList
@@ -1834,14 +1817,14 @@ module CombatRoll =
                                     weapon.governingSkillName
                                     (skill.level |> skillLevelToDicePoolMod)
                                     weaponSkillData.governingAttributes
-                                    filteredDicePoolCalculationData
+                                    dicePoolCalculationData
                             | None ->
                                 createDicePoolModList
                                     (Some weapon.baseDiceTier)
                                     weapon.governingSkillName
                                     emptyDicePoolMod
                                     weaponSkillData.governingAttributes
-                                    filteredDicePoolCalculationData
+                                    dicePoolCalculationData
                 |> (fun skillDicePoolModList ->
                     createHandedVariationCombatRolls
                         itemName
