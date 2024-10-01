@@ -771,16 +771,16 @@ module Weapon =
 
     type Weapon = {
         name: string
-        governingSkillName: SkillName
         oneHandedDiceMod: DicePoolMod option
         twoHandedDiceMod: DicePoolMod option
+        dualWieldedDiceMod: DicePoolMod option
         penetration: Penetration
         range: Range
         damageTypes: DamageType Set
         engageableOpponents: EngageableOpponents
-        dualWieldedDiceMod: DicePoolMod option
         areaOfEffectOption: AreaOfEffect option
         resourceNameOption: ResourceName option
+        governingSkillName: SkillName
         baseDiceTier: BaseDiceTier
     }
 
@@ -1316,13 +1316,16 @@ module DicePoolCalculation =
         ]
         |> List.collect id
 
-    let createSkillDicePoolMods
-        skillName
+    let skillLevelToDicePoolMod skillLevel =
+        skillLevel |> neg1To5ToInt |> intToD6DicePoolMod
+
+    let createSkillDicePoolModList
+        (skillName: SkillName.SkillName)
         skillLevel
         governingAttributeNameSet
         (dicePoolCalculationData: DicePoolCalculationData)
         =
-        let skillLevelDiceMod = skillLevel |> neg1To5ToInt |> intToD6DicePoolMod
+        let skillLevelDiceMod = skillLevel |> skillLevelToDicePoolMod
         createDicePoolModList None skillName skillLevelDiceMod governingAttributeNameSet dicePoolCalculationData
 
     let calculateSkillDicePool
@@ -1331,7 +1334,22 @@ module DicePoolCalculation =
         governingAttributeNameSet
         (dicePoolCalculationData: DicePoolCalculationData)
         =
-        createSkillDicePoolMods skillName skillLevel governingAttributeNameSet dicePoolCalculationData
+        createSkillDicePoolModList skillName skillLevel governingAttributeNameSet dicePoolCalculationData
+        |> dicePoolModListToDicePool
+
+    let calculateWeaponSkillDicePool
+        weaponBaseDiceTierOption
+        skillName
+        skillLevelDicePoolMod
+        governingAttributeNameSet
+        (dicePoolCalculationData: DicePoolCalculationData)
+        =
+        createDicePoolModList
+            weaponBaseDiceTierOption
+            skillName
+            skillLevelDicePoolMod
+            governingAttributeNameSet
+            dicePoolCalculationData
         |> dicePoolModListToDicePool
 
     let calculateVocationStatDicePool
@@ -1352,16 +1370,16 @@ module DicePoolCalculation =
 
 module Skill =
     open Neg1To5
-    open DicePoolMod
-    open SkillName
     open DicePoolCalculation
+    open SkillName
+    open DicePool
     open AttributeName
 
     type Skill = {
         name: SkillName
         level: Neg1To5
         governingAttributeNames: AttributeName Set
-        dicePoolModList: DicePoolMod List
+        dicePool: DicePool
     }
 
     let init name level governingAttributes dicePoolCalculationData =
@@ -1370,7 +1388,7 @@ module Skill =
             name = name
             level = level
             governingAttributeNames = governingAttributes
-            dicePoolModList = createSkillDicePoolMods name level governingAttributes dicePoolCalculationData
+            dicePool = calculateSkillDicePool name level governingAttributes dicePoolCalculationData
         }
 
     open CoreSkillData
@@ -1743,7 +1761,7 @@ module CombatRoll =
 
     let createWeaponItemCombatRolls
         (equipmentList: ItemElement List)
-        (weaponSkillList: Skill List)
+        (vocationList: Vocation List)
         (weaponSkillDataMap: Map<string, WeaponSkillData>)
         (dicePoolCalculationData: DicePoolCalculationData)
         : CombatRoll List =
@@ -1788,64 +1806,96 @@ module CombatRoll =
         // Step 3: Try to find the weaponSkill that governs the specific weapon. If none exists, init a "fake" skill at level 0.
         // If some weaponSkillData exists, check if they have a weapon skill for it already.
         // If so, return the skill, else make a "default" skill using weaponSkillData.
-        |> List.collect (fun (itemName, weapon, filteredDicePoolCalculationData, weaponResourceOption) ->
-            weapon.governingSkillName
-            |> weaponSkillDataMap.TryFind
-            |> function
-                | None -> Skill.init weapon.governingSkillName Neg1To5.Zero Set.empty filteredDicePoolCalculationData
-                | Some weaponSkillData ->
-                    weaponSkillList
-                    |> List.tryFind (fun skill -> skill.name = weaponSkillData.name)
-                    |> function
-                        | Some skill -> skill
-                        | None ->
-                            Skill.init
-                                weaponSkillData.name
-                                Neg1To5.Zero
-                                weaponSkillData.governingAttributes
-                                filteredDicePoolCalculationData
-            |> (fun skill ->
-                createHandedVariationCombatRolls
-                    itemName
-                    weapon.name
-                    weapon.oneHandedDiceMod
-                    weapon.twoHandedDiceMod
-                    weapon.dualWieldedDiceMod
-                    weapon.penetration
-                    weapon.range
-                    weapon.damageTypes
-                    weapon.engageableOpponents
-                    weapon.areaOfEffectOption
-                    skill.dicePoolModList
-                    weaponResourceOption))
+        |> List.collect
+            (fun
+                (itemName,
+                 weapon,
+                 filteredDicePoolCalculationData: DicePoolCalculationData: DicePoolCalculationData,
+                 weaponResourceOption) ->
+                weapon.governingSkillName
+                |> weaponSkillDataMap.TryFind
+                |> function
+                    | None ->
+                        createDicePoolModList
+                            (Some weapon.baseDiceTier)
+                            weapon.governingSkillName
+                            emptyDicePoolMod
+                            Set.empty
+                            filteredDicePoolCalculationData
+
+                    | Some weaponSkillData ->
+                        vocationList
+                        |> vocationListToWeaponSkillList
+                        |> List.tryFind (fun skill -> skill.name = weaponSkillData.name)
+                        |> function
+                            | Some skill ->
+                                createDicePoolModList
+                                    (Some weapon.baseDiceTier)
+                                    weapon.governingSkillName
+                                    (skill.level |> skillLevelToDicePoolMod)
+                                    weaponSkillData.governingAttributes
+                                    filteredDicePoolCalculationData
+                            | None ->
+                                createDicePoolModList
+                                    (Some weapon.baseDiceTier)
+                                    weapon.governingSkillName
+                                    emptyDicePoolMod
+                                    weaponSkillData.governingAttributes
+                                    filteredDicePoolCalculationData
+                |> (fun skillDicePoolModList ->
+                    createHandedVariationCombatRolls
+                        itemName
+                        weapon.name
+                        weapon.oneHandedDiceMod
+                        weapon.twoHandedDiceMod
+                        weapon.dualWieldedDiceMod
+                        weapon.penetration
+                        weapon.range
+                        weapon.damageTypes
+                        weapon.engageableOpponents
+                        weapon.areaOfEffectOption
+                        skillDicePoolModList
+                        weaponResourceOption))
 
     open WeaponSpell
 
-    let createMagicCombatRolls (vocationList: Vocation List) (weaponSpellSet: WeaponSpell Set) =
+    let createMagicCombatRolls (vocationList: Vocation List) (weaponSpellSet: WeaponSpell Set) dicePoolCalculationData =
 
         vocationList
         |> vocationListToMagicSkillsAndMagicSystem
         |> List.collect (fun (magicSkills, magicSystem: MagicSystem.MagicSystem) ->
-            let magicSkillDataMap =
-                MagicSkillData.makeMagicSkillDataMap magicSystem.magicSkillDataSet
 
             magicSkills
-            |> Seq.map (fun magicSkill -> (magicSkill, magicSkillDataMap.Item magicSkill.name))
+            |> Seq.map (fun magicSkill ->
+                (magicSkill,
+                 (MagicSkillData.makeMagicSkillDataMap magicSystem.magicSkillDataSet).Item magicSkill.name,
+                 magicSystem.vocationGoverningAttributeSet))
             |> Seq.toList)
-        |> List.collect (fun (magicSkill, magicSkillData: MagicSkillData.MagicSkillData) ->
+        |> List.map
+            (fun (magicSkill, magicSkillData: MagicSkillData.MagicSkillData, magicSystemGoverningAttributeSet) ->
+                let magicSkillDicePooList =
+                    createSkillDicePoolModList
+                        magicSkill.name
+                        magicSkill.level
+                        magicSystemGoverningAttributeSet
+                        dicePoolCalculationData
+
+                (magicSkill.name, magicSkillDicePooList, magicSkillData)
+
+            )
+        |> List.collect (fun (magicSkillName, magicSkillDicePoolList, magicSkillData: MagicSkillData.MagicSkillData) ->
             weaponSpellSet
-            |> Set.toSeq
             |> Seq.choose (fun weaponSpell ->
                 if (isMeleeOrReachRange weaponSpell.range) && magicSkillData.isMeleeCapable then
-                    Some(magicSkill, magicSkillData, weaponSpell)
-                elif (not (isMeleeOrReachRange weaponSpell.range)) && magicSkillData.isRangeCapable then
-                    Some(magicSkill, magicSkillData, weaponSpell)
+                    Some(magicSkillName, magicSkillDicePoolList, magicSkillData, weaponSpell)
+                elif not (isMeleeOrReachRange weaponSpell.range) && magicSkillData.isRangeCapable then
+                    Some(magicSkillName, magicSkillDicePoolList, magicSkillData, weaponSpell)
                 else
                     None)
             |> Seq.toList)
-        |> List.collect (fun (magicSkill, magicSkillData, weaponSpell: WeaponSpell) ->
+        |> List.collect (fun (magicSkillName, magicSkillDicePoolModList, magicSkillData, weaponSpell: WeaponSpell) ->
             createHandedVariationCombatRolls
-                magicSkill.name
+                magicSkillName
                 weaponSpell.name
                 weaponSpell.oneHandedDiceMod
                 weaponSpell.twoHandedDiceMod
@@ -1855,7 +1905,7 @@ module CombatRoll =
                 magicSkillData.damageTypes
                 weaponSpell.engageableOpponents
                 weaponSpell.areaOfEffectOption
-                magicSkill.dicePoolModList
+                magicSkillDicePoolModList
                 None)
 
     let createCombatRolls
@@ -1866,16 +1916,9 @@ module CombatRoll =
         (dicePoolCalculationData: DicePoolCalculationData)
         : CombatRoll List =
 
-        let weaponCombatRolls =
-            createWeaponItemCombatRolls
-                equipmentList
-                (vocationListToWeaponSkillList vocationList)
-                weaponSkillDataMap
-                dicePoolCalculationData
-
-        let magicCombatRolls = createMagicCombatRolls vocationList weaponSpellSet
-
-        List.collect id [ weaponCombatRolls; magicCombatRolls ]
+        List.append
+            (createWeaponItemCombatRolls equipmentList vocationList weaponSkillDataMap dicePoolCalculationData)
+            (createMagicCombatRolls vocationList weaponSpellSet dicePoolCalculationData)
 
 module CharacterInformation =
     type CharacterInformation = {

@@ -249,7 +249,7 @@ let weaponSet =
     |> Set.map (fun (baseDiceTier: BaseDiceTier) ->
         let createPrefixedWeaponClasses prefix =
             makeFogentRoleplayDataSetExcludingFileExtension weaponClassTableName (fun row -> {
-                name = $"""{prefix} {row.["name"]}"""
+                name = $"""{prefix}{row.["name"]}"""
                 governingSkillName = SkillName row.["governingSkillName"]
                 oneHandedDiceMod = parseDicePoolModOptionString row.["oneHandedWeaponDice"]
                 twoHandedDiceMod = parseDicePoolModOptionString row.["twoHandedWeaponDice"]
@@ -266,8 +266,8 @@ let weaponSet =
         if baseDiceTier.itemPrefix = "Mundane" then
             Set.union (createPrefixedWeaponClasses baseDiceTier.itemPrefix) (createPrefixedWeaponClasses "")
         else
-            createPrefixedWeaponClasses baseDiceTier.itemPrefix)
-    |> Set.intersectMany
+            createPrefixedWeaponClasses $"{baseDiceTier.itemPrefix} ")
+    |> Set.unionMany
 
 // WeaponSkillData
 let weaponSkillDataSet =

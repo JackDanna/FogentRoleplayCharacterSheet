@@ -262,21 +262,21 @@ module LiteDBTypes =
         name: SkillName
         level: Neg1To5
         governingAttributeNames: AttributeName seq
-        dicePoolModList: DicePoolMod List
+        dicePool: DicePool
     }
 
     let toSkill x : Skill = {
         name = x.name
         level = x.level
         governingAttributeNames = Set.ofSeq x.governingAttributeNames
-        dicePoolModList = x.dicePoolModList
+        dicePool = x.dicePool
     }
 
     let toLiteDB_Skill (x: Skill) = {
         name = x.name
         level = x.level
         governingAttributeNames = x.governingAttributeNames
-        dicePoolModList = x.dicePoolModList
+        dicePool = x.dicePool
     }
 
     type LiteDB_WeaponSkillData = {
