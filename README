@@ -1,9 +1,0 @@
-Todo:
-
-Pull Attribute out of Attributes and Core Skill. They should have there own csv file.
-
-Instead of BaseDiceTierMods for adding base dice to weapons, add base dice tier to weapons. During importing from the csv, you can cross weapons (which are missing their tier information) with BaseTierDice.
-
-Maybes:
-
-Combat Rolls can consume muliple weapon resources
