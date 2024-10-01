@@ -767,6 +767,7 @@ module Weapon =
     open Penetration
     open ResourceName
     open SkillName
+    open BaseDiceTier
 
     type Weapon = {
         name: string
@@ -780,6 +781,7 @@ module Weapon =
         dualWieldedDiceMod: DicePoolMod option
         areaOfEffectOption: AreaOfEffect option
         resourceNameOption: ResourceName option
+        baseDiceTier: BaseDiceTier
     }
 
 module Container =
@@ -1269,6 +1271,7 @@ module ItemElement =
 module DicePoolCalculation =
     open Attribute
     open DicePoolMod
+    open BaseDiceTier
     open BaseDiceMod
     open Neg1To5
     open ZeroToFive
@@ -1281,11 +1284,21 @@ module DicePoolCalculation =
         effects: Effect List
     }
 
-    let createDicePoolModList skillName levelDiceMod governingAttributeNameSet dicePoolCalculationData =
+    let createDicePoolModList
+        weaponBaseDiceTierOption
+        skillName
+        levelDiceMod
+        governingAttributeNameSet
+        dicePoolCalculationData
+        =
+
         let baseDice =
-            dicePoolCalculationData.effects
-            |> effectsToBaseDiceModList
-            |> findBaseDiceWith3d6Default skillName
+            match weaponBaseDiceTierOption with
+            | Some itemBaseDiceTier -> itemBaseDiceTier.baseDice
+            | None ->
+                dicePoolCalculationData.effects
+                |> effectsToBaseDiceModList
+                |> findBaseDiceWith3d6Default skillName
 
         [
             [ baseDice |> AddDice ]
@@ -1310,7 +1323,7 @@ module DicePoolCalculation =
         (dicePoolCalculationData: DicePoolCalculationData)
         =
         let skillLevelDiceMod = skillLevel |> neg1To5ToInt |> intToD6DicePoolMod
-        createDicePoolModList skillName skillLevelDiceMod governingAttributeNameSet dicePoolCalculationData
+        createDicePoolModList None skillName skillLevelDiceMod governingAttributeNameSet dicePoolCalculationData
 
     let calculateSkillDicePool
         skillName
@@ -1329,7 +1342,12 @@ module DicePoolCalculation =
         =
         let vocationStatDiceMod = vocationStatLevel |> zeroToFiveToInt |> intToD6DicePoolMod
 
-        createDicePoolModList vocationStatName vocationStatDiceMod governingAttributeNameSet dicePoolCalculationData
+        createDicePoolModList
+            None
+            vocationStatName
+            vocationStatDiceMod
+            governingAttributeNameSet
+            dicePoolCalculationData
         |> dicePoolModListToDicePool
 
 module Skill =

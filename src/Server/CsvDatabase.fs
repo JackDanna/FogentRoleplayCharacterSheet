@@ -232,21 +232,42 @@ let magicSystemSet =
             |> Set.map (fun key -> magicSkillDataMap.Item key)
     })
 
+// BaseDiceTiers
+open FogentRoleplayLib.BaseDiceTier
+
+let baseDiceTiers =
+    makeFogentRoleplayDataSetExcludingFileExtension baseDiceTierTableName (fun row -> {
+        itemPrefix = string row.["itemPrefix"]
+        level = int row.["level"]
+        baseDice = parseDicePoolString row.["baseDice"]
+    //itemDurabilityMax = uint row.["itemDurabilityMax"]
+    })
+
 // WeaponClass
 let weaponSet =
-    makeFogentRoleplayDataSetExcludingFileExtension weaponClassTableName (fun row -> {
-        name = string row.["name"]
-        governingSkillName = SkillName row.["governingSkillName"]
-        oneHandedDiceMod = parseDicePoolModOptionString row.["oneHandedWeaponDice"]
-        twoHandedDiceMod = parseDicePoolModOptionString row.["twoHandedWeaponDice"]
-        penetration = uint row.["penetration"]
-        range = rangeMap.Item row.["range"]
-        damageTypes = stringToDamageTypeSet row.["damageTypes"]
-        engageableOpponents = engageableOpponentsMap row.["engageableOpponents"]
-        dualWieldedDiceMod = parseDicePoolModOptionString row.["dualWieldableBonus"]
-        areaOfEffectOption = namedAreaOfEffectOptionMap row.["areaOfEffect"]
-        resourceNameOption = resourceOptionMap row.["resourceClass"]
-    })
+    baseDiceTiers
+    |> Set.map (fun (baseDiceTier: BaseDiceTier) ->
+        let createPrefixedWeaponClasses prefix =
+            makeFogentRoleplayDataSetExcludingFileExtension weaponClassTableName (fun row -> {
+                name = $"""{prefix} {row.["name"]}"""
+                governingSkillName = SkillName row.["governingSkillName"]
+                oneHandedDiceMod = parseDicePoolModOptionString row.["oneHandedWeaponDice"]
+                twoHandedDiceMod = parseDicePoolModOptionString row.["twoHandedWeaponDice"]
+                penetration = uint row.["penetration"]
+                range = rangeMap.Item row.["range"]
+                damageTypes = stringToDamageTypeSet row.["damageTypes"]
+                engageableOpponents = engageableOpponentsMap row.["engageableOpponents"]
+                dualWieldedDiceMod = parseDicePoolModOptionString row.["dualWieldableBonus"]
+                areaOfEffectOption = namedAreaOfEffectOptionMap row.["areaOfEffect"]
+                resourceNameOption = resourceOptionMap row.["resourceClass"]
+                baseDiceTier = baseDiceTier
+            })
+
+        if baseDiceTier.itemPrefix = "Mundane" then
+            Set.union (createPrefixedWeaponClasses baseDiceTier.itemPrefix) (createPrefixedWeaponClasses "")
+        else
+            createPrefixedWeaponClasses baseDiceTier.itemPrefix)
+    |> Set.intersectMany
 
 // WeaponSkillData
 let weaponSkillDataSet =
@@ -346,17 +367,6 @@ let attributeDeterminedDiceModMap =
     |> Set.map (fun (attributeDeterminedDiceModEffect: AttributeDeterminedDiceMod) ->
         attributeDeterminedDiceModEffect.name, attributeDeterminedDiceModEffect)
     |> Map.ofSeq
-
-// BaseDiceTiers
-open FogentRoleplayLib.BaseDiceTier
-
-let baseDiceTiers =
-    makeFogentRoleplayDataSetExcludingFileExtension baseDiceTierTableName (fun row -> {
-        itemPrefix = string row.["itemPrefix"]
-        level = int row.["level"]
-        baseDice = parseDicePoolString row.["baseDice"]
-    //itemDurabilityMax = uint row.["itemDurabilityMax"]
-    })
 
 // BaseDiceModEffect
 open FogentRoleplayLib.BaseDiceMod

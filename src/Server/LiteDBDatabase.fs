@@ -60,6 +60,7 @@ module LiteDBTypes =
     open FogentRoleplayLib.TextEffect
     open FogentRoleplayLib.ItemStack
     open FogentRoleplayLib.Container
+    open FogentRoleplayLib.BaseDiceTier
 
     type LiteDB_WeaponResource = {
         name: string
@@ -103,6 +104,7 @@ module LiteDBTypes =
         dualWieldedDiceMod: DicePoolMod option
         areaOfEffectOption: AreaOfEffect option
         resourceNameOption: ResourceName option
+        baseDiceTier: BaseDiceTier
     }
 
     let toWeapon (x: LiteDB_Weapon) : Weapon = {
@@ -117,6 +119,7 @@ module LiteDBTypes =
         dualWieldedDiceMod = x.dualWieldedDiceMod
         areaOfEffectOption = x.areaOfEffectOption
         resourceNameOption = x.resourceNameOption
+        baseDiceTier = x.baseDiceTier
     }
 
     let toLiteDB_Weapon (x: Weapon) : LiteDB_Weapon = {
@@ -131,6 +134,7 @@ module LiteDBTypes =
         dualWieldedDiceMod = x.dualWieldedDiceMod
         areaOfEffectOption = x.areaOfEffectOption
         resourceNameOption = x.resourceNameOption
+        baseDiceTier = x.baseDiceTier
     }
 
     type LiteDB_AttributeDeterminedDiceMod = {
