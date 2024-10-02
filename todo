@@ -1,6 +1,6 @@
 Todo:
 
-Pull Attribute out of Attributes and Core Skill. They should have there own csv file.
+Ensure there is no conflicts between base dice tier effects and weapons with the prefixed baseDiceTier
 
 Maybes:
 
