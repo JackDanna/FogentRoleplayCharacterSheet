@@ -932,6 +932,8 @@ module CombatSpeed =
 module DurationAndSource =
     type DurationAndSource = { duration: string; source: string }
 
+    let emptyDurationAndSource = { duration = ""; source = "" }
+
 module AttributeDeterminedDiceMod =
     open DurationAndSource
     open AttributeName
@@ -1017,6 +1019,8 @@ module TextEffect =
     open PhysicalDefense
     open SkillDiceMod
 
+    open Weapon
+
     type TextEffect = {
         name: string
         effect: string
@@ -1024,36 +1028,34 @@ module TextEffect =
     }
 
     // AttributeDeterminedDiceMod
-    let attributeDeterminedDiceModToEffectString (addm: AttributeDeterminedDiceMod) =
-        sprintf
-            "%s to %s"
-            (dicePoolModToString addm.dicePoolMod)
-            (stringSeqToStringSeperatedByCommaAndSpace addm.attributesToEffect)
 
     let attributeDeterminedDiceModToTextEffect (addm: AttributeDeterminedDiceMod) = {
         name = addm.name
-        effect = attributeDeterminedDiceModToEffectString addm
+        effect =
+            $"{dicePoolModToString addm.dicePoolMod} to {stringSeqToStringSeperatedByCommaAndSpace addm.attributesToEffect}"
         durationAndSource = addm.durationAndSource
     }
 
     // PhysicalDefense
-    let physicalDefenseToEffectString pd =
-        sprintf "+%.2f to Physical Defense" pd.physicalDefense
 
     let physicalDefenseToNameAndEffect (pd: PhysicalDefense) = {
         name = pd.name
-        effect = physicalDefenseToEffectString pd
+        effect = sprintf "+%.2f to Physical Defense" pd.physicalDefense
         durationAndSource = pd.durationAndSource
     }
 
     // SkillDiceMod
-    let skillDiceModToEffectString sdm =
-        sprintf "%s to %s" (dicePoolModToString sdm.diceMod) sdm.skillToEffect
 
     let skillDiceModToTextEffect (sdm: SkillDiceMod) = {
         name = sdm.name
-        effect = skillDiceModToEffectString sdm
+        effect = $"{dicePoolModToString sdm.diceMod} to {sdm.skillToEffect}"
         durationAndSource = sdm.durationAndSource
+    }
+
+    let weaponToTextEffect (weapon: Weapon) = {
+        name = weapon.name
+        effect = ""
+        durationAndSource = emptyDurationAndSource
     }
 
 module Effect =
@@ -1142,8 +1144,9 @@ module Effect =
             | BaseDiceMod _ -> false
             | _ -> true)
 
-    let effectToTextEffect effect =
+    let effectToTextEffect (effect: Effect) =
         match effect with
+        | Weapon weapon -> weaponToTextEffect weapon
         | TextEffect te -> te
         | SkillDiceMod sdm -> skillDiceModToTextEffect sdm
         | AttributeDeterminedDiceMod addm -> attributeDeterminedDiceModToTextEffect addm
