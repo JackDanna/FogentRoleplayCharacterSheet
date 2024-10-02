@@ -46,6 +46,7 @@
               mhutchie.git-graph
               ms-dotnettools.csharp
               ionide.ionide-fsharp
+              bradlc.vscode-tailwindcss
               #vscodevim.vim
             ] ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
               {
