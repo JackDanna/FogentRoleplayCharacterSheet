@@ -30,15 +30,18 @@ let update (msg: Msg) (model: CharacterInformation) =
 
 open Feliz
 open Feliz.Bulma
+open Feliz.DaisyUI
 
 let view (model: CharacterInformation) (dispatch: Msg -> unit) =
 
     let characterInformationTextArea (labelName: string) (text: string) dispatchMsg =
-        Bulma.container [
-            Bulma.label (labelName + ":")
-            Bulma.textarea [
+
+        Daisy.formControl [
+            Daisy.label [ Daisy.labelText $"{labelName}:" ]
+            Daisy.textarea [
                 prop.placeholder $"Enter {labelName}..."
-                prop.text text
+                prop.className "h-24"
+                textarea.bordered
                 prop.onTextChange (fun text -> dispatch (dispatchMsg text))
             ]
         ]
