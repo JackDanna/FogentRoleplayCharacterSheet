@@ -199,6 +199,11 @@ let coreSkillDataSet: Set<CoreSkillData> =
         attributeName = AttributeName row.["governingAttribute"]
     })
 
+let coreSkillDataMap =
+    coreSkillDataSet
+    |> Seq.map (fun coreSkillData -> coreSkillData.skillName, coreSkillData)
+    |> Map.ofSeq
+
 let attributeNameSet =
     coreSkillDataSet |> Set.map (fun coreSkillData -> coreSkillData.attributeName)
 
@@ -215,8 +220,10 @@ let magicSkillDataSet: Set<MagicSkillData> =
         isRangeCapable = Bool row.["rangeCapable"]
     })
 
-let magicSkillDataMap = makeMagicSkillDataMap magicSkillDataSet
-
+let magicSkillDataMap =
+    magicSkillDataSet
+    |> Seq.map (fun magicSystem -> magicSystem.name, magicSystem)
+    |> Map.ofSeq
 
 // MagicSystem
 let magicSystemSet =
@@ -371,27 +378,21 @@ let attributeDeterminedDiceModMap =
 // BaseDiceModEffect
 open FogentRoleplayLib.BaseDiceMod
 
-let weaponSkillBaseDiceMods =
-    weaponSkillDataMap.Values
-    |> Seq.collect (fun weaponSkillData ->
-        baseDiceTiers
-        |> Set.map (fun baseDiceTier -> (weaponSkillData, baseDiceTier))
-        |> Set.toSeq)
-    |> Seq.map (fun (weaponSkill: WeaponSkillData, baseDiceTier: BaseDiceTier) -> {
-        name = baseDiceTier.itemPrefix + " " + weaponSkill.name
-        effectedSkillName = weaponSkill.name
+let makeBaseDiceMods baseDiceTiers skillNames =
+    skillNames
+    |> Seq.allPairs baseDiceTiers
+    |> Seq.map (fun (baseDiceTier: BaseDiceTier, skillName: SkillName) -> {
+        name = $"{baseDiceTier.itemPrefix} {skillName} Base Dice Mod" //baseDiceTier.itemPrefix + " " + weaponSkill.name
+        effectedSkillName = skillName
         baseDiceTier = baseDiceTier
         durationAndSource = { duration = ""; source = "" }
     })
     |> Set.ofSeq
 
-// Need to make baseDiceMods for magic skill and core skills
-let magicSkillBaseDiceMods = Set.empty
-
-let coreSkillBaseDiceMods = Set.empty
-
 let baseDiceModSet =
-    Set.unionMany [ weaponSkillBaseDiceMods; magicSkillBaseDiceMods; coreSkillBaseDiceMods ]
+    [ weaponSkillDataMap.Keys; magicSkillDataMap.Keys; coreSkillDataMap.Keys ]
+    |> Seq.collect id
+    |> makeBaseDiceMods baseDiceTiers
 
 // WeightClass
 let weightClassSet: WeightClass Set =

@@ -1408,9 +1408,10 @@ module Skill =
 
 module WeaponSkillData =
     open AttributeName
+    open SkillName
 
     type WeaponSkillData = {
-        name: string
+        name: SkillName
         governingAttributes: AttributeName Set
     }
 
