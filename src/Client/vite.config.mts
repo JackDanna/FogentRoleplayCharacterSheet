@@ -11,6 +11,7 @@ export default defineConfig({
         outDir: "../../deploy/public",
     },
     server: {
+        host: '0.0.0.0',
         port: 8080,
         proxy: {
             // redirect requests that start with /api/ to the server on port 5000
