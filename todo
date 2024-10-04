@@ -2,6 +2,24 @@ Todo:
 
 Add know vocation skills so that baseDiceTierMods can be created for them
 
+Add Spells for character sheet
+
+Added effects to 
+
 Maybes:
 
 Combat Rolls can consume muliple weapon resources
+
+Magic Combat Skills need resource used
+
+Should only show dual weilded if two one handed weapons
+
+hide twohanded if dice pool is the same as one handed
+
+Maybes:
+
+Item Durability
+
+Magic Skill data should maybe live on magic Skill
+
+Off person Containers
