@@ -2047,8 +2047,6 @@ module Character =
     open WeightClass
     open CarryWeightCalculation
     open CoreSkillData
-    open ListUtils
-    open WeightClass
 
     type Character = {
         name: string
