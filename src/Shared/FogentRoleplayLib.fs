@@ -758,6 +758,26 @@ module BaseDiceTier =
         baseDice: DicePool
     }
 
+module WeaponSpell =
+
+    open DicePoolMod
+    open Penetration
+    open Range
+    open EngageableOpponents
+    open AreaOfEffect
+
+    type WeaponSpell = {
+        name: string
+        oneHandedDiceMod: DicePoolMod option
+        twoHandedDiceMod: DicePoolMod option
+        dualWieldedDiceMod: DicePoolMod option
+        penetration: Penetration
+        range: Range
+        engageableOpponents: EngageableOpponents
+        areaOfEffectOption: AreaOfEffect option
+        magicResourceAmount: uint
+    }
+
 module Weapon =
     open DicePoolMod
     open Range
@@ -789,26 +809,6 @@ module Container =
         name: string
         weightCapacity: float
         volumeFtCubed: float
-    }
-
-module WeaponSpell =
-
-    open DicePoolMod
-    open Penetration
-    open Range
-    open EngageableOpponents
-    open AreaOfEffect
-
-    type WeaponSpell = {
-        name: string
-        oneHandedDiceMod: DicePoolMod option
-        twoHandedDiceMod: DicePoolMod option
-        dualWieldedDiceMod: DicePoolMod option
-        penetration: Penetration
-        range: Range
-        engageableOpponents: EngageableOpponents
-        areaOfEffectOption: AreaOfEffect option
-        magicResourceAmount: uint
     }
 
 // Character Building Blocks
