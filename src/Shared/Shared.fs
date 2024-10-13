@@ -5,9 +5,6 @@ open FogentRoleplayLib.Character
 
 type Login = { userName: string; password: string }
 
-//
-// type IdEntity<'T> = { Id: int; Entity: 'T }
-
 [<CLIMutable>]
 type IdUser = { Id: int; Login: Login }
 
