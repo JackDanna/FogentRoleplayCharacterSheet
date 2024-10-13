@@ -2097,6 +2097,7 @@ module Character =
     open CoreSkillData
 
     type Character = {
+        id: int
         name: string
         attributes: Attribute Set
         coreSkills: Skill Set
@@ -2112,7 +2113,7 @@ module Character =
         carryWeightCalculationOption: CarryWeightCalculation option
     }
 
-    let init (settingData: SettingData) =
+    let init characterId (settingData: SettingData) =
         let attributes =
             Set.map (fun x -> Attribute.init x.attributeName) settingData.coreSkillDataSet
 
@@ -2134,6 +2135,7 @@ module Character =
             | None -> None
 
         {
+            id = characterId
             name = ""
             attributes = attributes
             coreSkills = coreSkills
@@ -2170,3 +2172,14 @@ module Character =
                         ]
                       | None -> []
         })
+
+module Setting =
+    open SettingData
+    open Character
+
+    type Setting = {
+        id: int
+        name: string
+        characters: Character seq
+        SettingData: SettingData
+    }

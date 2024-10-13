@@ -562,6 +562,7 @@ module LiteDBTypes =
     }
 
     type LiteDB_Character = {
+        id: int
         name: string
         attributes: Attribute seq
         coreSkills: LiteDB_Skill seq
@@ -578,6 +579,7 @@ module LiteDBTypes =
     }
 
     let toCharacter x : Character = {
+        id = x.id
         name = x.name
         attributes = Set.ofSeq x.attributes
         coreSkills = x.coreSkills |> Seq.map toSkill |> Set.ofSeq
@@ -597,6 +599,7 @@ module LiteDBTypes =
     }
 
     let toLiteDB_Character (x: Character) = {
+        id = x.id
         name = x.name
         attributes = x.attributes
         coreSkills = x.coreSkills |> Seq.map toLiteDB_Skill
@@ -706,7 +709,7 @@ let addNewCharacter settingData username =
     match usernameToIdUser username with
     | Some idUser ->
         settingData
-        |> FogentRoleplayLib.Character.init
+        |> FogentRoleplayLib.Character.init 0 // Setting ID to zero will tell the DB to autoincrement its list of known ids
         |> insertNewCharacter idUser.Id
         |> ignore
 
