@@ -37,8 +37,8 @@ let generateToken username =
     |> Saturn.Auth.generateJWT (secret, algorithm) issuer (DateTime.UtcNow.AddHours(1.0))
 
 let createUserData (login: Login) : UserData = {
-    username = login.userName
-    token = generateToken login.userName
+    username = login.username
+    token = generateToken login.username
 }
 
 let login (login: Login) = async {

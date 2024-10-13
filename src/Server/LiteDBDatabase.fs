@@ -686,7 +686,7 @@ let getUsersForCharacter characterId =
     |> Seq.map (fun uca -> users.FindOne(fun user -> user.Id = uca.UserId))
 
 let usernameToIdUser (username: Username) =
-    users.Find(fun idUser -> idUser.Login.userName = username) |> Seq.tryHead
+    users.Find(fun idUser -> idUser.Login.username = username) |> Seq.tryHead
 
 let addNewCharacter settingData username =
 
@@ -715,11 +715,11 @@ let updateCharacter username (newCharacter: Character) =
             if doesUserOwnCharacter then
                 liteDB_IdCharacters.Update(toLiteDB_Character newCharacter) |> ignore
 
-let isValidUserLogin login =
+let isValidUserLogin (login: Login) =
 
     users.Find(
         Query.And(
-            Query.EQ("Login.userName", BsonValue(login.userName)),
+            Query.EQ("Login.userName", BsonValue(login.username)),
             Query.EQ("Login.password", BsonValue(login.password))
         )
     )

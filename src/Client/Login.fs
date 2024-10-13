@@ -22,7 +22,7 @@ let (|UserLoggedIn|_|) =
 
 let init () =
     {
-        login = { userName = ""; password = "" }
+        login = { username = ""; password = "" }
         LoginAttempt = HasNotStartedYet
     },
     Cmd.none
@@ -38,7 +38,7 @@ let update (msg: Msg) (model: Model) =
         {
             model with
                 login = {
-                    userName = username
+                    username = username
                     password = model.login.password
                 }
         },
@@ -48,7 +48,7 @@ let update (msg: Msg) (model: Model) =
         {
             model with
                 login = {
-                    userName = model.login.userName
+                    username = model.login.username
                     password = password
                 }
         },
@@ -149,7 +149,7 @@ let view (state: Model) (dispatch: Msg -> unit) =
                                     prop.className "input"
                                     prop.placeholder "Username"
                                     prop.type'.email
-                                    prop.valueOrDefault state.login.userName
+                                    prop.valueOrDefault state.login.username
                                     prop.onChange (UsernameChanged >> dispatch)
                                 ]
 
