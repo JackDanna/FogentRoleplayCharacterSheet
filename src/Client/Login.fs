@@ -123,7 +123,7 @@ let centered (children: ReactElement list) =
         prop.children children
     ]
 
-let view (state: Model) (dispatch: Msg -> unit) =
+let view (model: Model) (dispatch: Msg -> unit) =
     layout [
         Html.div [
             prop.className "box"
@@ -149,7 +149,7 @@ let view (state: Model) (dispatch: Msg -> unit) =
                                     prop.className "input"
                                     prop.placeholder "Username"
                                     prop.type'.email
-                                    prop.valueOrDefault state.login.username
+                                    prop.valueOrDefault model.login.username
                                     prop.onChange (UsernameChanged >> dispatch)
                                 ]
 
@@ -173,7 +173,7 @@ let view (state: Model) (dispatch: Msg -> unit) =
                                     prop.className "input"
                                     prop.placeholder "********"
                                     prop.type'.password
-                                    prop.valueOrDefault state.login.password
+                                    prop.valueOrDefault model.login.password
                                     prop.onChange (PasswordChanged >> dispatch)
                                 ]
                                 Html.span [
@@ -191,7 +191,7 @@ let view (state: Model) (dispatch: Msg -> unit) =
                         Html.button [
                             prop.className [
                                 "button is-info is-fullwidth"
-                                if state.LoginAttempt = InProgress then
+                                if model.LoginAttempt = InProgress then
                                     "is-loading"
                             ]
 
@@ -201,7 +201,7 @@ let view (state: Model) (dispatch: Msg -> unit) =
                     ]
                 ]
 
-                renderLoginOutcome state.LoginAttempt
+                renderLoginOutcome model.LoginAttempt
             ]
         ]
     ]
