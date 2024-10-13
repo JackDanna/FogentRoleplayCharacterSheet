@@ -2,8 +2,6 @@ module Character
 
 open FogentRoleplayLib
 open Character
-open CoreSkillData
-open DicePoolCalculation
 open Skill
 open SettingData
 open ItemElement
