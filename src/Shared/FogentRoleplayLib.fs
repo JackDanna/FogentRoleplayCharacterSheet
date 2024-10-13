@@ -1137,13 +1137,6 @@ module Effect =
 
     let effectsToWeaponList = List.choose effectToWeaponOption
 
-    let effectToNonBaseDiceModEffects effects =
-        effects
-        |> List.filter (fun effect ->
-            match effect with
-            | BaseDiceMod _ -> false
-            | _ -> true)
-
     let effectToTextEffect (effect: Effect) =
         match effect with
         | Weapon weapon -> weaponToTextEffect weapon
