@@ -3,13 +3,15 @@ namespace Shared
 open FogentRoleplayLib.SettingData
 open FogentRoleplayLib.Character
 
-type Login = { userName: string; password: string }
+type Username = string
+
+type Login = { userName: Username; password: string }
 
 [<CLIMutable>]
 type IdUser = { Id: int; Login: Login }
 
 type JWT = string
-type Username = string
+
 type UserData = { username: Username; token: JWT }
 
 type LoginResult =
