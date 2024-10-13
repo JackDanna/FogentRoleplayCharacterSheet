@@ -58,7 +58,6 @@ let update (msg: Msg) (model: Model) =
         let nextState = { model with LoginAttempt = InProgress }
 
         let login = async {
-            //let! loginResult = Api.login state.Username state.Password
             let! loginResult = guestApi.login model.login
             return Login(Finished loginResult)
         }
