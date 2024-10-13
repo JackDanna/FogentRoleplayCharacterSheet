@@ -5,10 +5,11 @@ open Elmish
 
 open Fable.Remoting.Client
 open Shared
+open FogentRoleplayLib.Character
 
 type Model = {
     User: Shared.UserData
-    idCharacterList: IdCharacter seq
+    characterList: Character seq
     selectedCharacter: int option
 }
 
@@ -19,7 +20,7 @@ let getUserApi token =
     |> Remoting.buildProxy<IUserApi>
 
 type Msg =
-    | GotNewIdCharacterList of IdCharacter list
+    | GotNewIdCharacterList of Character list
     | SelectCharacter of int
     | DeleteCharacter of int
     | AddNewCharacter
@@ -31,7 +32,7 @@ let init (user: Shared.UserData) =
 
     {
         User = user
-        idCharacterList = []
+        characterList = []
         selectedCharacter = None
     },
     Cmd.OfAsync.perform api.getIdCharacterList user.username GotNewIdCharacterList
@@ -45,11 +46,11 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
     | GotNewIdCharacterList idCharacterList ->
         {
             model with
-                idCharacterList = idCharacterList
+                characterList = idCharacterList
         },
         Cmd.none
     | SelectCharacter index ->
-        if Seq.tryFind (fun x -> x.Id = index) model.idCharacterList |> Option.isSome then
+        if Seq.tryFind (fun x -> x.id = index) model.characterList |> Option.isSome then
             {
                 model with
                     selectedCharacter = Some index
@@ -61,7 +62,7 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
     | DeleteCharacter id ->
         {
             model with
-                idCharacterList = Seq.filter (fun idCharacter -> idCharacter.Id <> id) model.idCharacterList
+                characterList = Seq.filter (fun idCharacter -> idCharacter.id <> id) model.characterList
         },
         // Need to add deletion in the database
         Cmd.none
@@ -73,26 +74,23 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
         | None -> model, Cmd.none
         | Some index ->
 
-            model.idCharacterList
-            |> Seq.tryFind (fun x -> x.Id = index)
+            model.characterList
+            |> Seq.tryFind (fun x -> x.id = index)
             |> function
                 | None -> model, Cmd.none
                 | Some idCharacter ->
-                    let updatedIdCharacter = {
-                        idCharacter with
-                            Character = Character.update msg idCharacter.Character
-                    }
+                    let updatedIdCharacter = Character.update msg idCharacter
 
                     {
                         model with
-                            idCharacterList =
+                            characterList =
                                 Seq.map
                                     (fun x ->
-                                        if x.Id = updatedIdCharacter.Id then
+                                        if x.id = updatedIdCharacter.id then
                                             updatedIdCharacter
                                         else
                                             x)
-                                    model.idCharacterList
+                                    model.characterList
                     },
                     Cmd.OfAsync.perform
                         (userApi.updateIdCharacter model.User.username)
@@ -135,15 +133,15 @@ let view (model: Model) dispatch =
 
                     Bulma.container (
                         Seq.map
-                            (fun idCharacter ->
+                            (fun character ->
                                 Bulma.container [
-                                    Html.text idCharacter.Character.name
+                                    Html.text character.name
                                     Html.button [
-                                        prop.onClick (fun _ -> dispatch (SelectCharacter idCharacter.Id))
+                                        prop.onClick (fun _ -> dispatch (SelectCharacter character.id))
                                         prop.text "Select"
                                     ]
                                 ])
-                            model.idCharacterList
+                            model.characterList
                         |> Seq.append [
                             Html.button [
                                 prop.onClick (fun _ -> (dispatch (AddNewCharacter)))
@@ -155,8 +153,7 @@ let view (model: Model) dispatch =
                     match model.selectedCharacter with
                     | Some index ->
                         Character.view
-                            (Seq.find (fun (idCharacter: IdCharacter) -> idCharacter.Id = index) model.idCharacterList)
-                                .Character
+                            (Seq.find (fun (character: Character) -> character.id = index) model.characterList)
                             (CharacterMsg >> dispatch)
                     | None -> Html.none
                 ]

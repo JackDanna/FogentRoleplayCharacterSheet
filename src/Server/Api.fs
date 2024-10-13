@@ -27,7 +27,7 @@ let getCharacterList username = async {
         |> List.ofSeq
 }
 
-let updateIdCharaacter username idCharacter = async { return LiteDBDatabase.updateIdCharacter username idCharacter }
+let updateIdCharaacter username character = async { return LiteDBDatabase.updateCharacter username character }
 
 let userApi: IUserApi = {
     addNewCharacter = addNewCharacter

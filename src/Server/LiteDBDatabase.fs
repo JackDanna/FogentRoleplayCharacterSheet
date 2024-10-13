@@ -561,6 +561,7 @@ module LiteDBTypes =
         weightClassSet = x.weightClassSet |> Seq.map toLiteDB_WeightClass
     }
 
+    [<CLIMutableAttribute>]
     type LiteDB_Character = {
         id: int
         name: string
@@ -618,22 +619,6 @@ module LiteDBTypes =
         carryWeightCalculationOption = x.carryWeightCalculationOption
     }
 
-    [<CLIMutableAttribute>]
-    type LiteDB_IdCharacter = {
-        Id: int
-        LiteDB_Character: LiteDB_Character
-    }
-
-    let toIdCharacter (x: LiteDB_IdCharacter) : IdCharacter = {
-        Id = x.Id
-        Character = toCharacter x.LiteDB_Character
-    }
-
-    let toLiteDB_IdCharacter (x: IdCharacter) : LiteDB_IdCharacter = {
-        Id = x.Id
-        LiteDB_Character = toLiteDB_Character x.Character
-    }
-
 let db =
     let mapper = FSharpBsonMapper()
     let connStr = "Filename=fogentData.db;mode=Exclusive"
@@ -662,7 +647,7 @@ type UserCharacterAccess = {
 }
 
 let users = collectionFromDB<IdUser>
-let liteDB_IdCharacters = collectionFromDB<LiteDB_IdCharacter>
+let liteDB_IdCharacters = collectionFromDB<LiteDB_Character>
 let userCharacterAccesses = collectionFromDB<UserCharacterAccess>
 
 //users.EnsureIndex(fun (u: IdUser) -> u.Entity.userName) |> ignore
@@ -685,17 +670,16 @@ let grantAccess userId characterId =
     |> ignore
 
 let insertNewCharacter userId (character: Character) =
-    let idCharacter: LiteDB_IdCharacter =
-        character |> createAutoIncrementedIdCharacter |> toLiteDB_IdCharacter
+    let idCharacter: LiteDB_Character = character |> toLiteDB_Character
 
     liteDB_IdCharacters.Insert(idCharacter) |> ignore
-    grantAccess userId idCharacter.Id
+    grantAccess userId idCharacter.id
     idCharacter
 
 let userIdToOwnedIdCharacters userId =
     userCharacterAccesses.Find(fun uca -> uca.UserId = userId)
-    |> Seq.map (fun uca -> liteDB_IdCharacters.FindOne(fun character -> character.Id = uca.CharacterId))
-    |> Seq.map toIdCharacter
+    |> Seq.map (fun uca -> liteDB_IdCharacters.FindOne(fun character -> character.id = uca.CharacterId))
+    |> Seq.map toCharacter
 
 let getUsersForCharacter characterId =
     userCharacterAccesses.Find(fun uca -> uca.CharacterId = characterId)
@@ -717,7 +701,7 @@ let addNewCharacter settingData username =
     | None -> Seq.empty
     |> List.ofSeq
 
-let updateIdCharacter username (idCharacterToUpdate: IdCharacter) =
+let updateCharacter username (newCharacter: Character) =
     username
     |> usernameToIdUser
     |> function
@@ -726,10 +710,10 @@ let updateIdCharacter username (idCharacterToUpdate: IdCharacter) =
             let doesUserOwnCharacter =
                 idUser.Id
                 |> userIdToOwnedIdCharacters
-                |> Seq.exists (fun ownedIdCharacter -> ownedIdCharacter.Id = idCharacterToUpdate.Id)
+                |> Seq.exists (fun ownedIdCharacter -> ownedIdCharacter.id = newCharacter.id)
 
             if doesUserOwnCharacter then
-                liteDB_IdCharacters.Update(toLiteDB_IdCharacter idCharacterToUpdate) |> ignore
+                liteDB_IdCharacters.Update(toLiteDB_Character newCharacter) |> ignore
 
 let isValidUserLogin login =
 

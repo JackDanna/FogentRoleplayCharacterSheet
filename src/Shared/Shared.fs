@@ -11,13 +11,6 @@ type Login = { userName: string; password: string }
 [<CLIMutable>]
 type IdUser = { Id: int; Login: Login }
 
-[<AutoOpen>]
-module IdCharacter =
-    [<CLIMutable>]
-    type IdCharacter = { Id: int; Character: Character }
-
-    let createAutoIncrementedIdCharacter character = { Id = 0; Character = character }
-
 type JWT = string
 type Username = string
 type UserData = { username: Username; token: JWT }
@@ -33,8 +26,8 @@ module Route =
 type IGuestApi = { login: Login -> Async<LoginResult> }
 
 type IUserApi = {
-    addNewCharacter: Username -> Async<IdCharacter List>
+    addNewCharacter: Username -> Async<Character List>
     getInitSettingData: unit -> Async<SettingData>
-    getIdCharacterList: Username -> Async<IdCharacter List>
-    updateIdCharacter: Username -> IdCharacter -> Async<unit>
+    getIdCharacterList: Username -> Async<Character List>
+    updateIdCharacter: Username -> Character -> Async<unit>
 }
