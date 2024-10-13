@@ -42,7 +42,6 @@ let createUserData (login: Login) : UserData = {
 }
 
 let login (login: Login) = async {
-    // This if statement needs to check if the username and password are valid
     if LiteDBDatabase.isValidUserLogin login then
         return LoggedIn(createUserData login)
     else
