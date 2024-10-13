@@ -301,7 +301,7 @@ let update msg (model: Character) =
             characterInformation = CharacterInformation.update msg model.characterInformation
       }
 
-    | EffectListMsg(msg) ->
+    | EffectListMsg msg ->
         match msg with
         | EffectList.Insert(effectName, _) ->
             EffectList.Insert(effectName, Some(makeEffectDataMap model.settingData.effectSet))
