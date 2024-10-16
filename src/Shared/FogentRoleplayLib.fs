@@ -2176,3 +2176,10 @@ module Setting =
         characters: Character seq
         SettingData: SettingData
     }
+
+    let init id name characters settingData = {
+        id = id
+        name = name
+        characters = characters
+        SettingData = settingData
+    }

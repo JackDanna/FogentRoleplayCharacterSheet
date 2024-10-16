@@ -2,6 +2,7 @@ namespace Shared
 
 open FogentRoleplayLib.SettingData
 open FogentRoleplayLib.Character
+open FogentRoleplayLib.Setting
 
 type Username = string
 
@@ -25,8 +26,7 @@ module Route =
 type IGuestApi = { login: Login -> Async<LoginResult> }
 
 type IUserApi = {
-    addNewCharacter: Username -> Async<Character List>
-    getInitSettingData: unit -> Async<SettingData>
-    getIdCharacterList: Username -> Async<Character List>
-    updateIdCharacter: Username -> Character -> Async<unit>
+    addNewCharacterApi: Username -> int -> Async<Result<Character, string>>
+    getOwnedSettingApi: Username -> Async<Setting seq>
+    updateCharacterApi: Username -> int -> Character -> Async<Result<unit, string>>
 }

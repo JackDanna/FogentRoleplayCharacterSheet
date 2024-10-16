@@ -13,27 +13,27 @@ open Shared
 open CsvDatabase
 open LiteDBDatabase
 
-let addNewCharacter username = async { return LiteDBDatabase.addNewCharacter (getInitSettingDataFromCSV ()) username }
-let getInitSettingData () = async { return getInitSettingDataFromCSV () }
-
-let getCharacterList username = async {
-    // In here I will have to search the DB for which characters the player has access to
-    return
-        username
-        |> usernameToIdUser
-        |> function
-            | Some idUser -> userIdToOwnedIdCharacters idUser.Id
-            | None -> Seq.empty
-        |> List.ofSeq
+let addNewCharacterApi username settingId = async {
+    return LiteDBDatabase.LiteDbTryInserts.insertNewCharacterInSettingForUser username settingId
 }
 
-let updateIdCharaacter username character = async { return LiteDBDatabase.updateCharacter username character }
+let getOwnedSettingsApi username = async {
+    return
+        username
+        |> tryUsernameToUser
+        |> function
+            | Some idUser -> userIdToOwnedSettings idUser.Id
+            | None -> Seq.empty
+}
+
+let updateCharaacterApi username settingId character = async {
+    return LiteDBDatabase.LiteDbTryUpdates.updateCharacter username settingId character
+}
 
 let userApi: IUserApi = {
-    addNewCharacter = addNewCharacter
-    getInitSettingData = getInitSettingData
-    getIdCharacterList = getCharacterList
-    updateIdCharacter = updateIdCharaacter
+    addNewCharacterApi = addNewCharacterApi
+    getOwnedSettingApi = getOwnedSettingsApi
+    updateCharacterApi = updateCharaacterApi
 }
 
 open Authorize
