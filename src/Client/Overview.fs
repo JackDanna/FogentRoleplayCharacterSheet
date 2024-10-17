@@ -83,14 +83,12 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
     | GotSettings settings -> { model with settings = settings }, Cmd.none
     | SelectSettingAndCharacter(settingId, characterId) ->
         tryFindCharacterInSetting model settingId characterId
-        |> function
-            | None -> model, Cmd.none
-            | Some _ ->
-                {
-                    model with
-                        selectedCharacter = Some characterId
-                },
-                Cmd.none
+        |> Option.map (fun character -> {
+            model with
+                selectedCharacter = Some character.id
+        })
+        |> Option.defaultValue model,
+        Cmd.none
 
     | DeleteCharacter id ->
         {
@@ -202,6 +200,8 @@ let view (model: Model) dispatch =
                                 //     prop.onClick (fun _ -> dispatch (SelectSettingAndCharacter setting.id))
                                 //     prop.text "Select"
                                 // ]
+
+
                                 ])
                             model.settings
                         |> Seq.append [
