@@ -21,9 +21,12 @@ let getOwnedSettingsApi username = async {
     return
         username
         |> tryUsernameToUser
-        |> function
-            | Some idUser -> userIdToOwnedSettings idUser.Id
-            | None -> Seq.empty
+
+        // |> function
+        //     | Some idUser -> userIdToOwnedSettings idUser.Id
+        //     | None -> Seq.empty
+        |> Option.toList
+        |> Seq.collect (fun idUser -> userIdToOwnedSettings idUser.Id)
 }
 
 let updateCharaacterApi username settingId character = async {

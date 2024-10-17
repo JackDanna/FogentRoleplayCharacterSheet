@@ -2101,7 +2101,6 @@ module Character =
         characterInformation: CharacterInformation
         characterEffects: Effect List
         combatSpeeds: CombatSpeed List
-        settingData: SettingData
         weightClassOption: WeightClass option
         carryWeightCalculationOption: CarryWeightCalculation option
     }
@@ -2139,7 +2138,6 @@ module Character =
             characterInformation = CharacterInformation.init ()
             characterEffects = effects
             combatSpeeds = ListUtils.init ()
-            settingData = settingData
             weightClassOption =
                 WeightClass.init carryWeightCalculationOption settingData.weightClassSet attributes coreSkills equipment
             carryWeightCalculationOption = carryWeightCalculationOption

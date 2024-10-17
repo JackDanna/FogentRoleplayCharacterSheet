@@ -600,7 +600,6 @@ module LiteDBTypes =
         characterInformation: CharacterInformation
         characterEffects: LiteDB_Effect List
         combatSpeeds: CombatSpeed List
-        settingData: LiteDB_SettingData
         weightClassOption: LiteDB_WeightClass option
         carryWeightCalculationOption: CarryWeightCalculation option
     }
@@ -617,7 +616,6 @@ module LiteDBTypes =
         characterInformation = x.characterInformation
         characterEffects = x.characterEffects |> List.map toEffect
         combatSpeeds = x.combatSpeeds
-        settingData = toSettingData x.settingData
         weightClassOption =
             match x.weightClassOption with
             | None -> None
@@ -637,7 +635,6 @@ module LiteDBTypes =
         characterInformation = x.characterInformation
         characterEffects = x.characterEffects |> List.map toLiteDB_Effect
         combatSpeeds = x.combatSpeeds
-        settingData = toLiteDB_SettingData x.settingData
         weightClassOption =
             match x.weightClassOption with
             | None -> None
@@ -892,7 +889,7 @@ module LiteDbTryInserts =
             |> Option.map (fun _ -> newCharacter))
         |> function
             | None -> Error("Failed to insert new character in setting.")
-            | Some character -> Ok(character)
+            | Some character -> Ok(settingId, character)
 
 [<AutoOpenAttribute>]
 module LiteDbTryUpdates =
@@ -928,7 +925,3 @@ let isValidUserLogin (login: Login) =
     | None ->
         tryInsertNewUser login // TESTING, REMOVE ASAP: This automatically creates a user if it doesn't exists,
         false)
-
-// Need to init the liteDB_Settings with data from csv
-
-FogentRoleplayLib.Setting.init 0 "Fallen" Seq.empty (CsvDatabase.getInitSettingDataFromCSV ())
