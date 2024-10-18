@@ -915,7 +915,7 @@ let isValidUserLogin (login: Login) =
 
     users.Find(
         Query.And(
-            Query.EQ("Login.userName", BsonValue(login.username)),
+            Query.EQ("Login.username", BsonValue(login.username)),
             Query.EQ("Login.password", BsonValue(login.password))
         )
     )

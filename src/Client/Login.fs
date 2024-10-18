@@ -55,23 +55,21 @@ let update (msg: Msg) (model: Model) =
         Cmd.none
 
     | Login Started ->
-        let nextState = { model with LoginAttempt = InProgress }
-
         let login = async {
             let! loginResult = guestApi.login model.login
             return Login(Finished loginResult)
         }
 
         let nextCmd = Cmd.fromAsync login
-        nextState, nextCmd
+        { model with LoginAttempt = InProgress }, nextCmd
 
     | Login(Finished loginResult) ->
-        let nextState = {
+
+        {
             model with
                 LoginAttempt = Resolved loginResult
-        }
-
-        nextState, Cmd.none
+        },
+        Cmd.none
 
 let renderLoginOutcome (loginResult: Deferred<Shared.LoginResult>) =
     match loginResult with
