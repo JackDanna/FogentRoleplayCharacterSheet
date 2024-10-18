@@ -867,9 +867,7 @@ module LiteDbTryInserts =
             tryUsernameToUser username
             |> function
                 | None -> None
-                | Some idUser -> Some(newCharacter, liteDB_Setting, idUser)
-
-        )
+                | Some idUser -> Some(newCharacter, liteDB_Setting, idUser))
         |> Option.bind (fun (newCharacter, liteDB_Setting, idUser) ->
             {
                 liteDB_Setting with
@@ -889,7 +887,7 @@ module LiteDbTryInserts =
             |> Option.map (fun _ -> newCharacter))
         |> function
             | None -> Error("Failed to insert new character in setting.")
-            | Some character -> Ok(settingId, character)
+            | Some character -> Ok(character)
 
 [<AutoOpenAttribute>]
 module LiteDbTryUpdates =

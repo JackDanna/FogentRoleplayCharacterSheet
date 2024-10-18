@@ -75,6 +75,7 @@ let temp model =
 let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
 
     let userApi = getUserApi model.User.token
+    let addNewCharacterApi = (userApi.addNewCharacterApi model.User.username)
 
     match msg with
     | GotSettings settings -> { model with settings = settings }, Cmd.none
@@ -106,7 +107,7 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
                 let preloadedAPI = userApi.updateCharacterApi model.User.username setting.id
 
                 Setting.update
-                    (userApi.addNewCharacterApi model.User.username)
+                    addNewCharacterApi
                     (Setting.CharacterListMsg(characterMsg, characterId, Some preloadedAPI))
                     setting))
         |> handleUpdatedSetting model
@@ -114,7 +115,7 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
     | SettingMsg settingMsg ->
         model.selectedSetting
         |> Option.bind (fun selectedSettingId -> tryFindSetting model selectedSettingId)
-        |> Option.map (Setting.update (userApi.addNewCharacterApi model.User.username) settingMsg)
+        |> Option.map (Setting.update addNewCharacterApi settingMsg)
         |> handleUpdatedSetting model
 
 open Feliz

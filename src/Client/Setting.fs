@@ -10,7 +10,7 @@ open Elmish
 type Msg =
     | SetSettingData of SettingData
     | AddNewCharacter
-    | AddedNewCharacter of Result<int * Character, string>
+    | AddedNewCharacter of Result<Character, string>
     | CharacterListMsg of Character.Msg * int * Option<Character -> Async<Result<unit, string>>>
     | UpdatedCharacter of Result<unit, string>
 
@@ -28,7 +28,7 @@ let update userApi (msg: Msg) (model: Setting) =
 
     | AddedNewCharacter result ->
         match result with
-        | Ok(settingId: int, character) ->
+        | Ok character ->
             {
                 model with
                     characters = character |> Seq.singleton |> Seq.append model.characters
