@@ -9,11 +9,12 @@ open Elmish
 
 type Msg =
     | SetSettingData of SettingData
-    | InsertNewCharacter of Character
+    | AddNewCharacter
+    | AddedNewCharacter of Result<int * Character, string>
     | CharacterListMsg of Character.Msg * int * Option<Character -> Async<Result<unit, string>>>
     | UpdatedCharacter of Result<unit, string>
 
-let update (msg: Msg) (model: Setting) =
+let update userApi (msg: Msg) (model: Setting) =
 
     match msg with
     | SetSettingData newSettingData ->
@@ -22,12 +23,19 @@ let update (msg: Msg) (model: Setting) =
                 SettingData = newSettingData
         },
         Cmd.none
-    | InsertNewCharacter character ->
-        {
-            model with
-                characters = Seq.append model.characters (Seq.singleton character)
-        },
-        Cmd.none
+
+    | AddNewCharacter -> model, Cmd.OfAsync.perform userApi model.id AddedNewCharacter
+
+    | AddedNewCharacter result ->
+        match result with
+        | Ok(settingId: int, character) ->
+            {
+                model with
+                    characters = character |> Seq.singleton |> Seq.append model.characters
+            },
+            Cmd.none
+        | Error _ -> model, Cmd.none
+
     | CharacterListMsg(msg, characterId, updateCharacterApiOption) ->
         model.characters
         |> Seq.tryFind (fun x -> x.id = characterId)
@@ -49,3 +57,29 @@ let update (msg: Msg) (model: Setting) =
     | UpdatedCharacter result ->
         // Might wanna do something with this result at some point
         model, Cmd.none
+
+open Feliz
+open Feliz.Bulma
+
+let view (model: Setting) dispatch selectSettingAndCharacter =
+    Bulma.container [
+        Html.text model.name
+        Bulma.container (
+            Seq.map
+                (fun (character: Character) ->
+                    Bulma.container [
+                        Html.text character.name
+                        Html.button [
+                            prop.onClick (fun _ -> selectSettingAndCharacter model.id character.id)
+                            prop.text "Select"
+                        ]
+                    ])
+                model.characters
+            |> Seq.append [
+                Html.button [
+                    prop.onClick (fun _ -> (dispatch (AddNewCharacter)))
+                    prop.text "Add New Character"
+                ]
+            ]
+        )
+    ]

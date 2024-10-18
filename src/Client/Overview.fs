@@ -28,9 +28,6 @@ type Msg =
     | SelectSettingAndCharacter of int * int
     | DeleteCharacter of int
 
-    | AddNewCharacter
-    | AddedNewCharacter of Result<int * Character, string>
-
     | CharacterMsg of Character.Msg
     | SettingMsg of Setting.Msg
 
@@ -98,28 +95,6 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
         // Need to add deletion in the database
         Cmd.none
 
-    | AddNewCharacter ->
-        match model.selectedSetting with
-        | Some settingId ->
-            model, Cmd.OfAsync.perform (userApi.addNewCharacterApi model.User.username) settingId AddedNewCharacter
-        | None -> model, Cmd.none
-
-    | AddedNewCharacter result ->
-        match result with
-        | Ok(settingId: int, character) ->
-            {
-                model with
-                    settings =
-                        model.settings
-                        |> Seq.map (fun setting ->
-                            if setting.id = settingId then
-                                setting |> Setting.update (Setting.InsertNewCharacter character) |> fst
-
-                            else
-                                setting)
-            },
-            Cmd.none
-        | Error _ -> model, Cmd.none
 
     | CharacterMsg characterMsg ->
 
@@ -130,37 +105,20 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
             |> Option.map (fun setting ->
                 let preloadedAPI = userApi.updateCharacterApi model.User.username setting.id
 
-                Setting.update (Setting.CharacterListMsg(characterMsg, characterId, Some preloadedAPI)) setting))
+                Setting.update
+                    (userApi.addNewCharacterApi model.User.username)
+                    (Setting.CharacterListMsg(characterMsg, characterId, Some preloadedAPI))
+                    setting))
         |> handleUpdatedSetting model
 
     | SettingMsg settingMsg ->
         model.selectedSetting
         |> Option.bind (fun selectedSettingId -> tryFindSetting model selectedSettingId)
-        |> Option.map (Setting.update settingMsg)
+        |> Option.map (Setting.update (userApi.addNewCharacterApi model.User.username) settingMsg)
         |> handleUpdatedSetting model
 
 open Feliz
 open Feliz.Bulma
-
-let viewCharacters settingId (characters: Character seq) dispatch =
-    Bulma.container (
-        Seq.map
-            (fun (character: Character) ->
-                Bulma.container [
-                    Html.text character.name
-                    Html.button [
-                        prop.onClick (fun _ -> dispatch (SelectSettingAndCharacter(settingId, character.id)))
-                        prop.text "Select"
-                    ]
-                ])
-            characters
-        |> Seq.append [
-            Html.button [
-                prop.onClick (fun _ -> (dispatch (AddNewCharacter)))
-                prop.text "Add New Character"
-            ]
-        ]
-    )
 
 let view (model: Model) dispatch =
     Bulma.hero [
@@ -190,28 +148,11 @@ let view (model: Model) dispatch =
             Bulma.heroBody [
 
                 Bulma.container [
-
-                    Bulma.container (
-                        Seq.map
-                            (fun setting ->
-                                Bulma.container [
-                                    Html.text setting.name
-                                // Html.button [
-                                //     prop.onClick (fun _ -> dispatch (SelectSettingAndCharacter setting.id))
-                                //     prop.text "Select"
-                                // ]
-
-
-                                ])
-                            model.settings
-                        |> Seq.append [
-                            Html.button [
-                                prop.onClick (fun _ -> (dispatch (AddNewCharacter)))
-                                prop.text "Add New Character"
-                            ]
-                        ]
-                    )
-
+                    model.settings
+                    |> Seq.map (fun setting ->
+                        Setting.view setting (SettingMsg >> dispatch) (fun settingId characterId ->
+                            dispatch (SelectSettingAndCharacter(settingId, characterId))))
+                    |> Bulma.container
 
                     model
                     |> temp
