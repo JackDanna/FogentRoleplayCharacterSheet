@@ -828,6 +828,11 @@ module LiteDbTryInserts =
         with _ ->
             None
 
+    let tryUpdateLiteDB_Setting (updatedLiteDB_Setting: LiteDB_Setting) =
+        match liteDB_Settings.Update(updatedLiteDB_Setting) with
+        | true -> Some true
+        | false -> None
+
     let innerInsertNewCharacter userId (settingId: int) =
 
         // Might wanna replace these with result at some point
@@ -865,9 +870,7 @@ module LiteDbTryInserts =
             liteDB_Setting)
         |> Option.bind (fun (newCharacter, liteDB_Setting) ->
             tryUsernameToUser username
-            |> function
-                | None -> None
-                | Some idUser -> Some(newCharacter, liteDB_Setting, idUser))
+            |> Option.map (fun idUser -> (newCharacter, liteDB_Setting, idUser)))
         |> Option.bind (fun (newCharacter, liteDB_Setting, idUser) ->
             {
                 liteDB_Setting with
@@ -877,7 +880,7 @@ module LiteDbTryInserts =
                         |> List.singleton
                         |> List.append liteDB_Setting.characters
             }
-            |> tryInsertLiteDB_Setting
+            |> tryUpdateLiteDB_Setting
             |> Option.bind (fun _ ->
                 try
                     tryInsertNewUserCharacterAccess idUser.Id liteDB_Setting.id newCharacter.id
@@ -923,3 +926,14 @@ let isValidUserLogin (login: Login) =
     | None ->
         tryInsertNewUser login // TESTING, REMOVE ASAP: This automatically creates a user if it doesn't exists,
         false)
+
+open FogentRoleplayLib.Setting
+
+// {
+//     SettingData = CsvDatabase.getInitSettingDataFromCSV ()
+//     characters = Seq.empty
+//     id = 0
+//     name = "Fallen"
+// }
+// |> toLiteDB_Setting
+// |> tryInsertLiteDB_Setting
