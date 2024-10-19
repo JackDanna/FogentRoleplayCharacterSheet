@@ -65,21 +65,24 @@ let view (model: Setting) dispatch selectSettingAndCharacter =
     Bulma.container [
         Html.text model.name
         Bulma.container (
-            Seq.map
-                (fun (character: Character) ->
-                    Bulma.container [
-                        Html.text character.name
-                        Html.button [
-                            prop.onClick (fun _ -> selectSettingAndCharacter model.id character.id)
-                            prop.text "Select"
-                        ]
-                    ])
-                model.characters
-            |> Seq.append [
-                Html.button [
-                    prop.onClick (fun _ -> (dispatch (AddNewCharacter)))
-                    prop.text "Add New Character"
+
+            Seq.append
+                (Seq.map
+                    (fun (character: Character) ->
+                        Bulma.container [
+                            Html.text character.name
+                            Html.button [
+                                prop.onClick (fun _ -> selectSettingAndCharacter model.id character.id)
+                                prop.text "Select"
+                            ]
+                        ])
+                    model.characters)
+
+                [
+                    Html.button [
+                        prop.onClick (fun _ -> dispatch AddNewCharacter)
+                        prop.text "Add New Character"
+                    ]
                 ]
-            ]
         )
     ]

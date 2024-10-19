@@ -29,7 +29,7 @@ type Msg =
     | DeleteCharacter of int
 
     | CharacterMsg of Character.Msg
-    | SettingMsg of Setting.Msg
+    | SettingListMsg of int * Setting.Msg
 
 let init (user: UserData) =
 
@@ -65,7 +65,7 @@ let handleUpdatedSetting model =
                                 setting)
                         model.settings
         },
-        Cmd.map SettingMsg settingCmd
+        Cmd.map (fun settingMsg -> SettingListMsg(settingModel.id, settingMsg)) settingCmd
 
 let temp model =
     match model.selectedSetting, model.selectedCharacter with
@@ -84,6 +84,7 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
         |> Option.map (fun character -> {
             model with
                 selectedCharacter = Some character.id
+                selectedSetting = Some settingId
         })
         |> Option.defaultValue model,
         Cmd.none
@@ -112,9 +113,9 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
                     setting))
         |> handleUpdatedSetting model
 
-    | SettingMsg settingMsg ->
-        model.selectedSetting
-        |> Option.bind (fun selectedSettingId -> tryFindSetting model selectedSettingId)
+    | SettingListMsg(settingId, settingMsg) ->
+        settingId
+        |> tryFindSetting model
         |> Option.map (Setting.update addNewCharacterApi settingMsg)
         |> handleUpdatedSetting model
 
@@ -151,8 +152,10 @@ let view (model: Model) dispatch =
                 Bulma.container [
                     model.settings
                     |> Seq.map (fun setting ->
-                        Setting.view setting (SettingMsg >> dispatch) (fun settingId characterId ->
-                            dispatch (SelectSettingAndCharacter(settingId, characterId))))
+                        Setting.view
+                            setting
+                            ((fun msg -> SettingListMsg(setting.id, msg)) >> dispatch)
+                            (fun settingId characterId -> dispatch (SelectSettingAndCharacter(settingId, characterId))))
                     |> Bulma.container
 
                     model
