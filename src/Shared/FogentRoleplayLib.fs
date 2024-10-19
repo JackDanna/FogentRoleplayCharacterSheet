@@ -1140,10 +1140,10 @@ module Effect =
     let effectToTextEffect (effect: Effect) =
         match effect with
         | Weapon weapon -> weaponToTextEffect weapon
-        | TextEffect te -> te
         | SkillDiceMod sdm -> skillDiceModToTextEffect sdm
         | AttributeDeterminedDiceMod addm -> attributeDeterminedDiceModToTextEffect addm
         | PhysicalDefense pd -> physicalDefenseToNameAndEffect pd
+        | TextEffect te -> te
 
 // Item
 
