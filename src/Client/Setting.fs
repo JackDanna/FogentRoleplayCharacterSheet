@@ -72,7 +72,11 @@ let createCharacterMsgWithSettingData settingData (msg: Character.Msg) =
             |> (fun msg -> VocationList.VocationMsgAtPosition(pos1, msg))
         | _ -> msg
         |> (fun msg -> VocationListMsg(msg, Some settingData))
-    | EffectListMsg(msg, _) -> (msg, Some settingData) |> EffectListMsg
+    | EffectListMsg(msg: EffectList.Msg, _) ->
+        match msg with
+        | EffectList.Msg.Insert(name, _) -> EffectList.Insert(name, Some(Effect))
+        | _ -> msg
+        |> (fun msg -> EffectListMsg(msg, Some settingData))
     | CombatSpeedsMsg msg ->
         match msg with
         | CombatSpeeds.Insert(name, coreSkillsOption, attributesOption, _) ->
@@ -124,9 +128,9 @@ let update userApi (msg: Msg) (model: Setting) =
         |> function
             | None -> model, Cmd.none
             | Some character ->
+                let newMsg = createCharacterMsgWithSettingData model.SettingData msg
 
-                let updatedCharacter =
-                    Character.update (createCharacterMsgWithSettingData model.SettingData msg) character
+                let updatedCharacter = Character.update newMsg character
 
                 {
                     model with
