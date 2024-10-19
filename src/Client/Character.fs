@@ -18,7 +18,7 @@ type Msg =
     | VocationListMsg of VocationList.Msg
     | EquipmentMsg of ItemElement.ItemElementListMsgType
     | CharacterInformationMsg of CharacterInformation.Msg
-    | EffectListMsg of EffectList.Msg
+    | EffectListMsg of EffectList.Msg * Option<SettingData>
     | CombatSpeedsMsg of CombatSpeeds.Msg
 
 let init = FogentRoleplayLib.Character.init
@@ -301,17 +301,16 @@ let update msg (model: Character) tempSettingData =
             characterInformation = CharacterInformation.update msg model.characterInformation
       }
 
-    | EffectListMsg msg ->
-        match msg with
-        | EffectList.Insert(effectName, _) ->
-            EffectList.Insert(effectName, Some(makeEffectDataMap tempSettingData.effectSet))
-        | _ -> msg
-        |> (fun msg -> {
-            model with
-                characterEffects = EffectList.update msg model.characterEffects
-        })
-        |> newEffectsForCharacter
-        <| tempSettingData
+    | EffectListMsg(msg, settingDataOption) ->
+        match settingDataOption with
+        | Some settingData ->
+            {
+                model with
+                    characterEffects = EffectList.update msg model.characterEffects
+            }
+            |> newEffectsForCharacter
+            <| settingData
+        | None -> model
 
     | CombatSpeedsMsg msg ->
         match msg with
@@ -385,7 +384,7 @@ let view (model: Character) dispatch tempSettingData =
         |> EffectList.view
             (tempSettingData.effectSet |> Set.map effectToEffectName)
             model.characterEffects
-            (EffectListMsg >> dispatch)
+            ((fun msg -> EffectListMsg(msg, None)) >> dispatch)
 
         ItemElement.equipmentView
             (tempSettingData.itemElementSet |> Set.map itemElementToName)

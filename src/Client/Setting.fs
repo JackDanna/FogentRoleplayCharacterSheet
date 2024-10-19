@@ -72,6 +72,7 @@ let createCharacterMsgWithSettingData settingData (msg: Character.Msg) =
             |> (fun msg -> VocationList.VocationMsgAtPosition(pos1, msg))
         | _ -> msg
         |> VocationListMsg
+    | EffectListMsg(msg, _) -> (msg, Some settingData) |> EffectListMsg
     | _ -> msg
 
 let update userApi (msg: Msg) (model: Setting) =
