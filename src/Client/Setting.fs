@@ -8,7 +8,6 @@ open Setting
 open Elmish
 
 type Msg =
-    | SetSettingData of SettingData
     | AddNewCharacter
     | AddedNewCharacter of Result<Character, string>
     | CharacterListMsg of Character.Msg * int * Option<Character -> Async<Result<unit, string>>>
@@ -17,13 +16,6 @@ type Msg =
 let update userApi (msg: Msg) (model: Setting) =
 
     match msg with
-    | SetSettingData newSettingData ->
-        {
-            model with
-                SettingData = newSettingData
-        },
-        Cmd.none
-
     | AddNewCharacter -> model, Cmd.OfAsync.perform userApi model.id AddedNewCharacter
 
     | AddedNewCharacter result ->
