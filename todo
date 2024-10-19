@@ -1,7 +1,5 @@
 Todo:
 
-Figure out why characters aren't being stored on the database after the last refacor
-
 Extract setting data out of Character into Setting
 
 Add Spells for character sheet
