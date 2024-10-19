@@ -85,12 +85,12 @@ let update msg (model: Character) tempSettingData =
     | SetName newName -> { model with name = newName }
 
     | AttributesMsg(msg, Some settingData) ->
-        newEffectsForCharacter
-            {
-                model with
-                    attributes = Attributes.update msg model.attributes
-            }
-            settingData
+        {
+            model with
+                attributes = Attributes.update msg model.attributes
+        }
+        |> newEffectsForCharacter
+        <| settingData
 
     | CoreSkillsMsg msg ->
         match msg with
