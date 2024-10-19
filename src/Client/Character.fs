@@ -54,8 +54,6 @@ let update msg (model: Character) tempSettingData =
 
     let dicePoolCalculationData = characterToDicePoolCalculationData model
 
-    let weaponSkillDataMap = makeWeaponSkillDataMap tempSettingData.weaponSkillDataSet
-
     let newEffectsForCharacter character =
         let newDicePoolCalculationData = characterToDicePoolCalculationData character
 
@@ -160,7 +158,7 @@ let update msg (model: Character) tempSettingData =
                             name,
                             vocationStatLevelOption,
                             Some dicePoolCalculationData,
-                            Some weaponSkillDataMap
+                            Some(makeWeaponSkillDataMap tempSettingData.weaponSkillDataSet)
                         )
 
                     | MundaneVocationSkills.ModifyMundaneVocationSkillAtPosition(pos2,
@@ -192,7 +190,7 @@ let update msg (model: Character) tempSettingData =
                             vocationStatLevelOption,
                             Some tempSettingData.attributeNameSet,
                             Some dicePoolCalculationData,
-                            Some weaponSkillDataMap,
+                            Some(makeWeaponSkillDataMap tempSettingData.weaponSkillDataSet),
                             magicSkillDataMapOption
                         )
 
