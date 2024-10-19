@@ -13,6 +13,101 @@ type Msg =
     | CharacterListMsg of Character.Msg * int * Option<Character -> Async<Result<unit, string>>>
     | UpdatedCharacter of Result<unit, string>
 
+let createCharacterMsgWithSettingData settingData (msg: Character.Msg) =
+    let weaponSkillDataMap =
+        WeaponSkillData.makeWeaponSkillDataMap settingData.weaponSkillDataSet
+
+    match msg with
+    | AttributesMsg(msg, _) -> AttributesMsg(msg, Some(settingData))
+    | VocationListMsg(msg, _) ->
+        match msg with
+        | VocationList.Msg.InsertVocation(vocationName, skillMapOption, dicePoolCalculationDataOption, _) ->
+            VocationList.Msg.InsertVocation(
+                vocationName,
+                skillMapOption,
+                dicePoolCalculationDataOption,
+                Some settingData.magicSystemSet
+            )
+        | VocationList.Msg.VocationMsgAtPosition(pos1, msg) ->
+            match msg with
+            | Vocation.MundaneOrMagicVocationExtrasMsg msg ->
+                match msg with
+                | MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg msg ->
+                    match msg with
+                    | MundaneVocationSkills.InsertMundaneVocationSkill(name,
+                                                                       vocationStatLevelOption,
+                                                                       dicePoolCalculationOption,
+                                                                       _) ->
+
+                        MundaneVocationSkills.InsertMundaneVocationSkill(
+                            name,
+                            vocationStatLevelOption,
+                            dicePoolCalculationOption,
+                            Some(weaponSkillDataMap)
+                        )
+                    | _ -> msg
+                    |> MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg
+                | MundaneOrMagicVocationExtras.MagicVocationExtrasMsg(MagicVocationExtras.MagicVocationSkillsMsg msg) ->
+                    match msg with
+                    | MagicVocationSkills.InsertMagicVocationSkill(name,
+                                                                   vocationStatLevelOption,
+                                                                   _,
+                                                                   dicePoolCalculationDataOption,
+                                                                   _,
+                                                                   magicSkillDataMapOption) ->
+                        MagicVocationSkills.InsertMagicVocationSkill(
+                            name,
+                            vocationStatLevelOption,
+                            Some settingData.attributeNameSet,
+                            dicePoolCalculationDataOption,
+                            Some(weaponSkillDataMap),
+                            magicSkillDataMapOption
+                        )
+                    | _ -> msg
+                    |> MagicVocationExtras.MagicVocationSkillsMsg
+                    |> MundaneOrMagicVocationExtras.MagicVocationExtrasMsg
+                | _ -> msg
+                |> Vocation.MundaneOrMagicVocationExtrasMsg
+            | _ -> msg
+            |> (fun msg -> VocationList.VocationMsgAtPosition(pos1, msg))
+        | _ -> msg
+        |> (fun msg -> VocationListMsg(msg, Some settingData))
+    | EffectListMsg(msg: EffectList.Msg, _) ->
+        match msg with
+        | EffectList.Msg.Insert(name, _) ->
+            EffectList.Insert(name, Some(Effect.makeEffectDataMap settingData.effectSet))
+        | _ -> msg
+        |> (fun msg -> EffectListMsg(msg, Some settingData))
+    | CombatSpeedsMsg msg ->
+        match msg with
+        | CombatSpeeds.Insert(name, coreSkillsOption, attributesOption, _) ->
+            CombatSpeeds.Insert(
+                name,
+                coreSkillsOption,
+                attributesOption,
+                Some(CombatSpeedCalculation.makeCombatSpeedCalculationMap settingData.combatSpeedCalculationSet)
+            )
+        | _ -> msg
+        |> CombatSpeedsMsg
+    | EquipmentMsg(msg, _) ->
+        match msg with
+        | ItemElement.ItemElementListMsgType.Insert(itemName, _) ->
+            (ItemElement.ItemElementListMsgType.Insert(itemName, Some settingData.itemElementSet))
+        | ItemElement.ItemElementListMsgType.ModifyItemElement(pos1,
+                                                               ItemElement.ItemElementMsgType.ContainerItemMsg(ItemElement.ContainerItemMsgType.ItemElementListMsg(ItemElement.ItemElementListMsgType.Insert(itemName,
+                                                                                                                                                                                                             _)))) ->
+            (ItemElement.ItemElementListMsgType.ModifyItemElement(
+                pos1,
+                ItemElement.ItemElementMsgType.ContainerItemMsg(
+                    ItemElement.ContainerItemMsgType.ItemElementListMsg(
+                        ItemElement.ItemElementListMsgType.Insert(itemName, Some settingData.itemElementSet)
+                    )
+                )
+            ))
+        | _ -> msg
+        |> (fun msg -> EquipmentMsg(msg, Some settingData))
+    | _ -> msg
+
 let update userApi (msg: Msg) (model: Setting) =
 
     match msg with
@@ -34,7 +129,9 @@ let update userApi (msg: Msg) (model: Setting) =
         |> function
             | None -> model, Cmd.none
             | Some character ->
-                let updatedCharacter = Character.update msg character model.SettingData
+                let newMsg = createCharacterMsgWithSettingData model.SettingData msg
+
+                let updatedCharacter = Character.update newMsg character
 
                 {
                     model with

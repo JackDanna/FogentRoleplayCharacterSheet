@@ -1,10 +1,16 @@
 Todo:
 
-Extract setting data out of Character into Setting
+Remove warning from app
+
+^^ Resolve how weapons and effects relate to eachother
 
 Add Spells for character sheet
 
-Added effects to 
+Added effects to
+
+Refactor UI with DasiyUI
+
+"Deleting" users from the database
 
 Maybes:
 

@@ -12,13 +12,13 @@ open CombatSpeedCalculation
 
 type Msg =
     | SetName of string
-    | AttributesMsg of Attributes.Msg
+    | AttributesMsg of Attributes.Msg * Option<SettingData>
     | CoreSkillsMsg of Skills.Msg
     | DestinyPointMsg of DestinyPoints.Msg
-    | VocationListMsg of VocationList.Msg
-    | EquipmentMsg of ItemElement.ItemElementListMsgType
+    | VocationListMsg of VocationList.Msg * Option<SettingData>
+    | EquipmentMsg of ItemElement.ItemElementListMsgType * Option<SettingData>
     | CharacterInformationMsg of CharacterInformation.Msg
-    | EffectListMsg of EffectList.Msg
+    | EffectListMsg of EffectList.Msg * Option<SettingData>
     | CombatSpeedsMsg of CombatSpeeds.Msg
 
 let init = FogentRoleplayLib.Character.init
@@ -50,49 +50,47 @@ let updateVocationListThenCombatRollList msgs dicePoolCalculation model tempSett
                 )
     }
 
-let update msg (model: Character) tempSettingData =
+let newEffectsForCharacter character settingData =
+    let newDicePoolCalculationData = characterToDicePoolCalculationData character
+
+    let newCoreSkills =
+        Skills.update (Skills.CalculateSkillDicePools newDicePoolCalculationData) character.coreSkills
+
+    {
+        character with
+            coreSkills = newCoreSkills
+            combatSpeeds =
+                CombatSpeeds.update
+                    (CombatSpeeds.RecalculateAllCombatSpeeds(newCoreSkills, character.attributes))
+                    character.combatSpeeds
+    }
+    |> updateVocationListThenCombatRollList
+        [
+            (VocationList.CalculateDicePools newDicePoolCalculationData)
+            (VocationList.VocationMsgForAll(
+                MundaneOrMagicVocationExtrasMsg(
+                    MundaneOrMagicVocationExtras.RecalculateCoreSkillResourcePool(coreSkillToMap newCoreSkills)
+                )
+            ))
+        ]
+        newDicePoolCalculationData
+    <| settingData
+
+
+let update msg (model: Character) =
 
     let dicePoolCalculationData = characterToDicePoolCalculationData model
-
-    let weaponSkillDataMap = makeWeaponSkillDataMap tempSettingData.weaponSkillDataSet
-
-    let newEffectsForCharacter character =
-        let newDicePoolCalculationData = characterToDicePoolCalculationData character
-
-        let newCoreSkills =
-            Skills.update (Skills.CalculateSkillDicePools newDicePoolCalculationData) character.coreSkills
-
-        {
-            character with
-                coreSkills = newCoreSkills
-                combatSpeeds =
-                    CombatSpeeds.update
-                        (CombatSpeeds.RecalculateAllCombatSpeeds(newCoreSkills, character.attributes))
-                        character.combatSpeeds
-        }
-        |> updateVocationListThenCombatRollList
-            [
-                (VocationList.CalculateDicePools newDicePoolCalculationData)
-                (VocationList.VocationMsgForAll(
-                    MundaneOrMagicVocationExtrasMsg(
-                        MundaneOrMagicVocationExtras.RecalculateCoreSkillResourcePool(coreSkillToMap newCoreSkills)
-                    )
-                ))
-            ]
-            newDicePoolCalculationData
 
     match msg with
     | SetName newName -> { model with name = newName }
 
-    | AttributesMsg msg ->
+    | AttributesMsg(msg, Some settingData) ->
         {
             model with
                 attributes = Attributes.update msg model.attributes
         }
         |> newEffectsForCharacter
-        <| tempSettingData
-
-
+        <| settingData
 
     | CoreSkillsMsg msg ->
         match msg with
@@ -127,10 +125,10 @@ let update msg (model: Character) tempSettingData =
             destinyPoints = DestinyPoints.update msg model.destinyPoints
       }
 
-    | VocationListMsg(msg: VocationList.Msg) ->
+    | VocationListMsg(msg, Some settingData) ->
 
         match msg with
-        | InsertVocation(vocationName, _, _, _) -> {
+        | InsertVocation(vocationName, _, _, magicSystemsOption) -> {
             model with
                 vocationList =
                     VocationList.update
@@ -138,7 +136,7 @@ let update msg (model: Character) tempSettingData =
                             vocationName,
                             Some(coreSkillToMap model.coreSkills),
                             Some dicePoolCalculationData,
-                            Some tempSettingData.magicSystemSet
+                            magicSystemsOption
                         ))
                         model.vocationList
           }
@@ -157,12 +155,15 @@ let update msg (model: Character) tempSettingData =
                 match msg with
                 | MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg(msg) ->
                     match msg with
-                    | MundaneVocationSkills.InsertMundaneVocationSkill(name, vocationStatLevelOption, _, _) ->
+                    | MundaneVocationSkills.InsertMundaneVocationSkill(name,
+                                                                       vocationStatLevelOption,
+                                                                       _,
+                                                                       weaponSkillDataOption) ->
                         MundaneVocationSkills.InsertMundaneVocationSkill(
                             name,
                             vocationStatLevelOption,
                             Some dicePoolCalculationData,
-                            Some weaponSkillDataMap
+                            weaponSkillDataOption
                         )
 
                     | MundaneVocationSkills.ModifyMundaneVocationSkillAtPosition(pos2,
@@ -184,17 +185,17 @@ let update msg (model: Character) tempSettingData =
                     match msg with
                     | MagicVocationSkills.InsertMagicVocationSkill(name,
                                                                    vocationStatLevelOption,
+                                                                   attributeNameSetOption,
                                                                    _,
-                                                                   _,
-                                                                   _,
+                                                                   weaponSkillDataMapOption,
                                                                    magicSkillDataMapOption) ->
 
                         MagicVocationSkills.InsertMagicVocationSkill(
                             name,
                             vocationStatLevelOption,
-                            Some tempSettingData.attributeNameSet,
+                            attributeNameSetOption,
                             Some dicePoolCalculationData,
-                            Some weaponSkillDataMap,
+                            weaponSkillDataMapOption,
                             magicSkillDataMapOption
                         )
 
@@ -232,51 +233,33 @@ let update msg (model: Character) tempSettingData =
 
             | _ -> msg
             |> (fun msg -> VocationMsgAtPosition(pos1, msg))
-            |> (fun msg -> updateVocationListThenCombatRollList [ msg ] dicePoolCalculationData model tempSettingData)
+            |> (fun msg -> updateVocationListThenCombatRollList [ msg ] dicePoolCalculationData model settingData)
 
-        | _ -> updateVocationListThenCombatRollList [ msg ] dicePoolCalculationData model tempSettingData
-    | EquipmentMsg msg ->
-        match msg with
-        | ItemElement.ItemElementListMsgType.Insert(itemName, _) ->
-            (ItemElement.ItemElementListMsgType.Insert(itemName, Some tempSettingData.itemElementSet))
+        | _ -> updateVocationListThenCombatRollList [ msg ] dicePoolCalculationData model settingData
+    | EquipmentMsg(msg, Some settingData) ->
 
-        | ItemElement.ItemElementListMsgType.ModifyItemElement(pos1,
-                                                               ItemElement.ItemElementMsgType.ContainerItemMsg(ItemElement.ContainerItemMsgType.ItemElementListMsg(ItemElement.ItemElementListMsgType.Insert(itemName,
-                                                                                                                                                                                                             _)))) ->
-            (ItemElement.ItemElementListMsgType.ModifyItemElement(
-                pos1,
-                ItemElement.ItemElementMsgType.ContainerItemMsg(
-                    ItemElement.ContainerItemMsgType.ItemElementListMsg(
-                        ItemElement.ItemElementListMsgType.Insert(itemName, Some tempSettingData.itemElementSet)
-                    )
-                )
-            ))
+        let newEquipment = ItemElement.itemElementListUpdate msg model.equipment
 
-        | _ -> msg
-
-        |> (fun msg ->
-            let newEquipment = ItemElement.itemElementListUpdate msg model.equipment
-
-            {
-                model with
-                    equipment = newEquipment
-                    weightClassOption =
-                        WeightClassOption.update
-                            (WeightClassOption.DetermineWeightClass(
-                                model.carryWeightCalculationOption,
-                                tempSettingData.weightClassSet,
-                                model.attributes,
-                                (Skills.update // We recalculate the core skills without the weightClassOption AttributeDeterminedDiceMod since that should only be factored into skill dice pool and not the num dice for determining carry weight
-                                    (Skills.CalculateSkillDicePools(
-                                        characterToDicePoolCalculationDataWithoutWeightClassOptionEffect model
-                                    ))
-                                    model.coreSkills),
-                                newEquipment
-                            ))
-                            model.weightClassOption
-            })
+        {
+            model with
+                equipment = newEquipment
+                weightClassOption =
+                    WeightClassOption.update
+                        (WeightClassOption.DetermineWeightClass(
+                            model.carryWeightCalculationOption,
+                            settingData.weightClassSet,
+                            model.attributes,
+                            (Skills.update // We recalculate the core skills without the weightClassOption AttributeDeterminedDiceMod since that should only be factored into skill dice pool and not the num dice for determining carry weight
+                                (Skills.CalculateSkillDicePools(
+                                    characterToDicePoolCalculationDataWithoutWeightClassOptionEffect model
+                                ))
+                                model.coreSkills),
+                            newEquipment
+                        ))
+                        model.weightClassOption
+        }
         |> newEffectsForCharacter
-        <| tempSettingData
+        <| settingData
 
     // | OffPersonContainerInstanceListMsg msg ->
     //     match msg with
@@ -300,32 +283,25 @@ let update msg (model: Character) tempSettingData =
             characterInformation = CharacterInformation.update msg model.characterInformation
       }
 
-    | EffectListMsg msg ->
-        match msg with
-        | EffectList.Insert(effectName, _) ->
-            EffectList.Insert(effectName, Some(makeEffectDataMap tempSettingData.effectSet))
-        | _ -> msg
-        |> (fun msg -> {
+    | EffectListMsg(msg, Some settingData) ->
+        {
             model with
                 characterEffects = EffectList.update msg model.characterEffects
-        })
+        }
         |> newEffectsForCharacter
-        <| tempSettingData
+        <| settingData
 
     | CombatSpeedsMsg msg ->
         match msg with
-        | CombatSpeeds.Insert(name, _, _, _) ->
-            CombatSpeeds.Insert(
-                name,
-                Some model.coreSkills,
-                Some model.attributes,
-                Some(makeCombatSpeedCalculationMap tempSettingData.combatSpeedCalculationSet)
-            )
+        | CombatSpeeds.Insert(name, _, _, settingDataOption) ->
+            CombatSpeeds.Insert(name, Some model.coreSkills, Some model.attributes, settingDataOption)
         | _ -> msg
         |> (fun msg -> {
             model with
                 combatSpeeds = CombatSpeeds.update msg model.combatSpeeds
         })
+
+    | _ -> model
 
 open Feliz
 open Feliz.Bulma
@@ -353,7 +329,7 @@ let view (model: Character) dispatch tempSettingData =
         |> Bulma.content
 
         Skills.coreSkillsView model.coreSkills (CoreSkillsMsg >> dispatch)
-        |> Attributes.attributesAndCoreSkillsListView model.attributes (AttributesMsg >> dispatch)
+        |> Attributes.attributesAndCoreSkillsListView model.attributes ((fun x -> AttributesMsg(x, None)) >> dispatch)
 
         DestinyPoints.view model.destinyPoints (DestinyPointMsg >> dispatch)
 
@@ -362,7 +338,7 @@ let view (model: Character) dispatch tempSettingData =
             (tempSettingData.magicSystemSet |> Seq.map (fun x -> x.name))
             (tempSettingData.weaponSkillDataSet |> Set.map (fun x -> x.name))
             model.vocationList
-            (VocationListMsg >> dispatch)
+            ((fun msg -> VocationListMsg(msg, None)) >> dispatch)
 
         CombatRollList.view model.combatRollList
 
@@ -382,12 +358,12 @@ let view (model: Character) dispatch tempSettingData =
         |> EffectList.view
             (tempSettingData.effectSet |> Set.map effectToEffectName)
             model.characterEffects
-            (EffectListMsg >> dispatch)
+            ((fun msg -> EffectListMsg(msg, None)) >> dispatch)
 
         ItemElement.equipmentView
             (tempSettingData.itemElementSet |> Set.map itemElementToName)
             model.equipment
-            (EquipmentMsg >> dispatch)
+            ((fun msg -> EquipmentMsg(msg, None)) >> dispatch)
 
         CharacterInformation.view model.characterInformation (CharacterInformationMsg >> dispatch)
     ]
