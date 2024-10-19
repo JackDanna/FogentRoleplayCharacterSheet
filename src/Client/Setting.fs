@@ -84,6 +84,25 @@ let createCharacterMsgWithSettingData settingData (msg: Character.Msg) =
             )
         | _ -> msg
         |> CombatSpeedsMsg
+    | EquipmentMsg msg ->
+        match msg with
+        | ItemElement.ItemElementListMsgType.Insert(itemName, _) ->
+            (ItemElement.ItemElementListMsgType.Insert(itemName, Some settingData.itemElementSet))
+
+        | ItemElement.ItemElementListMsgType.ModifyItemElement(pos1,
+                                                               ItemElement.ItemElementMsgType.ContainerItemMsg(ItemElement.ContainerItemMsgType.ItemElementListMsg(ItemElement.ItemElementListMsgType.Insert(itemName,
+                                                                                                                                                                                                             _)))) ->
+            (ItemElement.ItemElementListMsgType.ModifyItemElement(
+                pos1,
+                ItemElement.ItemElementMsgType.ContainerItemMsg(
+                    ItemElement.ContainerItemMsgType.ItemElementListMsg(
+                        ItemElement.ItemElementListMsgType.Insert(itemName, Some settingData.itemElementSet)
+                    )
+                )
+            ))
+
+        | _ -> msg
+        |> EquipmentMsg
     | _ -> msg
 
 let update userApi (msg: Msg) (model: Setting) =
