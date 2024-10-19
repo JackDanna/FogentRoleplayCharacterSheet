@@ -10,7 +10,6 @@ open Shared
 //open Storage
 //open System
 
-open CsvDatabase
 open LiteDBDatabase
 
 let addNewCharacterApi username settingId = async {
