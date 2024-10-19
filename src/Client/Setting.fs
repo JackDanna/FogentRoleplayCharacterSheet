@@ -73,6 +73,17 @@ let createCharacterMsgWithSettingData settingData (msg: Character.Msg) =
         | _ -> msg
         |> VocationListMsg
     | EffectListMsg(msg, _) -> (msg, Some settingData) |> EffectListMsg
+    | CombatSpeedsMsg msg ->
+        match msg with
+        | CombatSpeeds.Insert(name, coreSkillsOption, attributesOption, _) ->
+            CombatSpeeds.Insert(
+                name,
+                coreSkillsOption,
+                attributesOption,
+                Some(CombatSpeedCalculation.makeCombatSpeedCalculationMap settingData.combatSpeedCalculationSet)
+            )
+        | _ -> msg
+        |> CombatSpeedsMsg
     | _ -> msg
 
 let update userApi (msg: Msg) (model: Setting) =

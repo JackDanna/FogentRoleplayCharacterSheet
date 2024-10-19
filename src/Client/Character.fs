@@ -314,13 +314,8 @@ let update msg (model: Character) tempSettingData =
 
     | CombatSpeedsMsg msg ->
         match msg with
-        | CombatSpeeds.Insert(name, _, _, _) ->
-            CombatSpeeds.Insert(
-                name,
-                Some model.coreSkills,
-                Some model.attributes,
-                Some(makeCombatSpeedCalculationMap tempSettingData.combatSpeedCalculationSet)
-            )
+        | CombatSpeeds.Insert(name, _, _, settingDataOption) ->
+            CombatSpeeds.Insert(name, Some model.coreSkills, Some model.attributes, settingDataOption)
         | _ -> msg
         |> (fun msg -> {
             model with
