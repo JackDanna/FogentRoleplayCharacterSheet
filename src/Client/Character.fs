@@ -155,12 +155,15 @@ let update msg (model: Character) tempSettingData =
                 match msg with
                 | MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg(msg) ->
                     match msg with
-                    | MundaneVocationSkills.InsertMundaneVocationSkill(name, vocationStatLevelOption, _, _) ->
+                    | MundaneVocationSkills.InsertMundaneVocationSkill(name,
+                                                                       vocationStatLevelOption,
+                                                                       _,
+                                                                       weaponSkillDataOption) ->
                         MundaneVocationSkills.InsertMundaneVocationSkill(
                             name,
                             vocationStatLevelOption,
                             Some dicePoolCalculationData,
-                            Some(makeWeaponSkillDataMap tempSettingData.weaponSkillDataSet)
+                            weaponSkillDataOption
                         )
 
                     | MundaneVocationSkills.ModifyMundaneVocationSkillAtPosition(pos2,

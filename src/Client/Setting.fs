@@ -14,6 +14,9 @@ type Msg =
     | UpdatedCharacter of Result<unit, string>
 
 let createCharacterMsgWithSettingData settingData (msg: Character.Msg) =
+    let weaponSkillDataMap =
+        WeaponSkillData.makeWeaponSkillDataMap settingData.weaponSkillDataSet
+
     match msg with
     | AttributesMsg(msg, _) -> AttributesMsg(msg, Some(settingData))
     | VocationListMsg msg ->
@@ -25,6 +28,29 @@ let createCharacterMsgWithSettingData settingData (msg: Character.Msg) =
                 dicePoolCalculationDataOption,
                 Some settingData.magicSystemSet
             )
+        | VocationList.Msg.VocationMsgAtPosition(pos1, msg) ->
+            match msg with
+            | Vocation.MundaneOrMagicVocationExtrasMsg msg ->
+                match msg with
+                | MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg msg ->
+                    match msg with
+                    | MundaneVocationSkills.InsertMundaneVocationSkill(name,
+                                                                       vocationStatLevelOption,
+                                                                       dicePoolCalculationOption,
+                                                                       _) ->
+
+                        MundaneVocationSkills.InsertMundaneVocationSkill(
+                            name,
+                            vocationStatLevelOption,
+                            dicePoolCalculationOption,
+                            Some(weaponSkillDataMap)
+                        )
+                    | _ -> msg
+                    |> MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg
+                | _ -> msg
+                |> Vocation.MundaneOrMagicVocationExtrasMsg
+            | _ -> msg
+            |> (fun msg -> VocationList.VocationMsgAtPosition(pos1, msg))
         | _ -> msg
         |> VocationListMsg
     | _ -> msg
