@@ -22,7 +22,7 @@ let (|UserLoggedIn|_|) =
 
 let init () =
     {
-        login = { userName = ""; password = "" }
+        login = { username = ""; password = "" }
         LoginAttempt = HasNotStartedYet
     },
     Cmd.none
@@ -38,7 +38,7 @@ let update (msg: Msg) (model: Model) =
         {
             model with
                 login = {
-                    userName = username
+                    username = username
                     password = model.login.password
                 }
         },
@@ -48,31 +48,28 @@ let update (msg: Msg) (model: Model) =
         {
             model with
                 login = {
-                    userName = model.login.userName
+                    username = model.login.username
                     password = password
                 }
         },
         Cmd.none
 
     | Login Started ->
-        let nextState = { model with LoginAttempt = InProgress }
-
         let login = async {
-            //let! loginResult = Api.login state.Username state.Password
             let! loginResult = guestApi.login model.login
             return Login(Finished loginResult)
         }
 
         let nextCmd = Cmd.fromAsync login
-        nextState, nextCmd
+        { model with LoginAttempt = InProgress }, nextCmd
 
     | Login(Finished loginResult) ->
-        let nextState = {
+
+        {
             model with
                 LoginAttempt = Resolved loginResult
-        }
-
-        nextState, Cmd.none
+        },
+        Cmd.none
 
 let renderLoginOutcome (loginResult: Deferred<Shared.LoginResult>) =
     match loginResult with
@@ -123,7 +120,7 @@ let centered (children: ReactElement list) =
         prop.children children
     ]
 
-let view (state: Model) (dispatch: Msg -> unit) =
+let view (model: Model) (dispatch: Msg -> unit) =
     layout [
         Html.div [
             prop.className "box"
@@ -149,7 +146,7 @@ let view (state: Model) (dispatch: Msg -> unit) =
                                     prop.className "input"
                                     prop.placeholder "Username"
                                     prop.type'.email
-                                    prop.valueOrDefault state.login.userName
+                                    prop.valueOrDefault model.login.username
                                     prop.onChange (UsernameChanged >> dispatch)
                                 ]
 
@@ -173,7 +170,7 @@ let view (state: Model) (dispatch: Msg -> unit) =
                                     prop.className "input"
                                     prop.placeholder "********"
                                     prop.type'.password
-                                    prop.valueOrDefault state.login.password
+                                    prop.valueOrDefault model.login.password
                                     prop.onChange (PasswordChanged >> dispatch)
                                 ]
                                 Html.span [
@@ -191,7 +188,7 @@ let view (state: Model) (dispatch: Msg -> unit) =
                         Html.button [
                             prop.className [
                                 "button is-info is-fullwidth"
-                                if state.LoginAttempt = InProgress then
+                                if model.LoginAttempt = InProgress then
                                     "is-loading"
                             ]
 
@@ -201,7 +198,7 @@ let view (state: Model) (dispatch: Msg -> unit) =
                     ]
                 ]
 
-                renderLoginOutcome state.LoginAttempt
+                renderLoginOutcome model.LoginAttempt
             ]
         ]
     ]

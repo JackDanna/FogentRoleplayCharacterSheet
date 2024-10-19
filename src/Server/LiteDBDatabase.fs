@@ -5,6 +5,32 @@ open LiteDB.FSharp
 open Shared
 
 open FogentRoleplayLib.Character
+open FogentRoleplayLib.Setting
+
+// let insertEntity (entity: 'T) =
+//     // Since Id is set to 0, inserted entities will be placed according to auto-incrementation
+//     let idEntity = { Id = 0; Entity = entity }
+//     collectionFromDB.Insert(idEntity) |> ignore
+//     idEntity
+
+// let findEntity entity = collectionFromDB.FindById entity.Id
+
+// let insertEntities entities =
+//     entities |> Seq.map (fun entity -> insertEntity entity)
+
+//users.EnsureIndex(fun (u: IdUser) -> u.Entity.userName) |> ignore
+
+
+
+// [<CLIMutable>]
+// type UserCharacterAccess = {
+//     Id: int
+//     UserId: int
+//     SettingId: int
+//     CharacterId: int
+// //AccessGranted: System.DateTime
+// //AccessType: string
+// }
 
 [<AutoOpenAttribute>]
 module LiteDBTypes =
@@ -61,6 +87,7 @@ module LiteDBTypes =
     open FogentRoleplayLib.ItemStack
     open FogentRoleplayLib.Container
     open FogentRoleplayLib.BaseDiceTier
+    open FogentRoleplayLib.Setting
 
     type LiteDB_WeaponResource = {
         name: string
@@ -562,6 +589,7 @@ module LiteDBTypes =
     }
 
     type LiteDB_Character = {
+        id: int
         name: string
         attributes: Attribute seq
         coreSkills: LiteDB_Skill seq
@@ -572,12 +600,12 @@ module LiteDBTypes =
         characterInformation: CharacterInformation
         characterEffects: LiteDB_Effect List
         combatSpeeds: CombatSpeed List
-        settingData: LiteDB_SettingData
         weightClassOption: LiteDB_WeightClass option
         carryWeightCalculationOption: CarryWeightCalculation option
     }
 
     let toCharacter x : Character = {
+        id = x.id
         name = x.name
         attributes = Set.ofSeq x.attributes
         coreSkills = x.coreSkills |> Seq.map toSkill |> Set.ofSeq
@@ -588,7 +616,6 @@ module LiteDBTypes =
         characterInformation = x.characterInformation
         characterEffects = x.characterEffects |> List.map toEffect
         combatSpeeds = x.combatSpeeds
-        settingData = toSettingData x.settingData
         weightClassOption =
             match x.weightClassOption with
             | None -> None
@@ -597,6 +624,7 @@ module LiteDBTypes =
     }
 
     let toLiteDB_Character (x: Character) = {
+        id = x.id
         name = x.name
         attributes = x.attributes
         coreSkills = x.coreSkills |> Seq.map toLiteDB_Skill
@@ -607,7 +635,6 @@ module LiteDBTypes =
         characterInformation = x.characterInformation
         characterEffects = x.characterEffects |> List.map toLiteDB_Effect
         combatSpeeds = x.combatSpeeds
-        settingData = toLiteDB_SettingData x.settingData
         weightClassOption =
             match x.weightClassOption with
             | None -> None
@@ -616,19 +643,27 @@ module LiteDBTypes =
     }
 
     [<CLIMutableAttribute>]
-    type LiteDB_IdCharacter = {
-        Id: int
-        LiteDB_Character: LiteDB_Character
+    type LiteDB_Setting = {
+        id: int
+        name: string
+        characters: LiteDB_Character List // This has to be a List here, that we will never delete from to mimic database insertion
+        SettingData: LiteDB_SettingData
     }
 
-    let toIdCharacter (x: LiteDB_IdCharacter) : IdCharacter = {
-        Id = x.Id
-        Character = toCharacter x.LiteDB_Character
-    }
+    let toSetting (x: LiteDB_Setting) : Setting =
 
-    let toLiteDB_IdCharacter (x: IdCharacter) : LiteDB_IdCharacter = {
-        Id = x.Id
-        LiteDB_Character = toLiteDB_Character x.Character
+        {
+            id = x.id
+            name = x.name
+            characters = x.characters |> Seq.map toCharacter
+            SettingData = x.SettingData |> toSettingData
+        }
+
+    let toLiteDB_Setting (x: Setting) = {
+        id = x.id
+        name = x.name
+        characters = x.characters |> Seq.map toLiteDB_Character |> List.ofSeq
+        SettingData = x.SettingData |> toLiteDB_SettingData
     }
 
 let db =
@@ -638,101 +673,250 @@ let db =
 
 let collectionFromDB<'T> = db.GetCollection<'T>(typeof<'T>.Name)
 
-// let insertEntity (entity: 'T) =
-//     // Since Id is set to 0, inserted entities will be placed according to auto-incrementation
-//     let idEntity = { Id = 0; Entity = entity }
-//     collectionFromDB.Insert(idEntity) |> ignore
-//     idEntity
-
-// let findEntity entity = collectionFromDB.FindById entity.Id
-
-// let insertEntities entities =
-//     entities |> Seq.map (fun entity -> insertEntity entity)
-
 [<CLIMutable>]
 type UserCharacterAccess = {
     Id: int
     UserId: int
+    SettingId: int
     CharacterId: int
-//AccessGranted: System.DateTime
-//AccessType: string
 }
 
-let users = collectionFromDB<IdUser>
-let liteDB_IdCharacters = collectionFromDB<LiteDB_IdCharacter>
+let users: LiteCollection<IdUser> = collectionFromDB<IdUser>
+let liteDB_Settings = collectionFromDB<LiteDB_Setting>
 let userCharacterAccesses = collectionFromDB<UserCharacterAccess>
 
-//users.EnsureIndex(fun (u: IdUser) -> u.Entity.userName) |> ignore
+[<AutoOpenAttribute>]
+module UserCharacterAccessFilters =
 
-let insertNewUser (user: Login) =
-    let idEntity = { Id = 0; Login = user }
-    collectionFromDB.Insert(idEntity) |> ignore
-    idEntity
+    // UCA filter Utils
+    let isUserIdInUca userId uca = uca.UserId = userId
 
-let grantAccess userId characterId =
-    userCharacterAccesses.Insert(
-        {
-            Id = 0
-            UserId = userId
-            CharacterId = characterId
-        //AccessGrantedDate = System.DateTime.UtcNow
-        //AccessType = accessType
-        }
-    )
-    |> ignore
+    let isSettingIdInUca settingId uca = uca.SettingId = settingId
 
-let insertNewCharacter userId (character: Character) =
-    let idCharacter: LiteDB_IdCharacter =
-        character |> createAutoIncrementedIdCharacter |> toLiteDB_IdCharacter
+    let isUserIdAndSettingIdInUca userId settingId uca =
+        (uca.UserId = userId) && (uca.SettingId = settingId)
 
-    liteDB_IdCharacters.Insert(idCharacter) |> ignore
-    grantAccess userId idCharacter.Id
-    idCharacter
+    let filterUcaByUserId userId =
+        // This one is kinda worthless as I would never need to grab all characters without reference to what setting they are in
+        userCharacterAccesses.Find(isUserIdInUca userId)
 
-let userIdToOwnedIdCharacters userId =
-    userCharacterAccesses.Find(fun uca -> uca.UserId = userId)
-    |> Seq.map (fun uca -> liteDB_IdCharacters.FindOne(fun character -> character.Id = uca.CharacterId))
-    |> Seq.map toIdCharacter
+    let filterUcaBySettingId settingId =
+        userCharacterAccesses.Find(isSettingIdInUca settingId)
 
-let getUsersForCharacter characterId =
-    userCharacterAccesses.Find(fun uca -> uca.CharacterId = characterId)
-    |> Seq.map (fun uca -> users.FindOne(fun user -> user.Id = uca.UserId))
+    let filterUcaByUserIdAndSettingId userId settingId =
+        userCharacterAccesses.Find(isUserIdAndSettingIdInUca userId settingId)
 
-let usernameToIdUser (username: Username) =
-    users.Find(fun idUser -> idUser.Login.userName = username) |> Seq.tryHead
+    let filterUcaBySettingIdAndCharacterId settingId characterId =
+        // Even though unused now, could be handy later for grabing all users that have access to a character
+        settingId
+        |> filterUcaBySettingId
+        |> Seq.filter (fun uca -> uca.CharacterId = characterId)
 
-let addNewCharacter settingData username =
+[<AutoOpenAttribute>]
+module LiteDBCollectionTryFinds =
 
-    match usernameToIdUser username with
-    | Some idUser ->
-        settingData
-        |> FogentRoleplayLib.Character.init
-        |> insertNewCharacter idUser.Id
-        |> ignore
+    let tryUsernameToUser (username: Username) =
+        users.Find(fun idUser -> idUser.Login.username = username) |> Seq.tryHead
 
-        userIdToOwnedIdCharacters idUser.Id
-    | None -> Seq.empty
-    |> List.ofSeq
+    let tryFindIdUser userId =
+        if users.Exists((fun user -> user.Id = userId)) then
+            users.FindById(BsonValue(userId)) |> Some
+        else
+            None
 
-let updateIdCharacter username (idCharacterToUpdate: IdCharacter) =
-    username
-    |> usernameToIdUser
-    |> function
-        | None -> ()
-        | Some idUser ->
-            let doesUserOwnCharacter =
-                idUser.Id
-                |> userIdToOwnedIdCharacters
-                |> Seq.exists (fun ownedIdCharacter -> ownedIdCharacter.Id = idCharacterToUpdate.Id)
+    let tryFindSetting liteDB_SettingId =
+        if liteDB_Settings.Exists((fun x -> x.id = liteDB_SettingId)) then
+            liteDB_Settings.FindById(BsonValue(liteDB_SettingId)) |> Some
+        else
+            None
 
-            if doesUserOwnCharacter then
-                liteDB_IdCharacters.Update(toLiteDB_IdCharacter idCharacterToUpdate) |> ignore
+    let tryFindCharacter (characterId: int) (setting: LiteDB_Setting) =
+        setting.characters |> List.tryFind (fun character -> character.id = characterId)
 
-let isValidUserLogin login =
+    let tryFindCharacterWithCharacterIdAndSettingId characterId settingId =
+        settingId
+        |> tryFindSetting
+        |> function
+            | None -> None
+            | Some liteDB_Setting -> tryFindCharacter characterId liteDB_Setting
+
+    let tryPrimativeUca userId settingId characterId =
+        let userOption = tryFindIdUser userId
+
+        let characterOption =
+            tryFindCharacterWithCharacterIdAndSettingId settingId characterId
+
+        match userOption, characterOption with
+        | Some user, Some character -> Some(user, character)
+        | _, _ -> None
+
+    let tryPrimativeUcaToLiteDB_Character userId settingId characterId =
+        match tryPrimativeUca userId settingId characterId with
+        | Some(user, character) -> Some character
+        | None -> None
+
+    let tryUca uca =
+        tryPrimativeUca uca.UserId uca.SettingId uca.CharacterId
+
+    let tryUcaToLiteDB_Character uca =
+        match tryUca uca with
+        | Some(user, character) -> Some character
+        | None -> None
+
+
+    let tryUcaToUser uca =
+        match tryUca uca with
+        | Some(user, character) -> Some user
+        | None -> None
+
+[<AutoOpenAttribute>]
+module UserCharacterAccessUtils =
+
+    let tryUserIdAndSettingIdToOwnedSetting userId settingId =
+
+        settingId
+        |> tryFindSetting
+        |> Option.map (fun liteDB_Setting ->
+
+            let setting = liteDB_Setting |> toSetting
+
+            {
+                setting with
+                    characters =
+                        filterUcaByUserIdAndSettingId userId settingId
+                        |> Seq.choose tryUcaToLiteDB_Character
+                        |> Seq.map toCharacter
+            })
+
+    let userIdToOwnedSettings userId : Setting seq =
+
+        liteDB_Settings.FindAll()
+        |> Seq.choose (fun setting -> tryUserIdAndSettingIdToOwnedSetting userId setting.id)
+
+
+    let settingIdAndCharacterIdToUsers settingId characterId =
+        filterUcaBySettingIdAndCharacterId settingId characterId
+        |> Seq.choose tryUcaToUser
+
+[<AutoOpenAttribute>]
+module LiteDbTryInserts =
+
+    let tryInsertNewUser (user: Login) =
+        try
+            users.Insert({ Id = 0; Login = user }) |> ignore |> Ok
+        with _ ->
+            Error("Failed to insert new user.")
+
+    let tryInsertNewUserCharacterAccess userId settingId characterId =
+        try
+            userCharacterAccesses.Insert(
+                {
+                    Id = 0
+                    UserId = userId
+                    CharacterId = characterId
+                    SettingId = settingId
+                }
+            )
+            |> ignore
+            |> Ok
+        with _ ->
+            Error("Failed to insert new user character access")
+
+    let tryInsertLiteDB_Setting (updatedLiteDB_Setting: LiteDB_Setting) =
+        try
+            liteDB_Settings.Insert(updatedLiteDB_Setting) |> Some
+        with _ ->
+            None
+
+    let tryUpdateLiteDB_Setting (updatedLiteDB_Setting: LiteDB_Setting) =
+        match liteDB_Settings.Update(updatedLiteDB_Setting) with
+        | true -> Some true
+        | false -> None
+
+    let innerInsertNewCharacter userId (settingId: int) =
+
+        // Might wanna replace these with result at some point
+        tryFindSetting settingId
+        |> Option.map (fun liteDB_Setting ->
+            liteDB_Setting.SettingData
+            |> toSettingData
+            |> FogentRoleplayLib.Character.init liteDB_Setting.characters.Length,
+            liteDB_Setting)
+        |> Option.bind (fun (newCharacter, liteDB_Setting) ->
+            {
+                liteDB_Setting with
+                    characters =
+                        newCharacter
+                        |> toLiteDB_Character
+                        |> List.singleton
+                        |> List.append liteDB_Setting.characters
+            }
+            |> tryInsertLiteDB_Setting
+            |> Option.bind (fun _ ->
+                try
+                    tryInsertNewUserCharacterAccess userId liteDB_Setting.id newCharacter.id |> Some
+                with _ ->
+                    None)
+            |> Option.map (fun _ -> newCharacter))
+
+    let insertNewCharacterInSettingForUser username settingId =
+
+        settingId
+        |> tryFindSetting
+        |> Option.map (fun liteDB_Setting ->
+            liteDB_Setting.SettingData
+            |> toSettingData
+            |> FogentRoleplayLib.Character.init liteDB_Setting.characters.Length,
+            liteDB_Setting)
+        |> Option.bind (fun (newCharacter, liteDB_Setting) ->
+            tryUsernameToUser username
+            |> Option.map (fun idUser -> (newCharacter, liteDB_Setting, idUser)))
+        |> Option.bind (fun (newCharacter, liteDB_Setting, idUser) ->
+            {
+                liteDB_Setting with
+                    characters =
+                        newCharacter
+                        |> toLiteDB_Character
+                        |> List.singleton
+                        |> List.append liteDB_Setting.characters
+            }
+            |> tryUpdateLiteDB_Setting
+            |> Option.bind (fun _ ->
+                try
+                    tryInsertNewUserCharacterAccess idUser.Id liteDB_Setting.id newCharacter.id
+                    |> Some
+                with _ ->
+                    None)
+            |> Option.map (fun _ -> newCharacter))
+        |> function
+            | None -> Error("Failed to insert new character in setting.")
+            | Some character -> Ok(character)
+
+[<AutoOpenAttribute>]
+module LiteDbTryUpdates =
+
+    let updateCharacter username settingId (newCharacter: Character) =
+
+        username
+        |> tryUsernameToUser
+        |> Option.bind (fun idUser -> tryPrimativeUcaToLiteDB_Character idUser.Id settingId newCharacter.id)
+        |> Option.bind (fun _ -> settingId |> tryFindSetting)
+        |> Option.map (fun liteDB_Setting -> {
+            liteDB_Setting with
+                characters =
+                    liteDB_Setting.characters
+                    |> List.insertAt newCharacter.id (toLiteDB_Character newCharacter)
+        })
+        |> Option.bind tryInsertLiteDB_Setting
+        |> function
+            | None -> Error("Failed to update character.")
+            | Some _ -> Ok()
+
+let isValidUserLogin (login: Login) =
 
     users.Find(
         Query.And(
-            Query.EQ("Login.userName", BsonValue(login.userName)),
+            Query.EQ("Login.username", BsonValue(login.username)),
             Query.EQ("Login.password", BsonValue(login.password))
         )
     )
@@ -740,5 +924,16 @@ let isValidUserLogin login =
     |> (function
     | Some _ -> true
     | None ->
-        insertNewUser login // TESTING, REMOVE ASAP: This automatically creates a user if it doesn't exists,
+        tryInsertNewUser login // TESTING, REMOVE ASAP: This automatically creates a user if it doesn't exists,
         false)
+
+open FogentRoleplayLib.Setting
+
+// {
+//     SettingData = CsvDatabase.getInitSettingDataFromCSV ()
+//     characters = Seq.empty
+//     id = 0
+//     name = "Fallen"
+// }
+// |> toLiteDB_Setting
+// |> tryInsertLiteDB_Setting

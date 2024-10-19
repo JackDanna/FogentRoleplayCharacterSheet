@@ -5,10 +5,14 @@ open Elmish
 
 open Fable.Remoting.Client
 open Shared
+open FogentRoleplayLib.Character
+open FogentRoleplayLib.Setting
+
 
 type Model = {
     User: Shared.UserData
-    idCharacterList: IdCharacter seq
+    settings: Setting seq
+    selectedSetting: int option
     selectedCharacter: int option
 }
 
@@ -19,87 +23,101 @@ let getUserApi token =
     |> Remoting.buildProxy<IUserApi>
 
 type Msg =
-    | GotNewIdCharacterList of IdCharacter list
-    | SelectCharacter of int
-    | DeleteCharacter of int
-    | AddNewCharacter
-    | CharacterMsg of Character.Msg
-    | UpdatedIdCharacterOnDB of unit
+    | GotSettings of Setting seq
 
-let init (user: Shared.UserData) =
-    let api = getUserApi user.token
+    | SelectSettingAndCharacter of int * int
+    | DeleteCharacter of int
+
+    | CharacterMsg of Character.Msg
+    | SettingListMsg of int * Setting.Msg
+
+let init (user: UserData) =
 
     {
         User = user
-        idCharacterList = []
+        settings = Seq.empty
+        selectedSetting = None
         selectedCharacter = None
     },
-    Cmd.OfAsync.perform api.getIdCharacterList user.username GotNewIdCharacterList
+    Cmd.OfAsync.perform (getUserApi user.token).getOwnedSettingApi user.username GotSettings
 
+let tryFindSetting model settingId =
+    model.settings |> Seq.tryFind (fun setting -> setting.id = settingId)
+
+let tryFindCharacterInSetting model settingId characterId =
+
+    tryFindSetting model settingId
+    |> Option.map (fun setting -> setting.characters)
+    |> Option.bind (Seq.tryFind (fun character -> character.id = characterId))
+
+let handleUpdatedSetting model =
+    function
+    | None -> model, Cmd.none
+    | Some(settingModel, settingCmd) ->
+        {
+            model with
+                settings =
+                    Seq.map
+                        (fun setting ->
+                            if setting.id = settingModel.id then
+                                settingModel
+                            else
+                                setting)
+                        model.settings
+        },
+        Cmd.map (fun settingMsg -> SettingListMsg(settingModel.id, settingMsg)) settingCmd
+
+let temp model =
+    match model.selectedSetting, model.selectedCharacter with
+    | Some settingId, Some characterId -> Some(settingId, characterId)
+    | _, _ -> None
 
 let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
 
     let userApi = getUserApi model.User.token
+    let addNewCharacterApi = (userApi.addNewCharacterApi model.User.username)
 
     match msg with
-    | GotNewIdCharacterList idCharacterList ->
-        {
+    | GotSettings settings -> { model with settings = settings }, Cmd.none
+    | SelectSettingAndCharacter(settingId, characterId) ->
+        tryFindCharacterInSetting model settingId characterId
+        |> Option.map (fun character -> {
             model with
-                idCharacterList = idCharacterList
-        },
+                selectedCharacter = Some character.id
+                selectedSetting = Some settingId
+        })
+        |> Option.defaultValue model,
         Cmd.none
-    | SelectCharacter index ->
-        if Seq.tryFind (fun x -> x.Id = index) model.idCharacterList |> Option.isSome then
-            {
-                model with
-                    selectedCharacter = Some index
-            },
-            Cmd.none
-        else
-            model, Cmd.none
 
     | DeleteCharacter id ->
         {
             model with
-                idCharacterList = Seq.filter (fun idCharacter -> idCharacter.Id <> id) model.idCharacterList
+                settings = Seq.filter (fun idCharacter -> idCharacter.id <> id) model.settings
         },
         // Need to add deletion in the database
         Cmd.none
 
-    | AddNewCharacter -> model, Cmd.OfAsync.perform userApi.addNewCharacter model.User.username GotNewIdCharacterList
 
-    | CharacterMsg msg ->
-        match model.selectedCharacter with
-        | None -> model, Cmd.none
-        | Some index ->
+    | CharacterMsg characterMsg ->
 
-            model.idCharacterList
-            |> Seq.tryFind (fun x -> x.Id = index)
-            |> function
-                | None -> model, Cmd.none
-                | Some idCharacter ->
-                    let updatedIdCharacter = {
-                        idCharacter with
-                            Character = Character.update msg idCharacter.Character
-                    }
+        temp model
+        |> Option.bind (fun (settingId, characterId) ->
 
-                    {
-                        model with
-                            idCharacterList =
-                                Seq.map
-                                    (fun x ->
-                                        if x.Id = updatedIdCharacter.Id then
-                                            updatedIdCharacter
-                                        else
-                                            x)
-                                    model.idCharacterList
-                    },
-                    Cmd.OfAsync.perform
-                        (userApi.updateIdCharacter model.User.username)
-                        updatedIdCharacter
-                        UpdatedIdCharacterOnDB
+            tryFindSetting model settingId
+            |> Option.map (fun setting ->
+                let preloadedAPI = userApi.updateCharacterApi model.User.username setting.id
 
-    | UpdatedIdCharacterOnDB _ -> model, Cmd.none
+                Setting.update
+                    addNewCharacterApi
+                    (Setting.CharacterListMsg(characterMsg, characterId, Some preloadedAPI))
+                    setting))
+        |> handleUpdatedSetting model
+
+    | SettingListMsg(settingId, settingMsg) ->
+        settingId
+        |> tryFindSetting model
+        |> Option.map (Setting.update addNewCharacterApi settingMsg)
+        |> handleUpdatedSetting model
 
 open Feliz
 open Feliz.Bulma
@@ -132,35 +150,26 @@ let view (model: Model) dispatch =
             Bulma.heroBody [
 
                 Bulma.container [
+                    model.settings
+                    |> Seq.map (fun setting ->
+                        Setting.view
+                            setting
+                            ((fun msg -> SettingListMsg(setting.id, msg)) >> dispatch)
+                            (fun settingId characterId -> dispatch (SelectSettingAndCharacter(settingId, characterId))))
+                    |> Bulma.container
 
-                    Bulma.container (
-                        Seq.map
-                            (fun idCharacter ->
-                                Bulma.container [
-                                    Html.text idCharacter.Character.name
-                                    Html.button [
-                                        prop.onClick (fun _ -> dispatch (SelectCharacter idCharacter.Id))
-                                        prop.text "Select"
-                                    ]
-                                ])
-                            model.idCharacterList
-                        |> Seq.append [
-                            Html.button [
-                                prop.onClick (fun _ -> (dispatch (AddNewCharacter)))
-                                prop.text "Add New Character"
-                            ]
-                        ]
-                    )
-
-                    match model.selectedCharacter with
-                    | Some index ->
-                        Character.view
-                            (Seq.find (fun (idCharacter: IdCharacter) -> idCharacter.Id = index) model.idCharacterList)
-                                .Character
-                            (CharacterMsg >> dispatch)
-                    | None -> Html.none
+                    model
+                    |> temp
+                    |> Option.bind (fun (selectedSettingId, selectedCharacterId) ->
+                        Option.map2
+                            (fun setting character -> (setting.SettingData, character))
+                            (tryFindSetting model selectedSettingId)
+                            (tryFindCharacterInSetting model selectedSettingId selectedCharacterId))
+                    |> function
+                        | None -> Html.none
+                        | Some(settingData, character) ->
+                            Character.view character (CharacterMsg >> dispatch) settingData
                 ]
-
             ]
         ]
     ]

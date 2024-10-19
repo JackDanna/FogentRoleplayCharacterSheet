@@ -43,6 +43,7 @@
     <None Include="tailwind.config.js" />
     <None Include="index.html" />
     <None Include="paket.references" />
+    <Compile Include="Setting.fs" />
     <Compile Include="Extensions.fs" />
     <Compile Include="Overview.fs" />
     <Compile Include="Login.fs" />

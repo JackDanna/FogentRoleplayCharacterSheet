@@ -1,12 +1,16 @@
 Todo:
 
-Add know vocation skills so that baseDiceTierMods can be created for them
+Figure out why characters aren't being stored on the database after the last refacor
+
+Extract setting data out of Character into Setting
 
 Add Spells for character sheet
 
 Added effects to 
 
 Maybes:
+
+(Doesn't this already work?) Add know vocation skills so that baseDiceTierMods can be created for them
 
 Combat Rolls can consume muliple weapon resources
 

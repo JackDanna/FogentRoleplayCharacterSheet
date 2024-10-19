@@ -1137,13 +1137,6 @@ module Effect =
 
     let effectsToWeaponList = List.choose effectToWeaponOption
 
-    let effectToNonBaseDiceModEffects effects =
-        effects
-        |> List.filter (fun effect ->
-            match effect with
-            | BaseDiceMod _ -> false
-            | _ -> true)
-
     let effectToTextEffect (effect: Effect) =
         match effect with
         | Weapon weapon -> weaponToTextEffect weapon
@@ -2097,6 +2090,7 @@ module Character =
     open CoreSkillData
 
     type Character = {
+        id: int
         name: string
         attributes: Attribute Set
         coreSkills: Skill Set
@@ -2107,12 +2101,11 @@ module Character =
         characterInformation: CharacterInformation
         characterEffects: Effect List
         combatSpeeds: CombatSpeed List
-        settingData: SettingData
         weightClassOption: WeightClass option
         carryWeightCalculationOption: CarryWeightCalculation option
     }
 
-    let init (settingData: SettingData) =
+    let init characterId (settingData: SettingData) =
         let attributes =
             Set.map (fun x -> Attribute.init x.attributeName) settingData.coreSkillDataSet
 
@@ -2134,6 +2127,7 @@ module Character =
             | None -> None
 
         {
+            id = characterId
             name = ""
             attributes = attributes
             coreSkills = coreSkills
@@ -2144,7 +2138,6 @@ module Character =
             characterInformation = CharacterInformation.init ()
             characterEffects = effects
             combatSpeeds = ListUtils.init ()
-            settingData = settingData
             weightClassOption =
                 WeightClass.init carryWeightCalculationOption settingData.weightClassSet attributes coreSkills equipment
             carryWeightCalculationOption = carryWeightCalculationOption
@@ -2170,3 +2163,21 @@ module Character =
                         ]
                       | None -> []
         })
+
+module Setting =
+    open SettingData
+    open Character
+
+    type Setting = {
+        id: int
+        name: string
+        characters: Character seq
+        SettingData: SettingData
+    }
+
+    let init id name characters settingData = {
+        id = id
+        name = name
+        characters = characters
+        SettingData = settingData
+    }
