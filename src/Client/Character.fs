@@ -128,7 +128,7 @@ let update msg (model: Character) tempSettingData =
     | VocationListMsg(msg: VocationList.Msg) ->
 
         match msg with
-        | InsertVocation(vocationName, _, _, _) -> {
+        | InsertVocation(vocationName, _, _, magicSystemsOption) -> {
             model with
                 vocationList =
                     VocationList.update
@@ -136,7 +136,7 @@ let update msg (model: Character) tempSettingData =
                             vocationName,
                             Some(coreSkillToMap model.coreSkills),
                             Some dicePoolCalculationData,
-                            Some tempSettingData.magicSystemSet
+                            magicSystemsOption
                         ))
                         model.vocationList
           }

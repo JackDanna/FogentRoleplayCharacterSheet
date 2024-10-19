@@ -16,6 +16,17 @@ type Msg =
 let createCharacterMsgWithSettingData settingData (msg: Character.Msg) =
     match msg with
     | AttributesMsg(msg, _) -> AttributesMsg(msg, Some(settingData))
+    | VocationListMsg msg ->
+        match msg with
+        | VocationList.Msg.InsertVocation(vocationName, skillMapOption, dicePoolCalculationDataOption, _) ->
+            VocationList.Msg.InsertVocation(
+                vocationName,
+                skillMapOption,
+                dicePoolCalculationDataOption,
+                Some settingData.magicSystemSet
+            )
+        | _ -> msg
+        |> VocationListMsg
     | _ -> msg
 
 let update userApi (msg: Msg) (model: Setting) =
