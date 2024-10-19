@@ -733,7 +733,7 @@ module LiteDBCollectionTryFinds =
     let tryFindCharacter (characterId: int) (setting: LiteDB_Setting) =
         setting.characters |> List.tryFind (fun character -> character.id = characterId)
 
-    let tryFindCharacterWithCharacterIdAndSettingId characterId settingId =
+    let tryFindCharacterWithCharacterIdAndSettingId settingId characterId =
         settingId
         |> tryFindSetting
         |> function
