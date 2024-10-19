@@ -19,7 +19,7 @@ let createCharacterMsgWithSettingData settingData (msg: Character.Msg) =
 
     match msg with
     | AttributesMsg(msg, _) -> AttributesMsg(msg, Some(settingData))
-    | VocationListMsg msg ->
+    | VocationListMsg(msg, _) ->
         match msg with
         | VocationList.Msg.InsertVocation(vocationName, skillMapOption, dicePoolCalculationDataOption, _) ->
             VocationList.Msg.InsertVocation(
@@ -71,7 +71,7 @@ let createCharacterMsgWithSettingData settingData (msg: Character.Msg) =
             | _ -> msg
             |> (fun msg -> VocationList.VocationMsgAtPosition(pos1, msg))
         | _ -> msg
-        |> VocationListMsg
+        |> (fun msg -> VocationListMsg(msg, Some settingData))
     | EffectListMsg(msg, _) -> (msg, Some settingData) |> EffectListMsg
     | CombatSpeedsMsg msg ->
         match msg with

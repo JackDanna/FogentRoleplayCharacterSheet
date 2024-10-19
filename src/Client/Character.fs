@@ -15,7 +15,7 @@ type Msg =
     | AttributesMsg of Attributes.Msg * Option<SettingData>
     | CoreSkillsMsg of Skills.Msg
     | DestinyPointMsg of DestinyPoints.Msg
-    | VocationListMsg of VocationList.Msg
+    | VocationListMsg of VocationList.Msg * Option<SettingData>
     | EquipmentMsg of ItemElement.ItemElementListMsgType * Option<SettingData>
     | CharacterInformationMsg of CharacterInformation.Msg
     | EffectListMsg of EffectList.Msg * Option<SettingData>
@@ -125,7 +125,7 @@ let update msg (model: Character) tempSettingData =
             destinyPoints = DestinyPoints.update msg model.destinyPoints
       }
 
-    | VocationListMsg(msg: VocationList.Msg) ->
+    | VocationListMsg(msg, Some settingData) ->
 
         match msg with
         | InsertVocation(vocationName, _, _, magicSystemsOption) -> {
@@ -233,9 +233,9 @@ let update msg (model: Character) tempSettingData =
 
             | _ -> msg
             |> (fun msg -> VocationMsgAtPosition(pos1, msg))
-            |> (fun msg -> updateVocationListThenCombatRollList [ msg ] dicePoolCalculationData model tempSettingData)
+            |> (fun msg -> updateVocationListThenCombatRollList [ msg ] dicePoolCalculationData model settingData)
 
-        | _ -> updateVocationListThenCombatRollList [ msg ] dicePoolCalculationData model tempSettingData
+        | _ -> updateVocationListThenCombatRollList [ msg ] dicePoolCalculationData model settingData
     | EquipmentMsg(msg, settingDataOption) ->
         match settingDataOption with
         | None -> model
@@ -344,7 +344,7 @@ let view (model: Character) dispatch tempSettingData =
             (tempSettingData.magicSystemSet |> Seq.map (fun x -> x.name))
             (tempSettingData.weaponSkillDataSet |> Set.map (fun x -> x.name))
             model.vocationList
-            (VocationListMsg >> dispatch)
+            ((fun msg -> VocationListMsg(msg, None)) >> dispatch)
 
         CombatRollList.view model.combatRollList
 
