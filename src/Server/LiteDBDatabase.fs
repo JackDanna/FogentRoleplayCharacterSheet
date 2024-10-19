@@ -905,9 +905,9 @@ module LiteDbTryUpdates =
             liteDB_Setting with
                 characters =
                     liteDB_Setting.characters
-                    |> List.insertAt newCharacter.id (toLiteDB_Character newCharacter)
+                    |> List.updateAt newCharacter.id (toLiteDB_Character newCharacter)
         })
-        |> Option.bind tryInsertLiteDB_Setting
+        |> Option.bind tryUpdateLiteDB_Setting
         |> function
             | None -> Error("Failed to update character.")
             | Some _ -> Ok()
