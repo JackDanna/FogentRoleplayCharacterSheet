@@ -13,6 +13,11 @@ type Msg =
     | CharacterListMsg of Character.Msg * int * Option<Character -> Async<Result<unit, string>>>
     | UpdatedCharacter of Result<unit, string>
 
+let createCharacterMsgWithSettingData settingData (msg: Character.Msg) =
+    match msg with
+    | AttributesMsg(msg, _) -> AttributesMsg(msg, Some(settingData))
+    | _ -> msg
+
 let update userApi (msg: Msg) (model: Setting) =
 
     match msg with
@@ -34,7 +39,12 @@ let update userApi (msg: Msg) (model: Setting) =
         |> function
             | None -> model, Cmd.none
             | Some character ->
-                let updatedCharacter = Character.update msg character model.SettingData
+
+                let updatedCharacter =
+                    Character.update
+                        (createCharacterMsgWithSettingData model.SettingData msg)
+                        character
+                        model.SettingData
 
                 {
                     model with

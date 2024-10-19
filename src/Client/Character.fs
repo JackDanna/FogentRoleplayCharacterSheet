@@ -12,7 +12,7 @@ open CombatSpeedCalculation
 
 type Msg =
     | SetName of string
-    | AttributesMsg of Attributes.Msg
+    | AttributesMsg of Attributes.Msg * Option<SettingData>
     | CoreSkillsMsg of Skills.Msg
     | DestinyPointMsg of DestinyPoints.Msg
     | VocationListMsg of VocationList.Msg
@@ -84,15 +84,13 @@ let update msg (model: Character) tempSettingData =
     match msg with
     | SetName newName -> { model with name = newName }
 
-    | AttributesMsg msg ->
-        {
-            model with
-                attributes = Attributes.update msg model.attributes
-        }
-        |> newEffectsForCharacter
-        <| tempSettingData
-
-
+    | AttributesMsg(msg, Some settingData) ->
+        newEffectsForCharacter
+            {
+                model with
+                    attributes = Attributes.update msg model.attributes
+            }
+            settingData
 
     | CoreSkillsMsg msg ->
         match msg with
@@ -327,6 +325,8 @@ let update msg (model: Character) tempSettingData =
                 combatSpeeds = CombatSpeeds.update msg model.combatSpeeds
         })
 
+    | _ -> model
+
 open Feliz
 open Feliz.Bulma
 
@@ -353,7 +353,7 @@ let view (model: Character) dispatch tempSettingData =
         |> Bulma.content
 
         Skills.coreSkillsView model.coreSkills (CoreSkillsMsg >> dispatch)
-        |> Attributes.attributesAndCoreSkillsListView model.attributes (AttributesMsg >> dispatch)
+        |> Attributes.attributesAndCoreSkillsListView model.attributes ((fun x -> AttributesMsg(x, None)) >> dispatch)
 
         DestinyPoints.view model.destinyPoints (DestinyPointMsg >> dispatch)
 
