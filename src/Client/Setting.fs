@@ -88,7 +88,6 @@ let createCharacterMsgWithSettingData settingData (msg: Character.Msg) =
         match msg with
         | ItemElement.ItemElementListMsgType.Insert(itemName, _) ->
             (ItemElement.ItemElementListMsgType.Insert(itemName, Some settingData.itemElementSet))
-
         | ItemElement.ItemElementListMsgType.ModifyItemElement(pos1,
                                                                ItemElement.ItemElementMsgType.ContainerItemMsg(ItemElement.ContainerItemMsgType.ItemElementListMsg(ItemElement.ItemElementListMsgType.Insert(itemName,
                                                                                                                                                                                                              _)))) ->
@@ -100,7 +99,6 @@ let createCharacterMsgWithSettingData settingData (msg: Character.Msg) =
                     )
                 )
             ))
-
         | _ -> msg
         |> (fun msg -> EquipmentMsg(msg, Some settingData))
     | _ -> msg
