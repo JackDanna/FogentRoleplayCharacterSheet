@@ -126,10 +126,7 @@ let update userApi (msg: Msg) (model: Setting) =
             | Some character ->
 
                 let updatedCharacter =
-                    Character.update
-                        (createCharacterMsgWithSettingData model.SettingData msg)
-                        character
-                        model.SettingData
+                    Character.update (createCharacterMsgWithSettingData model.SettingData msg) character
 
                 {
                     model with

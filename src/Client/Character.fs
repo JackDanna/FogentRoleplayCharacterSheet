@@ -77,7 +77,7 @@ let newEffectsForCharacter character settingData =
     <| settingData
 
 
-let update msg (model: Character) tempSettingData =
+let update msg (model: Character) =
 
     let dicePoolCalculationData = characterToDicePoolCalculationData model
 
