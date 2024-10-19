@@ -74,7 +74,8 @@ let createCharacterMsgWithSettingData settingData (msg: Character.Msg) =
         |> (fun msg -> VocationListMsg(msg, Some settingData))
     | EffectListMsg(msg: EffectList.Msg, _) ->
         match msg with
-        | EffectList.Msg.Insert(name, _) -> EffectList.Insert(name, Some(Effect))
+        | EffectList.Msg.Insert(name, _) ->
+            EffectList.Insert(name, Some(Effect.makeEffectDataMap settingData.effectSet))
         | _ -> msg
         |> (fun msg -> EffectListMsg(msg, Some settingData))
     | CombatSpeedsMsg msg ->
