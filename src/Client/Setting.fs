@@ -84,7 +84,7 @@ let createCharacterMsgWithSettingData settingData (msg: Character.Msg) =
             )
         | _ -> msg
         |> CombatSpeedsMsg
-    | EquipmentMsg msg ->
+    | EquipmentMsg(msg, _) ->
         match msg with
         | ItemElement.ItemElementListMsgType.Insert(itemName, _) ->
             (ItemElement.ItemElementListMsgType.Insert(itemName, Some settingData.itemElementSet))
@@ -102,7 +102,7 @@ let createCharacterMsgWithSettingData settingData (msg: Character.Msg) =
             ))
 
         | _ -> msg
-        |> EquipmentMsg
+        |> (fun msg -> EquipmentMsg(msg, Some settingData))
     | _ -> msg
 
 let update userApi (msg: Msg) (model: Setting) =

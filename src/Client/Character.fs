@@ -16,7 +16,7 @@ type Msg =
     | CoreSkillsMsg of Skills.Msg
     | DestinyPointMsg of DestinyPoints.Msg
     | VocationListMsg of VocationList.Msg
-    | EquipmentMsg of ItemElement.ItemElementListMsgType
+    | EquipmentMsg of ItemElement.ItemElementListMsgType * Option<SettingData>
     | CharacterInformationMsg of CharacterInformation.Msg
     | EffectListMsg of EffectList.Msg * Option<SettingData>
     | CombatSpeedsMsg of CombatSpeeds.Msg
@@ -236,30 +236,33 @@ let update msg (model: Character) tempSettingData =
             |> (fun msg -> updateVocationListThenCombatRollList [ msg ] dicePoolCalculationData model tempSettingData)
 
         | _ -> updateVocationListThenCombatRollList [ msg ] dicePoolCalculationData model tempSettingData
-    | EquipmentMsg msg ->
+    | EquipmentMsg(msg, settingDataOption) ->
+        match settingDataOption with
+        | None -> model
+        | Some settingData ->
 
-        let newEquipment = ItemElement.itemElementListUpdate msg model.equipment
+            let newEquipment = ItemElement.itemElementListUpdate msg model.equipment
 
-        {
-            model with
-                equipment = newEquipment
-                weightClassOption =
-                    WeightClassOption.update
-                        (WeightClassOption.DetermineWeightClass(
-                            model.carryWeightCalculationOption,
-                            tempSettingData.weightClassSet,
-                            model.attributes,
-                            (Skills.update // We recalculate the core skills without the weightClassOption AttributeDeterminedDiceMod since that should only be factored into skill dice pool and not the num dice for determining carry weight
-                                (Skills.CalculateSkillDicePools(
-                                    characterToDicePoolCalculationDataWithoutWeightClassOptionEffect model
-                                ))
-                                model.coreSkills),
-                            newEquipment
-                        ))
-                        model.weightClassOption
-        }
-        |> newEffectsForCharacter
-        <| tempSettingData
+            {
+                model with
+                    equipment = newEquipment
+                    weightClassOption =
+                        WeightClassOption.update
+                            (WeightClassOption.DetermineWeightClass(
+                                model.carryWeightCalculationOption,
+                                settingData.weightClassSet,
+                                model.attributes,
+                                (Skills.update // We recalculate the core skills without the weightClassOption AttributeDeterminedDiceMod since that should only be factored into skill dice pool and not the num dice for determining carry weight
+                                    (Skills.CalculateSkillDicePools(
+                                        characterToDicePoolCalculationDataWithoutWeightClassOptionEffect model
+                                    ))
+                                    model.coreSkills),
+                                newEquipment
+                            ))
+                            model.weightClassOption
+            }
+            |> newEffectsForCharacter
+            <| settingData
 
     // | OffPersonContainerInstanceListMsg msg ->
     //     match msg with
@@ -366,7 +369,7 @@ let view (model: Character) dispatch tempSettingData =
         ItemElement.equipmentView
             (tempSettingData.itemElementSet |> Set.map itemElementToName)
             model.equipment
-            (EquipmentMsg >> dispatch)
+            ((fun msg -> EquipmentMsg(msg, None)) >> dispatch)
 
         CharacterInformation.view model.characterInformation (CharacterInformationMsg >> dispatch)
     ]
