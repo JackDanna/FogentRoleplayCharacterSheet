@@ -185,17 +185,17 @@ let update msg (model: Character) tempSettingData =
                     match msg with
                     | MagicVocationSkills.InsertMagicVocationSkill(name,
                                                                    vocationStatLevelOption,
+                                                                   attributeNameSetOption,
                                                                    _,
-                                                                   _,
-                                                                   _,
+                                                                   weaponSkillDataMapOption,
                                                                    magicSkillDataMapOption) ->
 
                         MagicVocationSkills.InsertMagicVocationSkill(
                             name,
                             vocationStatLevelOption,
-                            Some tempSettingData.attributeNameSet,
+                            attributeNameSetOption,
                             Some dicePoolCalculationData,
-                            Some(makeWeaponSkillDataMap tempSettingData.weaponSkillDataSet),
+                            weaponSkillDataMapOption,
                             magicSkillDataMapOption
                         )
 

@@ -47,6 +47,25 @@ let createCharacterMsgWithSettingData settingData (msg: Character.Msg) =
                         )
                     | _ -> msg
                     |> MundaneOrMagicVocationExtras.MundaneVocationSkillsMsg
+                | MundaneOrMagicVocationExtras.MagicVocationExtrasMsg(MagicVocationExtras.MagicVocationSkillsMsg msg) ->
+                    match msg with
+                    | MagicVocationSkills.InsertMagicVocationSkill(name,
+                                                                   vocationStatLevelOption,
+                                                                   _,
+                                                                   dicePoolCalculationDataOption,
+                                                                   _,
+                                                                   magicSkillDataMapOption) ->
+                        MagicVocationSkills.InsertMagicVocationSkill(
+                            name,
+                            vocationStatLevelOption,
+                            Some settingData.attributeNameSet,
+                            dicePoolCalculationDataOption,
+                            Some(weaponSkillDataMap),
+                            magicSkillDataMapOption
+                        )
+                    | _ -> msg
+                    |> MagicVocationExtras.MagicVocationSkillsMsg
+                    |> MundaneOrMagicVocationExtras.MagicVocationExtrasMsg
                 | _ -> msg
                 |> Vocation.MundaneOrMagicVocationExtrasMsg
             | _ -> msg
