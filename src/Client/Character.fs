@@ -306,7 +306,7 @@ let update msg (model: Character) =
 open Feliz
 open Feliz.Bulma
 
-let view (model: Character) dispatch tempSettingData =
+let view (model: Character) dispatch settingData =
 
     Bulma.container [
 
@@ -334,16 +334,16 @@ let view (model: Character) dispatch tempSettingData =
         DestinyPoints.view model.destinyPoints (DestinyPointMsg >> dispatch)
 
         VocationList.view
-            tempSettingData.attributeNameSet
-            (tempSettingData.magicSystemSet |> Seq.map (fun x -> x.name))
-            (tempSettingData.weaponSkillDataSet |> Set.map (fun x -> x.name))
+            settingData.attributeNameSet
+            (settingData.magicSystemSet |> Seq.map (fun x -> x.name))
+            (settingData.weaponSkillDataSet |> Set.map (fun x -> x.name))
             model.vocationList
             ((fun msg -> VocationListMsg(msg, None)) >> dispatch)
 
         CombatRollList.view model.combatRollList
 
         CombatSpeeds.view
-            (tempSettingData.combatSpeedCalculationSet |> Set.map (fun x -> x.name))
+            (settingData.combatSpeedCalculationSet |> Set.map (fun x -> x.name))
             model.combatSpeeds
             (CombatSpeedsMsg >> dispatch)
 
@@ -356,12 +356,12 @@ let view (model: Character) dispatch tempSettingData =
         | None -> []
 
         |> EffectList.view
-            (tempSettingData.effectSet |> Set.map effectToEffectName)
+            (settingData.effectSet |> Set.map effectToEffectName)
             model.characterEffects
             ((fun msg -> EffectListMsg(msg, None)) >> dispatch)
 
         ItemElement.equipmentView
-            (tempSettingData.itemElementSet |> Set.map itemElementToName)
+            (settingData.itemElementSet |> Set.map itemElementToName)
             model.equipment
             ((fun msg -> EquipmentMsg(msg, None)) >> dispatch)
 
