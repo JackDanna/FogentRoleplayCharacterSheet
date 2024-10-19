@@ -50,34 +50,36 @@ let updateVocationListThenCombatRollList msgs dicePoolCalculation model tempSett
                 )
     }
 
+let newEffectsForCharacter character settingData =
+    let newDicePoolCalculationData = characterToDicePoolCalculationData character
+
+    let newCoreSkills =
+        Skills.update (Skills.CalculateSkillDicePools newDicePoolCalculationData) character.coreSkills
+
+    {
+        character with
+            coreSkills = newCoreSkills
+            combatSpeeds =
+                CombatSpeeds.update
+                    (CombatSpeeds.RecalculateAllCombatSpeeds(newCoreSkills, character.attributes))
+                    character.combatSpeeds
+    }
+    |> updateVocationListThenCombatRollList
+        [
+            (VocationList.CalculateDicePools newDicePoolCalculationData)
+            (VocationList.VocationMsgForAll(
+                MundaneOrMagicVocationExtrasMsg(
+                    MundaneOrMagicVocationExtras.RecalculateCoreSkillResourcePool(coreSkillToMap newCoreSkills)
+                )
+            ))
+        ]
+        newDicePoolCalculationData
+    <| settingData
+
+
 let update msg (model: Character) tempSettingData =
 
     let dicePoolCalculationData = characterToDicePoolCalculationData model
-
-    let newEffectsForCharacter character =
-        let newDicePoolCalculationData = characterToDicePoolCalculationData character
-
-        let newCoreSkills =
-            Skills.update (Skills.CalculateSkillDicePools newDicePoolCalculationData) character.coreSkills
-
-        {
-            character with
-                coreSkills = newCoreSkills
-                combatSpeeds =
-                    CombatSpeeds.update
-                        (CombatSpeeds.RecalculateAllCombatSpeeds(newCoreSkills, character.attributes))
-                        character.combatSpeeds
-        }
-        |> updateVocationListThenCombatRollList
-            [
-                (VocationList.CalculateDicePools newDicePoolCalculationData)
-                (VocationList.VocationMsgForAll(
-                    MundaneOrMagicVocationExtrasMsg(
-                        MundaneOrMagicVocationExtras.RecalculateCoreSkillResourcePool(coreSkillToMap newCoreSkills)
-                    )
-                ))
-            ]
-            newDicePoolCalculationData
 
     match msg with
     | SetName newName -> { model with name = newName }
