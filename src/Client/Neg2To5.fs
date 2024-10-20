@@ -14,10 +14,12 @@ let update (msg: Msg) (model: Neg2To5) =
         | None -> model
 
 open Feliz
-open Feliz.Bulma
+open Feliz.DaisyUI
 
 let view model dispatch =
-    Bulma.input.number [
+
+    Html.input [
+        prop.type' "number"
         prop.max (neg2To5ToInt Five)
         prop.min (neg2To5ToInt NegTwo)
         prop.value (neg2To5ToInt model)
