@@ -1,8 +1,25 @@
-# SAFE Template
+# Fogent Roleplay Character Sheet
 
-This template can be used to generate a full-stack web application using the [SAFE Stack](https://safe-stack.github.io/). It was created using the dotnet [SAFE Template](https://safe-stack.github.io/docs/template-overview/). If you want to learn more about the template why not start with the [quick start](https://safe-stack.github.io/docs/quickstart/) guide?
+This is a application for managing Fogent Roleplay Characters. It was built from the [SAFE Stack](https://safe-stack.github.io/). It was created using the dotnet [SAFE Template](https://safe-stack.github.io/docs/template-overview/). If you want to learn more about the template why not start with the [quick start](https://safe-stack.github.io/docs/quickstart/) guide?
 
-## Install pre-requisites
+## Part 1: Installing pre-requisites:
+
+### Option A: Install pre-requisites with flake.nix
+
+You'll need to install/enable the following pre-requisites in order to build the app.
+
+- Install [Nix](https://nixos.org/)
+    - Enable [Flakes](https://nixos.wiki/wiki/Flakes)
+
+Enter this repositories directory and run the following on the command line:
+
+```bash
+nix run
+```
+
+This will install all dependencies and development tools. You'll then be droped into a vscode enviroment with all the recommend F# plugins installed.
+
+### Option B: Install pre-requisites manually
 
 You'll need to install the following pre-requisites in order to build SAFE applications
 
@@ -10,7 +27,13 @@ You'll need to install the following pre-requisites in order to build SAFE appli
 * [Node 18](https://nodejs.org/en/download/) or higher
 * [NPM 9](https://www.npmjs.com/package/npm) or higher
 
-## Starting the application
+## Part 2: Starting the application
+
+The application uses the [FogentRoleplayData](https://github.com/JackDanna/FogentRoleplayData) repository as a git submodule, which contains .csv files with all the data on the settings it supports. Run the following command to pull it down.
+
+```bash
+git submodule update --recursive --remote
+```
 
 Before you run the project **for the first time only** you must install dotnet "local tools" with this command:
 
