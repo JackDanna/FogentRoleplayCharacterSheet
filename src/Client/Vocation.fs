@@ -24,31 +24,30 @@ let init vocationName coreSkillMap dicePoolCalculationData (magicSystemMap: Map<
 
 let update (msg: Msg) (model: Vocation) =
 
-    let temp =
-        (fun msg ->
-            let newVocationStat = VocationStat.update msg model.vocationStat
+    let updateVocationStatThenRecalculateVocationResourcePool msg =
+        let newVocationStat = VocationStat.update msg model.vocationStat
 
-            {
-                vocationStat = newVocationStat
-                mundaneOrMagicVocationExtras =
-                    MundaneOrMagicVocationExtras.update
-                        (MundaneOrMagicVocationExtras.RecalculateVocationResourcePool(
-                            newVocationStat.level,
-                            newVocationStat.dicePool
-                        ))
-                        model.mundaneOrMagicVocationExtras
-            })
+        {
+            vocationStat = newVocationStat
+            mundaneOrMagicVocationExtras =
+                MundaneOrMagicVocationExtras.update
+                    (MundaneOrMagicVocationExtras.RecalculateVocationResourcePool(
+                        newVocationStat.level,
+                        newVocationStat.dicePool
+                    ))
+                    model.mundaneOrMagicVocationExtras
+        }
 
     match msg with
     | VocationStatMsg(msg) ->
         match msg with
         | VocationStat.ToggleGoveringAttribute(attributeName, dicePoolCalculationDataOption) ->
             (VocationStat.ToggleGoveringAttribute(attributeName, dicePoolCalculationDataOption))
-            |> temp
+            |> updateVocationStatThenRecalculateVocationResourcePool
 
         | VocationStat.ZeroToFiveMsg(msg, Some dicePoolCalculationData) ->
             (VocationStat.ZeroToFiveMsg(msg, Some dicePoolCalculationData))
-            |> temp
+            |> updateVocationStatThenRecalculateVocationResourcePool
             |> (fun vocation -> {
                 vocation with
                     mundaneOrMagicVocationExtras =
@@ -67,7 +66,7 @@ let update (msg: Msg) (model: Vocation) =
                         )
             })
 
-        | _ -> temp msg
+        | _ -> updateVocationStatThenRecalculateVocationResourcePool msg
 
     | MundaneOrMagicVocationExtrasMsg msg ->
         match msg with
