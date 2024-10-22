@@ -30,7 +30,7 @@ open Skills
 open VocationList
 open Vocation
 
-let updateVocationListThenCombatRollList msgs dicePoolCalculation model tempSettingData =
+let updateVocationListThenCombatRollList msgs dicePoolCalculation settingData model =
     let newVocationList =
         msgs
         |> List.fold (fun acc msg -> VocationList.update msg acc) model.vocationList
@@ -43,8 +43,8 @@ let updateVocationListThenCombatRollList msgs dicePoolCalculation model tempSett
                     CombatRollList.RecalculateCombatRollList(
                         model.equipment,
                         newVocationList,
-                        makeWeaponSkillDataMap tempSettingData.weaponSkillDataSet,
-                        tempSettingData.weaponSpellSet,
+                        makeWeaponSkillDataMap settingData.weaponSkillDataSet,
+                        settingData.weaponSpellSet,
                         dicePoolCalculation
                     )
                 )
@@ -56,8 +56,15 @@ let newEffectsForCharacter settingData character =
     let newCoreSkills =
         Skills.update (Skills.CalculateSkillDicePools newDicePoolCalculationData) character.coreSkills
 
-
-    updateVocationListThenCombatRollList
+    {
+        character with
+            coreSkills = newCoreSkills
+            combatSpeeds =
+                CombatSpeeds.update
+                    (CombatSpeeds.RecalculateAllCombatSpeeds(newCoreSkills, character.attributes))
+                    character.combatSpeeds
+    }
+    |> updateVocationListThenCombatRollList
         [
             (VocationList.CalculateDicePools newDicePoolCalculationData)
             (VocationList.VocationMsgForAll(
@@ -67,14 +74,6 @@ let newEffectsForCharacter settingData character =
             ))
         ]
         newDicePoolCalculationData
-        {
-            character with
-                coreSkills = newCoreSkills
-                combatSpeeds =
-                    CombatSpeeds.update
-                        (CombatSpeeds.RecalculateAllCombatSpeeds(newCoreSkills, character.attributes))
-                        character.combatSpeeds
-        }
         settingData
 
 let update msg (model: Character) =
@@ -232,9 +231,9 @@ let update msg (model: Character) =
 
             | _ -> msg
             |> (fun msg -> VocationMsgAtPosition(pos1, msg))
-            |> (fun msg -> updateVocationListThenCombatRollList [ msg ] dicePoolCalculationData model settingData)
+            |> (fun msg -> updateVocationListThenCombatRollList [ msg ] dicePoolCalculationData settingData model)
 
-        | _ -> updateVocationListThenCombatRollList [ msg ] dicePoolCalculationData model settingData
+        | _ -> updateVocationListThenCombatRollList [ msg ] dicePoolCalculationData settingData model
     | EquipmentMsg(msg, Some settingData) ->
 
         let newEquipment = ItemElement.itemElementListUpdate msg model.equipment
