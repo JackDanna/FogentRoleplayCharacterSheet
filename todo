@@ -10,8 +10,4 @@ Maybes:
 
 (Doesn't this already work?) Add know vocation skills so that baseDiceTierMods can be created for them
 
-Combat Rolls can consume muliple weapon resources
-
-Magic Combat Skills need resource used
-
 Magic Skill data should maybe live on magic Skill
