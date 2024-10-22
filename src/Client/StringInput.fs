@@ -9,7 +9,7 @@ let update (msg: Msg) (model: string) : string =
     | SetString newName -> newName
 
 open Feliz
-open ViewUtils.DasiyUI
+open ViewUtils
 
 let view (model: string) (dispatch: Msg -> unit) =
     textInput [
