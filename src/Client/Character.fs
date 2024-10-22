@@ -261,23 +261,6 @@ let update msg (model: Character) =
         |> newEffectsForCharacter
         <| settingData
 
-    // | OffPersonContainerInstanceListMsg msg ->
-    //     match msg with
-    //     | ContainerInstanceList.ModifyContainerInstance(pos1,
-    //                                                     ContainerInstance.ItemStackListMsg(ItemStackList.Insert(itemName,
-    //                                                                                                             _))) ->
-    //         ContainerInstanceList.ModifyContainerInstance(
-    //             pos1,
-    //             ContainerInstance.ItemStackListMsg(
-    //                 ItemStackList.Insert(itemName, Some tempSettingData.itemElementMap)
-    //             )
-    //         )
-    //     | _ -> msg
-    //     |> (fun msg -> {
-    //         model with
-    //             offPersonContinaerItemList = ContainerInstanceList.update msg model.offPersonContinaerInstacneList
-    //     })
-
     | CharacterInformationMsg msg -> {
         model with
             characterInformation = CharacterInformation.update msg model.characterInformation
