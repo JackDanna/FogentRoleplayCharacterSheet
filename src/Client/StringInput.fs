@@ -9,10 +9,11 @@ let update (msg: Msg) (model: string) : string =
     | SetString newName -> newName
 
 open Feliz
-open Feliz.Bulma
+open Feliz.DaisyUI
 
 let view (model: string) (dispatch: Msg -> unit) =
-    Bulma.input.text [
+    Daisy.input [
+        prop.type' "text"
         prop.value model
         prop.onTextChange (fun input -> dispatch (SetString input))
     ]
