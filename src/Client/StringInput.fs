@@ -9,11 +9,10 @@ let update (msg: Msg) (model: string) : string =
     | SetString newName -> newName
 
 open Feliz
-open Feliz.DaisyUI
+open ViewUtils.DasiyUI
 
 let view (model: string) (dispatch: Msg -> unit) =
-    Daisy.input [
-        prop.type' "text"
+    textInput [
         prop.value model
         prop.onTextChange (fun input -> dispatch (SetString input))
     ]
