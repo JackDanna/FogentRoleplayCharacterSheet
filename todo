@@ -1,7 +1,5 @@
 Todo:
 
-Remove warning from app
-
 ^^ Resolve how weapons and effects relate to eachother
 
 Refactor old weapon classes in Csv: Shoddy Shortbow is a mundane weapon atm
