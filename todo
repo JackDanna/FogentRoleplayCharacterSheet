@@ -1,13 +1,5 @@
 Maybes:
 
-- Hardcore weapons
--- Martial skills: Small bladed, Medium Sword, ect...
--- Spell skills: Skills per spell?
-
-- Casul mode
--- Martial Skill: Small Melee, Medium Melee
--- Spell Skills: Blazecraft, ect...
-
 (Doesn't this already work?) Add know vocation skills so that baseDiceTierMods can be created for them
 
 Magic Skill data should maybe live on magic Skill
