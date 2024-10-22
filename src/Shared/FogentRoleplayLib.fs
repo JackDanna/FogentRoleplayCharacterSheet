@@ -2145,11 +2145,12 @@ module Character =
 
     let characterToDicePoolCalculationDataWithoutWeightClassOptionEffect character = {
         effects =
+            // I should extract out spell weapon effects here
             character.characterEffects
             @ itemElementListToNonContainedEffects character.equipment
         attributes = character.attributes
     }
-
+    // I need to figure out what this function is doing
     let characterToDicePoolCalculationData character =
         character
         |> characterToDicePoolCalculationDataWithoutWeightClassOptionEffect
