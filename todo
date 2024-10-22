@@ -8,8 +8,6 @@ Refactor old weapon classes in Csv: Shoddy Shortbow is a mundane weapon atm
 
 Refactor weapon and spell weapon to maybe use the same base
 
-Added effects to
-
 Maybes:
 
 - Hardcore weapons
@@ -33,5 +31,3 @@ hide twohanded if dice pool is the same as one handed
 Item Durability
 
 Magic Skill data should maybe live on magic Skill
-
-Off person Containers
