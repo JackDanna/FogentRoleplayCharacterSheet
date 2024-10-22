@@ -267,12 +267,12 @@ let update msg (model: Character) =
       }
 
     | EffectListMsg(msg, Some settingData) ->
-        {
-            model with
-                characterEffects = EffectList.update msg model.characterEffects
-        }
-        |> newEffectsForCharacter
-        <| settingData
+        newEffectsForCharacter
+            {
+                model with
+                    characterEffects = EffectList.update msg model.characterEffects
+            }
+            settingData
 
     | CombatSpeedsMsg msg ->
         match msg with
