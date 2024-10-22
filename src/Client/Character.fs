@@ -56,15 +56,8 @@ let newEffectsForCharacter character settingData =
     let newCoreSkills =
         Skills.update (Skills.CalculateSkillDicePools newDicePoolCalculationData) character.coreSkills
 
-    {
-        character with
-            coreSkills = newCoreSkills
-            combatSpeeds =
-                CombatSpeeds.update
-                    (CombatSpeeds.RecalculateAllCombatSpeeds(newCoreSkills, character.attributes))
-                    character.combatSpeeds
-    }
-    |> updateVocationListThenCombatRollList
+
+    updateVocationListThenCombatRollList
         [
             (VocationList.CalculateDicePools newDicePoolCalculationData)
             (VocationList.VocationMsgForAll(
@@ -74,8 +67,15 @@ let newEffectsForCharacter character settingData =
             ))
         ]
         newDicePoolCalculationData
-    <| settingData
-
+        {
+            character with
+                coreSkills = newCoreSkills
+                combatSpeeds =
+                    CombatSpeeds.update
+                        (CombatSpeeds.RecalculateAllCombatSpeeds(newCoreSkills, character.attributes))
+                        character.combatSpeeds
+        }
+        settingData
 
 let update msg (model: Character) =
 
