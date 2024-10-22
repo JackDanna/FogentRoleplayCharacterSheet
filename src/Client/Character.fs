@@ -240,26 +240,26 @@ let update msg (model: Character) =
 
         let newEquipment = ItemElement.itemElementListUpdate msg model.equipment
 
-        {
-            model with
-                equipment = newEquipment
-                weightClassOption =
-                    WeightClassOption.update
-                        (WeightClassOption.DetermineWeightClass(
-                            model.carryWeightCalculationOption,
-                            settingData.weightClassSet,
-                            model.attributes,
-                            (Skills.update // We recalculate the core skills without the weightClassOption AttributeDeterminedDiceMod since that should only be factored into skill dice pool and not the num dice for determining carry weight
-                                (Skills.CalculateSkillDicePools(
-                                    characterToDicePoolCalculationDataWithoutWeightClassOptionEffect model
-                                ))
-                                model.coreSkills),
-                            newEquipment
-                        ))
-                        model.weightClassOption
-        }
-        |> newEffectsForCharacter
-        <| settingData
+        newEffectsForCharacter
+            {
+                model with
+                    equipment = newEquipment
+                    weightClassOption =
+                        WeightClassOption.update
+                            (WeightClassOption.DetermineWeightClass(
+                                model.carryWeightCalculationOption,
+                                settingData.weightClassSet,
+                                model.attributes,
+                                (Skills.update // We recalculate the core skills without the weightClassOption AttributeDeterminedDiceMod since that should only be factored into skill dice pool and not the num dice for determining carry weight
+                                    (Skills.CalculateSkillDicePools(
+                                        characterToDicePoolCalculationDataWithoutWeightClassOptionEffect model
+                                    ))
+                                    model.coreSkills),
+                                newEquipment
+                            ))
+                            model.weightClassOption
+            }
+            settingData
 
     | CharacterInformationMsg msg -> {
         model with
