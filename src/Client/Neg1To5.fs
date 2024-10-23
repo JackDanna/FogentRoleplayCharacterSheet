@@ -23,8 +23,8 @@ open ViewUtils
 
 let view (model: Neg1To5) dispatch userInputDisabled =
     numberInput [
-        prop.max 5
-        prop.min -1
+        prop.max (neg1To5ToInt Five)
+        prop.min (neg1To5ToInt NegOne)
         prop.disabled userInputDisabled
         prop.value (neg1To5ToInt model)
         prop.onChange (fun num -> dispatch (ChangedNeg1To5(num, None)))
