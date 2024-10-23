@@ -4,7 +4,6 @@ open FogentRoleplayLib.Item
 open FogentRoleplayLib.Effect
 
 open Feliz
-open Feliz.Bulma
 
 let view (model: Item) =
 
