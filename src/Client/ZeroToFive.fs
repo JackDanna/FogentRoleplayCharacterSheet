@@ -14,10 +14,10 @@ let update msg model =
         | None -> model
 
 open Feliz
-open Feliz.Bulma
+open ViewUtils
 
 let view (model: ZeroToFive) dispatch =
-    Bulma.input.number [
+    numberInput [
         prop.max 5
         prop.min 0
         prop.value (zeroToFiveToUint model |> int)
