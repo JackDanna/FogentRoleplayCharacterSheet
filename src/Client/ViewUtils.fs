@@ -26,6 +26,9 @@ let textInputWithDropdownSet (onTextChange: string -> unit) dropdownSet dataList
         ]
     ]
 
+let numberInput list =
+    [ prop.type' "number" ] @ list |> Daisy.input
+
 let deleteEquipmentRowButton onClick =
     Html.td [ Html.button [ prop.onClick onClick; prop.text "-" ] ]
     |> List.singleton

@@ -14,12 +14,11 @@ let update (msg: Msg) (model: Neg2To5) =
         | None -> model
 
 open Feliz
-open Feliz.DaisyUI
+open ViewUtils
 
 let view model dispatch =
 
-    Html.input [
-        prop.type' "number"
+    numberInput [
         prop.max (neg2To5ToInt Five)
         prop.min (neg2To5ToInt NegTwo)
         prop.value (neg2To5ToInt model)
