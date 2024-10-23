@@ -24,11 +24,7 @@ let update msg model =
 
 open Feliz
 
-let coreSkillsView
-    model
-    (dispatch: Msg -> unit)
-    (isThisAttributeNameContiainedOnSkill: FogentRoleplayLib.Attribute.Attribute)
-    =
+let coreSkillsView model dispatch (isThisAttributeNameContiainedOnSkill: FogentRoleplayLib.Attribute.Attribute) =
     model
     |> Seq.mapi (fun index (coreSkill: FogentRoleplayLib.Skill.Skill) ->
         if coreSkill.governingAttributeNames.Contains isThisAttributeNameContiainedOnSkill.attributeName then
