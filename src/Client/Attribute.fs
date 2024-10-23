@@ -15,9 +15,19 @@ let update msg model =
 
 open Feliz
 open Feliz.Bulma
+open Feliz.DaisyUI
 
 let view model dispatch =
-    Bulma.columns [
-        Bulma.column [ prop.text model.attributeName ]
-        Bulma.column [ Neg2To5.view model.level (Neg2To5Msg >> dispatch) ]
+
+    Html.thead [
+        Html.th [ prop.text model.attributeName ]
+        Html.th [ Neg2To5.view model.level (Neg2To5Msg >> dispatch) ]
+        Html.th []
+    ]
+
+let attributeAndCoreSkills model dispatch (preloadedCoreSkillView: Attribute -> ReactElement) =
+    Daisy.table [
+        view model dispatch
+        //
+        preloadedCoreSkillView model
     ]

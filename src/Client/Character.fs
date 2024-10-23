@@ -308,8 +308,10 @@ let view (model: Character) dispatch settingData =
         ]
         |> Bulma.content
 
-        Skills.coreSkillsView model.coreSkills (CoreSkillsMsg >> dispatch)
-        |> Attributes.attributesAndCoreSkillsListView model.attributes ((fun x -> AttributesMsg(x, None)) >> dispatch)
+        Attributes.attributesAndCoreSkillsListView
+            model.attributes
+            ((fun x -> AttributesMsg(x, None)) >> dispatch)
+            (Skills.coreSkillsView model.coreSkills (CoreSkillsMsg >> dispatch))
 
         DestinyPoints.view model.destinyPoints (DestinyPointMsg >> dispatch)
 

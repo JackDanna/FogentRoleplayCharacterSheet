@@ -20,23 +20,19 @@ let update msg model =
 open Feliz
 open Feliz.Bulma
 
-let view model dispatch preloadedCoreSkillView =
-
-    model
-    |> Set.toList
-    |> List.mapi (fun position attribute ->
-        [
-            Attribute.view attribute (fun msg -> ModifyAttribute(position, msg) |> dispatch)
-        ]
-        @ (preloadedCoreSkillView attribute.attributeName)
-        |> Bulma.box
-        |> Bulma.column)
-
 let attributesAndCoreSkillsListView model dispatch preloadedCoreSkillView =
     Bulma.container [
         Bulma.label "Attributes and Core Skills:" |> Bulma.content
         Bulma.columns [
             columns.isCentered
-            prop.children (view model dispatch preloadedCoreSkillView)
+            prop.children (
+                model
+                |> Set.toList
+                |> List.mapi (fun position attribute ->
+                    Attribute.attributeAndCoreSkills
+                        attribute
+                        (fun msg -> ModifyAttribute(position, msg) |> dispatch)
+                        preloadedCoreSkillView)
+            )
         ]
     ]

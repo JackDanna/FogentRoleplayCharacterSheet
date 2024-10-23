@@ -35,11 +35,16 @@ let view attributeNameSet model (dispatch: Msg -> unit) =
         |> Bulma.content)
     |> Html.ul
 
-let coreSkillsView model (dispatch: Msg -> unit) isThisAttributeNameContiainedOnSkill =
+let coreSkillsView
+    model
+    (dispatch: Msg -> unit)
+    (isThisAttributeNameContiainedOnSkill: FogentRoleplayLib.Attribute.Attribute)
+    =
     model
     |> Set.toList
     |> List.mapi (fun index (coreSkill: FogentRoleplayLib.Skill.Skill) ->
-        if coreSkill.governingAttributeNames.Contains isThisAttributeNameContiainedOnSkill then
+        if coreSkill.governingAttributeNames.Contains isThisAttributeNameContiainedOnSkill.attributeName then
             Skill.coreSkillView coreSkill (fun msg -> ModifySkillAtPosition(index, msg) |> dispatch)
         else
             Html.none)
+    |> Html.tbody

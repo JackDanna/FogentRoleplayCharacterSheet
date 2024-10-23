@@ -97,6 +97,7 @@ let update msg (model: Skill) =
 
 open Feliz
 open Feliz.Bulma
+open Feliz.DaisyUI
 
 let governingAttributesToggle
     (attributeNameSet: AttributeName Set)
@@ -131,23 +132,23 @@ let governingAttributesToggle
     ]
 
 let viewAsList attributeNameSet (model: Skill) dispatch userInputDisabled showGoverningSkillColumn = [
-    Bulma.column [ prop.text model.name ]
+    Html.td [ prop.text model.name ]
     if showGoverningSkillColumn then
-        Bulma.column [
+        Html.td [
             governingAttributesToggle attributeNameSet model.governingAttributeNames (fun toggledAttributeName ->
                 ToggleGoverningAttribute(toggledAttributeName, None) |> dispatch)
         ]
     else
         Html.none
-    Bulma.column [
+    Html.td [
         Neg1To5.view model.level ((fun msg -> ModifySkillLevel(msg, None, None)) >> dispatch) userInputDisabled
     ]
-    Bulma.column [ model.dicePool |> dicePoolToString |> prop.text ]
+    Html.td [ model.dicePool |> dicePoolToString |> prop.text ]
 ]
 
 let view attributeNameSet (model: Skill) dispatch disableChangeLevel showGoverningSkillColumn =
     viewAsList attributeNameSet model dispatch disableChangeLevel showGoverningSkillColumn
-    |> Bulma.columns
+    |> Html.tr
 
 let coreSkillView model dispatch =
     view Set.empty model dispatch false false
