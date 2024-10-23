@@ -7,8 +7,6 @@ open FogentRoleplayLib.Neg1To5
 open FogentRoleplayLib.DicePoolCalculation
 open FogentRoleplayLib.AttributeName
 open FogentRoleplayLib.StringUtils
-open FogentRoleplayLib.CoreSkillData
-open FogentRoleplayLib.DicePoolMod
 
 type ZeroToFiveAndDicePoolCalculationData = ZeroToFive * DicePoolCalculationData
 
@@ -115,13 +113,14 @@ let governingAttributesToggle
                         Bulma.dropdownItem.a [
                             prop.onClick (fun _ -> dispatchToggleGoverningAttribute attributeName)
                             prop.children [
-                                Bulma.columns [
-                                    Bulma.column [
-                                        Bulma.input.checkbox [
+                                Html.div [
+                                    prop.className "flex flex-row w-full gap-4"
+                                    prop.children [
+                                        Daisy.checkbox [
                                             prop.isChecked (List.contains attributeName (List.ofSeq model))
                                         ]
+                                        Html.text attributeName
                                     ]
-                                    Bulma.column [ prop.text attributeName ]
                                 ]
                             ]
                         ])
