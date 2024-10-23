@@ -94,7 +94,6 @@ let update msg (model: Skill) =
 
 
 open Feliz
-open Feliz.Bulma
 open Feliz.DaisyUI
 
 let governingAttributesToggle
@@ -102,15 +101,20 @@ let governingAttributesToggle
     (model: AttributeName Set)
     dispatchToggleGoverningAttribute
     =
-    Bulma.dropdown [
-        dropdown.isHoverable
-        prop.children [
-            Bulma.dropdownTrigger [ Bulma.button.button [ Html.span (stringSetToStringSeperatedByCommas model) ] ]
-            Bulma.dropdownMenu [
 
-                List.map
+    Daisy.dropdown [
+        Daisy.button.button [
+            //button.primary;
+
+            prop.text (stringSetToStringSeperatedByCommas model)
+        ]
+        Daisy.dropdownContent [
+            prop.className "p-2 shadow menu bg-base-100 rounded-box w-52 z-50"
+            prop.tabIndex 0
+            prop.children (
+                Seq.map
                     (fun attributeName ->
-                        Bulma.dropdownItem.a [
+                        Html.listItem [
                             prop.onClick (fun _ -> dispatchToggleGoverningAttribute attributeName)
                             prop.children [
                                 Html.div [
@@ -124,9 +128,8 @@ let governingAttributesToggle
                                 ]
                             ]
                         ])
-                    (attributeNameSet |> List.ofSeq)
-                |> Bulma.dropdownContent
-            ]
+                    attributeNameSet
+            )
         ]
     ]
 
