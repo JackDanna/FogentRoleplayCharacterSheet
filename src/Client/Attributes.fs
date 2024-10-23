@@ -19,10 +19,11 @@ let update msg model =
 
 open Feliz
 open Feliz.Bulma
+open Feliz.DaisyUI
 
 let attributesAndCoreSkillsListView model dispatch preloadedCoreSkillView =
     Bulma.container [
-        Bulma.label "Attributes and Core Skills:" |> Bulma.content
+        Daisy.label [ prop.text "Attributes and Core Skills:" ]
         Bulma.columns [
             columns.isCentered
             prop.children (
