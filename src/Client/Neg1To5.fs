@@ -19,10 +19,10 @@ let update (msg: Msg) (model: Neg1To5) : Neg1To5 =
         | _, _ -> model
 
 open Feliz
-open Feliz.Bulma
+open ViewUtils
 
 let view (model: Neg1To5) dispatch userInputDisabled =
-    Bulma.input.number [
+    numberInput [
         prop.max 5
         prop.min -1
         prop.disabled userInputDisabled
