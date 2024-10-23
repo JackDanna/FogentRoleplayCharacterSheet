@@ -27,8 +27,7 @@ let attributesAndCoreSkillsListView model dispatch preloadedCoreSkillView =
             columns.isCentered
             prop.children (
                 model
-                |> Set.toList
-                |> List.mapi (fun position attribute ->
+                |> Seq.mapi (fun position attribute ->
                     Attribute.attributeAndCoreSkills
                         attribute
                         (fun msg -> ModifyAttribute(position, msg) |> dispatch)
