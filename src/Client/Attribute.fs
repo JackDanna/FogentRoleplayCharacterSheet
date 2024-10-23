@@ -14,7 +14,6 @@ let update msg model =
       }
 
 open Feliz
-open Feliz.Bulma
 open Feliz.DaisyUI
 
 let view model dispatch =
