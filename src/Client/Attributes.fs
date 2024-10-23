@@ -18,14 +18,13 @@ let update msg model =
         |> Set.ofList
 
 open Feliz
-open Feliz.Bulma
 open Feliz.DaisyUI
 
 let attributesAndCoreSkillsListView model dispatch preloadedCoreSkillView =
-    Bulma.container [
+    Html.div [
         Daisy.label [ prop.text "Attributes and Core Skills:" ]
-        Bulma.columns [
-            columns.isCentered
+        Html.div [
+            prop.className "flex flex-row w-full gap-4"
             prop.children (
                 model
                 |> Seq.mapi (fun position attribute ->
