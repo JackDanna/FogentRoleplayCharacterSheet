@@ -45,10 +45,22 @@
               jnoortheen.nix-ide
               mhutchie.git-graph
               ms-dotnettools.csharp
-              ionide.ionide-fsharp
+              #ionide.ionide-fsharp
               bradlc.vscode-tailwindcss
               #vscodevim.vim
             ] ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
+              {
+                name = "ionide-fsharp";
+                publisher = "ionide";
+                version = "7.21.2";
+                sha256 = "sha256-HuBlneb7/IRM+FBQLCDf8lMAtvU3bJpb4VDRaolm21g=";
+              }
+              # {
+              #   name = "csharp";
+              #   publisher = "ms-dotnettools";
+              #   version = "2.50.27";
+              #   sha256 = "sha256-TSohDtn+VOhPi5FbA7VbzH8kom+GmdMfq5FoMCXlv5U=";
+              # }
               {
                 name = "vscode-edit-csv";
                 publisher = "janisdd";
