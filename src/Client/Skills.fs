@@ -1,7 +1,6 @@
 module Skills
 
 open FogentRoleplayLib.DicePoolCalculation
-open FogentRoleplayLib.CoreSkillData
 
 type Msg =
     | ModifySkillAtPosition of int * Skill.Msg
@@ -24,16 +23,6 @@ let update msg model =
         Set.map (fun coreSkill -> Skill.update (Skill.CalculateDicePool(dicePoolCalculationData)) coreSkill) model
 
 open Feliz
-open Feliz.Bulma
-
-let view attributeNameSet model (dispatch: Msg -> unit) =
-    model
-    |> Set.toList
-    |> List.mapi (fun index coreSkill ->
-        Skill.view attributeNameSet coreSkill (fun msg -> ModifySkillAtPosition(index, msg) |> dispatch) false true
-        |> Bulma.columns
-        |> Bulma.content)
-    |> Html.ul
 
 let coreSkillsView
     model
@@ -41,8 +30,7 @@ let coreSkillsView
     (isThisAttributeNameContiainedOnSkill: FogentRoleplayLib.Attribute.Attribute)
     =
     model
-    |> Set.toList
-    |> List.mapi (fun index (coreSkill: FogentRoleplayLib.Skill.Skill) ->
+    |> Seq.mapi (fun index (coreSkill: FogentRoleplayLib.Skill.Skill) ->
         if coreSkill.governingAttributeNames.Contains isThisAttributeNameContiainedOnSkill.attributeName then
             Skill.coreSkillView coreSkill (fun msg -> ModifySkillAtPosition(index, msg) |> dispatch)
         else
