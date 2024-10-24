@@ -128,6 +128,7 @@ let update msg model =
     | _, _ -> model, Cmd.none
 
 open Feliz
+open Feliz.DaisyUI
 
 let index model dispatch =
     match model.user with
@@ -169,5 +170,11 @@ let view model dispatch =
 
     React.router [
         router.onUrlChanged (parseUrl >> UrlChanged >> dispatch)
-        router.children [ Html.div [ activePage ] ]
+        router.children [
+            Html.div [
+                //
+                theme.fantasy
+                prop.children activePage
+            ]
+        ]
     ]
