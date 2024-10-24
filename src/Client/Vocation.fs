@@ -163,21 +163,20 @@ let view attributeNameSet (weaponSkillNameSet) (model: Vocation) dispatch =
         | Some magicResouceUI -> magicResouceUI
         | None -> Html.none
 
-    Daisy.card [
-        Daisy.table [
-            Html.thead [
-                VocationStat.view attributeNameSet model.vocationStat (VocationStatMsg >> dispatch)
-                |> Seq.map Html.th
-                |> Html.tr
-            ]
-            Html.tbody (
-                skills
-                //
-                |> Seq.map Html.tableRow
-            )
-
+    Daisy.table [
+        Html.thead [
+            VocationStat.view attributeNameSet model.vocationStat (VocationStatMsg >> dispatch)
+            |> Seq.map Html.th
+            |> Html.tr
         ]
-        insertUI
-        // This is the magic Resource UI
-        magicResourceUI
+        Html.tbody (
+            skills
+            //
+            |> Seq.map Html.tableRow
+        )
+        Html.tfoot [
+            Html.tr [ insertUI ]
+            // This is the magic Resource UI
+            Html.tr [ magicResourceUI ]
+        ]
     ]
