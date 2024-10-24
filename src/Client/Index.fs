@@ -169,10 +169,5 @@ let view model dispatch =
 
     React.router [
         router.onUrlChanged (parseUrl >> UrlChanged >> dispatch)
-        router.children [
-            Html.div [
-                //prop.style [ style.padding 40 ];
-                prop.children [ activePage ]
-            ]
-        ]
+        router.children [ Html.div [ prop.className ""; prop.children [ activePage ] ] ]
     ]
