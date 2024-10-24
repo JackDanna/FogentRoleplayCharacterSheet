@@ -43,15 +43,18 @@ let view
                 |> Html.tr
             ]
             Html.tableBody (
-                List.mapi
-                    (fun position equipmentRow ->
-                        (Effect.view equipmentRow (fun msg -> dispatch (ModifyEffect(position, msg))))
-                        @ (Html.button [ prop.onClick (fun _ -> dispatch (Remove(position))); prop.text "-" ]
-                           |> Html.td
-                           |> List.singleton)
-                        |> Html.tr)
-                    model
-                |> List.append [ weightClassOptionADDME @ [ Html.none |> Html.td ] |> Html.tr ]
+                Seq.append
+                    [ weightClassOptionADDME @ [ Html.td [] ] |> Html.tr ]
+                    (Seq.mapi
+                        (fun position equipmentRow ->
+                            Html.button [ prop.onClick (fun _ -> dispatch (Remove(position))); prop.text "-" ]
+                            |> Html.td
+                            |> List.singleton
+                            |> Seq.append (
+                                Effect.view equipmentRow (fun msg -> dispatch (ModifyEffect(position, msg)))
+                            )
+                            |> Html.tr)
+                        model)
             )
             Html.tfoot [
                 ViewUtils.textInputWithDropdownSet
