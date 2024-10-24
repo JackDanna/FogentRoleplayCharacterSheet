@@ -74,15 +74,13 @@ let update msg (model: MagicVocationSkill Set) =
     | _ -> model
 
 open Feliz
-open Feliz.Bulma
 
 let view magicSystemName attributeNameSet magicSkillNames weaponSkillNames model (dispatch: Msg -> unit) =
     model
     |> Seq.mapi (fun index mundaneVocationSkill ->
-        (MagicVocationSkill.view attributeNameSet mundaneVocationSkill (fun msg ->
-            ModifySkillAtPosition(index, msg) |> dispatch))
-        @ ViewUtils.deleteEquipmentRowButton (fun _ -> dispatch (RemoveAtPosition(index)))
-        |> Html.tableRow)
+        (fun msg -> ModifySkillAtPosition(index, msg) |> dispatch)
+        |> MagicVocationSkill.view attributeNameSet mundaneVocationSkill
+        |> Seq.append (ViewUtils.deleteEquipmentRowButton (fun _ -> dispatch (RemoveAtPosition(index)))))
     |> (fun magicVocationSkillsTableBody ->
 
         magicVocationSkillsTableBody,
