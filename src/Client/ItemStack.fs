@@ -9,13 +9,13 @@ let update (msg: Msg) (model: ItemStack) =
     | SetItemStackQuantity msg -> { model with quantity = msg }
 
 open Feliz
-open Feliz.Bulma
+open ViewUtils
 
 let view (model: ItemStack) (dispatch: Msg -> unit) =
     let (name, effectNames, weight, value) = Item.view model.item
 
     name,
-    Bulma.input.number [
+    numberInput [
         prop.min 1
         prop.value (int model.quantity)
         prop.onChange (fun (num: int) -> dispatch (SetItemStackQuantity(uint num)))

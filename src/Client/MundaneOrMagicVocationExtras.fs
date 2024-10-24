@@ -71,7 +71,6 @@ let update msg (model: MundaneOrMagicVocationExtras) =
     | _, _ -> model
 
 open Feliz
-open Feliz.Bulma
 
 let view attributeNameSet (weaponSkillNameSet) (model: MundaneOrMagicVocationExtras) dispatch =
 
