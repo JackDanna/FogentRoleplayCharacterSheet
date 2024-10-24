@@ -35,7 +35,7 @@ let update msg : CombatRoll list =
         createCombatRolls equipmentList weaponSkillList weaponSkillDataMap weaponSpellSet dicePoolCalculationData
 
 open Feliz
-open Feliz.Bulma
+open Feliz.DaisyUI
 open FogentRoleplayLib.DicePoolMod
 
 let combatRollRow (model: CombatRoll) =
@@ -58,10 +58,9 @@ let combatRollRow (model: CombatRoll) =
     |> Html.tr
 
 let view (model: CombatRoll list) =
-    Bulma.container [
-        Bulma.label "Combat Rolls:"
-        Bulma.table [
-            table.isBordered
+    Html.div [
+        Daisy.labelText "Combat Rolls:"
+        Daisy.table [
             prop.children [
                 Html.thead [
                     [
