@@ -64,16 +64,14 @@ let update msg (model: VocationStat) =
 open Feliz
 open ViewUtils
 
-let view attributeNameSet (model: VocationStat) dispatch =
-
-    [
-        textInput [
-            prop.value model.name
-            prop.onTextChange (fun value -> dispatch (SetName value))
-        ]
-        Skill.governingAttributesToggle attributeNameSet model.governingAttributeNameSet (fun toggledAttributeName ->
-            ToggleGoveringAttribute(toggledAttributeName, None) |> dispatch)
-        ZeroToFive.view model.level ((fun msg -> ZeroToFiveMsg(msg, None)) >> dispatch)
-        Html.text (model.dicePool |> dicePoolToString)
-        Html.none
+let view attributeNameSet (model: VocationStat) dispatch = [
+    textInput [
+        prop.value model.name
+        prop.onTextChange (fun value -> dispatch (SetName value))
     ]
+    Skill.governingAttributesToggle attributeNameSet model.governingAttributeNameSet (fun toggledAttributeName ->
+        ToggleGoveringAttribute(toggledAttributeName, None) |> dispatch)
+    ZeroToFive.view model.level ((fun msg -> ZeroToFiveMsg(msg, None)) >> dispatch)
+    Html.text (model.dicePool |> dicePoolToString)
+    Html.none
+]
