@@ -284,29 +284,28 @@ let update msg (model: Character) =
     | _ -> model
 
 open Feliz
-open Feliz.Bulma
+open ViewUtils
 
 let view (model: Character) dispatch settingData =
 
-    Bulma.container [
+    Html.div [
 
-        Bulma.input.text [
+        textInput [
             prop.value model.name
             prop.placeholder "Character Name"
             prop.onTextChange (SetName >> dispatch)
             prop.classes [ "is-large"; "has-text-centered" ]
         ]
-        |> Bulma.content
 
-        Bulma.image [
-            Html.img [
-                prop.style [ style.height 500; style.width 500 ]
-                prop.classes [ "center" ]
-
-                prop.src "https://cogentroleplaycommunity.github.io/Fallen/src/Characters/PC/JavkWick/Javk-Wick.png"
+        Html.div [
+            prop.className "flex justify-center"
+            prop.children [
+                Html.img [
+                    prop.src "https://cogentroleplaycommunity.github.io/Fallen/src/Characters/PC/JavkWick/Javk-Wick.png"
+                    prop.style [ style.height 500; style.width 500 ]
+                ]
             ]
         ]
-        |> Bulma.content
 
         Attributes.attributesAndCoreSkillsListView
             model.attributes
