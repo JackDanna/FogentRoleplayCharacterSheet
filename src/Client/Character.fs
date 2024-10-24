@@ -294,14 +294,14 @@ let view (model: Character) dispatch settingData =
             prop.value model.name
             prop.placeholder "Character Name"
             prop.onTextChange (SetName >> dispatch)
-            prop.classes [ "is-large"; "has-text-centered" ]
+            prop.className "input-bordered text-center text-2xl w-full m-4"
         ]
 
         Html.div [
             prop.className "flex justify-center"
             prop.children [
                 Html.img [
-                    prop.src "https://cogentroleplaycommunity.github.io/Fallen/src/Characters/PC/JavkWick/Javk-Wick.png"
+                    prop.src "https://imgcdn.stablediffusionweb.com/2024/5/11/c6a9aebb-1b7e-47d5-9fd5-9b030444402c.jpg"
                     prop.style [ style.height 500; style.width 500 ]
                 ]
             ]
