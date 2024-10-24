@@ -26,7 +26,7 @@ let update msg (model: Effect list) =
     | _ -> model
 
 open Feliz
-open Feliz.Bulma
+open Feliz.DaisyUI
 
 let view
     (characterEffectNameList: string Set)
@@ -34,32 +34,30 @@ let view
     (dispatch: Msg -> unit)
     (weightClassOptionADDME: list<Fable.React.ReactElement>)
     =
-    Bulma.container [
-        Bulma.label "Effects:"
-        Bulma.table [
-            table.isBordered
-            prop.children [
-                Html.thead [
-                    List.map (fun (thString: string) -> Html.th thString) [ "Name"; "Effect"; "Duration"; "Source" ]
-                    |> Html.tr
-                ]
-                Html.tableBody (
-                    List.mapi
-                        (fun position equipmentRow ->
-                            (Effect.view equipmentRow (fun msg -> dispatch (ModifyEffect(position, msg))))
-                            @ (Html.button [ prop.onClick (fun _ -> dispatch (Remove(position))); prop.text "-" ]
-                               |> Html.td
-                               |> List.singleton)
-                            |> Html.tr)
-                        model
-                    |> List.append [ weightClassOptionADDME @ [ Html.none |> Html.td ] |> Html.tr ]
-                )
-                Html.tfoot [
-                    ViewUtils.textInputWithDropdownSet
-                        (fun input -> dispatch (Insert(input, None)))
-                        characterEffectNameList
-                        "EffectList"
-                ]
+    Html.div [
+        Daisy.labelText "Effects:"
+        Daisy.table [
+            Html.thead [
+                [ "Name"; "Effect"; "Duration"; "Source" ]
+                |> Seq.map (fun (thString: string) -> Html.th thString)
+                |> Html.tr
+            ]
+            Html.tableBody (
+                List.mapi
+                    (fun position equipmentRow ->
+                        (Effect.view equipmentRow (fun msg -> dispatch (ModifyEffect(position, msg))))
+                        @ (Html.button [ prop.onClick (fun _ -> dispatch (Remove(position))); prop.text "-" ]
+                           |> Html.td
+                           |> List.singleton)
+                        |> Html.tr)
+                    model
+                |> List.append [ weightClassOptionADDME @ [ Html.none |> Html.td ] |> Html.tr ]
+            )
+            Html.tfoot [
+                ViewUtils.textInputWithDropdownSet
+                    (fun input -> dispatch (Insert(input, None)))
+                    characterEffectNameList
+                    "EffectList"
             ]
         ]
     ]
