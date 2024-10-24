@@ -83,7 +83,6 @@ let view magicSystemName attributeNameSet magicSkillNames weaponSkillNames model
             ModifySkillAtPosition(index, msg) |> dispatch))
         @ ViewUtils.deleteEquipmentRowButton (fun _ -> dispatch (RemoveAtPosition(index)))
         |> Html.tableRow)
-    |> Html.tbody
     |> (fun magicVocationSkillsTableBody ->
 
         magicVocationSkillsTableBody,

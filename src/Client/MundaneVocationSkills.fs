@@ -63,7 +63,6 @@ let view attributeNameSet weaponSkillNames model (dispatch: Msg -> unit) =
         |> MundaneVocationSkill.view attributeNameSet mundaneVocationSkill
         |> Seq.append (ViewUtils.deleteEquipmentRowButton (fun _ -> dispatch (RemoveAtPosition(index))))
         |> Html.tableRow)
-    |> Html.tbody
     |> (fun mundaneVocationSkillsTableBody ->
         mundaneVocationSkillsTableBody,
         ViewUtils.textInputWithDropdownSet

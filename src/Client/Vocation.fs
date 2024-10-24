@@ -170,9 +170,7 @@ let view attributeNameSet (weaponSkillNameSet) (model: Vocation) dispatch =
                 |> Seq.map Html.th
                 |> Html.tr
             ]
-
-            // This will be the tbody
-            skills
+            Html.tbody skills
         ]
         insertUI
         // This is the magic Resource UI
