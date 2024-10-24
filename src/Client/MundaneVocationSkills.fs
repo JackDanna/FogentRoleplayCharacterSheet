@@ -59,9 +59,13 @@ open Feliz
 let view attributeNameSet weaponSkillNames model (dispatch: Msg -> unit) =
     model
     |> Seq.mapi (fun index mundaneVocationSkill ->
-        (fun msg -> ModifyMundaneVocationSkillAtPosition(index, msg) |> dispatch)
-        |> MundaneVocationSkill.view attributeNameSet mundaneVocationSkill
-        |> Seq.append (ViewUtils.deleteEquipmentRowButton (fun _ -> dispatch (RemoveAtPosition(index)))))
+        Seq.append
+            (MundaneVocationSkill.view
+                //
+                attributeNameSet
+                mundaneVocationSkill
+                (fun msg -> ModifyMundaneVocationSkillAtPosition(index, msg) |> dispatch))
+            (ViewUtils.deleteEquipmentRowButton (fun _ -> dispatch (RemoveAtPosition(index)))))
     |> (fun mundaneVocationSkillsTableBody ->
         mundaneVocationSkillsTableBody,
         ViewUtils.textInputWithDropdownSet
