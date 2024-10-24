@@ -151,17 +151,15 @@ let magicResourceView (model: MagicVocationExtras) dispatch =
     horizontalDiv [
         prop.children [
             Html.text model.magicSystem.resourceName
-            // Bulma.column [ prop.text model.magicSystem.governingCoreSkill ]
+            // Html.txt model.magicSystem.governingCoreSkill
             numberInput [
                 prop.min 0
                 prop.max (int (model.coreSkillResourcePool + model.vocationResourcePool))
                 prop.value (int model.currentMagicResource)
                 prop.onChange (fun (num: int) -> dispatch (SetCurrentMagicResource(uint num)))
             ]
-            // Bulma.column [
-            //     sprintf "CoreSkillResourcePool: %d" (model.coreSkillResourcePool) |> prop.text
-            // ]
-            // Bulma.column [ sprintf "VocationResourcePool: %d" (model.vocationResourcePool) |> prop.text ]
+            //Html.text $"CoreSkillResourcePool: {model.coreSkillResourcePool}"
+            //Html.text $"VocationResourcePool: {model.vocationResourcePool}"
             sprintf "Max: %d" (model.vocationResourcePool + model.coreSkillResourcePool)
             |> Html.text
         ]
