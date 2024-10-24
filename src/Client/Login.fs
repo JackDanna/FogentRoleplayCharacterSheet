@@ -111,7 +111,7 @@ let view (model: Model) (dispatch: Msg -> unit) =
                     ]
 
                     Html.div [
-                        prop.className "field"
+                        prop.className ""
 
                         prop.children [
                             Html.label [ prop.className "label"; prop.text "Username" ]
@@ -137,7 +137,7 @@ let view (model: Model) (dispatch: Msg -> unit) =
                     ]
 
                     Html.div [
-                        prop.className "field"
+                        prop.className ""
                         prop.children [
                             Html.label [ prop.className "label"; prop.text "Password" ]
                             Html.div [
@@ -160,7 +160,7 @@ let view (model: Model) (dispatch: Msg -> unit) =
                     ]
 
                     Html.div [
-                        prop.className "field"
+                        prop.className ""
                         prop.children [
                             Html.button [
                                 prop.className [
