@@ -23,7 +23,7 @@ open ViewUtils
 
 let attributesAndCoreSkillsListView model dispatch preloadedCoreSkillView =
     Html.div [
-        Daisy.label [ prop.text "Attributes and Core Skills:" ]
+        Daisy.labelText "Attributes and Core Skills:"
         horizontalDiv [
             prop.children (
                 model

@@ -40,7 +40,7 @@ open Feliz.DaisyUI
 
 let view attributeNameSet (magicSystemNameSet) (weaponSkillNameSet) model dispatch =
     Html.div [
-        Daisy.label [ prop.text "Vocations and Vocational Skills:" ]
+        Daisy.labelText "Vocations and Vocational Skills:"
         horizontalDiv [
             prop.children (
                 List.mapi

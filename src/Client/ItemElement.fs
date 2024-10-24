@@ -52,9 +52,8 @@ and itemElementListUpdate msg (model: ItemElement list) : ItemElement list =
     | _ -> model
 
 // Views
-
 open Feliz
-open Feliz.Bulma
+open Feliz.DaisyUI
 
 let containerItemView (model: ContainerItem) =
     let (name, effectsName, weight, value) = Item.view model.item
@@ -87,8 +86,7 @@ let itemElementView model dispatch =
     ])
 
 let itemElementListView (allItemStackNameSet: string Set) (model: ItemElement list) dispatch =
-    Bulma.table [
-        //table.isBordered
+    Daisy.table [
         prop.children [
             Html.thead [ [ "Name"; "#"; "Effect"; "LB"; "Value"; "" ] |> Seq.map Html.th |> Html.tr ]
             Html.tableBody (
@@ -116,38 +114,32 @@ let itemElementListView (allItemStackNameSet: string Set) (model: ItemElement li
     ]
 
 // Views for container Items
-
-let containerTypeAndContainedItemView allItemStackNameSet (model: ContainerItem) dispatch =
-    Bulma.container [
-        Bulma.label model.item.name
-        Html.text (
-            "current weight: "
-            + (sumItemElementListWeight model.containedElements |> string)
-        )
-        Html.text ("max weight: " + (model.containerTypeData.weightCapacity |> string))
-        itemElementListView allItemStackNameSet model.containedElements (ItemElementListMsg >> dispatch)
-    ]
-
 let containerItemListView allItemStackNameSet (model: ItemElement list) (dispatch: ItemElementListMsgType -> unit) =
-    Bulma.container (
+    Html.div (
         model
         |> List.mapi (fun position itemElement ->
             match itemElement with
             | ContainerItem containerItem ->
-
-                containerTypeAndContainedItemView
-                    allItemStackNameSet
-                    containerItem
-                    (ContainerItemMsg >> (fun msg -> ModifyItemElement(position, msg)) >> dispatch)
+                Html.div [
+                    Daisy.labelText containerItem.item.name
+                    Html.text "current weight: {sumItemElementListWeight containerItem.containedElements}"
+                    Html.text $"max weight: {containerItem.containerTypeData.weightCapacity}"
+                    itemElementListView
+                        allItemStackNameSet
+                        containerItem.containedElements
+                        (ItemElementListMsg
+                         >> ContainerItemMsg
+                         >> (fun msg -> ModifyItemElement(position, msg))
+                         >> dispatch)
+                ]
             | _ -> Html.none)
     )
 
 // Equipment view
-
 let equipmentView allItemStackNames (model: ItemElement list) (dispatch: ItemElementListMsgType -> unit) =
-    Bulma.container [
-        Bulma.label "Equiped Items:"
+    Html.div [
+        Daisy.labelText "Equiped Items:"
         itemElementListView allItemStackNames model dispatch
-        Bulma.label "Containers:"
+        Daisy.labelText "Containers:"
         containerItemListView allItemStackNames model dispatch
     ]

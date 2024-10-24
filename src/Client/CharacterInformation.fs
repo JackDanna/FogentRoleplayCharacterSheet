@@ -37,7 +37,7 @@ let view (model: CharacterInformation) (dispatch: Msg -> unit) =
     let characterInformationTextArea (labelName: string) (text: string) dispatchMsg =
 
         Daisy.formControl [
-            Daisy.label [ Daisy.labelText $"{labelName}:" ]
+            Daisy.labelText $"{labelName}:"
             Daisy.textarea [
                 prop.placeholder $"Enter {labelName}..."
                 prop.className "h-24"
