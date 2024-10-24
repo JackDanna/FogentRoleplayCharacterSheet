@@ -84,39 +84,33 @@ let itemElementView model dispatch =
         Html.td effectsName
         Html.td weight
         Html.td value
-
     ])
 
 let itemElementListView (allItemStackNameSet: string Set) (model: ItemElement list) dispatch =
-    Bulma.container [
-        Bulma.table [
-            table.isBordered
-            prop.children [
-                Html.thead [
-                    List.map (fun (thString: string) -> Html.th thString) [ "Name"; "#"; "Effect"; "LB"; "Value" ]
-                    |> Html.tr
-                ]
-                Html.tableBody (
-                    List.mapi
-                        (fun position itemElement ->
-                            let itemElementView =
-                                itemElementView itemElement (fun msg -> dispatch (ModifyItemElement(position, msg)))
+    Bulma.table [
+        //table.isBordered
+        prop.children [
+            Html.thead [ [ "Name"; "#"; "Effect"; "LB"; "Value"; "" ] |> Seq.map Html.th |> Html.tr ]
+            Html.tableBody (
+                List.mapi
+                    (fun position itemElement ->
+                        let itemElementView =
+                            itemElementView itemElement (fun msg -> dispatch (ModifyItemElement(position, msg)))
 
-                            let deleteEquipmentRowButton =
-                                Html.td [
-                                    Html.button [ prop.onClick (fun _ -> dispatch (Remove(position))); prop.text "-" ]
-                                ]
-                                |> List.singleton
+                        let deleteEquipmentRowButton =
+                            Html.td [
+                                Html.button [ prop.onClick (fun _ -> dispatch (Remove(position))); prop.text "-" ]
+                            ]
+                            |> List.singleton
 
-                            Html.tr (List.append itemElementView deleteEquipmentRowButton))
-                        model
-                )
-                Html.tfoot [
-                    ViewUtils.textInputWithDropdownSet
-                        (fun input -> dispatch (Insert(input, None)))
-                        allItemStackNameSet
-                        "ItemStackList"
-                ]
+                        Html.tr (List.append itemElementView deleteEquipmentRowButton))
+                    model
+            )
+            Html.tfoot [
+                ViewUtils.textInputWithDropdownSet
+                    (fun input -> dispatch (Insert(input, None)))
+                    allItemStackNameSet
+                    "ItemStackList"
             ]
         ]
     ]
