@@ -55,22 +55,18 @@ let update msg model =
     | _ -> model
 
 open Feliz
-open Feliz.Bulma
 
 let view attributeNameSet weaponSkillNames model (dispatch: Msg -> unit) =
     model
-    |> Set.toList
-    |> List.mapi (fun index mundaneVocationSkill ->
-        (MundaneVocationSkill.view attributeNameSet mundaneVocationSkill (fun msg ->
-            ModifyMundaneVocationSkillAtPosition(index, msg) |> dispatch))
-        @ ViewUtils.deleteEquipmentRowButton (fun _ -> dispatch (RemoveAtPosition(index)))
-        |> Bulma.columns
-        |> Bulma.content)
-    |> (fun x ->
-
-        List.append x [
-            ViewUtils.textInputWithDropdownSet
-                (fun input -> InsertMundaneVocationSkill(input, None, None, None) |> dispatch)
-                weaponSkillNames
-                "mundaneVocationSkills"
-        ])
+    |> Seq.mapi (fun index mundaneVocationSkill ->
+        (fun msg -> ModifyMundaneVocationSkillAtPosition(index, msg) |> dispatch)
+        |> MundaneVocationSkill.view attributeNameSet mundaneVocationSkill
+        |> Seq.append (ViewUtils.deleteEquipmentRowButton (fun _ -> dispatch (RemoveAtPosition(index))))
+        |> Html.tableRow)
+    |> Html.tbody
+    |> (fun mundaneVocationSkillsTableBody ->
+        mundaneVocationSkillsTableBody,
+        ViewUtils.textInputWithDropdownSet
+            (fun input -> InsertMundaneVocationSkill(input, None, None, None) |> dispatch)
+            weaponSkillNames
+            "mundaneVocationSkills")

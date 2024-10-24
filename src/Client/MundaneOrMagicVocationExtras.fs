@@ -77,14 +77,20 @@ let view attributeNameSet (weaponSkillNameSet) (model: MundaneOrMagicVocationExt
 
     match model with
     | MundaneVocationExtras mundaneVocation ->
-        MundaneVocationSkills.view
-            attributeNameSet
-            weaponSkillNameSet
-            mundaneVocation
-            (MundaneVocationSkillsMsg >> dispatch)
+        let (tbody, insertUI) =
+            MundaneVocationSkills.view
+                attributeNameSet
+                weaponSkillNameSet
+                mundaneVocation
+                (MundaneVocationSkillsMsg >> dispatch)
+
+        tbody, insertUI, None
     | MagicVocationExtras magicVocationExtras ->
-        MagicVocationExtras.view
-            attributeNameSet
-            weaponSkillNameSet
-            magicVocationExtras
-            (MagicVocationExtrasMsg >> dispatch)
+        let (tbody, insertUI, magicResourceUI) =
+            MagicVocationExtras.view
+                attributeNameSet
+                weaponSkillNameSet
+                magicVocationExtras
+                (MagicVocationExtrasMsg >> dispatch)
+
+        tbody, insertUI, (Some magicResourceUI)

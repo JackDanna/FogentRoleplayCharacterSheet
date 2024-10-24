@@ -147,16 +147,34 @@ let update (msg: Msg) (model: Vocation) =
         }
 
 open Feliz
-open Feliz.Bulma
+open Feliz.DaisyUI
 
 let view attributeNameSet (weaponSkillNameSet) (model: Vocation) dispatch =
 
-    [
-        VocationStat.view attributeNameSet model.vocationStat (VocationStatMsg >> dispatch)
+    let (skills, insertUI, magicResourceOption) =
+        MundaneOrMagicVocationExtras.view
+            attributeNameSet
+            weaponSkillNameSet
+            model.mundaneOrMagicVocationExtras
+            (MundaneOrMagicVocationExtrasMsg >> dispatch)
+
+    let magicResourceUI =
+        match magicResourceOption with
+        | Some magicResouceUI -> magicResouceUI
+        | None -> Html.none
+
+    Daisy.card [
+        Daisy.table [
+            Html.thead [
+                VocationStat.view attributeNameSet model.vocationStat (VocationStatMsg >> dispatch)
+                |> Seq.map Html.th
+                |> Html.tr
+            ]
+
+            // This will be the tbody
+            skills
+        ]
+        insertUI
+        // This is the magic Resource UI
+        magicResourceUI
     ]
-    @ MundaneOrMagicVocationExtras.view
-        attributeNameSet
-        weaponSkillNameSet
-        model.mundaneOrMagicVocationExtras
-        (MundaneOrMagicVocationExtrasMsg >> dispatch)
-    |> Bulma.box

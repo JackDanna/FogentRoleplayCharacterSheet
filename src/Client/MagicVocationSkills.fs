@@ -78,20 +78,16 @@ open Feliz.Bulma
 
 let view magicSystemName attributeNameSet magicSkillNames weaponSkillNames model (dispatch: Msg -> unit) =
     model
-    |> Set.toList
-    |> List.mapi (fun index mundaneVocationSkill ->
+    |> Seq.mapi (fun index mundaneVocationSkill ->
         (MagicVocationSkill.view attributeNameSet mundaneVocationSkill (fun msg ->
             ModifySkillAtPosition(index, msg) |> dispatch))
         @ ViewUtils.deleteEquipmentRowButton (fun _ -> dispatch (RemoveAtPosition(index)))
-        |> Bulma.columns
-        |> Bulma.content)
-    |> (fun x ->
+        |> Html.tableRow)
+    |> Html.tbody
+    |> (fun magicVocationSkillsTableBody ->
 
-        List.append x [
-            ViewUtils.textInputWithDropdownSet
-                (fun input -> InsertMagicVocationSkill(input, None, None, None, None, None) |> dispatch)
-                (Set.union magicSkillNames weaponSkillNames)
-                magicSystemName
-        ]
-
-    )
+        magicVocationSkillsTableBody,
+        ViewUtils.textInputWithDropdownSet
+            (fun input -> InsertMagicVocationSkill(input, None, None, None, None, None) |> dispatch)
+            (Set.union magicSkillNames weaponSkillNames)
+            magicSystemName)
