@@ -149,12 +149,12 @@ let update userApi (msg: Msg) (model: Setting) =
 
 open Feliz
 open ViewUtils
+open Feliz.DaisyUI
 
 let view (model: Setting) dispatch selectSettingAndCharacter =
     Html.div [
-        Html.text model.name
+        Daisy.labelText model.name
         Html.div (
-
             Seq.append
                 (Seq.map
                     (fun (character: Character) ->
@@ -168,7 +168,6 @@ let view (model: Setting) dispatch selectSettingAndCharacter =
                             ]
                         ])
                     model.characters)
-
                 [
                     Html.button [
                         prop.onClick (fun _ -> dispatch AddNewCharacter)
