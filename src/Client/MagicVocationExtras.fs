@@ -158,10 +158,9 @@ let magicResourceView (model: MagicVocationExtras) dispatch =
                 prop.value (int model.currentMagicResource)
                 prop.onChange (fun (num: int) -> dispatch (SetCurrentMagicResource(uint num)))
             ]
-            //Html.text $"CoreSkillResourcePool: {model.coreSkillResourcePool}"
-            //Html.text $"VocationResourcePool: {model.vocationResourcePool}"
-            sprintf "Max: %d" (model.vocationResourcePool + model.coreSkillResourcePool)
-            |> Html.text
+            // Html.text $"CoreSkillResourcePool: {model.coreSkillResourcePool}"
+            // Html.text $"VocationResourcePool: {model.vocationResourcePool}"
+            Html.text $"Max: {model.vocationResourcePool + model.coreSkillResourcePool}"
         ]
     ]
 
