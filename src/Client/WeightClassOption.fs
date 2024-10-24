@@ -23,7 +23,6 @@ let update msg (model: WeightClass option) =
         init carryWeightCalculationOption weightClassSet attributes coreSkills equipment
 
 open Feliz
-open Feliz.Bulma
 
 let view (model: WeightClass option) equipmentWeight maxWeight =
     match model with
