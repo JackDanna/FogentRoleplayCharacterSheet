@@ -57,14 +57,35 @@ open Feliz
 open Feliz.Bulma
 
 let containerItemView (model: ContainerItem) =
-
-    List.insertAt 1 (Html.td [ Html.text model.containerTypeData.name ]) (Item.view model.item)
+    let (name, effectsName, weight, value) = Item.view model.item
+    name, Html.text model.containerTypeData.name, effectsName, weight, value
 
 let itemElementView model dispatch =
     match model with
-    | Item item -> Item.view item
-    | ItemStack itemStack -> ItemStack.view itemStack (ItemStackMsg >> dispatch)
-    | ContainerItem containerItem -> containerItemView containerItem
+    | Item item ->
+        let (name, effectsName, weight, value) = Item.view item
+
+        name, None, effectsName, weight, value
+    | ItemStack itemStack ->
+        let (name, quantityUI, effectsName, weight, value) =
+            ItemStack.view itemStack (ItemStackMsg >> dispatch)
+
+        name, Some quantityUI, effectsName, weight, value
+    | ContainerItem containerItem ->
+        let (name, containerNameUI, effectsName, weight, value) =
+            containerItemView containerItem
+
+        name, Some containerNameUI, effectsName, weight, value
+    |> (fun (name, quantityOrContainerUIOption, effectsName, weight, value) -> [
+        Html.td name
+        match quantityOrContainerUIOption with
+        | None -> Html.td []
+        | Some quantityOrContainer -> Html.td quantityOrContainer
+        Html.td effectsName
+        Html.td weight
+        Html.td value
+
+    ])
 
 let itemElementListView (allItemStackNameSet: string Set) (model: ItemElement list) dispatch =
     Bulma.container [

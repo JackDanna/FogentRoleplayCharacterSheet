@@ -12,14 +12,28 @@ open Feliz
 open Feliz.Bulma
 
 let view (model: ItemStack) (dispatch: Msg -> unit) =
+    let (name, effectNames, weight, value) = Item.view model.item
 
-    List.insertAt
-        1
-        (Html.td [
-            Bulma.input.number [
-                prop.min 1
-                prop.value (int model.quantity)
-                prop.onChange (fun (num: int) -> dispatch (SetItemStackQuantity(uint num)))
-            ]
-        ])
-        (Item.view model.item)
+    // [
+    //     Html.td name
+    //     (Html.td [
+    //         Bulma.input.number [
+    //             prop.min 1
+    //             prop.value (int model.quantity)
+    //             prop.onChange (fun (num: int) -> dispatch (SetItemStackQuantity(uint num)))
+    //         ]
+    //     ])
+    //     Html.td effectNames
+    //     Html.td weight
+    //     Html.td value
+    // ]
+
+    name,
+    Bulma.input.number [
+        prop.min 1
+        prop.value (int model.quantity)
+        prop.onChange (fun (num: int) -> dispatch (SetItemStackQuantity(uint num)))
+    ],
+    effectNames,
+    weight,
+    value
