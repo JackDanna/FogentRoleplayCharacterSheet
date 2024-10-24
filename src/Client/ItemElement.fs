@@ -122,7 +122,7 @@ let containerItemListView allItemStackNameSet (model: ItemElement list) (dispatc
             | ContainerItem containerItem ->
                 Html.div [
                     Daisy.labelText containerItem.item.name
-                    Html.text "current weight: {sumItemElementListWeight containerItem.containedElements}"
+                    Html.text $"current weight: {sumItemElementListWeight containerItem.containedElements}"
                     Html.text $"max weight: {containerItem.containerTypeData.weightCapacity}"
                     itemElementListView
                         allItemStackNameSet
