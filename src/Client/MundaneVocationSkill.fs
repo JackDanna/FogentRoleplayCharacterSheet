@@ -53,7 +53,6 @@ let update msg model =
         |> VocationalSkill
 
 open Feliz
-open Feliz.Bulma
 
 let vocationalSkillView attributeNameSet model dispatch =
     Skill.viewAsList attributeNameSet model dispatch true true
