@@ -148,21 +148,23 @@ let update userApi (msg: Msg) (model: Setting) =
         model, Cmd.none
 
 open Feliz
-open Feliz.Bulma
+open ViewUtils
 
 let view (model: Setting) dispatch selectSettingAndCharacter =
-    Bulma.container [
+    Html.div [
         Html.text model.name
-        Bulma.container (
+        Html.div (
 
             Seq.append
                 (Seq.map
                     (fun (character: Character) ->
-                        Bulma.container [
-                            Html.text character.name
-                            Html.button [
-                                prop.onClick (fun _ -> selectSettingAndCharacter model.id character.id)
-                                prop.text "Select"
+                        horizontalDiv [
+                            prop.children [
+                                Html.text character.name
+                                Html.button [
+                                    prop.onClick (fun _ -> selectSettingAndCharacter model.id character.id)
+                                    prop.text "Select"
+                                ]
                             ]
                         ])
                     model.characters)
