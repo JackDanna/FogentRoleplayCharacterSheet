@@ -101,68 +101,71 @@ let view (model: Model) (dispatch: Msg -> unit) =
         prop.className "flex items-center justify-center p-40"
         prop.children [
             Daisy.card [
+                card.bordered
                 prop.children [
-                    centered [
-                        Html.img [
-                            prop.src "https://fable.io/img/fable_logo.png"
-                            prop.height 160
-                            prop.width 140
+                    Daisy.cardBody [
+
+
+                        centered [
+                            Html.img [
+                                prop.src "https://fable.io/img/fable_logo.png"
+                                prop.height 160
+                                prop.width 140
+                            ]
                         ]
-                    ]
 
-                    Html.div [
-                        prop.className ""
+                        Html.div [
+                            prop.className ""
 
-                        prop.children [
-                            Html.label [ prop.className "label"; prop.text "Username" ]
+                            prop.children [
+                                Html.label [ prop.className "label"; prop.text "Username" ]
 
-                            Html.div [
-                                prop.className "control has-icons-left"
-                                prop.children [
-                                    Html.input [
-                                        prop.className "input"
-                                        prop.placeholder "Username"
-                                        prop.type'.email
-                                        prop.valueOrDefault model.login.username
-                                        prop.onChange (UsernameChanged >> dispatch)
-                                    ]
+                                Html.div [
+                                    prop.className "control has-icons-left"
+                                    prop.children [
+                                        Html.input [
+                                            prop.className "input"
+                                            prop.placeholder "Username"
+                                            prop.type'.email
+                                            prop.valueOrDefault model.login.username
+                                            prop.onChange (UsernameChanged >> dispatch)
+                                        ]
 
-                                    Html.span [
-                                        prop.className "icon is-small is-left"
-                                        prop.children [ Html.i [ prop.className "fa fa-user" ] ]
+                                        Html.span [
+                                            prop.className "icon is-small is-left"
+                                            prop.children [ Html.i [ prop.className "fa fa-user" ] ]
+                                        ]
                                     ]
                                 ]
                             ]
                         ]
-                    ]
 
-                    Html.div [
-                        prop.className ""
-                        prop.children [
-                            Html.label [ prop.className "label"; prop.text "Password" ]
-                            Html.div [
-                                prop.className "control has-icons-left"
-                                prop.children [
-                                    Html.input [
-                                        prop.className "input"
-                                        prop.placeholder "********"
-                                        prop.type'.password
-                                        prop.valueOrDefault model.login.password
-                                        prop.onChange (PasswordChanged >> dispatch)
-                                    ]
-                                    Html.span [
-                                        prop.className "icon is-small is-left"
-                                        prop.children [ Html.i [ prop.className "fa fa-lock" ] ]
+                        Html.div [
+                            prop.className ""
+                            prop.children [
+                                Html.label [ prop.className "label"; prop.text "Password" ]
+                                Html.div [
+                                    prop.className "control has-icons-left"
+                                    prop.children [
+                                        Html.input [
+                                            prop.className "input"
+                                            prop.placeholder "********"
+                                            prop.type'.password
+                                            prop.valueOrDefault model.login.password
+                                            prop.onChange (PasswordChanged >> dispatch)
+                                        ]
+                                        Html.span [
+                                            prop.className "icon is-small is-left"
+                                            prop.children [ Html.i [ prop.className "fa fa-lock" ] ]
+                                        ]
                                     ]
                                 ]
                             ]
                         ]
-                    ]
 
-                    Html.div [
-                        prop.className ""
-                        prop.children [
-                            Html.button [
+                        Daisy.cardActions [
+                            Daisy.button.button [
+                                button.primary
                                 prop.className [
                                     "button is-info is-fullwidth"
                                     if model.LoginAttempt = InProgress then
@@ -173,9 +176,11 @@ let view (model: Model) (dispatch: Msg -> unit) =
                                 prop.text "Login"
                             ]
                         ]
+
+                        renderLoginOutcome model.LoginAttempt
+
                     ]
 
-                    renderLoginOutcome model.LoginAttempt
                 ]
             ]
         ]

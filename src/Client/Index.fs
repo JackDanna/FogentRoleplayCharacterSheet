@@ -171,10 +171,6 @@ let view model dispatch =
     React.router [
         router.onUrlChanged (parseUrl >> UrlChanged >> dispatch)
         router.children [
-            Html.div [
-                //
-                theme.fantasy
-                prop.children activePage
-            ]
+            Html.div [ prop.className "h-full"; theme.cyberpunk; prop.children activePage ]
         ]
     ]
