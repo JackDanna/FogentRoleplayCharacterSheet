@@ -39,7 +39,6 @@ let update msg model =
 
 
 open Feliz
-open Feliz.Bulma
 
 let view attributeNameSet model dispatch =
     match model with
