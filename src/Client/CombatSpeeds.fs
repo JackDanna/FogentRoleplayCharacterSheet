@@ -27,38 +27,36 @@ let update msg model =
     | _ -> model
 
 open Feliz
-open Feliz.Bulma
+open Feliz.DaisyUI
 
 let view (combatSpeedCalculationNames: string Set) (model: CombatSpeed list) (dispatch: Msg -> unit) =
-    Bulma.container [
-        Bulma.label "Combat Speeds:"
-        Bulma.table [
-            table.isBordered
-            prop.children [
-                Html.thead [
-                    List.map (fun (thString: string) -> Html.th thString) [ "Name"; "Speed (ft)"; "Description" ]
-                    |> Html.tr
-                ]
-                Html.tableBody (
-                    List.mapi
-                        (fun position combatSpeed ->
-                            let combatSpeed = CombatSpeed.view combatSpeed
+    Html.div [
+        Daisy.labelText "Combat Speeds:"
+        Daisy.table [
+            Html.thead [
+                [ "Name"; "Speed (ft)"; "Description" ]
+                |> List.map (fun (thString: string) -> Html.th thString)
+                |> Html.tr
+            ]
+            Html.tableBody (
+                List.mapi
+                    (fun position combatSpeed ->
+                        let combatSpeed = CombatSpeed.view combatSpeed
 
-                            let deleteEquipmentRowButton =
-                                Html.td [
-                                    Html.button [ prop.onClick (fun _ -> dispatch (Remove(position))); prop.text "-" ]
-                                ]
-                                |> List.singleton
+                        let deleteEquipmentRowButton =
+                            Html.td [
+                                Html.button [ prop.onClick (fun _ -> dispatch (Remove(position))); prop.text "-" ]
+                            ]
+                            |> List.singleton
 
-                            Html.tr (List.append combatSpeed deleteEquipmentRowButton))
-                        model
-                )
-                Html.tfoot [
-                    ViewUtils.textInputWithDropdownSet
-                        (fun input -> dispatch (Insert(input, None, None, None)))
-                        combatSpeedCalculationNames
-                        "CombatSpeeds"
-                ]
+                        Html.tr (List.append combatSpeed deleteEquipmentRowButton))
+                    model
+            )
+            Html.tfoot [
+                ViewUtils.textInputWithDropdownSet
+                    (fun input -> dispatch (Insert(input, None, None, None)))
+                    combatSpeedCalculationNames
+                    "CombatSpeeds"
             ]
         ]
     ]
