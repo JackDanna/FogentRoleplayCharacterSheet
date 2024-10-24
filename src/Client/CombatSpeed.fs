@@ -35,7 +35,6 @@ let update msg (model: CombatSpeed) : CombatSpeed =
     | RecalculateCombatSpeed(skills, attributes) -> init skills attributes model.combatSpeedCalculation
 
 open Feliz
-open Feliz.Bulma
 
 let view (model: CombatSpeed) = [
     Html.td [ prop.text model.combatSpeedCalculation.name ]
