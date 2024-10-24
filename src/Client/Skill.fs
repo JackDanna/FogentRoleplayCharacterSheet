@@ -95,6 +95,7 @@ let update msg (model: Skill) =
 
 open Feliz
 open Feliz.DaisyUI
+open ViewUtils
 
 let governingAttributesToggle
     (attributeNameSet: AttributeName Set)
@@ -117,8 +118,7 @@ let governingAttributesToggle
                         Html.listItem [
                             prop.onClick (fun _ -> dispatchToggleGoverningAttribute attributeName)
                             prop.children [
-                                Html.div [
-                                    prop.className "flex flex-row w-full gap-4"
+                                horizontalDiv [
                                     prop.children [
                                         Daisy.checkbox [
                                             prop.isChecked (List.contains attributeName (List.ofSeq model))

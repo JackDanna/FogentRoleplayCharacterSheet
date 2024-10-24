@@ -19,12 +19,12 @@ let update msg model =
 
 open Feliz
 open Feliz.DaisyUI
+open ViewUtils
 
 let attributesAndCoreSkillsListView model dispatch preloadedCoreSkillView =
     Html.div [
         Daisy.label [ prop.text "Attributes and Core Skills:" ]
-        Html.div [
-            prop.className "flex flex-row w-full gap-4"
+        horizontalDiv [
             prop.children (
                 model
                 |> Seq.mapi (fun position attribute ->

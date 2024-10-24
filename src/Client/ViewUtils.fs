@@ -26,9 +26,12 @@ let textInputWithDropdownSet (onTextChange: string -> unit) dropdownSet dataList
         ]
     ]
 
-let numberInput list =
-    [ prop.type' "number" ] @ list |> Daisy.input
+let numberInput props =
+    [ prop.type' "number" ] @ props |> Daisy.input
 
 let deleteEquipmentRowButton onClick =
     Html.td [ Html.button [ prop.onClick onClick; prop.text "-" ] ]
     |> List.singleton
+
+let horizontalDiv props =
+    [ prop.className "flex flex-row w-full gap-4" ] @ props |> Html.div

@@ -145,27 +145,25 @@ let update msg (model: MagicVocationExtras) =
       }
 
 open Feliz
-open Feliz.Bulma
+open ViewUtils
 
-let temp (model: MagicVocationExtras) dispatch =
-    Bulma.columns [
-        Bulma.column [ prop.text model.magicSystem.resourceName ]
-        // Bulma.column [ prop.text model.magicSystem.governingCoreSkill ]
-        Bulma.column [
-            Bulma.input.number [
+let magicResourceView (model: MagicVocationExtras) dispatch =
+    horizontalDiv [
+        prop.children [
+            Html.text model.magicSystem.resourceName
+            // Bulma.column [ prop.text model.magicSystem.governingCoreSkill ]
+            numberInput [
                 prop.min 0
                 prop.max (int (model.coreSkillResourcePool + model.vocationResourcePool))
                 prop.value (int model.currentMagicResource)
                 prop.onChange (fun (num: int) -> dispatch (SetCurrentMagicResource(uint num)))
             ]
-        ]
-        // Bulma.column [
-        //     sprintf "CoreSkillResourcePool: %d" (model.coreSkillResourcePool) |> prop.text
-        // ]
-        // Bulma.column [ sprintf "VocationResourcePool: %d" (model.vocationResourcePool) |> prop.text ]
-        Bulma.column [
+            // Bulma.column [
+            //     sprintf "CoreSkillResourcePool: %d" (model.coreSkillResourcePool) |> prop.text
+            // ]
+            // Bulma.column [ sprintf "VocationResourcePool: %d" (model.vocationResourcePool) |> prop.text ]
             sprintf "Max: %d" (model.vocationResourcePool + model.coreSkillResourcePool)
-            |> prop.text
+            |> Html.text
         ]
     ]
 
@@ -180,4 +178,4 @@ let view attributeNameSet (weaponSkillNames) (model: MagicVocationExtras) dispat
             model.magicVocationSkills
             (MagicVocationSkillsMsg >> dispatch)
 
-    tbody, insert, (temp model dispatch)
+    tbody, insert, (magicResourceView model dispatch)
