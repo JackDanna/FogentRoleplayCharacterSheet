@@ -62,24 +62,24 @@ let update msg (model: VocationStat) =
 
 
 open Feliz
-open Feliz.Bulma
+open ViewUtils
 
 let view attributeNameSet (model: VocationStat) dispatch =
-    Bulma.columns [
-        Bulma.column [
-            Bulma.input.text [
+    Html.thead [
+        //prop.className "flex flex-row w-full gap-4"
+        prop.className "grid grid-cols-4 gap-4"
+        [
+            textInput [
                 prop.value model.name
                 prop.onTextChange (fun value -> dispatch (SetName value))
             ]
-        ]
-        Bulma.column [
             Skill.governingAttributesToggle
                 attributeNameSet
                 model.governingAttributeNameSet
                 (fun toggledAttributeName -> ToggleGoveringAttribute(toggledAttributeName, None) |> dispatch)
-        ]
-        Bulma.column [
             ZeroToFive.view model.level ((fun msg -> ZeroToFiveMsg(msg, None)) >> dispatch)
+            Html.text (model.dicePool |> dicePoolToString)
         ]
-        Bulma.column [ prop.text (model.dicePool |> dicePoolToString) ]
+        |> Seq.map Html.th
+        |> prop.children
     ]
