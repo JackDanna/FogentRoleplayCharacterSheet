@@ -120,29 +120,48 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
         |> handleUpdatedSetting model
 
 open Feliz
+open Feliz.DaisyUI
 
 let view (model: Model) dispatch =
-    Html.div [
-
+    Daisy.drawer [
+        prop.className "lg:drawer-open rounded-lg shadow bg-base-200 h-screen"
         prop.children [
+            Daisy.drawerToggle [ prop.id "my-drawer" ]
+            Daisy.drawerContent [
+                prop.className "flex flex-col items-center justify-center"
+                prop.children [
+                    model
+                    |> temp
+                    |> Option.bind (fun (selectedSettingId, selectedCharacterId) ->
+                        Option.map2
+                            (fun setting character -> (setting.SettingData, character))
+                            (tryFindSetting model selectedSettingId)
+                            (tryFindCharacterInSetting model selectedSettingId selectedCharacterId))
+                    |> function
+                        | None -> Html.none
+                        | Some(settingData, character) ->
+                            Character.view character (CharacterMsg >> dispatch) settingData
+                ]
+            ]
+            Daisy.drawerSide [
+                prop.className "absolute h-full"
+                prop.children [
+                    Daisy.drawerOverlay [ prop.htmlFor "my-drawer" ]
+                    Daisy.menu [
+                        prop.className "p-4 h-full overflow-y-auto w-80 bg-base-100 text-base-content"
+                        prop.children (
+                            model.settings
+                            |> Seq.map (fun setting ->
+                                Setting.view
+                                    setting
+                                    ((fun msg -> SettingListMsg(setting.id, msg)) >> dispatch)
+                                    (fun settingId characterId ->
+                                        dispatch (SelectSettingAndCharacter(settingId, characterId))))
+                        )
+                    ]
 
-            model.settings
-            |> Seq.map (fun setting ->
-                Setting.view
-                    setting
-                    ((fun msg -> SettingListMsg(setting.id, msg)) >> dispatch)
-                    (fun settingId characterId -> dispatch (SelectSettingAndCharacter(settingId, characterId))))
-            |> Html.div
+                ]
+            ]
 
-            model
-            |> temp
-            |> Option.bind (fun (selectedSettingId, selectedCharacterId) ->
-                Option.map2
-                    (fun setting character -> (setting.SettingData, character))
-                    (tryFindSetting model selectedSettingId)
-                    (tryFindCharacterInSetting model selectedSettingId selectedCharacterId))
-            |> function
-                | None -> Html.none
-                | Some(settingData, character) -> Character.view character (CharacterMsg >> dispatch) settingData
         ]
     ]
