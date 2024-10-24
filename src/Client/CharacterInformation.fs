@@ -29,7 +29,6 @@ let update (msg: Msg) (model: CharacterInformation) =
 
 
 open Feliz
-open Feliz.Bulma
 open Feliz.DaisyUI
 
 let view (model: CharacterInformation) (dispatch: Msg -> unit) =
@@ -46,7 +45,7 @@ let view (model: CharacterInformation) (dispatch: Msg -> unit) =
             ]
         ]
 
-    Bulma.container [
+    Html.div [
         characterInformationTextArea "Backstory" model.backstory SetBackstory
         characterInformationTextArea "Notes" model.notes SetNotes
         characterInformationTextArea "Beliefs/Morality" model.beliefsAndMorality SetBeliefsAndMorality
