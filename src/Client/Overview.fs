@@ -120,56 +120,29 @@ let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
         |> handleUpdatedSetting model
 
 open Feliz
-open Feliz.Bulma
 
 let view (model: Model) dispatch =
-    Bulma.hero [
-        hero.isFullHeight
-        color.isDanger
-
-        prop.style [
-            style.backgroundSize "cover"
-            style.backgroundImageUrl
-                "https://www.onlygfx.com/wp-content/uploads/2015/12/simple-old-paper-1-transparent.jpg"
-            style.backgroundPosition "no-repeat center center fixed"
-        ]
+    Html.div [
 
         prop.children [
 
-            Bulma.heroHead [
-                Bulma.navbar [
-                    color.isPrimary
-                    prop.children [
-                        Bulma.navbarItem.div [
-                            Bulma.title.h3 [ prop.text "Fallen"; prop.style [ style.fontFamily "PT Serif Caption" ] ]
-                        ]
-                    ]
-                ]
-            ]
+            model.settings
+            |> Seq.map (fun setting ->
+                Setting.view
+                    setting
+                    ((fun msg -> SettingListMsg(setting.id, msg)) >> dispatch)
+                    (fun settingId characterId -> dispatch (SelectSettingAndCharacter(settingId, characterId))))
+            |> Html.div
 
-            Bulma.heroBody [
-
-                Bulma.container [
-                    model.settings
-                    |> Seq.map (fun setting ->
-                        Setting.view
-                            setting
-                            ((fun msg -> SettingListMsg(setting.id, msg)) >> dispatch)
-                            (fun settingId characterId -> dispatch (SelectSettingAndCharacter(settingId, characterId))))
-                    |> Bulma.container
-
-                    model
-                    |> temp
-                    |> Option.bind (fun (selectedSettingId, selectedCharacterId) ->
-                        Option.map2
-                            (fun setting character -> (setting.SettingData, character))
-                            (tryFindSetting model selectedSettingId)
-                            (tryFindCharacterInSetting model selectedSettingId selectedCharacterId))
-                    |> function
-                        | None -> Html.none
-                        | Some(settingData, character) ->
-                            Character.view character (CharacterMsg >> dispatch) settingData
-                ]
-            ]
+            model
+            |> temp
+            |> Option.bind (fun (selectedSettingId, selectedCharacterId) ->
+                Option.map2
+                    (fun setting character -> (setting.SettingData, character))
+                    (tryFindSetting model selectedSettingId)
+                    (tryFindCharacterInSetting model selectedSettingId selectedCharacterId))
+            |> function
+                | None -> Html.none
+                | Some(settingData, character) -> Character.view character (CharacterMsg >> dispatch) settingData
         ]
     ]
