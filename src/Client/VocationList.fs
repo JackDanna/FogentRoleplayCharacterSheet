@@ -35,26 +35,28 @@ let update msg model =
 
 
 open Feliz
-open Feliz.Bulma
+open ViewUtils
+open Feliz.DaisyUI
 
 let view attributeNameSet (magicSystemNameSet) (weaponSkillNameSet) model dispatch =
-    Bulma.container [
-        Bulma.label [ prop.text "Vocations and Vocational Skills:" ] |> Bulma.content
-        //Bulma.button.button [ prop.onClick (fun _ -> dispatch Insert); prop.text "+" ]
-        Bulma.columns [
-            columns.isCentered
-            prop.children [
+    Html.div [
+        Daisy.label [ prop.text "Vocations and Vocational Skills:" ]
+        horizontalDiv [
+            prop.children (
                 List.mapi
                     (fun position vocation ->
-                        Bulma.column [
-                            Vocation.view attributeNameSet weaponSkillNameSet vocation (fun msg ->
-                                dispatch (VocationMsgAtPosition(position, msg)))
+                        Html.div [
+                            Vocation.view
+                                //
+                                attributeNameSet
+                                weaponSkillNameSet
+                                vocation
+                                (fun msg -> dispatch (VocationMsgAtPosition(position, msg)))
 
-                            Bulma.button.button [ prop.onClick (fun _ -> dispatch (Remove position)); prop.text "-" ]
+                            Daisy.button.button [ prop.onClick (fun _ -> dispatch (Remove position)); prop.text "-" ]
                         ])
                     model
-                |> Bulma.columns
-            ]
+            )
         ]
         ViewUtils.textInputWithDropdownSet
             (fun input -> InsertVocation(input, None, None, None) |> dispatch)
